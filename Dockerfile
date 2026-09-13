@@ -1,5 +1,5 @@
 # --- Этап 1: Сборка фронтенда (Vue / Vite) ---
-FROM node:18-alpine AS frontend-builder
+FROM node:20-alpine AS frontend-builder
 WORKDIR /app/frontend
 
 # Копируем файлы зависимостей и устанавливаем их
