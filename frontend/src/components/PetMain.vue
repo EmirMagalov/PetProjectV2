@@ -79,6 +79,7 @@ watch(location, (newLocation) => {
 })
 // Запускаем рандомный взгляд при монтировании компонента
 onMounted(() => {
+
   initGameData()
   location.value = 'home'
   startRandomLooking()
