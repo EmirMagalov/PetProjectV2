@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # 1. Бэкенд (FastAPI)
+  backend:
+    build: .
+    container_name: pet_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+     - ./backend/data:/app/data
+    env_file:
+      - .env
+  # 2. Nginx + Фронтенд (раздает статику и проксирует /api/)
+  nginx:
+    image: nginx:alpine
+    container_name: pet_nginx
+    restart: always
+    ports:
+      - "80:80" # Прокидываем 8080 порт наружу для ngrok
+      - "443:443"
+
+    volumes:
+      # Подключаем твой собранный фронтенд внутрь контейнера Nginx
+      - ./frontend/dist:/usr/share/nginx/html
+      # Подключаем конфиг Nginx
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - backend
+
+  bot:
+    build: .
+    container_name: pet_bot
+    restart: always
+    command: python -m bot.main  # Команда запуска вашего бота
+    env_file:
+      - .env
+    depends_on:
+      - backend
+

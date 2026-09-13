@@ -1,0 +1,207 @@
+<script setup>
+import { foodList } from '@/scripts/foodItems.js'
+import { headItems } from '@/scripts/headwearItems.js'
+import { ref, computed } from 'vue'
+import { addToCart, buyHeadwear } from "@/scripts/basket.js"
+import { gameData } from "@/scripts/useGameStore.js"
+
+defineProps({
+  isOpen: {
+    type: Boolean,
+    required: true
+  }
+})
+
+defineEmits(['close'])
+
+const activeTab = ref('food')
+
+// Динамический список товаров в зависимости от выбранной вкладки
+const currentList = computed(() => {
+  if (activeTab.value === 'food') {
+    // Еда (исключаем шаманские товары, если они в общем списке еды)
+    return foodList.filter(item => item.category !== 'shaman')
+  } else if (activeTab.value === 'shaman') {
+    // Вкладка Шамана — фильтруем по категории 'shaman'
+    return foodList.filter(item => item.category === 'shaman')
+  } else {
+    // Одежда
+    return headItems
+  }
+})
+
+const lastBought = ref(null)
+let notificationTimer = null
+
+// Универсальная логика клика по кнопке товара
+function handleItemClick(item) {
+  if (activeTab.value === 'food' || activeTab.value === 'shaman') {
+    // Покупка еды или предметов шамана
+    if (gameData.coins >= item.cost) {
+      gameData.coins -= item.cost
+      addToCart(item.id)
+      showNotification(item)
+    } else {
+      alert("Не хватает монет!")
+    }
+  } else {
+    // Логика для одежды
+    if (gameData.unlockedHeads?.includes(item.id)) {
+      selectHeadwear(item.id)
+    } else {
+      if (gameData.coins >= item.cost) {
+        gameData.coins -= item.cost
+        buyHeadwear(item.id)
+        showNotification(item)
+      } else {
+        alert("Не хватает монет!")
+      }
+    }
+  }
+}
+
+// Функция надевания/снимания шапки
+function selectHeadwear(headId) {
+  if (gameData.equippedHead === headId) {
+    gameData.equippedHead = null
+  } else {
+    gameData.equippedHead = headId
+  }
+}
+
+function showNotification(item) {
+  lastBought.value = item
+  if (notificationTimer) clearTimeout(notificationTimer)
+  notificationTimer = setTimeout(() => {
+    lastBought.value = null
+  }, 2500)
+}
+</script>
+
+<template>
+  <div v-if="isOpen" class="fixed inset-0  z-150 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+
+    <!-- Само окно магазина -->
+    <div class="relative w-full max-w-md h-180 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+
+      <!-- Шапка модалки -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          🛒 Магазин
+        </h2>
+
+        <button
+            @click="$emit('close')"
+            class="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-800"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Переключатель категорий -->
+      <div class="flex border-b border-slate-800 bg-slate-900/40 p-2 gap-2">
+        <button
+            @click="activeTab = 'food'"
+            :class="['flex-1 py-2 rounded-xl text-sm font-bold transition-all', activeTab === 'food' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+        >
+          🍔 Еда
+        </button>
+        <button
+            @click="activeTab = 'shaman'"
+            v-show="gameData.level >=10"
+            :class="['flex-1 py-2 rounded-xl text-sm font-bold transition-all', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+        >
+          🪶 Шаман
+        </button>
+        <button
+            @click="activeTab = 'clothes'"
+            :class="['flex-1 py-2 rounded-xl text-sm font-bold transition-all', activeTab === 'clothes' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+        >
+          🧢 Одежда
+        </button>
+      </div>
+
+      <!-- Список товаров -->
+      <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <div
+            v-for="item in currentList"
+            :key="item.id"
+            class="flex items-center justify-between bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 hover:border-slate-600 transition-all"
+        >
+          <!-- Картинка и описание -->
+          <div class="flex items-center gap-3">
+            <div class="w-15 h-15 bg-white/20 rounded-lg flex items-center justify-center p-1">
+              <img :src="item.image" :alt="item.name" class="w-full h-full object-contain">
+            </div>
+            <div>
+              <h3 class="font-semibold text-sm text-white ">{{ item.name }}</h3>
+              <p v-if="activeTab === 'food' || activeTab === 'shaman'" class="text-xs text-emerald-400">{{ item.foodGain?`+ ${item.foodGain} сытости`:''}}<br>{{ item.energyGain?`+ ${item.energyGain} энергии`:''}}</p>
+              <p v-else-if="gameData.unlockedHeads?.includes(item.id)" class="text-xs text-blue-400">
+                {{ gameData.equippedHead === item.id ? '✨ Надето' : '✅ Куплено' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Динамическая кнопка: Покупка или Выбор -->
+          <button
+              @click="handleItemClick(item)"
+              :class="[
+                'px-4 py-2 min-w-23 font-bold rounded-lg text-sm transition-all active:scale-90 flex justify-center items-center gap-1.5 shrink-0',
+                activeTab === 'clothes' && gameData.unlockedHeads?.includes(item.id)
+                  ? (gameData.equippedHead === item.id
+                      ? 'bg-slate-700 text-slate-300 cursor-default'
+                      : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20')
+                  : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20'
+              ]"
+          >
+            <template v-if="activeTab === 'clothes' && gameData.unlockedHeads?.includes(item.id)">
+              {{ gameData.equippedHead === item.id ? 'Снять' : 'Выбрать' }}
+            </template>
+            <template v-else>
+              <span class="w-5"><img src="/gamePlay/coin.svg" alt=""></span> {{ item.cost }}
+            </template>
+          </button>
+        </div>
+      </div>
+
+      <!-- Подвал модалки (баланс) -->
+      <div class="px-6 py-4 border-t border-slate-800 bg-slate-900/80 flex items-center justify-between">
+        <span class="text-slate-400 text-sm">Баланс:</span>
+        <span class="text-amber-400 font-bold text-lg flex items-center gap-1 tabular-nums">
+          🪙 {{ gameData.coins }}
+        </span>
+      </div>
+
+    </div>
+
+    <!-- Всплывающее уведомление -->
+    <transition name="toast">
+      <div
+          v-if="lastBought"
+          class="absolute bottom-10 z-200 bg-emerald-600/90 border border-emerald-400 text-white px-5 py-3 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-3"
+      >
+        <div class="w-8 h-8 bg-white/20 rounded-lg p-1 flex items-center justify-center shrink-0">
+          <img :src="lastBought.image" class="w-full h-full object-contain">
+        </div>
+        <div>
+          <p class="text-xs text-emerald-200 font-medium">Успешное приобретение!</p>
+          <p class="text-sm font-bold">{{ lastBought.name }}</p>
+        </div>
+      </div>
+    </transition>
+
+  </div>
+</template>
+
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+}
+</style>
