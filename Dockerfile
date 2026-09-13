@@ -1,30 +1,31 @@
-# --- Этап 1: Сборка фронтенда (Vue / Vite) ---
+# --- Этап 1: Сборка фронтенда ---
 FROM node:20-alpine AS frontend-builder
+
 WORKDIR /app/frontend
 
-# Копируем файлы зависимостей и устанавливаем их
+# Устанавливаем зависимости
 COPY frontend/package*.json ./
 RUN npm install
 
-# Копируем остальной фронтенд и собираем проект
+# Копируем исходники и собираем
 COPY frontend/ .
 RUN npm run build
 
 
-# --- Этап 2: Финальный образ с бэкендом (Python) ---
+# --- Этап 2: Python + готовый dist ---
 FROM python:3.10-slim
+
 WORKDIR /app
 
-# Устанавливаем Python-зависимости
+# Python-зависимости
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем бэкенд
+# Бэкенд
 COPY src/ .
 
-# Копируем скомпилированный фронтенд из первого этапа
-# (путь назначения зависит от того, откуда ваш FastAPI отдает статичные файлы)
+# Готовый dist из первого этапа
 COPY --from=frontend-builder /app/frontend/dist /app/static
 
-# Запускаем сервер
+# Запуск
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
