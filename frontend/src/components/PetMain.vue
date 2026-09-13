@@ -79,7 +79,14 @@ watch(location, (newLocation) => {
 })
 // Запускаем рандомный взгляд при монтировании компонента
 onMounted(() => {
+  if (window.Telegram?.WebApp) {
+    const tg = window.Telegram.WebApp
 
+    // Отключаем вертикальные свайпы для закрытия/сворачивания
+    if (typeof tg.disableVerticalSwipes === 'function') {
+      tg.disableVerticalSwipes()
+    }
+  }
   initGameData()
   location.value = 'home'
   startRandomLooking()
