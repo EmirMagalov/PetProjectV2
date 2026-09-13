@@ -12,3 +12,11 @@ img, .game-image {
     -webkit-user-drag: none;
     user-drag: none;
 }
+
+
+.food-element,
+.shower-element,
+.foam-element {
+    touch-action: none;
+    -webkit-touch-callout: none;
+}
