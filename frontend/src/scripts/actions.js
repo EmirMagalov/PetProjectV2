@@ -84,18 +84,21 @@ export function feedPet(foodId) {
             gameData.stinky = true
         }
         if (gameData.foodLevel >= 100) {
-            console.log('100')
             gameData.foodStreak++
             gameData.fastfoodStreak++
         }
-        console.log(gameData.foodStreak)
-        if (gameData.foodStreak >= 2) {
 
+        if (gameData.foodStreak >= 2) {
+            gameData.isFat = true
             gameData.lives = Math.max(0, gameData.lives - 1)
         }
         // Проверяем категорию еды
         if (foodItem.category === 'fastfood') {
             gameData.fastfoodStreak++
+            if (gameData.fastfoodStreak >=4){
+                gameData.isFat = true
+                gameData.foodStreak = 2
+            }
         } else if (foodItem.category === 'fruits') {
             if (gameData.fruitStreak >= 3) {
                 gameData.isFat = false

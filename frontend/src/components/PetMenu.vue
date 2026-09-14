@@ -33,7 +33,8 @@ import {
       @close="isShopOpen = false"
   />
 
-  <div class="rounded-4xl p-3 mx-5 bg-[#fff6ef] h-65 mt-1 border-2 border-[#f7c9a5] flex flex-col justify-center">
+  <div
+      class="rounded-4xl p-3 mx-5 bg-[#fff6ef] h-65 mt-1 border-2 border-[#f7c9a5] flex flex-col justify-center items-center">
     <div v-if="isGameOver">
       <div
           @click="startOver()"
@@ -92,7 +93,7 @@ import {
 
         <!-- ДУШ -->
         <div
-            class="bg-[#fff6ef] justify-center relative h-25 flex flex-col gap-0 items-center p-2 rounded-3xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 "
+            class="bg-[#fff6ef] justify-center relative h-25 flex flex-col gap-0 items-center p-2 rounded-3xl border-2 border-[#f7c9a5] transition-transform duration-50"
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
           <div v-show="!feedStatus"
@@ -108,17 +109,22 @@ import {
                showerDrag.isDragging.value ? 'fixed z-150' : 'relative',
                statusFoam && !showerDrag.isDragging.value ? 'animate-pulse' : ''
              ]"
-               class="flex flex-col items-center cursor-move w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
+               class="flex flex-col items-center cursor-move w-[70px] h-[70px]  bg-contain bg-no-repeat bg-center"
           ></div>
-          <img v-show="showerDrag.isDragging.value || feedStatus" src="/gamePlay/shower_icon.webp" class="opacity-30"
-               width="70"
-               alt="">
+          <div v-show="showerDrag.isDragging.value || feedStatus"
+               style="background-image: url('/gamePlay/shower_icon.webp')"
+               class="w-[70px] h-[70px] opacity-30 bg-contain">
+
+          </div>
+          <!--          <img v-show="showerDrag.isDragging.value || feedStatus" src="/gamePlay/shower_icon.webp" class="opacity-30"-->
+          <!--               width="70"-->
+          <!--               alt="">-->
           <button class="text-xs font-bold text-gray-600">Душ</button>
         </div>
 
         <!-- ШАМПУНЬ -->
         <div
-            class="bg-[#fff6ef] relative h-25  justify-center flex flex-col gap-1 items-center p-2 rounded-3xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 "
+            class="bg-[#fff6ef] relative h-25  justify-center flex flex-col gap-1 items-center p-2 rounded-3xl border-2 border-[#f7c9a5] transition-transform duration-50  "
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
           <div v-show="!feedStatus"
@@ -136,9 +142,15 @@ import {
              ]"
                class="flex flex-col items-center cursor-move w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
           ></div>
-          <img v-show="foamDrag.isDragging.value || feedStatus" src="/gamePlay/shampoo_icon.webp" class="opacity-30 "
-               width="70"
-               alt="">
+          <div v-show="foamDrag.isDragging.value || feedStatus"
+               style="background-image: url('/gamePlay/shampoo_icon.webp')"
+               class="w-[70px] h-[70px] opacity-30 bg-contain">
+
+          </div>
+          <!--          <img v-show="foamDrag.isDragging.value || feedStatus" src="/gamePlay/shampoo_icon.webp" class="opacity-30 "-->
+          <!--               width="60px"-->
+          <!--               height="60px"-->
+          <!--               alt="">-->
           <button class="text-xs font-bold text-gray-600">Шампунь</button>
         </div>
 
@@ -160,18 +172,16 @@ import {
 
         <div
             @click="nextItem()"
-            class="bg-[#fff6ef] justify-center  flex flex-col relative items-center p-2 rounded-3xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95"
+            class="bg-[#fff6ef] justify-center  flex flex-col relative items-center p-2 rounded-3xl border-2 border-[#f7c9a5]"
 
         >
+
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
-          <!--        <div v-show="cartItemsList.length <= 0 && !cartItemsList[currentIndex]"-->
-          <!--             class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"-->
-          <!--             style="background-image: url('/gamePlay/fridge_empty.webp')">-->
-          <!--        </div>-->
 
           <!-- ЕДА ИЗ ХОЛОДИЛЬНИКА -->
           <div v-show="!feedStatus"
                ref="foodEl"
+
                :style="[
        (foodDrag.isDragging.value && !foodConsumedByPipe) ? foodDrag.style.value : {},
        {
@@ -180,15 +190,16 @@ import {
        }
      ]"
                :class="[
-       (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150' : 'relative',
+       (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative',
        showHunger && !(foodDrag.isDragging.value && !foodConsumedByPipe) ? 'animate-pulse' : ''
      ]"
-               class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
+               class="flex flex-col items-center cursor-move  w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
           ></div>
 
           <img v-show="(foodDrag.isDragging.value || feedStatus) && !foodConsumedByPipe"
                :src="cartItemsList[currentIndex]?.image"
-               class="opacity-30 relative"
+
+               class="opacity-30  relative"
                width="80"
                alt="">
 
@@ -202,7 +213,7 @@ import {
         </div>
         <div
             @click="isShopOpen = true"
-            class="bg-[#fff6ef] justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
+            class="bg-[#fff6ef] justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50  cursor-pointer"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
                style="background-image: url('/gamePlay/market.webp')">
@@ -239,6 +250,5 @@ import {
 .animate-pulse {
   animation: pulse-breath 0.5s ease-in-out infinite;
 }
-
 
 </style>

@@ -3,8 +3,16 @@
 
 body,html{
     overflow: hidden;
+    overscroll-behavior: none;
 }
-
+/* Полный запрет выделения текста и элементов на странице */
+body {
+    -webkit-user-select: none;   /* Safari / iOS Safari */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer / Edge */
+    user-select: none;           /* Стандартный синтаксис */
+    -webkit-touch-callout: none; /* Отключение всплывающего меню на iOS при долгом таппе */
+}
 img, .game-image {
     -webkit-touch-callout: none !important;
     -webkit-user-select: none !important;
@@ -14,9 +22,12 @@ img, .game-image {
 }
 
 
-.food-element,
-.shower-element,
-.foam-element {
-    touch-action: none;
+.food-item,
+.shower-item,
+.foam-item {
+    touch-action: none;          /* самое важное */
+    -webkit-user-select: none;
+    user-select: none;
     -webkit-touch-callout: none;
+    -webkit-user-drag: none;
 }

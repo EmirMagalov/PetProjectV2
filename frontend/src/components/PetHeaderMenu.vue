@@ -58,9 +58,13 @@ import {expPercentage} from "@/scripts/level.js";
         </div>
 
       </div>
-      <div v-show="gameData.addictionStreak >=2" class="absolute bottom-0 right-0">
-        <img src="/gamePlay/drunk.webp" alt=""  width="30">
+      <div v-show="gameData.isFat" class="absolute bottom-1 right-8 transition-transform duration-50 animate-pulse">
+        <img src="/gamePlay/fat_icon.webp" alt="" width="25">
       </div>
+      <div v-show="gameData.addictionStreak >=2" class="absolute bottom-1 right-1 animate-pulse">
+        <img src="/gamePlay/drunk_icon.webp" alt="" width="25">
+      </div>
+
     </div>
 
 
@@ -68,5 +72,16 @@ import {expPercentage} from "@/scripts/level.js";
 </template>
 
 <style scoped>
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    transform: scale(1.03) translateY(1px);
+  }
+}
 
+.animate-pulse {
+  animation: pulse 0.5s ease-in-out infinite;
+}
 </style>

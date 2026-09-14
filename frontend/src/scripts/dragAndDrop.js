@@ -153,20 +153,17 @@ export const foodDrag = useDraggable(foodEl, {
     disabled: computed(() => Object.keys(gameData.cart).length === 0),
     preventDefault: true,
     onStart: (pos, event) => {
-        // previousMouth = mouth.value
+        currentDraggedItem.value = 'food'
+        foodConsumedByPipe.value = false
+        // Жестко фиксируем стартовые координаты с экрана в момент касания
         if (foodEl.value) {
             const rect = foodEl.value.getBoundingClientRect()
             foodDrag.x.value = rect.left
             foodDrag.y.value = rect.top
         }
-        // ЗАПОМИНАЕМ актуальный рот в момент поднятия яблока!
-        // previousMouth = mouth.value
-        currentDraggedItem.value = 'food'
-        foodConsumedByPipe.value = false
     },
     onMove: (pos, event) => handleMove(event, 'food'),
     onEnd: () => {
-        // 👇 Берём ID текущего товара прямо здесь перед вызовом handleEnd
         const foodId = currentFoodItem.value?.id
         const foodCategory = currentFoodItem.value?.category
         if (actionTimer) {
@@ -174,23 +171,19 @@ export const foodDrag = useDraggable(foodEl, {
             actionTimer = null
         }
         statusSmoke.value = false
-        handleEnd('food', foodId,foodCategory)
-        // mouth.value = previousMouth
-        foodDrag.x.value = -9999
-        foodDrag.y.value = -9999
+        handleEnd('food', foodId, foodCategory)
     }
 })
 
 export const showerDrag = useDraggable(showerEl, {
     preventDefault: true,
     onStart: (pos, event) => {
+        currentDraggedItem.value = 'shower'
         if (showerEl.value) {
             const rect = showerEl.value.getBoundingClientRect()
             showerDrag.x.value = rect.left
             showerDrag.y.value = rect.top
         }
-        // previousMouth = mouth.value
-        currentDraggedItem.value = 'shower'
     },
     onMove: (pos, event) => handleMove(event, 'shower'),
     onEnd: () => handleEnd('shower')
@@ -199,13 +192,12 @@ export const showerDrag = useDraggable(showerEl, {
 export const foamDrag = useDraggable(foamEl, {
     preventDefault: true,
     onStart: (pos, event) => {
+        currentDraggedItem.value = 'foam'
         if (foamEl.value) {
             const rect = foamEl.value.getBoundingClientRect()
             foamDrag.x.value = rect.left
             foamDrag.y.value = rect.top
         }
-        // previousMouth = mouth.value
-        currentDraggedItem.value = 'foam'
     },
     onMove: (pos, event) => handleMove(event, 'foam'),
     onEnd: () => handleEnd('foam')

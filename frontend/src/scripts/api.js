@@ -2,7 +2,8 @@ import axios from 'axios'
 import {gameData, lowEnergy, showHunger} from './useGameStore.js'
 import {computed} from "vue";
 
-export const API_URL = '/api'
+// export const API_URL = '/api'
+export const API_URL = import.meta.env.VITE_API_URL || '/api'
 
 export async function initGameData() {
     // Получаем Telegram ID текущего пользователя (если открыто в Telegram)

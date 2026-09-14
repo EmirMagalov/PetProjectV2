@@ -122,27 +122,24 @@ watch(
         batheStatus,
 
         ()=>gameData.foodLevel,
-        ()=>gameData.fastfoodStreak,
+
         ()=>gameData.isFat,
 
     ],
-    ([hovered,isBathe,foodLevel,fastFood,isFat]) => {
+    ([hovered,isBathe,foodLevel,isFat]) => {
         const isLowEnergy = gameData.energy < 40
         const isHungry = gameData.foodLevel < 45
         const isDrunk = gameData.addictionStreak >= 2
         const hasIssues = isLowEnergy || isHungry || isDrunk
 
         // Приоритет 1: Если предмет перетаскивают над зоной — ВСЕГДА открытый рот
-        if (fastFood>4) {
-            gameData.isFat = true
-            gameData.fastfoodStreak = 0
-        }
+
         if (foodLevel <= 95) {
             gameData.foodStreak = 0
         }
 
         if (foodLevel<15){
-            body.value = '/character/fat_body.webp'
+            body.value = '/character/skinny_body.webp'
         }
         else if (isFat){
             body.value = '/character/fat_body.webp'
