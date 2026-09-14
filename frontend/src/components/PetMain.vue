@@ -201,7 +201,7 @@ onUnmounted(() => {
           <Status v-if="!levelStatus && feedStatus" :status="feedStatus" text="Ням-ням!" image="/gamePlay/hunger.webp"
                   :additional="`+${lastFedItem?.foodGain}`"/>
           <Status :status="levelStatus" text="Уровеь повышен" :additional="gameData.level"/>
-          <Status :status="isGameOver" text="💀 Питомец погиб!" image="/gamePlay/grave.webp" bg-color="bg-[#808080]"/>
+          <Status :status="isGameOver" text="Питомец погиб!" image="/gamePlay/grave.webp" bg-color="bg-[#808080]"/>
           <PetStinky/>
           <PetFoam :status-foam="statusFoam"/>
           <PetSmoke :status-smoke="statusSmoke"/>

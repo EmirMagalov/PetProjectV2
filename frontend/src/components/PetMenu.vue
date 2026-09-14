@@ -93,7 +93,7 @@ import {
 
         <!-- ДУШ -->
         <div
-            class="bg-[#fff6ef] justify-center relative h-25 flex flex-col gap-0 items-center p-2 rounded-3xl border-2 border-[#f7c9a5] transition-transform duration-50"
+            class="border-gray-300 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
           <div v-show="!feedStatus"
@@ -124,7 +124,7 @@ import {
 
         <!-- ШАМПУНЬ -->
         <div
-            class="bg-[#fff6ef] relative h-25  justify-center flex flex-col gap-1 items-center p-2 rounded-3xl border-2 border-[#f7c9a5] transition-transform duration-50  "
+            class="border-gray-300 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
           <div v-show="!feedStatus"
@@ -169,60 +169,69 @@ import {
 
       <div v-show="location==='food'" class="grid grid-cols-2 gap-x-4 gap-y-1.5 w-60 place-self-center">
 
-
         <div
             @click="nextItem()"
-            class="bg-[#fff6ef] justify-center  flex flex-col relative items-center p-2 rounded-3xl border-2 border-[#f7c9a5]"
-
+            class="border-gray-300 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
         >
-
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
-          <!-- ЕДА ИЗ ХОЛОДИЛЬНИКА -->
-          <div v-show="!feedStatus"
-               ref="foodEl"
+          <!-- 1. Если холодильник пуст: показываем только заглушку и текст -->
+          <template v-if="cartItemsList.length === 0">
+            <div
+                class="flex flex-col items-center justify-center w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
+                style="background-image: url('/gamePlay/fridge_empty.webp')">
+            </div>
+          </template>
 
-               :style="[
-       (foodDrag.isDragging.value && !foodConsumedByPipe) ? foodDrag.style.value : {},
-       {
-         'touch-action': 'none',
-         'background-image': `url('${cartItemsList.length > 0 && cartItemsList[currentIndex] ? cartItemsList[currentIndex].image : '/gamePlay/fridge_empty.webp'}')`
-       }
-     ]"
-               :class="[
-       (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative',
-       showHunger && !(foodDrag.isDragging.value && !foodConsumedByPipe) ? 'animate-pulse' : ''
-     ]"
-               class="flex flex-col items-center cursor-move  w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
-          ></div>
+          <!-- 2. Если в холодильнике есть еда: показываем продукты и логику драг-н-драп -->
+          <template v-else>
+            <div v-show="!feedStatus"
+                 ref="foodEl"
+                 :style="[
+                   (foodDrag.isDragging.value && !foodConsumedByPipe) ? foodDrag.style.value : {},
+                   {
+                     'touch-action': 'none',
+                     'background-image': `url('${cartItemsList[currentIndex]?.image}')`
+                   }
+                 ]"
+                 :class="[
+                   (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative',
+                   showHunger && !(foodDrag.isDragging.value && !foodConsumedByPipe) ? 'animate-pulse' : ''
+                 ]"
+                 class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
+            ></div>
 
-          <img v-show="(foodDrag.isDragging.value || feedStatus) && !foodConsumedByPipe"
-               :src="cartItemsList[currentIndex]?.image"
+            <img v-show="(foodDrag.isDragging.value || feedStatus) && !foodConsumedByPipe"
+                 :src="cartItemsList[currentIndex]?.image"
+                 class="opacity-30 relative"
+                 width="80"
+                 alt="">
+          </template>
 
-               class="opacity-30  relative"
-               width="80"
-               alt="">
-
-
-          <p class="text-xs absolute bottom-1   font-bold text-gray-600 pointer-events-none whitespace-nowrap"
-             :class="{ 'absolute': Object.keys(gameData.cart).length === 0 }">
+          <!-- Текст названия / статуса -->
+          <p class="text-xs absolute bottom-1 font-bold text-gray-600 pointer-events-none whitespace-nowrap">
             {{
-              cartItemsList[currentIndex] ? `${cartItemsList[currentIndex].name} x${gameData.cart[cartItemsList[currentIndex]?.id]}` : 'Холодильник пуст'
-            }}</p>
+              cartItemsList.length > 0 && cartItemsList[currentIndex]
+                  ? `${cartItemsList[currentIndex].name} x${gameData.cart[cartItemsList[currentIndex]?.id]}`
+                  : 'Холодильник пуст'
+            }}
+          </p>
 
         </div>
+
         <div
             @click="isShopOpen = true"
-            class="bg-[#fff6ef] justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50  cursor-pointer"
+            class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
                style="background-image: url('/gamePlay/market.webp')">
           </div>
           <button class="text-md font-bold text-gray-600 pointer-events-none">Магазин</button>
         </div>
+
         <div
             @click="location = 'home'"
-            class="bg-[#fff6ef] justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
+            class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-20 h-20 bg-contain bg-no-repeat bg-center"
                style="background-image: url('/gamePlay/back_icon.webp')">

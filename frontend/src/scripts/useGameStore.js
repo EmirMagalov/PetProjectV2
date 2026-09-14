@@ -1,7 +1,7 @@
 import {ref, reactive, watch, computed} from 'vue'
 
 export const mouth = ref('/character/happy_mouth.webp')
-export const sleepTimeRemaining = ref("00:00")
+export const sleepTimeRemaining = ref("")
 
 export const isShopOpen = ref(false)
 export const lowEnergy = ref(false)

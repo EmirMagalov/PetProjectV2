@@ -182,7 +182,7 @@ watch(() => gameData.lives, async (newLives) => {
     // Если жизни кончились, и мы ЕЩЕ не в процессе сброса/перезагрузки
     if (newLives <= 0 && !isGameOver.value) {
         isGameOver.value = true
-        console.log("💀 Питомец погиб!")
+
 
 
     }
