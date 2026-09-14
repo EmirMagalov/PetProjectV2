@@ -1,10 +1,10 @@
 import {
     cloudShow,
-    energyFull,
+    energyFull, feedStatus,
     gameData, hearts,
     isAnimating, isBadMood, isGameOver,
     isVibrating,
-    lastFedItem,
+    lastFedItem, lifeStatus,
     showHunger,
 
 }
@@ -34,31 +34,38 @@ export function otherFeedPet(foodId) {
     if (foodItem && gameData.cart[targetId] > 0) {
         // 👇 Используем общую функцию списания
         removeFromCart(targetId)
+        if (foodId === "pipe") {
+            gameData.isDrunk = true
+            gameData.addictionStreak = Math.min(4, gameData.addictionStreak + 1)
+            gameData.lastAddictionTime = Math.floor(Date.now() / 1000)
 
-        gameData.isDrunk = true
-        gameData.addictionStreak = Math.min(4, gameData.addictionStreak + 1)
-        gameData.lastAddictionTime = Math.floor(Date.now() / 1000)
+            if (gameData.addictionStreak >= 3) {
+                gameData.lives = Math.max(0, gameData.lives - 1)
+            }
 
-        if (gameData.addictionStreak >= 3) {
-            gameData.lives = Math.max(0, gameData.lives - 1)
+            if (drunkTimer) {
+                clearTimeout(drunkTimer)
+            }
+            if (gameData.addictionStreak <= 1) {
+                drunkTimer = setTimeout(() => {
+                    gameData.isDrunk = false
+                    drunkTimer = null
+                }, 60000)
+            }
+            gameData.energy = Math.min(80, gameData.foodLevel + 80)
         }
 
-        if (drunkTimer) {
-            clearTimeout(drunkTimer)
-        }
 
-        // Включаем таймер на 1 минуту (60 000 миллисекунд)
-        if (gameData.addictionStreak <= 1) {
-            drunkTimer = setTimeout(() => {
-                gameData.isDrunk = false
-                drunkTimer = null
-            }, 60000)
-        }
         gameData.coins += 1
-        gameData.energy = Math.min(80, gameData.foodLevel + 80)
+        if (foodId === "lifePotion") {
+            lifeStatus.value = true
+            gameData.lives = Math.min(3, gameData.lives + 1)
+            setTimeout(() => lifeStatus.value = false, 800)
+        }
+
         animationCoin(1)
         addExp(20)
-        currentIndex.value = 0
+
         if (gameData.feedCount > 6) {
             gameData.stinky = true
         }
@@ -80,6 +87,8 @@ export function feedPet(foodId) {
         gameData.feedCount += 1
         animationCoin(1)
         addExp(20)
+        feedStatus.value = true
+        setTimeout(() => feedStatus.value = false, 800)
         if (gameData.feedCount > 3) {
             gameData.stinky = true
         }
@@ -93,13 +102,13 @@ export function feedPet(foodId) {
             gameData.lives = Math.max(0, gameData.lives - 1)
         }
         // Проверяем категорию еды
-        if (foodItem.category === 'fastfood') {
+        if (foodItem.subcategory === 'fastfood') {
             gameData.fastfoodStreak++
-            if (gameData.fastfoodStreak >=4){
+            if (gameData.fastfoodStreak >= 4) {
                 gameData.isFat = true
                 gameData.foodStreak = 2
             }
-        } else if (foodItem.category === 'fruits') {
+        } else if (foodItem.subcategory === 'fruits') {
             if (gameData.fruitStreak >= 3) {
                 gameData.isFat = false
             }

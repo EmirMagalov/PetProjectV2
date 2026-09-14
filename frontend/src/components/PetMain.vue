@@ -10,7 +10,7 @@ import {
   mouth,
   lowEnergy,
   hearts, isVibrating, lastFedItem, isBadMood, isAnimating, gameData, blink, statusShower, statusFoam, feedStatus,
-  locationUrl, location, dropZoneRef, body, isGameOver
+  locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus
 } from "@/scripts/useGameStore.js";
 
 import {addCoins} from "@/scripts/actions.js";
@@ -200,6 +200,7 @@ onUnmounted(() => {
           <!-- Индикатор успешного кормления   -->
           <Status v-if="!levelStatus && feedStatus" :status="feedStatus" text="Ням-ням!" image="/gamePlay/hunger.webp"
                   :additional="`+${lastFedItem?.foodGain}`"/>
+          <Status v-if="!levelStatus && lifeStatus" :status="lifeStatus" text="+ 1 жизнь!" image="/gamePlay/heart.svg"/>
           <Status :status="levelStatus" text="Уровеь повышен" :additional="gameData.level"/>
           <Status :status="isGameOver" text="Питомец погиб!" image="/gamePlay/grave.webp" bg-color="bg-[#808080]"/>
           <PetStinky/>

@@ -22,8 +22,20 @@ import {
   showerEl,
   foamEl, foodConsumedByPipe
 } from "@/scripts/dragAndDrop.js";
+import {computed} from "vue";
 
+const shouldPulse = computed(() => {
+  // Добавляем .value, чтобы Vue отслеживал изменения массива
+  const list = cartItemsList.value || cartItemsList;
 
+  if (!showHunger.value || (foodDrag.isDragging.value && !foodConsumedByPipe)) {
+    return false;
+  }
+  if (list.length === 0 || !list[currentIndex.value]) {
+    return false;
+  }
+  return list[currentIndex.value].category !== 'shaman';
+});
 </script>
 
 <template>
@@ -196,7 +208,7 @@ import {
                  ]"
                  :class="[
                    (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative',
-                   showHunger && !(foodDrag.isDragging.value && !foodConsumedByPipe) ? 'animate-pulse' : ''
+                   shouldPulse ? 'animate-pulse' : ''
                  ]"
                  class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
             ></div>

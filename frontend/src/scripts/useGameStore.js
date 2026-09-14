@@ -17,6 +17,7 @@ export const hearts = ref(false)
 
 export const dropZoneRef = ref()
 export const feedStatus = ref(false)
+export const lifeStatus = ref(false)
 export const statusFoam = ref(false)
 export const statusShower = ref(false)
 export const currentDraggedItem = ref(null)
@@ -34,7 +35,7 @@ export const isGameOver = ref(false)
 export const gameData = reactive({
     level: 1,
     exp: 0,
-    coins: 50,
+    coins: 1150,
     lives: 3,
     foodLevel: 50,
     energy: 50,

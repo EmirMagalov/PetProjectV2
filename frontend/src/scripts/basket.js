@@ -33,6 +33,7 @@ export const cartItemsList = computed(() => {
             count: count,
             name: foodInfo?.name || 'Неизвестно',
             category: foodInfo?.category || 'Неизвестно',
+            subcategory: foodInfo?.subcategory || 'Неизвестно',
             image: foodInfo?.image || '',
             foodGain: foodInfo?.foodGain || 0,
             cost: foodInfo?.cost || 0

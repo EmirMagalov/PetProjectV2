@@ -99,7 +99,7 @@ export function handleMove(event, itemType) {
                     }, 2000)
                 }
             }
-        }else if(itemType === 'foam'){
+        } else if (itemType === 'foam') {
             batheStatus.value = true
         }
     } else {
@@ -116,7 +116,7 @@ export function handleMove(event, itemType) {
 }
 
 // Универсальная функция окончания перетаскивания
-export function handleEnd(itemType, foodId,foodCategory) {
+export function handleEnd(itemType, foodId, foodCategory) {
     // Если еда уже была съедена конусом через таймер
     if (foodConsumedByPipe.value || foodId === 'pipe') {
         statusSmoke.value = false
@@ -128,13 +128,22 @@ export function handleEnd(itemType, foodId,foodCategory) {
     }
 
     if (isHovered.value) {
+
         if (itemType === 'food') {
-            feedStatus.value = true
-            feedPet(foodId)
+            if (foodCategory === 'food') {
+
+                feedPet(foodId)
+            } else {
+                if (!(foodId === 'lifePotion' && gameData.lives >= 3)) {
+                    otherFeedPet(foodId)
+                }
+            }
+
+
         } else if (itemType === 'foam') {
             statusFoam.value = true
         }
-        setTimeout(() => feedStatus.value = false, 800)
+
     }
     batheStatus.value = false
     isHovered.value = false

@@ -76,6 +76,16 @@ function showNotification(item) {
     lastBought.value = null
   }, 2500)
 }
+
+const getItemBonuses = (item) => {
+  const bonuses = []
+  if (item.foodGain) bonuses.push(`+ ${item.foodGain} сытости`)
+  if (item.energyGain) bonuses.push(`+ ${item.energyGain} энергии`)
+  if (item.life) bonuses.push(`+ ${item.life} жизнь`)
+  return bonuses
+}
+
+
 </script>
 
 <template>
@@ -135,9 +145,10 @@ function showNotification(item) {
             </div>
             <div>
               <h3 class="font-semibold text-sm text-white ">{{ item.name }}</h3>
-              <p v-if="activeTab === 'food' || activeTab === 'shaman'" class="text-xs text-emerald-400">{{ item.foodGain?`+ ${item.foodGain} сытости`:''}}<br>{{ item.energyGain?`+ ${item.energyGain} энергии`:''}}</p>
-              <p v-else-if="gameData.unlockedHeads?.includes(item.id)" class="text-xs text-blue-400">
-                {{ gameData.equippedHead === item.id ? '✨ Надето' : '✅ Куплено' }}
+              <p v-if="activeTab === 'food' || activeTab === 'shaman'" class="text-xs text-emerald-400">
+                <template v-for="(bonus, index) in getItemBonuses(item)" :key="index">
+                  {{ bonus }}<br v-if="index < getItemBonuses(item).length - 1">
+                </template>
               </p>
             </div>
           </div>
