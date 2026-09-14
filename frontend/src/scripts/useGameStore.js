@@ -35,7 +35,7 @@ export const isGameOver = ref(false)
 export const gameData = reactive({
     level: 1,
     exp: 0,
-    coins: 1150,
+    coins: 50,
     lives: 3,
     foodLevel: 50,
     energy: 50,
