@@ -134,8 +134,9 @@ watch(
 
         // Приоритет 1: Если предмет перетаскивают над зоной — ВСЕГДА открытый рот
 
-        if (foodLevel <= 95) {
+        if (foodLevel <= 85) {
             gameData.foodStreak = 0
+            gameData.isFat = false
         }
 
         if (foodLevel<15){
