@@ -96,10 +96,12 @@ export function feedPet(foodId) {
             gameData.foodStreak++
             gameData.fastfoodStreak++
         }
-
+        if (gameData.isFat){
+            gameData.lives = Math.max(0, gameData.lives - 1)
+        }
         if (gameData.foodStreak >= 2) {
             gameData.isFat = true
-            gameData.lives = Math.max(0, gameData.lives - 1)
+
         }
         // Проверяем категорию еды
         if (foodItem.subcategory === 'fastfood') {
