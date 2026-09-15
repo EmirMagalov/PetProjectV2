@@ -39,6 +39,7 @@ export const gameData = reactive({
     lives: 3,
     foodLevel: 50,
     energy: 50,
+    clickCounter:0,
     stinky: false,
     sleep: false,
     sleepEndTime: 0,

@@ -10,21 +10,17 @@ import {
 }
     from "@/scripts/useGameStore.js";
 import '@/scripts/stats.js'
-import {cartItemsList, currentFoodItem, currentIndex, giveCoinToggle, removeFromCart} from "@/scripts/basket.js";
+import {cartItemsList, currentFoodItem, currentIndex, removeFromCart} from "@/scripts/basket.js";
 import {foodList} from "@/scripts/foodItems.js";
 import {addExp} from "@/scripts/level.js";
 
 import {toggleSleep} from "@/scripts/stats.js";
 import {initGameData, resetPet} from "@/scripts/api.js";
+import {ref} from "vue";
 
 let hideTrackerTimer = null
 export let drunkTimer = null
 
-
-export function addCoins(amount) {
-    gameData.coins += amount
-
-}
 
 export function otherFeedPet(foodId) {
     const targetId = foodId || cartItemsList.value[currentIndex.value]?.id
@@ -63,7 +59,7 @@ export function otherFeedPet(foodId) {
             setTimeout(() => lifeStatus.value = false, 800)
         }
 
-        animationCoin(1)
+        addCoin(1)
         addExp(20)
 
         if (gameData.feedCount > 6) {
@@ -85,7 +81,7 @@ export function feedPet(foodId) {
         gameData.foodLevel = Math.min(100, gameData.foodLevel + foodItem.foodGain)
         gameData.coins += 1
         gameData.feedCount += 1
-        animationCoin(1)
+        addCoin(1)
         addExp(20)
         feedStatus.value = true
         setTimeout(() => feedStatus.value = false, 800)
@@ -149,65 +145,54 @@ export function goSleep() {
 }
 
 
+// Переменная для хранения ссылки на таймер анимации вне функции
+export const animKey = ref(0)
+
 export function spawnHeart() {
-    if (isAnimating.value) {
-        return
-    }
-
     gameData.sleep = false
-    isAnimating.value = true
-    isVibrating.value = true
 
-    // Меняем состояние ДО начала анимации, чтобы шаблон сразу понял, что показывать
-    giveCoinToggle.value = !giveCoinToggle.value
-
+    addCoin(1)
+    addExp(1)
+    gameData.clickCounter ++
+    // Тратим энергию / сытость
     if (isBadMood.value) {
-
-        gameData.energy = Math.max(0, gameData.energy - 1.5)
-        gameData.foodLevel = Math.max(0, gameData.foodLevel - 1)
+        gameData.energy = Math.max(0, gameData.energy - 0.02)
+        gameData.foodLevel = Math.max(0, gameData.foodLevel - 0.02)
     } else {
-        gameData.energy = Math.max(0, gameData.energy - 0.5)
-        gameData.foodLevel = Math.max(0, gameData.foodLevel - 0.3)
+        gameData.energy = Math.max(0, gameData.energy - 0.01)
+        gameData.foodLevel = Math.max(0, gameData.foodLevel - 0.01)
     }
+
     if (gameData.isFat) {
         gameData.PlayCount++
-
-        // Если поиграли 5 раз — худеем!
         if (gameData.PlayCount >= 10) {
             gameData.isFat = false
             gameData.PlayCount = 0
-            gameData.fastfoodStreak = 0 // Сбрасываем и стрик фастфуда на всякий случай
+            gameData.fastfoodStreak = 0
         }
     }
-    // Показываем анимацию
-    hearts.value = true
 
-    addExp(5)
-    // Таймер окончания анимации
+    // Увеличиваем ключ — это мгновенно перезапустит анимации сердечка и монетки с нуля
+    animKey.value++
+    isVibrating.value = true
+
+    // Короткий сброс вибрации рта
     setTimeout(() => {
-        isAnimating.value = false
         isVibrating.value = false
-        hearts.value = false
-        // Начисляем монету, если выпал этот цикл
-        if (giveCoinToggle.value) {
-            addCoins(1)
-        }
-    }, 800)
+    }, 150)
 }
 
+export function addCoin(coins = 1) {
 
-export function animationCoin(coins = 1) {
+    gameData.coins += coins
+
+    // 2. Включаем флаги анимации
     isAnimating.value = true
-    giveCoinToggle.value = true
+
     setTimeout(() => {
         isAnimating.value = false
-        giveCoinToggle.value = true
-        gameData.coins += coins
 
-
-        // Начисляем монету, если выпал этот цикл
-
-    }, 800)
+    }, 150) // Делаем быстрым, например 150мс под стать вибрации
 }
 
 

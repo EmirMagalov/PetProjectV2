@@ -21,6 +21,7 @@ export async function initGameData() {
         gameData.foodLevel = serverData.food_level
         gameData.energy = serverData.energy
         gameData.stinky = serverData.stinky
+        gameData.clickCounter = serverData.click_counter
         gameData.sleep = serverData.sleep
         gameData.sleepEndTime = serverData.sleep_end_time
         gameData.fastfoodStreak = serverData.fastfood_streak
@@ -73,6 +74,7 @@ export async function syncToBackend() {
             energy: gameData.energy,
             stinky: gameData.stinky,
             sleep: gameData.sleep,
+            click_counter:gameData.clickCounter,
             sleep_end_time: gameData.sleepEndTime,
             fastfood_streak: gameData.fastfoodStreak,
             is_fat: gameData.isFat,
@@ -111,6 +113,7 @@ document.addEventListener('visibilitychange', () => {
             energy: gameData.energy,
             stinky: gameData.stinky,
             sleep: gameData.sleep,
+            click_counter:gameData.clickCounter,
             sleep_end_time: gameData.sleepEndTime,
             fastfood_streak: gameData.fastfoodStreak,
             is_fat: gameData.isFat,

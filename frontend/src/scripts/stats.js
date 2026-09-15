@@ -10,20 +10,20 @@ import {
 } from "@/scripts/useGameStore.js";
 import {addExp} from "@/scripts/level.js";
 
-import {animationCoin, drunkTimer} from "@/scripts/actions.js";
+import {addCoin, drunkTimer} from "@/scripts/actions.js";
 import {batheStatus, isHovered, previousMouth} from "@/scripts/dragAndDrop.js";
 
 
 setInterval(() => {
 
     if (gameData.foodLevel > 0) {
-        const consumeAmount = gameData.isDrunk ? 1 : 0.5
+        const consumeAmount = gameData.isDrunk ? 0.5:0.3
         gameData.foodLevel = Math.max(0, gameData.foodLevel - consumeAmount)
     }
 
     // 2. Уменьшаем энергию (если не спит)
     if (gameData.energy > 0 && !gameData.sleep) {
-        gameData.energy = Math.max(0, gameData.energy - 1)
+        gameData.energy = Math.max(0, gameData.energy - 0.2)
     }
 
     // 3. Проверка штрафов за голод или отсутствие энергии
@@ -47,8 +47,8 @@ setInterval(() => {
     if (isFoodZero || isEnergyZero) {
         gameData.badStatsMinutes++
 
-        // Если оба на нуле — каждые 30 минуты, если один — каждые 60 минут
-        const targetMinutes = (isFoodZero && isEnergyZero) ? 30 : 60
+
+        const targetMinutes =  480
 
         if (gameData.badStatsMinutes >= targetMinutes) {
 
@@ -98,7 +98,7 @@ setInterval(() => {
     if (timeLeftSec <= 0) {
         gameData.energy = 100
         gameData.sleep = false
-        animationCoin(5)
+        addCoin(5)
         addExp(35)
         sleepTimeRemaining.value = "00:00"
         gameData.sleepEndTime = 0

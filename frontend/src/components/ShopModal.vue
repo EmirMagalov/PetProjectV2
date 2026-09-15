@@ -118,7 +118,7 @@ const getItemBonuses = (item) => {
         </button>
         <button
             @click="activeTab = 'shaman'"
-            v-show="gameData.level >=10"
+            v-show="gameData.level >=5"
             :class="['flex-1 py-2 rounded-xl text-sm font-bold transition-all', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
           🪶 Шаман

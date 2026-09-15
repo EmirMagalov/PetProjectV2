@@ -56,7 +56,6 @@ async def reset_pet(data: dict):
     # Сбрасываем всё к заводским настройкам
     pet.level = 1
     pet.exp = 0
-    pet.coins = 50  # Или сколько у вас на старте
     pet.lives = 3
     pet.food_level = 50
     pet.energy = 50

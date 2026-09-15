@@ -39,7 +39,7 @@ register_tortoise(
     app,
     db_url=settings.DATABASE_URL,
     modules={"models": ["backend.models.pet"]}, # Указываем весь пакет models, чтобы подтянулись все файлы внутри (включая pet.py)
-    generate_schemas=True,
+    generate_schemas=False,
     add_exception_handlers=True,
 )
 

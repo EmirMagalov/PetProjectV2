@@ -32,17 +32,17 @@ async def update_pet_stats(pet) -> bool:
 
         for _ in range(capped_minutes):
             if pet.food_level > 0:
-                consume = 1.0 if pet.is_drunk else 0.5
+                consume = 0.5 if pet.is_drunk else 0.3
                 pet.food_level = max(0.0, pet.food_level - consume)
             if pet.energy > 0:
-                pet.energy = max(0, pet.energy - 1)
+                pet.energy = max(0, pet.energy - 0.2)
 
             is_food_zero = pet.food_level == 0
             is_energy_zero = pet.energy == 0
 
             if is_food_zero or is_energy_zero:
                 pet.bad_stats_minutes += 1
-                target_minutes = 30 if (is_food_zero and is_energy_zero) else 60
+                target_minutes =  480
 
                 if pet.bad_stats_minutes >= target_minutes:
                     if pet.lives > 0:

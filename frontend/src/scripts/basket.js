@@ -8,7 +8,7 @@ import {
 } from "@/scripts/useGameStore.js";
 import {foodList} from "@/scripts/foodItems.js";
 import {headItems} from "@/scripts/headwearItems.js";
-import {addCoins} from "@/scripts/actions.js";
+
 import {syncToBackend} from "@/scripts/api.js";
 
 // export const cart = reactive(
@@ -108,5 +108,5 @@ export function buyHeadwear(headId) {
     gameData.equippedHead = headId
 }
 
-export const giveCoinToggle = ref(false)
+
 

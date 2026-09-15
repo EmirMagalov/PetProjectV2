@@ -2,6 +2,7 @@ from tortoise import models, fields
 class Pet(models.Model):
     tg_id = fields.BigIntField(pk=True)
     # Основные игровые статы
+    click_counter = fields.IntField(default=0)
     level = fields.IntField(default=1)
     exp = fields.IntField(default=0)
     coins = fields.IntField(default=0)

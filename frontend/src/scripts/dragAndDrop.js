@@ -1,6 +1,6 @@
 import {useDraggable} from "@vueuse/core";
 import {computed, ref} from "vue";
-import {animationCoin, feedPet, otherFeedPet} from "@/scripts/actions.js";
+import {addCoin, feedPet, otherFeedPet} from "@/scripts/actions.js";
 import {
     currentDraggedItem,
     dropZoneRef,
@@ -56,7 +56,7 @@ export function handleMove(event, itemType) {
                     actionTimer = setTimeout(() => {
                         statusSmoke.value = false
                         otherFeedPet(foodId)
-                        animationCoin(2)
+                        addCoin(2)
                         addExp(5)
 
                         // Помечаем, что еда уже съедена
@@ -93,7 +93,7 @@ export function handleMove(event, itemType) {
                         statusFoam.value = false
                         showerCount.value += 1
                         gameData.stinky = false
-                        animationCoin(2)
+                        addCoin(2)
                         addExp(25)
                         gameData.feedCount = 0
                     }, 2000)

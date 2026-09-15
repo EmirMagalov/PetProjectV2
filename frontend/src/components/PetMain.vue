@@ -13,13 +13,10 @@ import {
   locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus
 } from "@/scripts/useGameStore.js";
 
-import {addCoins} from "@/scripts/actions.js";
-
 import CloudMessage from "@/components/CloudMessage.vue";
 import PetStinky from "@/components/PetStinky.vue";
 import PetHeadwear from "@/components/PetHeadwear.vue";
-import {giveCoinToggle} from "@/scripts/basket.js";
-import {spawnHeart} from "@/scripts/actions.js";
+import {animKey, spawnHeart} from "@/scripts/actions.js";
 import Status from "@/components/Status.vue";
 import {levelStatus} from "@/scripts/level.js";
 import {statusSmoke} from "@/scripts/dragAndDrop.js";
@@ -135,15 +132,17 @@ onUnmounted(() => {
         <!-- Зона персонажа (сюда перетаскиваем яблоко) -->
 
         <div ref="dropZoneRef"
+             class="absolute inset-0 z-30 flex justify-center mt-5 items-center cursor-pointer">
 
-             :class="[
-               'absolute inset-0 z-30 flex justify-center mt-5 items-center cursor-pointer transition-transform',
-               isAnimating ? 'animate-pop' : ''
-             ]">
-          <div  @click="spawnHeart" class="absolute top-30 z-120 w-25 h-25"></div>
-          <img v-show="hearts" :src=" isBadMood? '/gamePlay/angry.svg':'/gamePlay/kiss.svg'" :style="{
+          <div @click="spawnHeart" class="absolute top-30 z-120 w-25 h-25"></div>
 
-      }" :class="['absolute text-2xl w-5 select-none z-20',hearts?'animate-float-heart':'']" alt="">
+          <!-- Сердечко с key для перезапуска анимации на каждый клик -->
+          <img
+              :key="animKey"
+              :src="isBadMood ? '/gamePlay/angry_icon.webp' : '/gamePlay/happy_icon.webp'"
+              class="absolute text-2xl w-5 select-none z-20 animate-float-heart"
+              alt="">
+
           <div v-show="gameData.sleep"
                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-40">
             <div class="absolute text-[#00BFFF]  font-extrabold text-xl z-1 drop-shadow-md">Z</div>
@@ -151,53 +150,55 @@ onUnmounted(() => {
           </div>
           <p class="bg-[#fbf3e0]"></p>
 
-          <img :src="body" class="absolute w-45" alt="">
+          <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
+          <div :key="animKey" class="absolute flex justify-center items-center animate-pop w-45 h-45">
+            <img :src="body" class="absolute w-45" alt="">
+            <img :src="getHornAsset(gameData.level)" class="absolute w-45" alt="">
+            <img v-show="gameData.isDrunk" src="/character/drunk.webp" class="absolute w-45" alt="">
+            <div v-if="!blink && !gameData.sleep">
 
-          <img :src="getHornAsset(gameData.level)" class="absolute w-45" alt="">
-          <img v-show="gameData.isDrunk" src="/character/drunk.webp" class="absolute w-45" alt="">
-          <div v-if="!blink && !gameData.sleep">
-
-            <div v-show="lowEnergy" class="absolute inset-0 flex justify-center items-center z-10">
-              <img src="/character/bags_left.webp" class="absolute w-45" alt=""/>
-              <img src="/character/bags_right.webp" class="absolute w-45" alt=""/>
-            </div>
-
-            <div class="absolute inset-0 flex justify-center items-center  pointer-events-none">
-
-              <img src="/character/eye_left.webp" class="absolute w-45" alt="">
-              <img src="/character/eye_right.webp" class="absolute w-45" alt="">
-            </div>
-
-            <!-- ЗРАЧКИ -->
-            <!-- 1. Внешний блок зрачков ТОЖЕ моргает вместе с глазами, но без смещения -->
-            <div class="absolute inset-0 flex justify-center items-center  pointer-events-none">
-              <!-- 2. Внутренний блок отвечает ТОЛЬКО за рандомный взгляд -->
-              <div
-                  class="absolute inset-0 flex justify-center items-center pupils-look"
-                  :style="{
-                transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)`
-              }"
-              >
-                <img src="/character/pupils_left.webp" class="absolute w-45" alt=""/>
-                <img src="/character/pupils_right.webp" class="absolute w-45" alt=""/>
-
+              <div v-show="lowEnergy" class="absolute inset-0 flex justify-center items-center z-10">
+                <img src="/character/bags_left.webp" class="absolute w-45" alt=""/>
+                <img src="/character/bags_right.webp" class="absolute w-45" alt=""/>
               </div>
 
+              <div class="absolute inset-0 flex justify-center items-center  pointer-events-none">
 
+                <img src="/character/eye_left.webp" class="absolute w-45" alt="">
+                <img src="/character/eye_right.webp" class="absolute w-45" alt="">
+              </div>
+
+              <!-- ЗРАЧКИ -->
+              <div class="absolute inset-0 flex justify-center items-center  pointer-events-none">
+                <div
+                    class="absolute inset-0 flex justify-center items-center pupils-look"
+                    :style="{
+                transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)`
+              }"
+                >
+                  <img src="/character/pupils_left.webp" class="absolute w-45" alt=""/>
+                  <img src="/character/pupils_right.webp" class="absolute w-45" alt=""/>
+
+                </div>
+
+
+              </div>
             </div>
+            <img v-else src="/character/eye_close.webp" class="absolute w-45" alt="">
+            <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''" class="absolute w-45" alt="">
           </div>
-          <img v-else src="/character/eye_close.webp" class="absolute w-45" alt="">
-          <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''" class="absolute w-45" alt="">
+
+
           <div class="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible z-30">
             <CloudMessage/>
 
-
-            <img v-show="isAnimating && giveCoinToggle" :class="['absolute w-5 z-50',isAnimating?'animate-coinFly ':'']"
+            <!-- Монетка с key для перезапуска анимации на каждый клик -->
+            <img :key="animKey"
+                 class="absolute w-5 z-50 animate-coinFly"
                  src="/gamePlay/coin.svg" alt="">
-
-
           </div>
-          <!-- Индикатор успешного кормления   -->
+
+          <!-- Индикаторы статусов -->
           <Status v-if="!levelStatus && feedStatus" :status="feedStatus" text="Ням-ням!" image="/gamePlay/hunger.webp"
                   :additional="`+${lastFedItem?.foodGain}`"/>
           <Status v-if="!levelStatus && lifeStatus" :status="lifeStatus" text="+ 1 жизнь!" image="/gamePlay/heart.svg"/>
@@ -214,17 +215,6 @@ onUnmounted(() => {
 
     <!-- Меню -->
     <div class="mt-auto pb-4 shrink-0">
-      <!--      <PetMenu-->
-      <!--          v-model:mouth="mouth"-->
-      <!--          v-model:feedStatus="feedStatus"-->
-      <!--          v-model:location="location"-->
-      <!--          v-model:currentDraggedItem="currentDraggedItem"-->
-      <!--          v-model:sleep="sleep"-->
-      <!--          v-model:statusFoam="statusFoam"-->
-      <!--          v-model:statusShower="statusShower"-->
-      <!--          :dropZoneRef="dropZoneRef"-->
-      <!--          @feed-success="spawnHeart"-->
-      <!--      />-->
       <PetMenu/>
     </div>
 
@@ -236,25 +226,22 @@ onUnmounted(() => {
 <style scoped>
 @keyframes floatHeart {
   0% {
-    transform: translate(0, 0) scale(1);
+    transform: translate(-15px, -15px) scale(1);
     opacity: 1;
   }
   50% {
-    /* Летит на случайную ширину по X и чуть выше по Y */
     transform: translate(-40px, -30px) scale(1.5);
   }
   100% {
-    /* Улетает в финальную случайную точку и растворяется */
     transform: translate(-40px, -30px) scale(0.8);
     opacity: 0;
   }
 }
 
 .animate-float-heart {
-  animation: floatHeart 0.8s ease-out forwards;
+  animation: floatHeart 0.5s ease-out forwards;
 }
 
-/* Новая анимация для персонажа при клике */
 @keyframes popCharacter {
   0% {
     transform: scale(1);
@@ -268,7 +255,7 @@ onUnmounted(() => {
 }
 
 .animate-pop {
-  animation: popCharacter 0.5s;
+  animation: popCharacter 0.2s ease-out;
 }
 
 @keyframes vibrate {
@@ -284,25 +271,19 @@ onUnmounted(() => {
 }
 
 .animate-vibrate {
-  /* Вибрирует очень быстро, 0.05 секунды на цикл, 16 раз за 0.8с */
   animation: vibrate 0.50s linear infinite;
-  /* Важно: чтобы вибрация не влияла на другие элементы */
   display: inline-block;
 }
 
-
-/* Плавный переход для рандомного взгляда зрачков */
 .pupils-look {
   transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Эффект лунного свечения (серебристо-белое) */
 .moon-glow {
   box-shadow: 0 0 20px 8px rgba(240, 244, 248, 0.5),
   0 0 40px 15px rgba(203, 213, 225, 0.2);
 }
 
-/* Плавное покачивание / «дыхание» во время сна */
 @keyframes sleep-breath {
   0%, 100% {
     transform: scale(1) translateY(0);
@@ -312,7 +293,6 @@ onUnmounted(() => {
   }
 }
 
-/* Анимация всплывающих буковок Zzz */
 @keyframes float-z {
   0% {
     opacity: 0;
@@ -327,18 +307,8 @@ onUnmounted(() => {
   }
 }
 
-/* Класс для «дыхания» персонажа */
 .animate-sleep {
   animation: sleep-breath 3s ease-in-out infinite;
-}
-
-/* Классы для буковок Zzz */
-.zzz-container {
-  position: absolute;
-  top: 20%;
-  right: 25%;
-  pointer-events: none;
-  z-index: 30;
 }
 
 .z-1 {
@@ -347,7 +317,7 @@ onUnmounted(() => {
 
 .z-2 {
   animation: float-z 2.5s ease-in-out infinite;
-  animation-delay: 1.2s; /* Вторая буковка летит с задержкой */
+  animation-delay: 1.2s;
   font-size: 0.8rem;
 }
 
@@ -365,7 +335,6 @@ onUnmounted(() => {
   }
 }
 
-/* Бесконечное легкое покачивание после появления */
 @keyframes cloudFloat {
   0%, 100% {
     transform: translateY(0) scale(1);
@@ -376,12 +345,10 @@ onUnmounted(() => {
 }
 
 .animate-thought-cloud {
-  /* Сначала срабатывает появление (0.4с), затем бесконечно запускается покачивание (3с) */
   animation: thoughtCloudAppearAndFloat 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
   cloudFloat 3s ease-in-out 0.4s infinite;
   transform-origin: center bottom;
 }
-
 
 @keyframes coinFly {
   0% {
@@ -389,18 +356,15 @@ onUnmounted(() => {
     opacity: 1;
   }
   50% {
-    /* Летит на 30 пикселей влево/вверх и чуть увеличивается */
     transform: translate(30px, -50px) scale(1.2);
   }
   100% {
-    /* Улетает еще выше и растворяется */
     transform: translate(120px, -150px) scale(0.8);
     opacity: 1;
   }
 }
 
 .animate-coinFly {
-  animation: coinFly 0.6s ease-out forwards;
+  animation: coinFly 0.2s ease-out forwards;
 }
-
 </style>
