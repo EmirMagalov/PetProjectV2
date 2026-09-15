@@ -183,7 +183,7 @@ const shouldPulse = computed(() => {
         <div
             @click="nextItem()"
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
-            :class="shouldPulse ? 'animate-pulse' : ''"
+
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
