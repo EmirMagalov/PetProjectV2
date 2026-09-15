@@ -356,11 +356,11 @@ onUnmounted(() => {
     opacity: 1;
   }
   50% {
-    transform: translate(30px, -50px) scale(1.2);
+    transform: translate(5px, -50px) scale(1.2);
   }
   100% {
-    transform: translate(120px, -150px) scale(0.8);
-    opacity: 1;
+    transform: translate(5px, -100px) scale(0.8);
+    opacity:0;
   }
 }
 
