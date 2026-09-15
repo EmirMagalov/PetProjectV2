@@ -13,6 +13,12 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    # Добавляем проверку здоровья базы
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pet_user -d pet_db"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
 
   backend:
     build: .
@@ -23,7 +29,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy  # <--- Бэкенд ждет, пока база реально ответит
 
   bot:
     build: .
@@ -33,8 +40,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
-      - backend
+      db:
+        condition: service_healthy  # <--- Бот тоже ждет базу
+      backend:
+        condition: service_started
 
   nginx:
     build:
