@@ -30,6 +30,8 @@ services:
     container_name: pet_bot
     restart: always
     command: ["python", "-m", "bot.main"]
+    volumes:
+      - ./backend/data:/app/data
     env_file:
       - .env
     depends_on:
