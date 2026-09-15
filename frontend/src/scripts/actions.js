@@ -165,7 +165,7 @@ export function spawnHeart() {
 
     if (gameData.isFat) {
         gameData.PlayCount++
-        if (gameData.PlayCount >= 10) {
+        if (gameData.PlayCount >= 30) {
             gameData.isFat = false
             gameData.PlayCount = 0
             gameData.fastfoodStreak = 0
