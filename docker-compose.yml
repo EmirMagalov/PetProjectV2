@@ -1,14 +1,40 @@
+version: '3.8'
+
 services:
+  db:
+    image: postgres:15-alpine
+    container_name: pet_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: pet_user
+      POSTGRES_PASSWORD: pet_password
+      POSTGRES_DB: pet_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   backend:
     build: .
     container_name: pet_backend
     restart: always
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend/data:/app/data
     env_file:
       - .env
+    depends_on:
+      - db
+
+  bot:
+    build: .
+    container_name: pet_bot
+    restart: always
+    command: ["python", "-m", "bot.main"]
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - backend
 
   nginx:
     build:
@@ -25,14 +51,5 @@ services:
     depends_on:
       - backend
 
-  bot:
-    build: .
-    container_name: pet_bot
-    restart: always
-    command: ["python", "-m", "bot.main"]
-    volumes:
-      - ./backend/data:/app/data
-    env_file:
-      - .env
-    depends_on:
-      - backend
+volumes:
+  pgdata:
