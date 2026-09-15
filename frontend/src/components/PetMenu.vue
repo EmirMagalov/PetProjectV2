@@ -183,7 +183,7 @@ const shouldPulse = computed(() => {
         <div
             @click="nextItem()"
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
-            :class="showHunger?'animate-pulse':''"
+            :class="shouldPulse ? 'animate-pulse' : ''"
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
@@ -208,7 +208,7 @@ const shouldPulse = computed(() => {
                  ]"
                  :class="[
                    (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative',
-                   shouldPulse ? 'animate-pulse' : ''
+
                  ]"
                  class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
             ></div>

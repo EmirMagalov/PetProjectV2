@@ -30,7 +30,7 @@ export const batheStatus = ref(false)
 
 
 // Универсальная функция проверки зоны и открытия рта
-export function handleMove(event, itemType) {
+export function handleMove(event, itemType,foodCategory) {
     if (itemType === 'food' && foodConsumedByPipe.value) {
         foodDrag.x.value = -9999
         foodDrag.y.value = -9999
@@ -50,7 +50,7 @@ export function handleMove(event, itemType) {
         isHovered.value = true
         if (itemType === 'food') {
 
-            if (gameData.cart['pipe']) {
+            if (gameData.cart['pipe'] && foodCategory ==='shaman') {
                 statusSmoke.value = true
                 if (!actionTimer) {
                     actionTimer = setTimeout(() => {
@@ -171,7 +171,13 @@ export const foodDrag = useDraggable(foodEl, {
             foodDrag.y.value = rect.top
         }
     },
-    onMove: (pos, event) => handleMove(event, 'food'),
+    onMove: (pos, event) => {
+        // Актуальные id и category берем на каждый сдвиг из текущего элемента
+        const foodId = currentFoodItem.value?.id
+        const foodCategory = currentFoodItem.value?.category
+
+        handleMove(event, 'food', foodId, foodCategory)
+    },
     onEnd: () => {
         const foodId = currentFoodItem.value?.id
         const foodCategory = currentFoodItem.value?.category
