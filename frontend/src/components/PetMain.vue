@@ -132,7 +132,7 @@ onUnmounted(() => {
         <!-- Зона персонажа (сюда перетаскиваем яблоко) -->
 
         <div ref="dropZoneRef"
-             class="absolute inset-0 z-30 flex justify-center mt-5 items-center cursor-pointer">
+             class="absolute inset-0 z-30 flex justify-center  items-center cursor-pointer">
 
           <div @click="spawnHeart" class="absolute top-30 z-120 w-25 h-25"></div>
 

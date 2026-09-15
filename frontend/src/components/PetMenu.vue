@@ -10,7 +10,7 @@ import {
   isShopOpen,
   showHunger,
   sleepTimeRemaining,
-  statusFoam, location, locationUrl, isGameOver
+  statusFoam, location, isGameOver
 } from "@/scripts/useGameStore.js";
 import {goSleep, startOver} from "@/scripts/actions.js";
 import {
@@ -25,7 +25,6 @@ import {
 import {computed} from "vue";
 
 const shouldPulse = computed(() => {
-  // Добавляем .value, чтобы Vue отслеживал изменения массива
   const list = cartItemsList.value || cartItemsList;
 
   if (!showHunger.value || (foodDrag.isDragging.value && !foodConsumedByPipe)) {
@@ -105,7 +104,7 @@ const shouldPulse = computed(() => {
 
         <!-- ДУШ -->
         <div
-            class="border-gray-300 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
+            class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
           <div v-show="!feedStatus"
@@ -136,7 +135,7 @@ const shouldPulse = computed(() => {
 
         <!-- ШАМПУНЬ -->
         <div
-            class="border-gray-300 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
+            class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
           <div v-show="!feedStatus"
@@ -183,7 +182,8 @@ const shouldPulse = computed(() => {
 
         <div
             @click="nextItem()"
-            class="border-gray-300 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
+            class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
+            :class="showHunger?'animate-pulse':''"
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
