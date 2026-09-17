@@ -43,9 +43,9 @@ export async function initGameData() {
         console.log(" Данные успешно синхронизированы с сервером!")
     } catch (e) {
         console.error("Ошибка соединения с бэкендом:", e)
-
-    }finally {
         await minDelay
+    }finally {
+
         isLoading.value = false
     }
 }
