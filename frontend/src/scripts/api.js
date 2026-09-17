@@ -9,7 +9,7 @@ export const isLoading = ref(true)
 let isDataLoaded = false
 
 export async function initGameData() {
-    const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
     isLoading.value = true
 
     // Делаем цикл с попытками на случай холодного старта бэкенда
@@ -65,7 +65,7 @@ export async function initGameData() {
 }
 
 export async function resetPet() {
-    const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
 
     try {
         await axios.post(`${API_URL}/reset`, {tg_id: tgId})
@@ -84,7 +84,7 @@ export async function syncToBackend() {
         return
     }
 
-    const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
 
     try {
         await axios.post(`${API_URL}/update`, {
@@ -119,7 +119,7 @@ setInterval(syncToBackend, 15000)
 
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden' && isDataLoaded) {
-        const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+        const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
         const payload = JSON.stringify({
             tg_id: tgId,
             level: gameData.level,
