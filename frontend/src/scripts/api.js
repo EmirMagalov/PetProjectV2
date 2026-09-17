@@ -10,9 +10,12 @@ let isDataLoaded = false
 
 export async function initGameData() {
     const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
-
+    const minDelay = new Promise(resolve => setTimeout(resolve, 800))
     try {
-        const response = await axios.get(`${API_URL}/${tgId}`)
+        const [response] = await Promise.all([
+            axios.get(`${API_URL}/${tgId}`),
+            minDelay // Ждем и ответ сервера, и минимум 800мс
+        ])
         const serverData = response.data
 
         gameData.level = serverData.level
@@ -40,6 +43,7 @@ export async function initGameData() {
         console.log(" Данные успешно синхронизированы с сервером!")
     } catch (e) {
         console.error("Ошибка соединения с бэкендом:", e)
+        await minDelay
     }finally {
 
         isLoading.value = false
