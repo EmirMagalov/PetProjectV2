@@ -21,7 +21,7 @@ import Status from "@/components/Status.vue";
 import {levelStatus} from "@/scripts/level.js";
 import {statusSmoke} from "@/scripts/dragAndDrop.js";
 import PetSmoke from "@/components/PetSmoke.vue";
-import {initGameData} from "@/scripts/api.js";
+import {initGameData, isLoading} from "@/scripts/api.js"; // <--- Импортируем isLoading
 
 
 const pupilOffset = ref({x: 0, y: 0})
@@ -100,7 +100,14 @@ onUnmounted(() => {
 
 <template>
   <div
-      :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000', gameData.sleep ? 'bg-linear-to-r from-blue-800 via-blue-900 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']">
+      :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000 relative', gameData.sleep ? 'bg-linear-to-r from-blue-800 via-blue-900 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']">
+
+    <!-- 🛑 ОВЕРЛЕЙ ЗАГРУЗКИ (БЛОКИРУЕТ ИНТЕРФЕЙС, ПОКА ДАННЫЕ НЕ ПРИШЛИ) -->
+    <div v-if="isLoading" class="fixed inset-0 z-200 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center gap-4">
+      <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-white font-bold text-sm tracking-wide">Загрузка...</p>
+    </div>
+
     <PetHeaderMenu/>
 
     <!-- Холст -->

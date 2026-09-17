@@ -1,10 +1,11 @@
 import axios from 'axios'
 import {gameData, lowEnergy, showHunger} from './useGameStore.js'
-import {computed} from "vue";
+import {computed, ref} from "vue";
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
 
 // Флаг: загружены ли данные с сервера
+export const isLoading = ref(true)
 let isDataLoaded = false
 
 export async function initGameData() {
@@ -34,11 +35,14 @@ export async function initGameData() {
         gameData.equippedHead = serverData.equipped_head
         gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
 
-        // 🟢 Данные успешно получены, разрешаем сохранения!
+
         isDataLoaded = true
         console.log(" Данные успешно синхронизированы с сервером!")
     } catch (e) {
         console.error("Ошибка соединения с бэкендом:", e)
+    }finally {
+
+        isLoading.value = false
     }
 }
 
