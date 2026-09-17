@@ -5,7 +5,7 @@ from backend.models.pet import Pet as PetModel
 user_router = Router()
 
 
-@user_router.message(CommandStart)
+@user_router.message(Command("start"))
 async def start_handler(message: types.Message):
     keyboard = types.InlineKeyboardMarkup(
         inline_keyboard=[
