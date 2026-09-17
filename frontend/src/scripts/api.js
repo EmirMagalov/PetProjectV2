@@ -10,43 +10,57 @@ let isDataLoaded = false
 
 export async function initGameData() {
     const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
-    const minDelay = new Promise(resolve => setTimeout(resolve, 800))
-    try {
-        const [response] = await Promise.all([
-            axios.get(`${API_URL}/${tgId}`),
-            minDelay // Ждем и ответ сервера, и минимум 800мс
-        ])
-        const serverData = response.data
+    isLoading.value = true
 
-        gameData.level = serverData.level
-        gameData.exp = serverData.exp
-        gameData.coins = serverData.coins
-        gameData.lives = serverData.lives
-        gameData.foodLevel = serverData.food_level
-        gameData.energy = serverData.energy
-        gameData.stinky = serverData.stinky
-        gameData.clickCounter = serverData.click_counter
-        gameData.sleep = serverData.sleep
-        gameData.sleepEndTime = serverData.sleep_end_time
-        gameData.fastfoodStreak = serverData.fastfood_streak
-        gameData.isFat = serverData.is_fat
-        gameData.isDrunk = serverData.is_drunk
-        gameData.addictionLevel = serverData.addiction_level
-        gameData.addictionStreak = serverData.addiction_streak
-        gameData.cart = serverData.cart
-        gameData.unlockedHeads = serverData.unlocked_heads
-        gameData.equippedHead = serverData.equipped_head
-        gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
+    // Делаем цикл с попытками на случай холодного старта бэкенда
+    const maxRetries = 5;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const minDelay = new Promise(resolve => setTimeout(resolve, 800))
+            const [response] = await Promise.all([
+                axios.get(`${API_URL}/${tgId}`),
+                minDelay
+            ])
+            const serverData = response.data
 
+            gameData.level = serverData.level
+            gameData.exp = serverData.exp
+            gameData.coins = serverData.coins
+            gameData.lives = serverData.lives
+            gameData.foodLevel = serverData.food_level
+            gameData.energy = serverData.energy
+            gameData.stinky = serverData.stinky
+            gameData.clickCounter = serverData.click_counter
+            gameData.sleep = serverData.sleep
+            gameData.sleepEndTime = serverData.sleep_end_time
+            gameData.fastfoodStreak = serverData.fastfood_streak
+            gameData.isFat = serverData.is_fat
+            gameData.isDrunk = serverData.is_drunk
+            gameData.addictionLevel = serverData.addiction_level
+            gameData.addictionStreak = serverData.addiction_streak
+            gameData.cart = serverData.cart
+            gameData.unlockedHeads = serverData.unlocked_heads
+            gameData.equippedHead = serverData.equipped_head
+            gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
 
-        isDataLoaded = true
-        console.log(" Данные успешно синхронизированы с сервером!")
-    } catch (e) {
-        console.error("Ошибка соединения с бэкендом:", e)
-        await minDelay
-    }finally {
+            isDataLoaded = true
+            isLoading.value = false // Успех! Выключаем лоудер
+            console.log(" Данные успешно синхронизированы с сервером!")
+            return; // Выходим из функции, всё ок
 
-        isLoading.value = false
+        } catch (e) {
+            console.warn(`⚠️ Попытка ${attempt} из ${maxRetries} не удалась (сервер греется)...`, e)
+
+            if (attempt === maxRetries) {
+                console.error("❌ Не удалось подключиться к бэкенду после всех попыток.")
+                // Здесь можно изменить текст лоудера на "Ошибка подключения, перезагрузите страницу"
+                // Но лоудер НЕ выключаем (isLoading.value остается true), чтобы пользователь
+                // не мог играть на дефолтах и слать мусор на сервер.
+            } else {
+                // Ждем 2 секунды перед следующей попыткой пока контейнер поднимается
+                await new Promise(resolve => setTimeout(resolve, 2000))
+            }
+        }
     }
 }
 
