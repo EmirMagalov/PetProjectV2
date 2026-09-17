@@ -95,32 +95,39 @@ watch(location, (newLocation) => {
   }
 })
 // Запускаем рандомный взгляд при монтировании компонента
-onMounted(() => {
+onUnmounted(() => {
+  clearInterval(lookInterval)
+  clearInterval(blinkInterval)
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+})
+
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible') {
+    initGameData()
+  }
+}
+
+onMounted(async () => {
   if (window.Telegram?.WebApp) {
     const tg = window.Telegram.WebApp
-
-    // Отключаем вертикальные свайпы для закрытия/сворачивания
     if (typeof tg.disableVerticalSwipes === 'function') {
       tg.disableVerticalSwipes()
     }
   }
-  const handleVisibilityChange = () => {
-    if (document.visibilityState === 'visible') {
-      // Перезапрашиваем актуальные данные с бэкенда
-      initGameData();
-    }
-  };
 
-  document.addEventListener('visibilitychange', handleVisibilityChange);
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 
-  onUnmounted(() => {
-    document.removeEventListener('visibilitychange', handleVisibilityChange);
-  });
   location.value = 'home'
   preloadImages()
   startRandomLooking()
-})
 
+  // 👉 САМОЕ ГЛАВНОЕ: Обязательно загружаем данные с бэкенда при самом первом открытии!
+  try {
+    await initGameData()
+  } catch (e) {
+    console.error("Ошибка при первоначальной загрузке:", e)
+  }
+})
 // Очищаем интервал при уходе со страницы, чтобы не было утечек памяти
 onUnmounted(() => {
   clearInterval(lookInterval)
