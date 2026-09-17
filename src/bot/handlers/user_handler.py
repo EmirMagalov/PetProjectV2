@@ -41,7 +41,7 @@ async def broadcast_handler(message: types.Message):
         inline_keyboard=[
             [
                 types.InlineKeyboardButton(
-                    text="🎁 Забрать 100 монет!",
+                    text="🎁 Забрать 150 монет!",
                     callback_data="claim_bonus_100"
                 )
             ]
@@ -85,11 +85,11 @@ async def claim_bonus_handler(callback: types.CallbackQuery):
         return
 
     # Начисляем 100 монет
-    pet.coins += 100
+    pet.coins += 150
     await pet.save()
 
     # Убираем кнопку у сообщения, чтобы нельзя было нажать повторно, и меняем текст
     await callback.message.edit_text(
-        f"✅ Успешно! Вам начислено +100 монет.\n💰 Текущий баланс: {pet.coins} монет."
+        f"✅ Успешно! Вам начислено +150 монет.\n💰 Текущий баланс: {pet.coins} монет."
     )
     await callback.answer("Бонус успешно получен! 🎉")
