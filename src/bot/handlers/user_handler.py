@@ -28,7 +28,7 @@ async def start_handler(message: types.Message):
 
 
 # ⚠️ Замени на свой Telegram ID, чтобы только ты мог делать рассылку
-ADMIN_IDS = [123456789]
+ADMIN_IDS = [1059422557]
 
 
 @user_router.message(Command("broadcast"))
