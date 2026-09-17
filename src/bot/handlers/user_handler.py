@@ -36,6 +36,15 @@ async def broadcast_handler(message: types.Message):
     if message.from_user.id not in ADMIN_IDS:
         return
 
+    # Извлекаем текст сообщения после команды /broadcast
+    # Например, если написать "/broadcast Привет всем!", то в переменной text окажется "Привет всем!"
+    command_parts = message.text.split(maxsplit=1)
+    if len(command_parts) < 2:
+        await message.answer("❌ Укажи текст для рассылки! Пример:\n<code>/broadcast Текст сообщения</code>", parse_mode="HTML")
+        return
+
+    custom_text = command_parts[1]
+
     # Клавиатура с кнопкой получения бонуса
     keyboard = types.InlineKeyboardMarkup(
         inline_keyboard=[
@@ -48,12 +57,7 @@ async def broadcast_handler(message: types.Message):
         ]
     )
 
-    text = (
-        "🎉 Просим прощения за временные неудобства связанные с многочисленной отправкой сообщений!\n\n"
-        "Нажми на кнопку ниже, чтобы получить +150 монет на свой баланс!"
-    )
-
-    # Получаем всех питомцев (у каждого есть свой tg_id) из базы
+    # Получаем всех питомцев из базы
     pets = await PetModel.all()
 
     success_count = 0
@@ -61,12 +65,12 @@ async def broadcast_handler(message: types.Message):
         try:
             await message.bot.send_message(
                 chat_id=pet.tg_id,
-                text=text,
-                reply_markup=keyboard
+                text=custom_text,  # Отправляем твой кастомный текст
+                reply_markup=keyboard,
+                parse_mode="HTML"   # Поддерживает HTML-разметку в твоем тексте (жирный, курсив и т.д.)
             )
             success_count += 1
         except Exception as e:
-            # Пользователь мог заблокировать бота, просто пропускаем его
             print(f"Не удалось отправить сообщение для {pet.tg_id}: {e}")
 
     await message.answer(f"✅ Рассылка завершена. Успешно отправлено: {success_count}")
