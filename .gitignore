@@ -53,7 +53,10 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-
+db.sqlite3-shm
+db.sqlite3-wal
+src/db.sqlite3-shm
+src/db.sqlite3-wal
 # Flask stuff
 instance/
 .webassets-cache
