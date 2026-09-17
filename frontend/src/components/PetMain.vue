@@ -104,7 +104,18 @@ onMounted(() => {
       tg.disableVerticalSwipes()
     }
   }
-  initGameData()
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      // Перезапрашиваем актуальные данные с бэкенда
+      initGameData();
+    }
+  };
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  onUnmounted(() => {
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  });
   location.value = 'home'
   preloadImages()
   startRandomLooking()
