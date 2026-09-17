@@ -194,7 +194,7 @@ export function addCoin(coins = 1) {
     setTimeout(() => {
         isAnimating.value = false
 
-    }, 150) // Делаем быстрым, например 150мс под стать вибрации
+    }, 150)
 }
 
 

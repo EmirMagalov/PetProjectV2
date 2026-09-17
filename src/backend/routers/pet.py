@@ -10,21 +10,23 @@ pet_router = APIRouter(prefix="/api", tags=["api"])
 
 @pet_router.get("/{tg_id}")
 async def get_pet(tg_id: int):
-    pet, created = await PetModel.get_or_create(tg_id=tg_id, defaults={
-        "coins": 50,
-        "food_level": 50,
-        "energy": 50,
-        "lives": 3,
-        "feed_count":3,
-        "bad_stats_minutes": 0,
-        "cart":{'burger':1},
-        "last_update": time.time()
+    pet = await PetModel.filter(tg_id=tg_id).first()
+    if not pet:
+        pet, created = await PetModel.get_or_create(tg_id=tg_id, defaults={
+            "coins": 50,
+            "food_level": 50,
+            "energy": 50,
+            "lives": 3,
+            "feed_count":3,
+            "bad_stats_minutes": 0,
+            "cart":{'burger':1},
+            "last_update": time.time()
 
-    })
+        })
+    else:
 
-    # Вызываем общую функцию пересчета
-    await update_pet_stats(pet)
-
+        await update_pet_stats(pet)
+        await pet.save()
     return pet
 
 
