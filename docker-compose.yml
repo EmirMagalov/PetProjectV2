@@ -58,7 +58,10 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
-      - backend
+      db:
+        condition: service_healthy  # <--- Бот тоже ждет базу
+      backend:
+        condition: service_started
 
 volumes:
   pgdata:
