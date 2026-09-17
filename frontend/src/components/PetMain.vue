@@ -12,7 +12,27 @@ import {
   hearts, isVibrating, lastFedItem, isBadMood, isAnimating, gameData, blink, statusShower, statusFoam, feedStatus,
   locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus
 } from "@/scripts/useGameStore.js";
+// Список всех тяжелых картинок интерфейса и локаций, которые должны быть в кеше
+const imagesToPreload = [
+  '/location/home.webp',
+  '/location/bath.webp',
+  '/gamePlay/fridge.webp',
+  '/gamePlay/bath_icon.webp',
+  '/gamePlay/sleep_icon.webp',
+  '/gamePlay/sun_icon.webp',
+  '/gamePlay/shower_icon.webp',
+  '/gamePlay/shampoo_icon.webp',
+  '/gamePlay/back_icon.webp',
+  '/gamePlay/market.webp',
+  '/gamePlay/fridge_empty.webp'
+]
 
+export function preloadImages() {
+  imagesToPreload.forEach((src) => {
+    const img = new Image()
+    img.src = src
+  })
+}
 import CloudMessage from "@/components/CloudMessage.vue";
 import PetStinky from "@/components/PetStinky.vue";
 import PetHeadwear from "@/components/PetHeadwear.vue";
@@ -86,6 +106,7 @@ onMounted(() => {
   }
   initGameData()
   location.value = 'home'
+  preloadImages()
   startRandomLooking()
 })
 
