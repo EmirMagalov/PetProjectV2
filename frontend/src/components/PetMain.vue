@@ -27,7 +27,7 @@ const imagesToPreload = [
   '/gamePlay/fridge_empty.webp'
 ]
 
-export function preloadImages() {
+function preloadImages() {
   imagesToPreload.forEach((src) => {
     const img = new Image()
     img.src = src
