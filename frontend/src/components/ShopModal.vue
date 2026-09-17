@@ -140,7 +140,7 @@ const getItemBonuses = (item) => {
         >
           <!-- Картинка и описание -->
           <div class="flex items-center gap-3">
-            <div class="w-15 h-15 bg-white/20 rounded-lg flex items-center justify-center p-1">
+            <div class="w-15 h-15 shrink-0 bg-white/20 rounded-lg flex items-center justify-center p-1">
               <img :src="item.image" :alt="item.name" class="w-full h-full object-contain">
             </div>
             <div>

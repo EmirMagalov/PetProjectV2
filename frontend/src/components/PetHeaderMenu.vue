@@ -47,7 +47,7 @@ function formatNumber(num) {
 
           <!-- Монетки -->
           <div
-              :key="animKey"
+
               class="flex relative justify-center items-center  shadow-md bg-white/10 backdrop-blur-md whitespace-nowrap  w-15  py-1 rounded-xl border border-white/10 animate-pop">
             <img src="/gamePlay/coin.svg" alt="Монеты" width="15" class="shrink-0 ">
             <span class="text-sm font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">

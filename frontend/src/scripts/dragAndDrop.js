@@ -30,7 +30,7 @@ export const batheStatus = ref(false)
 
 
 // Универсальная функция проверки зоны и открытия рта
-export function handleMove(event, itemType,foodCategory) {
+export function handleMove(event, itemType,foodId,foodCategory) {
     if (itemType === 'food' && foodConsumedByPipe.value) {
         foodDrag.x.value = -9999
         foodDrag.y.value = -9999
@@ -40,7 +40,6 @@ export function handleMove(event, itemType,foodCategory) {
     const dropRect = dropZoneRef.value.getBoundingClientRect()
     const clientX = event.clientX
     const clientY = event.clientY
-    const foodId = currentFoodItem.value?.id
     if (
         clientX >= dropRect.left &&
         clientX <= dropRect.right &&
@@ -49,7 +48,7 @@ export function handleMove(event, itemType,foodCategory) {
     ) {
         isHovered.value = true
         if (itemType === 'food') {
-
+            console.log(foodCategory)
             if (gameData.cart['pipe'] && foodCategory ==='shaman') {
                 statusSmoke.value = true
                 if (!actionTimer) {

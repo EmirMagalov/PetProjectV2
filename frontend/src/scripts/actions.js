@@ -151,7 +151,9 @@ export const animKey = ref(0)
 export function spawnHeart() {
     gameData.sleep = false
 
-    addCoin(1)
+    if (gameData.clickCounter % 3 === 0) {
+        addCoin(1)
+    }
     addExp(1)
     gameData.clickCounter ++
     // Тратим энергию / сытость

@@ -193,7 +193,7 @@ onUnmounted(() => {
             <CloudMessage/>
 
             <!-- Монетка с key для перезапуска анимации на каждый клик -->
-            <img :key="animKey"
+            <img v-show="isAnimating" :key="animKey"
                  class="absolute w-5 z-50 animate-coinFly"
                  src="/gamePlay/coin.svg" alt="">
           </div>
