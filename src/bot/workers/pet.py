@@ -60,6 +60,7 @@ async def check_pets_loop():
     low_lives_notified = set()  # Для предупреждений об оставшихся 1-2 жизнях
     critical_life_notified = set()
     poop_notified = set()
+    stinky_notified = set()
     while True:
         try:
             await asyncio.sleep(60)
@@ -154,5 +155,17 @@ async def check_pets_loop():
                     # Как только игрок убрал какашку (is_pooped стал False), сбрасываем флаг
                     if pet.tg_id in poop_notified:
                         poop_notified.remove(pet.tg_id)
+
+                if pet.stinky:
+                    if pet.tg_id not in stinky_notified:
+                        await send_telegram_message(
+                            pet.tg_id,
+                            "🤢 Питомец начал сильно вонять! Пора его помыть!"
+                        )
+                        stinky_notified.add(pet.tg_id)
+                else:
+                    # Как только питомец перестал вонять (stinky стал False), сбрасываем флаг
+                    if pet.tg_id in stinky_notified:
+                        stinky_notified.remove(pet.tg_id)
         except Exception as e:
             print(f"Ошибка в фоновой рассылке: {e}")

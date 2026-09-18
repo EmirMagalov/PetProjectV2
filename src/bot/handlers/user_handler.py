@@ -36,22 +36,35 @@ async def broadcast_handler(message: types.Message):
     if message.from_user.id not in ADMIN_IDS:
         return
 
-    # Извлекаем текст сообщения после команды /broadcast
-    # Например, если написать "/broadcast Привет всем!", то в переменной text окажется "Привет всем!"
-    command_parts = message.text.split(maxsplit=1)
-    if len(command_parts) < 2:
-        await message.answer("❌ Укажи текст для рассылки! Пример:\n<code>/broadcast Текст сообщения</code>", parse_mode="HTML")
+    # Разбираем сообщение на части: команда, количество монет, текст
+    # Пример: /broadcast 150 Привет всем!
+    command_parts = message.text.split(maxsplit=2)
+    if len(command_parts) < 3:
+        await message.answer(
+            "❌ Неверный формат! Пример:\n<code>/broadcast 150 Текст сообщения</code>",
+            parse_mode="HTML"
+        )
         return
 
-    custom_text = command_parts[1]
+    # Проверяем, что вторым аргументом передано число (монеты)
+    try:
+        coins_amount = int(command_parts[1])
+    except ValueError:
+        await message.answer("❌ Второе слово должно быть числом (количеством монет)! Пример:\n<code>/broadcast 150 Текст</code>", parse_mode="HTML")
+        return
 
-    # Клавиатура с кнопкой получения бонуса
+    custom_text = command_parts[2]
+
+    # Создаем динамический callback_data, в который зашиваем сумму монет
+    # Например: "claim_bonus_150", "claim_bonus_500" и т.д.
+    callback_data_str = f"claim_bonus_{coins_amount}"
+
     keyboard = types.InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 types.InlineKeyboardButton(
-                    text="🎁 Забрать 150 монет!",
-                    callback_data="claim_bonus_100"
+                    text=f"🎁 Забрать {coins_amount} монет!",
+                    callback_data=callback_data_str
                 )
             ]
         ]
@@ -65,9 +78,9 @@ async def broadcast_handler(message: types.Message):
         try:
             await message.bot.send_message(
                 chat_id=pet.tg_id,
-                text=custom_text,  # Отправляем твой кастомный текст
+                text=custom_text,
                 reply_markup=keyboard,
-                parse_mode="HTML"   # Поддерживает HTML-разметку в твоем тексте (жирный, курсив и т.д.)
+                parse_mode="HTML"
             )
             success_count += 1
         except Exception as e:
@@ -77,9 +90,19 @@ async def broadcast_handler(message: types.Message):
 
 
 # Обработчик нажатия на кнопку бонуса
-@user_router.callback_query(F.data == "claim_bonus_100")
+from aiogram import F
+
+# Обработчик нажатия на любую кнопку бонуса из рассылки
+@user_router.callback_query(F.data.startswith("claim_bonus_"))
 async def claim_bonus_handler(callback: types.CallbackQuery):
     tg_id = callback.from_user.id
+
+    # Извлекаем количество монет из callback_data (например, из "claim_bonus_150" получаем 150)
+    try:
+        coins_amount = int(callback.data.split("_")[2])
+    except (IndexError, ValueError):
+        await callback.answer("❌ Ошибка обработки бонуса.", show_alert=True)
+        return
 
     # Ищем питомца в базе
     pet = await PetModel.filter(tg_id=tg_id).first()
@@ -88,12 +111,12 @@ async def claim_bonus_handler(callback: types.CallbackQuery):
         await callback.answer("❌ Питомец не найден! Сначала запусти игру в главном меню.", show_alert=True)
         return
 
-    # Начисляем 100 монет
-    pet.coins += 150
+    # Начисляем указанное количество монет
+    pet.coins += coins_amount
     await pet.save()
 
-    # Убираем кнопку у сообщения, чтобы нельзя было нажать повторно, и меняем текст
+    # Убираем кнопку у сообщения и обновляем текст
     await callback.message.edit_text(
-        f"✅ Успешно! Вам начислено +150 монет.\n💰 Текущий баланс: {pet.coins} монет."
+        f"✅ Успешно! Вам начислено +{coins_amount} монет.\n💰 Текущий баланс: {pet.coins} монет."
     )
     await callback.answer("Бонус успешно получен! 🎉")

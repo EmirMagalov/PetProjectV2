@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import {gameData} from "@/scripts/useGameStore.js";
 import {addCoin} from "@/scripts/actions.js";
+import {addExp} from "@/scripts/level.js";
 
 // Генерируем случайные координаты ОДИН РАЗ при создании, чтобы какашка не прыгала
 const randomLeft = ref(Math.floor(Math.random() * 71) + 10)
@@ -10,13 +11,14 @@ const randomBottom = ref(Math.floor(Math.random() * 15))
 const Clean = ()=>{
   gameData.isPooped = false
   addCoin(10)
+  addExp(20)
 }
 
 </script>
 
 <template>
-  <div @click="Clean()" class="absolute flex justify-center items-center  z-10 w-10"
-       :style="{ left: randomLeft + '%', bottom: randomBottom + 'px' }">
+  <div @click="Clean()" class="absolute flex justify-center items-center bottom-4 right-15  z-8 w-8"
+       >
 
     <!-- Основная картинка -->
     <img src="/gamePlay/poop.webp" alt="poop" class="w-full h-full object-contain">

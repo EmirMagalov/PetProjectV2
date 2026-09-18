@@ -39,6 +39,9 @@ async def update_pet_stats(pet) -> bool:
                 pet.energy = max(0, pet.energy - 0.1)
             if not pet.is_pooped and random.random() < 1 / 45:
                 pet.is_pooped = True
+
+            if not pet.stinky and random.random() < 1 / 90:
+                pet.stinky = True
             is_food_zero = pet.food_level == 0
             is_energy_zero = pet.energy == 0
 

@@ -22,7 +22,7 @@ export async function initGameData() {
                 minDelay
             ])
             const serverData = response.data
-
+            gameData.name = serverData.name
             gameData.level = serverData.level
             gameData.exp = serverData.exp
             gameData.coins = serverData.coins
@@ -90,6 +90,7 @@ export async function syncToBackend() {
     try {
         await axios.post(`${API_URL}/update`, {
             tg_id: tgId,
+            name:gameData.name,
             level: gameData.level,
             exp: gameData.exp,
             coins: gameData.coins,
@@ -124,6 +125,7 @@ document.addEventListener('visibilitychange', () => {
         const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
         const payload = JSON.stringify({
             tg_id: tgId,
+            name:gameData.name,
             level: gameData.level,
             exp: gameData.exp,
             coins: gameData.coins,

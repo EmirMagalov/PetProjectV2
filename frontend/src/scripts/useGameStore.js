@@ -33,6 +33,7 @@ export const body = ref("/character/main_body.webp")
 export const isGameOver = ref(false)
 
 export const gameData = reactive({
+    name:'Имя:',
     level: 1,
     exp: 0,
     coins: 50,

@@ -1,7 +1,7 @@
 from tortoise import models, fields
 class Pet(models.Model):
     tg_id = fields.BigIntField(pk=True)
-    name = fields.CharField(max_length=255,null=True,default=None)
+    name = fields.CharField(max_length=15,null=True,default=None)
     click_counter = fields.IntField(default=0)
     level = fields.IntField(default=1)
     exp = fields.IntField(default=0)

@@ -20,26 +20,8 @@ import {
   locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus
 } from "@/scripts/useGameStore.js";
 import Poop from "@/components/Poop.vue";
-
-const imagesModules = import.meta.glob([
-  '/location/*.webp',
-  '/gamePlay/*.webp',
-  '/character/*.webp',
-  '/food/*.webp',
-  '/other/*.webp',
-  '/headwear/*.webp',
-
-], { eager: true, import: 'default' })
-
-// Превращаем пути в массив ссылок
-const imagesToPreload = Object.values(imagesModules)
-
-function preloadImages() {
-  imagesToPreload.forEach((src) => {
-    const img = new Image()
-    img.src = src
-  })
-}
+import {preloadImages} from "@/scripts/preloadImages.js";
+import PhotoFrame from "@/components/PhotoFrame.vue";
 
 
 
@@ -254,6 +236,7 @@ onUnmounted(() => {
           <PetShower :status-shower="statusShower"/>
           <PetHeadwear/>
           <Poop v-show="gameData.isPooped"/>
+          <PhotoFrame/>
         </div>
       </div>
     </div>
