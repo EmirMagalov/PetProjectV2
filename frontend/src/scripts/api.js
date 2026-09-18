@@ -152,3 +152,23 @@ document.addEventListener('visibilitychange', () => {
         navigator.sendBeacon(`${API_URL}/update`, blob)
     }
 })
+
+
+window.addEventListener('focus', () => {
+    if (isDataLoaded) {
+        console.log("🎯 Окно получило фокус, запрашиваем актуальные данные с сервера...")
+        initGameData()
+    }
+})
+
+// Также говорим Telegram WebApp, что приложение готово и просим его обновиться, если поддерживается
+if (window.Telegram?.WebApp) {
+    window.Telegram.WebApp.ready()
+
+    // Если пользователь нажал кнопку в боте и WebApp развернулся повторно
+    window.Telegram.WebApp.onEvent('viewportChanged', () => {
+        if (isDataLoaded) {
+            initGameData()
+        }
+    })
+}
