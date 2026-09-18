@@ -1,19 +1,19 @@
 import axios from 'axios'
-import {gameData, lowEnergy, showHunger} from './useGameStore.js'
-import {computed, ref} from "vue";
+import { gameData } from './useGameStore.js'
+import { ref } from "vue";
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
 
 // Флаг: загружены ли данные с сервера
 export const isLoading = ref(true)
+let isDataLoaded = false
 
-
+// ====================== ЗАГРУЗКА ======================
 export async function initGameData() {
-    const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
     isLoading.value = true
 
-    // Делаем цикл с попытками на случай холодного старта бэкенда
-    const maxRetries = 5;
+    const maxRetries = 5
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
             const minDelay = new Promise(resolve => setTimeout(resolve, 800))
@@ -21,55 +21,56 @@ export async function initGameData() {
                 axios.get(`${API_URL}/${tgId}`),
                 minDelay
             ])
-            const serverData = response.data
-            gameData.name = serverData.name && serverData.name.trim() ? serverData.name : 'Имя:'
-            gameData.level = serverData.level
-            gameData.exp = serverData.exp
-            gameData.coins = serverData.coins
-            gameData.lives = serverData.lives
-            gameData.foodLevel = serverData.food_level
-            gameData.energy = serverData.energy
-            gameData.stinky = serverData.stinky
-            gameData.clickCounter = serverData.click_counter
-            gameData.sleep = serverData.sleep
-            gameData.sleepEndTime = serverData.sleep_end_time
-            gameData.fastfoodStreak = serverData.fastfood_streak
-            gameData.isFat = serverData.is_fat
-            gameData.isDrunk = serverData.is_drunk
-            gameData.isPooped = serverData.is_pooped
-            gameData.addictionLevel = serverData.addiction_level
-            gameData.addictionStreak = serverData.addiction_streak
-            gameData.cart = serverData.cart
-            gameData.unlockedHeads = serverData.unlocked_heads
-            gameData.equippedHead = serverData.equipped_head
-            gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
+            applyServerData(response.data)
 
             isDataLoaded = true
-            isLoading.value = false // Успех! Выключаем лоудер
-            console.log(" Данные успешно синхронизированы с сервером!")
-            return; // Выходим из функции, всё ок
+            isLoading.value = false
+            console.log("✅ Данные успешно синхронизированы с сервером!")
+            return
 
         } catch (e) {
-            console.warn(`⚠️ Попытка ${attempt} из ${maxRetries} не удалась (сервер греется)...`, e)
+            console.warn(`⚠️ Попытка ${attempt} из ${maxRetries} не удалась...`, e)
 
             if (attempt === maxRetries) {
                 console.error("❌ Не удалось подключиться к бэкенду после всех попыток.")
-                // Здесь можно изменить текст лоудера на "Ошибка подключения, перезагрузите страницу"
-                // Но лоудер НЕ выключаем (isLoading.value остается true), чтобы пользователь
-                // не мог играть на дефолтах и слать мусор на сервер.
             } else {
-                // Ждем 2 секунды перед следующей попыткой пока контейнер поднимается
                 await new Promise(resolve => setTimeout(resolve, 2000))
             }
         }
     }
 }
 
+// Вспомогательная функция — применяет данные с сервера
+function applyServerData(serverData) {
+    gameData.name = serverData.name && serverData.name.trim() ? serverData.name : 'Имя:'
+    gameData.level = serverData.level
+    gameData.exp = serverData.exp
+    gameData.coins = serverData.coins
+    gameData.lives = serverData.lives
+    gameData.foodLevel = serverData.food_level
+    gameData.energy = serverData.energy
+    gameData.stinky = serverData.stinky
+    gameData.clickCounter = serverData.click_counter
+    gameData.sleep = serverData.sleep
+    gameData.sleepEndTime = serverData.sleep_end_time
+    gameData.fastfoodStreak = serverData.fastfood_streak
+    gameData.isFat = serverData.is_fat
+    gameData.isDrunk = serverData.is_drunk
+    gameData.isPooped = serverData.is_pooped
+    gameData.addictionLevel = serverData.addiction_level
+    gameData.addictionStreak = serverData.addiction_streak
+    gameData.cart = serverData.cart
+    gameData.unlockedHeads = serverData.unlocked_heads
+    gameData.equippedHead = serverData.equipped_head
+    gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
+}
+
+// ====================== СБРОС ======================
 export async function resetPet() {
-    const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
 
     try {
-        await axios.post(`${API_URL}/reset`, {tg_id: tgId})
+        await axios.post(`${API_URL}/reset`, { tg_id: tgId })
         return true
     } catch (e) {
         console.error("❌ Ошибка при сбросе питомца:", e)
@@ -77,54 +78,78 @@ export async function resetPet() {
     }
 }
 
+// ====================== СИНХРОНИЗАЦИЯ ======================
 export async function syncToBackend() {
-    // 🛑 ЖЕСТКИЙ БЛОКАТОР: если данные с сервера еще не скачались,
-    // запрещаем отправлять мусор/дефолт на бэкенд!
-    if (!isDataLoaded || isSyncLocked) {
+    if (!isDataLoaded) {
+        console.warn("⚠️ Синхронизация заблокирована: данные с сервера ещё не загружены.")
         return
     }
 
-    const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+
+    const payload = {
+        tg_id: tgId,
+        name: gameData.name,
+        level: gameData.level,
+        exp: gameData.exp,
+        coins: gameData.coins,
+        cart: gameData.cart,
+        unlocked_heads: gameData.unlockedHeads,
+        equipped_head: gameData.equippedHead,
+        lives: gameData.lives,
+        food_level: gameData.foodLevel,
+        energy: gameData.energy,
+        stinky: gameData.stinky,
+        sleep: gameData.sleep,
+        click_counter: gameData.clickCounter,
+        sleep_end_time: gameData.sleepEndTime,
+        fastfood_streak: gameData.fastfoodStreak,
+        is_fat: gameData.isFat,
+        is_drunk: gameData.isDrunk,
+        is_pooped: gameData.isPooped,
+        addiction_level: gameData.addictionLevel,
+        addiction_streak: gameData.addictionStreak,
+        // Важно: отправляем last_update, который был получен с сервера
+        last_update: Math.floor(gameData.lastUpdate / 1000)
+    }
 
     try {
-        await axios.post(`${API_URL}/update`, {
-            tg_id: tgId,
-            name:gameData.name,
-            level: gameData.level,
-            exp: gameData.exp,
-            coins: gameData.coins,
-            cart: gameData.cart,
-            unlocked_heads: gameData.unlockedHeads,
-            equipped_head: gameData.equippedHead,
-            lives: gameData.lives,
-            food_level: gameData.foodLevel,
-            energy: gameData.energy,
-            stinky: gameData.stinky,
-            sleep: gameData.sleep,
-            click_counter: gameData.clickCounter,
-            sleep_end_time: gameData.sleepEndTime,
-            fastfood_streak: gameData.fastfoodStreak,
-            is_fat: gameData.isFat,
-            is_drunk: gameData.isDrunk,
-            is_pooped: gameData.isPooped,
-            addiction_level: gameData.addictionLevel,
-            addiction_streak: gameData.addictionStreak,
-            last_update: Math.floor(Date.now() / 1000)
-        })
+        const response = await axios.post(`${API_URL}/update`, payload)
+
+        if (response.data?.status === "outdated") {
+            console.warn("⚠️ Данные устарели — загружаем свежие с сервера")
+            // Можно сразу применить server_data, если бэкенд его вернул
+            if (response.data.server_data) {
+                applyServerData(response.data.server_data)
+            } else {
+                await initGameData()
+            }
+            return
+        }
+
+        // Успешно сохранили — обновляем локальный lastUpdate
+        if (response.data?.pet?.last_update) {
+            gameData.lastUpdate = Math.floor(response.data.pet.last_update * 1000)
+        } else {
+            gameData.lastUpdate = Date.now()
+        }
+
     } catch (e) {
         console.error("❌ Ошибка сохранения:", e)
     }
 }
 
-// Запускаем автосохранение каждые 15 секунд
+// Автосохранение каждые 15 секунд
 setInterval(syncToBackend, 15000)
 
+// Сохранение при уходе со страницы
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden' && isDataLoaded) {
-        const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+        const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+
         const payload = JSON.stringify({
             tg_id: tgId,
-            name:gameData.name,
+            name: gameData.name,
             level: gameData.level,
             exp: gameData.exp,
             coins: gameData.coins,
@@ -144,46 +169,10 @@ document.addEventListener('visibilitychange', () => {
             is_pooped: gameData.isPooped,
             addiction_level: gameData.addictionLevel,
             addiction_streak: gameData.addictionStreak,
-            last_update: Math.floor(Date.now() / 1000)
+            last_update: Math.floor(gameData.lastUpdate / 1000)
         })
 
-        const blob = new Blob([payload], {type: 'application/json'})
+        const blob = new Blob([payload], { type: 'application/json' })
         navigator.sendBeacon(`${API_URL}/update`, blob)
     }
 })
-
-
-let isDataLoaded = false
-let isRefreshing = false
-let isSyncLocked = false // 🛑 Блокировщик сохранения при фокусе
-
-async function safeRefreshData() {
-    if (!isDataLoaded || isRefreshing) return
-
-    isRefreshing = true
-    isSyncLocked = true // Блокируем syncToBackend, чтобы старый стейт не улетел на сервер
-
-    console.log("🎯 Обновляем данные с сервера при возвращении...")
-    try {
-        await initGameData()
-    } finally {
-        // Даем секунду после успешного обновления, прежде чем разрешить сохранения
-        setTimeout(() => {
-            isRefreshing = false
-            isSyncLocked = false
-        }, 1500)
-    }
-}
-
-window.addEventListener('focus', () => {
-    safeRefreshData()
-})
-
-// Также говорим Telegram WebApp, что приложение готово
-if (window.Telegram?.WebApp) {
-    window.Telegram.WebApp.ready()
-
-    window.Telegram.WebApp.onEvent('viewportChanged', () => {
-        safeRefreshData()
-    })
-}

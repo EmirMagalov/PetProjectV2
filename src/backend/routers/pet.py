@@ -32,21 +32,33 @@ async def get_pet(tg_id: int):
 
 @pet_router.post("/update")
 async def update_pet(data: dict):
-
     tg_id = data.get("tg_id")
     pet = await PetModel.get_or_none(tg_id=tg_id)
     if not pet:
         raise HTTPException(status_code=404, detail="Pet not found")
 
-    # Обновляем поля, которые прислал фронтенд (например, когда покормили или уложили спать)
+    client_last_update = data.get("last_update")
+
+    # Если клиент прислал last_update — проверяем, не устарели ли его данные
+    if client_last_update is not None:
+        # client_last_update приходит в секундах (int)
+        # pet.last_update у тебя тоже float/seconds
+        if client_last_update < pet.last_update:
+            # Данные клиента старше, чем то, что уже в базе
+            return {
+                "status": "outdated",
+                "server_data": pet  # можно сразу отдать свежие данные
+            }, 409
+
+    # Данные актуальные — сохраняем
     for key, value in data.items():
-        if hasattr(pet, key) and key != "tg_id":
+        if hasattr(pet, key) and key not in ("tg_id", "last_update"):
             setattr(pet, key, value)
 
     pet.last_update = time.time()
     await pet.save()
-    return {"status": "success", "pet": pet}
 
+    return {"status": "success", "pet": pet}
 
 @pet_router.post("/reset")
 async def reset_pet(data: dict):
