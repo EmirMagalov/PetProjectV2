@@ -39,16 +39,11 @@ async def update_pet(data: dict):
 
     client_last_update = data.get("last_update")
 
-    # Если клиент прислал last_update — проверяем, не устарели ли его данные
-    if client_last_update is not None:
-        # client_last_update приходит в секундах (int)
-        # pet.last_update у тебя тоже float/seconds
-        if client_last_update < pet.last_update:
-            # Данные клиента старше, чем то, что уже в базе
-            return {
-                "status": "outdated",
-                "server_data": pet  # можно сразу отдать свежие данные
-            }, 409
+    if client_last_update is not None and client_last_update < pet.last_update:
+        return {
+            "status": "outdated",
+            "server_data": pet
+        }
 
     # Данные актуальные — сохраняем
     for key, value in data.items():

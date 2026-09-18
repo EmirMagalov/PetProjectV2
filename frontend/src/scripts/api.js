@@ -143,8 +143,11 @@ export async function syncToBackend() {
 setInterval(syncToBackend, 15000)
 
 // Сохранение при уходе со страницы
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden' && isDataLoaded) {
+document.addEventListener('visibilitychange', async () => {
+    if (!isDataLoaded) return
+
+    if (document.visibilityState === 'hidden') {
+        // Уходим — сохраняем (как и раньше)
         const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
 
         const payload = JSON.stringify({
@@ -169,10 +172,15 @@ document.addEventListener('visibilitychange', () => {
             is_pooped: gameData.isPooped,
             addiction_level: gameData.addictionLevel,
             addiction_streak: gameData.addictionStreak,
-            last_update: Math.floor(gameData.lastUpdate / 1000)
+            last_update: Math.floor(gameData.lastUpdate / 1000)   // ← обязательно старый last_update
         })
 
         const blob = new Blob([payload], { type: 'application/json' })
         navigator.sendBeacon(`${API_URL}/update`, blob)
+
+    } else if (document.visibilityState === 'visible') {
+        // Вернулись в окно — сразу проверяем, не устарели ли данные
+        console.log("🔄 Окно стало видимым — проверяем актуальность данных...")
+        await initGameData()   // перезагружаем с сервера
     }
 })
