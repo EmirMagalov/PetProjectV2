@@ -51,6 +51,10 @@ if (savedSessionKey && savedSessionKey !== currentSessionKey) {
 
 // --- 4. ЗАГРУЗКА И СИНХРОНИЗАЦИЯ ДАННЫХ ---
 export async function initGameData() {
+    isDataLoaded = false
+
+    // Перехватываем лидерство принудительно при любом вызове initGameData (например, при релоаде)
+    claimTabActive()
     const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
     isLoading.value = true
 
