@@ -3,28 +3,53 @@ import {gameData, lowEnergy, showHunger} from './useGameStore.js'
 import {computed, ref} from "vue";
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
+
+// --- 1. СИСТЕМА КОНТРОЛЯ ЛИДЕРСТВА ВКЛАДОК ---
 const TAB_ID = Math.random().toString(36).substring(2)
 
-// Регистрируем эту вкладку как активную в текущей сессии браузера
-localStorage.setItem('active_game_tab', TAB_ID)
+// Функция проверяет, является ли эта вкладка главной в данный момент
+function isCurrentTabActive() {
+    try {
+        const raw = localStorage.getItem('active_game_master')
+        if (!raw) return true
+        const master = JSON.parse(raw)
+        // Главная та вкладка, чей ID совпадает, либо если мастер не обновлялся дольше 20 секунд
+        return master.id === TAB_ID || (Date.now() - master.time > 20000)
+    } catch (e) {
+        return true
+    }
+}
+
+// Заявляем права этой вкладки на лидерство
+function claimTabActive() {
+    localStorage.setItem('active_game_master', JSON.stringify({
+        id: TAB_ID,
+        time: Date.now()
+    }))
+}
+
+// Сразу при старте делаем эту вкладку мастером
+claimTabActive()
+
+// --- 2. ФЛАГИ СОСТОЯНИЯ ---
+export const isLoading = ref(true)
 let isDataLoaded = false
 let isRefreshing = false
-let isSyncLocked = false // 🛑 Блокировщик сохранения при фокусе
+let isSyncLocked = false // Блокировщик сохранения при фокусе/возвращении
+
+// --- 3. ЗАЩИТА ОТ СТАРЫХ СЕССИЙ БОТА ---
 const currentSessionKey = window.Telegram?.WebApp?.initData || 'web_debug_mode'
 const savedSessionKey = sessionStorage.getItem('tg_session_signature')
 
 if (savedSessionKey && savedSessionKey !== currentSessionKey) {
-    console.warn("🔄 Обнаружен новый вход через бота! Принудительно перезагружаем страницу для сброса кэша...")
+    console.warn("🔄 Обнаружен новый вход через бота! Принудительно перезагружаем страницу...")
     sessionStorage.setItem('tg_session_signature', currentSessionKey)
-    window.location.reload() // Жесткий сброс старого стейта в памяти
+    window.location.reload()
 } else {
     sessionStorage.setItem('tg_session_signature', currentSessionKey)
 }
 
-// Флаг: загружены ли данные с сервера
-export const isLoading = ref(true)
-
-
+// --- 4. ЗАГРУЗКА И СИНХРОНИЗАЦИЯ ДАННЫХ ---
 export async function initGameData() {
     const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
     isLoading.value = true
@@ -32,10 +57,16 @@ export async function initGameData() {
     // Делаем цикл с попытками на случай холодного старта бэкенда
     const maxRetries = 5;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        // Если эта вкладка потеряла лидерство, отменяем загрузку
+        if (!isCurrentTabActive()) {
+            console.warn("⚠️ Загрузка отменена: вкладка больше не активна.")
+            return
+        }
+
         try {
             const minDelay = new Promise(resolve => setTimeout(resolve, 800))
             const [response] = await Promise.all([
-                axios.get(`${API_URL}/${tgId}?_t=${Date.now()}`), // <-- добавили метку времени, чтобы кэш не сработал
+                axios.get(`${API_URL}/${tgId}?_t=${Date.now()}`), // Защита от кэша
                 minDelay
             ])
             const serverData = response.data
@@ -62,20 +93,16 @@ export async function initGameData() {
             gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
 
             isDataLoaded = true
-            isLoading.value = false // Успех! Выключаем лоудер
-            console.log(" Данные успешно синхронизированы с сервером!")
-            return; // Выходим из функции, всё ок
+            isLoading.value = false
+            console.log("✅ Данные успешно синхронизированы с сервером!")
+            return;
 
         } catch (e) {
             console.warn(`⚠️ Попытка ${attempt} из ${maxRetries} не удалась (сервер греется)...`, e)
 
             if (attempt === maxRetries) {
                 console.error("❌ Не удалось подключиться к бэкенду после всех попыток.")
-                // Здесь можно изменить текст лоудера на "Ошибка подключения, перезагрузите страницу"
-                // Но лоудер НЕ выключаем (isLoading.value остается true), чтобы пользователь
-                // не мог играть на дефолтах и слать мусор на сервер.
             } else {
-                // Ждем 2 секунды перед следующей попыткой пока контейнер поднимается
                 await new Promise(resolve => setTimeout(resolve, 2000))
             }
         }
@@ -95,10 +122,8 @@ export async function resetPet() {
 }
 
 export async function syncToBackend() {
-    // 🛑 ЖЕСТКИЙ БЛОКАТОР: если данные с сервера еще не скачались,
-    // запрещаем отправлять мусор/дефолт на бэкенд!
-    if (!isDataLoaded || isSyncLocked) {
-        console.warn("⚠️ Синхронизация заблокирована (данные не загружены или идет защита после фокуса).")
+    // 🛑 ЖЕСТКИЙ БЛОКАТОР: если вкладка не лидер, данные не загружены или идет защита — не шлем ничего
+    if (!isCurrentTabActive() || !isDataLoaded || isSyncLocked) {
         return
     }
 
@@ -107,7 +132,7 @@ export async function syncToBackend() {
     try {
         await axios.post(`${API_URL}/update`, {
             tg_id: tgId,
-            name:gameData.name,
+            name: gameData.name,
             level: gameData.level,
             exp: gameData.exp,
             coins: gameData.coins,
@@ -137,8 +162,12 @@ export async function syncToBackend() {
 // Запускаем автосохранение каждые 15 секунд
 setInterval(syncToBackend, 15000)
 
+// --- 5. ОБРАБОТЧИК ЖИЗНЕННОГО ЦИКЛА ---
 document.addEventListener('visibilitychange', () => {
-    // 1. Когда пользователь уходит из игры (сворачивает или открывает чат)
+    // Если эта вкладка не является мастером — игнорируем любые события
+    if (!isCurrentTabActive()) return
+
+    // 1. Когда пользователь уходит из игры (сворачивает)
     if (document.visibilityState === 'hidden' && isDataLoaded) {
         const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
         const payload = JSON.stringify({
@@ -170,18 +199,24 @@ document.addEventListener('visibilitychange', () => {
         navigator.sendBeacon(`${API_URL}/update`, blob)
     }
 
-    // 2. Когда пользователь возвращается в игру (нажал кнопку в боте и развернул WebApp)
+    // 2. Когда пользователь возвращается в игру (развернул или открыл из бота)
     if (document.visibilityState === 'visible') {
-        console.log("👁️ Приложение снова на экране! Принудительно забираем свежие данные с бэкенда...")
+        console.log("👁️ Приложение на экране! Забираем лидерство и свежие данные...")
+
+        // Захватываем статус главного окна
+        claimTabActive()
 
         isRefreshing = false
-        isSyncLocked = true // Жестко блокируем исходящие автосохранения на время загрузки
+        isSyncLocked = true // Включаем блок автосохранения на время загрузки
 
-        initGameData().then(() => {
-            setTimeout(() => {
-                isSyncLocked = false // Снимаем блокировку через 1.5 секунды после обновления
-            }, 1500)
-        })
+        initGameData()
+            .catch(err => console.error("❌ Ошибка при возврате в игру:", err))
+            .finally(() => {
+                // Гарантированно снимаем блокировку через 500мс после завершения запроса
+                setTimeout(() => {
+                    isSyncLocked = false
+                }, 500)
+            })
     }
 })
 
