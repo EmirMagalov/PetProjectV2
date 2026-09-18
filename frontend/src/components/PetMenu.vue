@@ -2,7 +2,7 @@
 
 import ShopModal from '@/components/ShopModal.vue'
 
-import {cartItemsList, currentFoodItem, currentIndex, nextItem} from "@/scripts/basket.js";
+import {cartItemsList, currentIndex, nextItem} from "@/scripts/basket.js";
 import {
   currentDraggedItem,
   feedStatus,
@@ -10,9 +10,9 @@ import {
   isShopOpen,
   showHunger,
   sleepTimeRemaining,
-  statusFoam, location, isGameOver
+  statusFoam, location, isGameOver, handleRestart
 } from "@/scripts/useGameStore.js";
-import {goSleep, startOver} from "@/scripts/actions.js";
+import {goSleep} from "@/scripts/actions.js";
 import {
   foamDrag,
   foodDrag,
@@ -48,7 +48,7 @@ const shouldPulse = computed(() => {
       class="rounded-4xl p-3 mx-5 bg-[#fff6ef] h-65 mt-1 border-2 border-[#f7c9a5] flex flex-col justify-center items-center">
     <div v-if="isGameOver">
       <div
-          @click="startOver()"
+          @click="handleRestart"
           class="bg-[#fff6ef] justify-center flex flex-col h-25   items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
           style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
 

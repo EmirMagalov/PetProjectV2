@@ -2,7 +2,7 @@ import {
     cloudShow,
     energyFull, feedStatus,
     gameData, hearts,
-    isAnimating, isBadMood, isGameOver,
+    isAnimating, isBadMood,
     isVibrating,
     lastFedItem, lifeStatus,
     showHunger,
@@ -15,7 +15,7 @@ import {foodList} from "@/scripts/foodItems.js";
 import {addExp} from "@/scripts/level.js";
 
 import {toggleSleep} from "@/scripts/stats.js";
-import {initGameData, resetPet} from "@/scripts/api.js";
+
 import {ref} from "vue";
 
 let hideTrackerTimer = null
@@ -197,9 +197,3 @@ export function addCoin(coins = 1) {
     }, 150)
 }
 
-
-export async function startOver() {
-    isGameOver.value = false
-    await resetPet()
-    await initGameData()
-}

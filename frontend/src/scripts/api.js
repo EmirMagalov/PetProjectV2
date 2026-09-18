@@ -22,7 +22,7 @@ export async function initGameData() {
                 minDelay
             ])
             const serverData = response.data
-            gameData.name = serverData.name
+            gameData.name = serverData.name && serverData.name.trim() ? serverData.name : 'Имя:'
             gameData.level = serverData.level
             gameData.exp = serverData.exp
             gameData.coins = serverData.coins

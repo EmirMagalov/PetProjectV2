@@ -1,10 +1,10 @@
 import {watch} from "vue";
 import {
     body,
-    cloudShow,
+    cloudShow, defaultGameData,
     gameData, isGameOver,
     lowEnergy,
-    mouth,
+    mouth, resetLocal,
     showHunger,
     sleepTimeRemaining
 } from "@/scripts/useGameStore.js";

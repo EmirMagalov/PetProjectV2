@@ -56,6 +56,7 @@ async def reset_pet(data: dict):
         raise HTTPException(status_code=404, detail="Pet not found")
 
     # Сбрасываем всё к заводским настройкам
+    pet.name = None
     pet.level = 1
     pet.exp = 0
     pet.lives = 3

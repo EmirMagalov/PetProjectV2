@@ -2,6 +2,7 @@ import {ref, reactive, watch, computed} from 'vue'
 
 export const mouth = ref('/character/happy_mouth.webp')
 export const sleepTimeRemaining = ref("")
+import {initGameData, isLoading, resetPet} from "@/scripts/api.js";
 
 export const isShopOpen = ref(false)
 export const lowEnergy = ref(false)
@@ -32,39 +33,69 @@ export const body = ref("/character/main_body.webp")
 
 export const isGameOver = ref(false)
 
-export const gameData = reactive({
-    name:'Имя:',
+export const defaultGameData = {
+    name: 'Имя:',
     level: 1,
     exp: 0,
     coins: 50,
     lives: 3,
     foodLevel: 50,
     energy: 50,
-    clickCounter:0,
+    clickCounter: 0,
     stinky: false,
     sleep: false,
     sleepEndTime: 0,
     feedCount: 3,
     equippedHead: null,
-    lastUpdate: Date.now(),
     foodStreak: 0,
     fastfoodStreak: 0,
     fruitStreak: 0,
     addictionLevel: 0,
     addictionStreak: 0,
-    lastAddictionTime:0,
+    lastAddictionTime: 0,
     isFat: false,
     isDrunk: false,
     isPooped: false,
     PlayCount: 0,
     badStatsMinutes: 0,
-    unlockedHeads:[],
+    unlockedHeads: [],
     cart: {}
+}
 
+// Создаем реактивный объект, используя дефолты
+export const gameData = reactive({
+    ...defaultGameData,
+    lastUpdate: Date.now()
 })
 
+
+
+
+export async function handleRestart() {
+    isGameOver.value = false
+    isLoading.value = true
+    await resetPet()
+    await resetLocal()
+    // Просто обновляем поля до дефолтных без дублирования портянки кода
+    await initGameData()
+}
+export async function resetLocal() {
+    const savedCoins = gameData.coins
+    const savedClicks = gameData.clickCounter
+
+    // 2. Применяем дефолтные значения ко всем остальным полям
+    Object.assign(gameData, defaultGameData, {
+        lastUpdate: Date.now()
+    })
+
+    // 3. Возвращаем сохраненные значения обратно
+    gameData.coins = savedCoins
+    gameData.clickCounter = savedClicks
+}
+
+
 export const isBadMood = computed(() => {
-    return showHunger.value || lowEnergy.value || gameData.addictionStreak >=2
+    return showHunger.value || lowEnergy.value || gameData.addictionStreak >= 2
 })
 
 
@@ -73,3 +104,5 @@ document.addEventListener('contextmenu', e => {
         e.preventDefault();
     }
 });
+
+
