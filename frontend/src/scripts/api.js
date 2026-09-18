@@ -154,21 +154,32 @@ document.addEventListener('visibilitychange', () => {
 })
 
 
-window.addEventListener('focus', () => {
-    if (isDataLoaded) {
-        console.log("🎯 Окно получило фокус, запрашиваем актуальные данные с сервера...")
-        initGameData()
+let isRefreshing = false
+
+async function safeRefreshData() {
+    if (!isDataLoaded || isRefreshing) return
+
+    isRefreshing = true
+    console.log("🎯 Обновляем данные с сервера...")
+    try {
+        await initGameData()
+    } finally {
+        // Небольшая задержка перед следующей возможной попыткой, чтобы отсечь дублирующие события
+        setTimeout(() => {
+            isRefreshing = false
+        }, 1000)
     }
+}
+
+window.addEventListener('focus', () => {
+    safeRefreshData()
 })
 
-// Также говорим Telegram WebApp, что приложение готово и просим его обновиться, если поддерживается
+// Также говорим Telegram WebApp, что приложение готово
 if (window.Telegram?.WebApp) {
     window.Telegram.WebApp.ready()
 
-    // Если пользователь нажал кнопку в боте и WebApp развернулся повторно
     window.Telegram.WebApp.onEvent('viewportChanged', () => {
-        if (isDataLoaded) {
-            initGameData()
-        }
+        safeRefreshData()
     })
 }
