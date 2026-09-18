@@ -10,13 +10,16 @@ localStorage.setItem('active_game_tab', TAB_ID)
 let isDataLoaded = false
 let isRefreshing = false
 let isSyncLocked = false // 🛑 Блокировщик сохранения при фокусе
-// Слушаем, если открылась другая вкладка — эта сразу понимает, что она больше не главная
-window.addEventListener('storage', (event) => {
-    if (event.key === 'active_game_tab' && event.newValue !== TAB_ID) {
-        console.warn("⚠️ Обнаружен другой экземпляр игры. Эта вкладка уходит в спячку!")
-        isDataLoaded = false // Блокируем любые отправки данных на сервер со старой вкладки
-    }
-})
+const currentSessionKey = window.Telegram?.WebApp?.initData || 'web_debug_mode'
+const savedSessionKey = sessionStorage.getItem('tg_session_signature')
+
+if (savedSessionKey && savedSessionKey !== currentSessionKey) {
+    console.warn("🔄 Обнаружен новый вход через бота! Принудительно перезагружаем страницу для сброса кэша...")
+    sessionStorage.setItem('tg_session_signature', currentSessionKey)
+    window.location.reload() // Жесткий сброс старого стейта в памяти
+} else {
+    sessionStorage.setItem('tg_session_signature', currentSessionKey)
+}
 
 // Флаг: загружены ли данные с сервера
 export const isLoading = ref(true)
