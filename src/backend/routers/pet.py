@@ -1,5 +1,4 @@
-from fastapi import routing, APIRouter, HTTPException
-from backend.schemas.pet import PetResponse, PetSyncRequest
+from fastapi import APIRouter, HTTPException
 from backend.models.pet import Pet as PetModel
 import time
 
@@ -17,14 +16,12 @@ async def get_pet(tg_id: int):
             "food_level": 50,
             "energy": 50,
             "lives": 3,
-            "feed_count":3,
+            "feed_count": 3,
             "bad_stats_minutes": 0,
-            "cart":{'burger':1},
+            "cart": {'burger': 1},
             "last_update": time.time()
-
         })
     else:
-
         await update_pet_stats(pet)
         await pet.save()
     return pet
@@ -39,6 +36,7 @@ async def update_pet(data: dict):
 
     client_last_update = data.get("last_update")
 
+    # Проверка версии
     if client_last_update is not None and client_last_update < pet.last_update:
         return {
             "status": "outdated",
@@ -55,6 +53,7 @@ async def update_pet(data: dict):
 
     return {"status": "success", "pet": pet}
 
+
 @pet_router.post("/reset")
 async def reset_pet(data: dict):
     tg_id = data.get("tg_id")
@@ -62,7 +61,6 @@ async def reset_pet(data: dict):
     if not pet:
         raise HTTPException(status_code=404, detail="Pet not found")
 
-    # Сбрасываем всё к заводским настройкам
     pet.name = None
     pet.level = 1
     pet.exp = 0
@@ -77,7 +75,7 @@ async def reset_pet(data: dict):
     pet.is_drunk = False
     pet.addiction_streak = 0
     pet.bad_stats_minutes = 0
-    pet.cart = {'burger':1}
+    pet.cart = {'burger': 1}
     pet.last_update = time.time()
 
     await pet.save()

@@ -4,7 +4,6 @@ import { ref } from "vue";
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
 
-// Флаг: загружены ли данные с сервера
 export const isLoading = ref(true)
 let isDataLoaded = false
 
@@ -40,7 +39,6 @@ export async function initGameData() {
     }
 }
 
-// Вспомогательная функция — применяет данные с сервера
 function applyServerData(serverData) {
     gameData.name = serverData.name && serverData.name.trim() ? serverData.name : 'Имя:'
     gameData.level = serverData.level
@@ -65,10 +63,21 @@ function applyServerData(serverData) {
     gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
 }
 
+// Тихая перезагрузка (без лоадера)
+async function quietReload() {
+    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    try {
+        const response = await axios.get(`${API_URL}/${tgId}`)
+        applyServerData(response.data)
+        console.log("✅ Данные тихо обновлены")
+    } catch (e) {
+        console.warn("⚠️ Не удалось тихо обновить данные", e)
+    }
+}
+
 // ====================== СБРОС ======================
 export async function resetPet() {
     const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
-
     try {
         await axios.post(`${API_URL}/reset`, { tg_id: tgId })
         return true
@@ -81,7 +90,7 @@ export async function resetPet() {
 // ====================== СИНХРОНИЗАЦИЯ ======================
 export async function syncToBackend() {
     if (!isDataLoaded) {
-        console.warn("⚠️ Синхронизация заблокирована: данные с сервера ещё не загружены.")
+        console.warn("⚠️ Синхронизация заблокирована: данные ещё не загружены.")
         return
     }
 
@@ -109,25 +118,23 @@ export async function syncToBackend() {
         is_pooped: gameData.isPooped,
         addiction_level: gameData.addictionLevel,
         addiction_streak: gameData.addictionStreak,
-        // Важно: отправляем last_update, который был получен с сервера
-        last_update: Math.floor(gameData.lastUpdate / 1000)
+        last_update: Math.floor(gameData.lastUpdate / 1000)   // ← ВАЖНО: старый last_update
     }
 
     try {
         const response = await axios.post(`${API_URL}/update`, payload)
 
         if (response.data?.status === "outdated") {
-            console.warn("⚠️ Данные устарели — загружаем свежие с сервера")
-            // Можно сразу применить server_data, если бэкенд его вернул
+            console.warn("⚠️ Данные устарели — загружаем свежие")
             if (response.data.server_data) {
                 applyServerData(response.data.server_data)
             } else {
-                await initGameData()
+                await quietReload()
             }
             return
         }
 
-        // Успешно сохранили — обновляем локальный lastUpdate
+        // Успешно сохранили
         if (response.data?.pet?.last_update) {
             gameData.lastUpdate = Math.floor(response.data.pet.last_update * 1000)
         } else {
@@ -142,12 +149,12 @@ export async function syncToBackend() {
 // Автосохранение каждые 15 секунд
 setInterval(syncToBackend, 15000)
 
-// Сохранение при уходе со страницы
+// Обработка видимости окна
 document.addEventListener('visibilitychange', async () => {
     if (!isDataLoaded) return
 
     if (document.visibilityState === 'hidden') {
-        // Уходим — сохраняем (как и раньше)
+        // Уходим — сохраняем
         const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
 
         const payload = JSON.stringify({
@@ -172,15 +179,15 @@ document.addEventListener('visibilitychange', async () => {
             is_pooped: gameData.isPooped,
             addiction_level: gameData.addictionLevel,
             addiction_streak: gameData.addictionStreak,
-            last_update: Math.floor(gameData.lastUpdate / 1000)   // ← обязательно старый last_update
+            last_update: Math.floor(gameData.lastUpdate / 1000)
         })
 
         const blob = new Blob([payload], { type: 'application/json' })
         navigator.sendBeacon(`${API_URL}/update`, blob)
 
     } else if (document.visibilityState === 'visible') {
-        // Вернулись в окно — сразу проверяем, не устарели ли данные
-        console.log("🔄 Окно стало видимым — проверяем актуальность данных...")
-        await initGameData()   // перезагружаем с сервера
+        // Вернулись — тихо обновляем данные
+        console.log("🔄 Окно стало видимым — тихо обновляем данные...")
+        await quietReload()
     }
 })
