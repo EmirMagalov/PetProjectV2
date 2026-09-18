@@ -36,6 +36,7 @@ export async function initGameData() {
             gameData.fastfoodStreak = serverData.fastfood_streak
             gameData.isFat = serverData.is_fat
             gameData.isDrunk = serverData.is_drunk
+            gameData.isPooped = serverData.is_pooped
             gameData.addictionLevel = serverData.addiction_level
             gameData.addictionStreak = serverData.addiction_streak
             gameData.cart = serverData.cart
@@ -105,6 +106,7 @@ export async function syncToBackend() {
             fastfood_streak: gameData.fastfoodStreak,
             is_fat: gameData.isFat,
             is_drunk: gameData.isDrunk,
+            is_pooped: gameData.isPooped,
             addiction_level: gameData.addictionLevel,
             addiction_streak: gameData.addictionStreak,
             last_update: Math.floor(Date.now() / 1000)
@@ -138,6 +140,7 @@ document.addEventListener('visibilitychange', () => {
             fastfood_streak: gameData.fastfoodStreak,
             is_fat: gameData.isFat,
             is_drunk: gameData.isDrunk,
+            is_pooped: gameData.isPooped,
             addiction_level: gameData.addictionLevel,
             addiction_streak: gameData.addictionStreak,
             last_update: Math.floor(Date.now() / 1000)

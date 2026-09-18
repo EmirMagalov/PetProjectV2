@@ -59,6 +59,7 @@ async def check_pets_loop():
     game_over_notified = set()
     low_lives_notified = set()  # Для предупреждений об оставшихся 1-2 жизнях
     critical_life_notified = set()
+    poop_notified = set()
     while True:
         try:
             await asyncio.sleep(60)
@@ -119,11 +120,11 @@ async def check_pets_loop():
                             critical_life_notified.remove(pet.tg_id)
 
                 # 4. Уведомление о голоде
-                if pet.food_level < 45:
+                if pet.food_level < 20:
                     if pet.tg_id not in hungry_notified:
                         await send_telegram_message(
                             pet.tg_id,
-                            "🍽️ Питомец начинает голодать!"
+                            "🍽️ Питомец проголодался!"
                         )
                         hungry_notified.add(pet.tg_id)
                 else:
@@ -131,7 +132,7 @@ async def check_pets_loop():
                         hungry_notified.remove(pet.tg_id)
 
                 # 5. Уведомление об энергии
-                if pet.energy < 40:
+                if pet.energy < 20:
                     if pet.tg_id not in energy_notified:
                         await send_telegram_message(
                             pet.tg_id,
@@ -141,6 +142,17 @@ async def check_pets_loop():
                 else:
                     if pet.tg_id in energy_notified:
                         energy_notified.remove(pet.tg_id)
-
+                # 6. Уведомление о какашке
+                if pet.is_pooped:
+                    if pet.tg_id not in poop_notified:
+                        await send_telegram_message(
+                            pet.tg_id,
+                            "💩 Питомец тут набедокурил... Надо убрать!"
+                        )
+                        poop_notified.add(pet.tg_id)
+                else:
+                    # Как только игрок убрал какашку (is_pooped стал False), сбрасываем флаг
+                    if pet.tg_id in poop_notified:
+                        poop_notified.remove(pet.tg_id)
         except Exception as e:
             print(f"Ошибка в фоновой рассылке: {e}")

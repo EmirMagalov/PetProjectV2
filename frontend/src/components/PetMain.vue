@@ -1,38 +1,9 @@
 <script setup>
-import {useDraggable} from "@vueuse/core"
 import PetMenu from "@/components/PetMenu.vue";
 import PetFoam from "@/components/PetFoam.vue";
 import PetShower from "@/components/PetShower.vue";
-import ProgressBar from "@/components/ProgressBar.vue";
 import {ref, onMounted, onUnmounted, watch} from "vue"
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
-import {
-  mouth,
-  lowEnergy,
-  hearts, isVibrating, lastFedItem, isBadMood, isAnimating, gameData, blink, statusShower, statusFoam, feedStatus,
-  locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus
-} from "@/scripts/useGameStore.js";
-// Список всех тяжелых картинок интерфейса и локаций, которые должны быть в кеше
-const imagesToPreload = [
-  '/location/home.webp',
-  '/location/bath.webp',
-  '/gamePlay/fridge.webp',
-  '/gamePlay/bath_icon.webp',
-  '/gamePlay/sleep_icon.webp',
-  '/gamePlay/sun_icon.webp',
-  '/gamePlay/shower_icon.webp',
-  '/gamePlay/shampoo_icon.webp',
-  '/gamePlay/back_icon.webp',
-  '/gamePlay/market.webp',
-  '/gamePlay/fridge_empty.webp'
-]
-
-function preloadImages() {
-  imagesToPreload.forEach((src) => {
-    const img = new Image()
-    img.src = src
-  })
-}
 import CloudMessage from "@/components/CloudMessage.vue";
 import PetStinky from "@/components/PetStinky.vue";
 import PetHeadwear from "@/components/PetHeadwear.vue";
@@ -41,7 +12,35 @@ import Status from "@/components/Status.vue";
 import {levelStatus} from "@/scripts/level.js";
 import {statusSmoke} from "@/scripts/dragAndDrop.js";
 import PetSmoke from "@/components/PetSmoke.vue";
-import {initGameData, isLoading} from "@/scripts/api.js"; // <--- Импортируем isLoading
+import {initGameData, isLoading} from "@/scripts/api.js";
+import {
+  mouth,
+  lowEnergy,
+  isVibrating, lastFedItem, isBadMood, isAnimating, gameData, blink, statusShower, statusFoam, feedStatus,
+  locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus
+} from "@/scripts/useGameStore.js";
+import Poop from "@/components/Poop.vue";
+
+const imagesModules = import.meta.glob([
+  '/location/*.webp',
+  '/gamePlay/*.webp',
+  '/character/*.webp',
+  '/food/*.webp',
+  '/other/*.webp',
+  '/headwear/*.webp',
+
+], { eager: true, import: 'default' })
+
+// Превращаем пути в массив ссылок
+const imagesToPreload = Object.values(imagesModules)
+
+function preloadImages() {
+  imagesToPreload.forEach((src) => {
+    const img = new Image()
+    img.src = src
+  })
+}
+
 
 
 const pupilOffset = ref({x: 0, y: 0})
@@ -95,11 +94,6 @@ watch(location, (newLocation) => {
   }
 })
 // Запускаем рандомный взгляд при монтировании компонента
-onUnmounted(() => {
-  clearInterval(lookInterval)
-  clearInterval(blinkInterval)
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
-})
 
 const handleVisibilityChange = () => {
   if (document.visibilityState === 'visible') {
@@ -128,11 +122,15 @@ onMounted(async () => {
     console.error("Ошибка при первоначальной загрузке:", e)
   }
 })
-// Очищаем интервал при уходе со страницы, чтобы не было утечек памяти
+
 onUnmounted(() => {
   clearInterval(lookInterval)
   clearInterval(blinkInterval)
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
+
+
+
 
 
 </script>
@@ -180,7 +178,7 @@ onUnmounted(() => {
         <div ref="dropZoneRef"
              class="absolute inset-0 z-30 flex justify-center  items-center cursor-pointer">
 
-          <div @click="spawnHeart" class="absolute top-30 z-120 w-25 h-25"></div>
+          <div @click="spawnHeart" class="absolute top-15 z-120 w-40 h-40"></div>
 
           <!-- Сердечко с key для перезапуска анимации на каждый клик -->
           <img
@@ -255,6 +253,7 @@ onUnmounted(() => {
           <PetSmoke :status-smoke="statusSmoke"/>
           <PetShower :status-shower="statusShower"/>
           <PetHeadwear/>
+          <Poop v-show="gameData.isPooped"/>
         </div>
       </div>
     </div>
@@ -402,11 +401,11 @@ onUnmounted(() => {
     opacity: 1;
   }
   50% {
-    transform: translate(5px, -50px) scale(1.2);
+    transform: translate(30px, -50px) scale(1.2);
   }
   100% {
-    transform: translate(5px, -100px) scale(0.8);
-    opacity:0;
+    transform: translate(150px, -150px) scale(0.8);
+    opacity: 1;
   }
 }
 

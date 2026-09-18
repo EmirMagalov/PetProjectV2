@@ -54,6 +54,7 @@ export const gameData = reactive({
     lastAddictionTime:0,
     isFat: false,
     isDrunk: false,
+    isPooped: false,
     PlayCount: 0,
     badStatsMinutes: 0,
     unlockedHeads:[],

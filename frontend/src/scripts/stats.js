@@ -17,13 +17,13 @@ import {batheStatus, isHovered, previousMouth} from "@/scripts/dragAndDrop.js";
 setInterval(() => {
 
     if (gameData.foodLevel > 0) {
-        const consumeAmount = gameData.isDrunk ? 0.5:0.3
+        const consumeAmount = gameData.isDrunk ? 0.3:0.1
         gameData.foodLevel = Math.max(0, gameData.foodLevel - consumeAmount)
     }
 
     // 2. Уменьшаем энергию (если не спит)
     if (gameData.energy > 0 && !gameData.sleep) {
-        gameData.energy = Math.max(0, gameData.energy - 0.2)
+        gameData.energy = Math.max(0, gameData.energy - 0.1)
     }
 
     // 3. Проверка штрафов за голод или отсутствие энергии
@@ -43,6 +43,9 @@ setInterval(() => {
         if (gameData.addictionStreak < 1) {
             gameData.isDrunk = false
         }
+    }
+    if (!gameData.isPooped && Math.random() < 1 / 45) {
+        gameData.isPooped = true
     }
     if (isFoodZero || isEnergyZero) {
         gameData.badStatsMinutes++
@@ -127,8 +130,8 @@ watch(
 
     ],
     ([hovered,isBathe,foodLevel,isFat]) => {
-        const isLowEnergy = gameData.energy < 40
-        const isHungry = gameData.foodLevel < 45
+        const isLowEnergy = gameData.energy < 20
+        const isHungry = gameData.foodLevel < 20
         const isDrunk = gameData.addictionStreak >= 2
         const hasIssues = isLowEnergy || isHungry || isDrunk
 

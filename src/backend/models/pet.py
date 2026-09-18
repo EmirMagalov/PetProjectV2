@@ -1,7 +1,7 @@
 from tortoise import models, fields
 class Pet(models.Model):
     tg_id = fields.BigIntField(pk=True)
-    # Основные игровые статы
+    name = fields.CharField(max_length=255,null=True,default=None)
     click_counter = fields.IntField(default=0)
     level = fields.IntField(default=1)
     exp = fields.IntField(default=0)
@@ -25,6 +25,7 @@ class Pet(models.Model):
     fastfood_streak = fields.IntField(default=0)
     is_fat = fields.BooleanField(default=False)
     is_drunk = fields.BooleanField(default=False)
+    is_pooped = fields.BooleanField(default=False)
     play_count = fields.IntField(default=0)
 
     cart = fields.JSONField(default={})

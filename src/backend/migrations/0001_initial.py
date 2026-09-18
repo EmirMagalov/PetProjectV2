@@ -12,6 +12,7 @@ class Migration(migrations.Migration):
             name='Pet',
             fields=[
                 ('tg_id', fields.BigIntField(generated=True, primary_key=True, unique=True, db_index=True)),
+                ('name', fields.CharField(null=True, max_length=255)),
                 ('click_counter', fields.IntField(default=0)),
                 ('level', fields.IntField(default=1)),
                 ('exp', fields.IntField(default=0)),
@@ -29,6 +30,7 @@ class Migration(migrations.Migration):
                 ('fastfood_streak', fields.IntField(default=0)),
                 ('is_fat', fields.BooleanField(default=False)),
                 ('is_drunk', fields.BooleanField(default=False)),
+                ('is_pooped', fields.BooleanField(default=False)),
                 ('play_count', fields.IntField(default=0)),
                 ('cart', fields.JSONField(default={}, encoder=functools.partial(dumps, separators=(',', ':')), decoder=loads)),
                 ('unlocked_heads', fields.JSONField(default=list, encoder=functools.partial(dumps, separators=(',', ':')), decoder=loads)),

@@ -1,9 +1,9 @@
 <script setup>
-import { foodList } from '@/scripts/foodItems.js'
-import { headItems } from '@/scripts/headwearItems.js'
-import { ref, computed } from 'vue'
-import { addToCart, buyHeadwear } from "@/scripts/basket.js"
-import { gameData } from "@/scripts/useGameStore.js"
+import {foodList} from '@/scripts/foodItems.js'
+import {headItems} from '@/scripts/headwearItems.js'
+import {ref, computed} from 'vue'
+import {addToCart, buyHeadwear} from "@/scripts/basket.js"
+import {gameData} from "@/scripts/useGameStore.js"
 
 defineProps({
   isOpen: {
@@ -92,7 +92,8 @@ const getItemBonuses = (item) => {
   <div v-if="isOpen" class="fixed inset-0  z-150 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
 
     <!-- Само окно магазина -->
-    <div class="relative w-full max-w-md h-180 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+    <div
+        class="relative w-full max-w-md h-180 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
 
       <!-- Шапка модалки -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
@@ -118,7 +119,7 @@ const getItemBonuses = (item) => {
         </button>
         <button
             @click="activeTab = 'shaman'"
-            v-show="gameData.level >=5"
+
             :class="['flex-1 py-2 rounded-xl text-sm font-bold transition-all', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
           🪶 Шаман
@@ -133,11 +134,20 @@ const getItemBonuses = (item) => {
 
       <!-- Список товаров -->
       <div class="p-6 overflow-y-auto space-y-4 flex-1">
+
         <div
             v-for="item in currentList"
             :key="item.id"
-            class="flex items-center justify-between bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 hover:border-slate-600 transition-all"
+            class="relative flex items-center justify-between bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 hover:border-slate-600 transition-all"
+            :class="{'opacity-50 pointer-events-none': activeTab === 'shaman' && gameData.level < 5}"
         >
+          <div v-if="activeTab === 'shaman' && gameData.level < 5"
+               class="absolute inset-0 z-20 bg-slate-950/70  flex items-center justify-center">
+          <span
+            class="text-amber-400 font-bold text-sm tracking-wide px-3 py-1 ">
+          🔒 Требуется 5 уровень
+          </span>
+          </div>
           <!-- Картинка и описание -->
           <div class="flex items-center gap-3">
             <div class="w-15 h-15 shrink-0 bg-white/20 rounded-lg flex items-center justify-center p-1">
