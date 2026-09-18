@@ -97,26 +97,27 @@ from aiogram import F
 async def claim_bonus_handler(callback: types.CallbackQuery):
     tg_id = callback.from_user.id
 
-    # Извлекаем количество монет из callback_data (например, из "claim_bonus_150" получаем 150)
     try:
         coins_amount = int(callback.data.split("_")[2])
     except (IndexError, ValueError):
         await callback.answer("❌ Ошибка обработки бонуса.", show_alert=True)
         return
 
-    # Ищем питомца в базе
-    pet = await PetModel.filter(tg_id=tg_id).first()
+    # Атомарно прибавляем монеты прямо в базе данных, исключая любые затирки
+    updated_count = await PetModel.filter(tg_id=tg_id).update(coins=PetModel.coins + coins_amount)
 
-    if not pet:
-        await callback.answer("❌ Питомец не найден! Сначала запусти игру в главном меню.", show_alert=True)
+    if updated_count == 0:
+        await callback.answer("❌ Питомец не найден! Сначала запусти игру.", show_alert=True)
         return
 
-    # Начисляем указанное количество монет
-    pet.coins += coins_amount
-    await pet.save()
+    # Достаем свежий актуальный баланс из базы
+    pet = await PetModel.filter(tg_id=tg_id).first()
 
-    # Убираем кнопку у сообщения и обновляем текст
-    await callback.message.edit_text(
-        f"✅ Успешно! Вам начислено +{coins_amount} монет.\n💰 Текущий баланс: {pet.coins} монет."
-    )
-    await callback.answer("Бонус успешно получен! 🎉")
+    try:
+        await callback.message.edit_text(
+            f"✅ Успешно! Вам начислено +{coins_amount} монет.\n💰 Текущий баланс: {pet.coins} монет."
+        )
+    except Exception:
+        pass
+
+    await callback.answer("Бонус успешно получен! 🎉", show_alert=True)
