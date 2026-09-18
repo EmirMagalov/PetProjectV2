@@ -10,6 +10,7 @@ pet_router = APIRouter(prefix="/api", tags=["api"])
 
 @pet_router.get("/{tg_id}")
 async def get_pet(tg_id: int):
+    # Принудительно забираем самую свежую версию из базы (refresh)
     pet = await PetModel.filter(tg_id=tg_id).first()
     if not pet:
         pet, created = await PetModel.get_or_create(tg_id=tg_id, defaults={
@@ -17,16 +18,23 @@ async def get_pet(tg_id: int):
             "food_level": 50,
             "energy": 50,
             "lives": 3,
-            "feed_count":3,
+            "feed_count": 3,
             "bad_stats_minutes": 0,
-            "cart":{'burger':1},
+            "cart": {'burger': 1},
             "last_update": time.time()
-
         })
     else:
-
+        # 1. Сначала обновляем статы (голод, время и т.д.) внутри объекта в памяти
         await update_pet_stats(pet)
+
+        # 2. НО ЧТОБЫ НЕ ЗАТЕРЕТЬ БОНУСЫ ИЗ БОТА:
+        # Достаем актуальные монеты прямо из базы на текущую микросекунду
+        fresh_db_pet = await PetModel.filter(tg_id=tg_id.strip() if isinstance(tg_id, str) else tg_id).first()
+        if fresh_db_pet:
+            pet.coins = fresh_db_pet.coins
+
         await pet.save()
+
     return pet
 
 
