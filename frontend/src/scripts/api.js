@@ -6,7 +6,7 @@ export const API_URL = import.meta.env.VITE_API_URL || '/api'
 
 // Флаг: загружены ли данные с сервера
 export const isLoading = ref(true)
-let isDataLoaded = false
+
 
 export async function initGameData() {
     const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
@@ -80,8 +80,7 @@ export async function resetPet() {
 export async function syncToBackend() {
     // 🛑 ЖЕСТКИЙ БЛОКАТОР: если данные с сервера еще не скачались,
     // запрещаем отправлять мусор/дефолт на бэкенд!
-    if (!isDataLoaded) {
-        console.warn("⚠️ Синхронизация заблокирована: данные с сервера еще не загружены.")
+    if (!isDataLoaded || isSyncLocked) {
         return
     }
 
@@ -154,20 +153,25 @@ document.addEventListener('visibilitychange', () => {
 })
 
 
+let isDataLoaded = false
 let isRefreshing = false
+let isSyncLocked = false // 🛑 Блокировщик сохранения при фокусе
 
 async function safeRefreshData() {
     if (!isDataLoaded || isRefreshing) return
 
     isRefreshing = true
-    console.log("🎯 Обновляем данные с сервера...")
+    isSyncLocked = true // Блокируем syncToBackend, чтобы старый стейт не улетел на сервер
+
+    console.log("🎯 Обновляем данные с сервера при возвращении...")
     try {
         await initGameData()
     } finally {
-        // Небольшая задержка перед следующей возможной попыткой, чтобы отсечь дублирующие события
+        // Даем секунду после успешного обновления, прежде чем разрешить сохранения
         setTimeout(() => {
             isRefreshing = false
-        }, 1000)
+            isSyncLocked = false
+        }, 1500)
     }
 }
 
