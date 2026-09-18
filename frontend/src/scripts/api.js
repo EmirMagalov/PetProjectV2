@@ -97,8 +97,8 @@ export async function resetPet() {
 export async function syncToBackend() {
     // 🛑 ЖЕСТКИЙ БЛОКАТОР: если данные с сервера еще не скачались,
     // запрещаем отправлять мусор/дефолт на бэкенд!
-    if (!isDataLoaded) {
-        console.warn("⚠️ Синхронизация заблокирована: данные с сервера еще не загружены.")
+    if (!isDataLoaded || isSyncLocked) {
+        console.warn("⚠️ Синхронизация заблокирована (данные не загружены или идет защита после фокуса).")
         return
     }
 
