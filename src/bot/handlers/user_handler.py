@@ -2,6 +2,7 @@ from aiogram import Router, F, types
 from aiogram.filters import CommandStart, Command
 from common.config import settings
 from backend.models.pet import Pet as PetModel
+from tortoise.expressions import F
 user_router = Router()
 
 
@@ -104,7 +105,11 @@ async def claim_bonus_handler(callback: types.CallbackQuery):
         return
 
     # Атомарно прибавляем монеты прямо в базе данных, исключая любые затирки
-    updated_count = await PetModel.filter(tg_id=tg_id).update(coins=PetModel.coins + coins_amount)
+    # Было:
+    # updated_count = await PetModel.filter(tg_id=tg_id).update(coins=PetModel.coins + coins_amount)
+
+    # Стало:
+    updated_count = await PetModel.filter(tg_id=tg_id).update(coins=F("coins") + coins_amount)
 
     if updated_count == 0:
         await callback.answer("❌ Питомец не найден! Сначала запусти игру.", show_alert=True)
