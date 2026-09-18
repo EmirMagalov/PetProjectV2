@@ -52,7 +52,7 @@ export const foodList = [
         category: 'shaman',
         subcategory:'pipe',
         energyGain: 80,
-        cost: 50,
+        cost: 350,
 
     },
     {
