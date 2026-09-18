@@ -3,6 +3,18 @@ import {gameData, lowEnergy, showHunger} from './useGameStore.js'
 import {computed, ref} from "vue";
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
+const TAB_ID = Math.random().toString(36).substring(2)
+
+// Регистрируем эту вкладку как активную в текущей сессии браузера
+localStorage.setItem('active_game_tab', TAB_ID)
+
+// Слушаем, если открылась другая вкладка — эта сразу понимает, что она больше не главная
+window.addEventListener('storage', (event) => {
+    if (event.key === 'active_game_tab' && event.newValue !== TAB_ID) {
+        console.warn("⚠️ Обнаружен другой экземпляр игры. Эта вкладка уходит в спячку!")
+        isDataLoaded = false // Блокируем любые отправки данных на сервер со старой вкладки
+    }
+})
 let isDataLoaded = false
 let isRefreshing = false
 let isSyncLocked = false // 🛑 Блокировщик сохранения при фокусе
