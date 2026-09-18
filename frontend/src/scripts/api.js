@@ -7,7 +7,9 @@ const TAB_ID = Math.random().toString(36).substring(2)
 
 // Регистрируем эту вкладку как активную в текущей сессии браузера
 localStorage.setItem('active_game_tab', TAB_ID)
-
+let isDataLoaded = false
+let isRefreshing = false
+let isSyncLocked = false // 🛑 Блокировщик сохранения при фокусе
 // Слушаем, если открылась другая вкладка — эта сразу понимает, что она больше не главная
 window.addEventListener('storage', (event) => {
     if (event.key === 'active_game_tab' && event.newValue !== TAB_ID) {
@@ -15,9 +17,7 @@ window.addEventListener('storage', (event) => {
         isDataLoaded = false // Блокируем любые отправки данных на сервер со старой вкладки
     }
 })
-let isDataLoaded = false
-let isRefreshing = false
-let isSyncLocked = false // 🛑 Блокировщик сохранения при фокусе
+
 // Флаг: загружены ли данные с сервера
 export const isLoading = ref(true)
 
