@@ -1,8 +1,8 @@
-from aiogram import Router, F, types
+from aiogram import Router, F as aiogram_F, types
 from aiogram.filters import CommandStart, Command
 from common.config import settings
 from backend.models.pet import Pet as PetModel
-from tortoise.expressions import F
+from tortoise.expressions import F as db_f
 user_router = Router()
 
 
