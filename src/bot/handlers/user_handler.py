@@ -109,7 +109,7 @@ async def claim_bonus_handler(callback: types.CallbackQuery):
     # updated_count = await PetModel.filter(tg_id=tg_id).update(coins=PetModel.coins + coins_amount)
 
     # Стало:
-    updated_count = await PetModel.filter(tg_id=tg_id).update(coins=F("coins") + coins_amount)
+    updated_count = await PetModel.filter(tg_id=tg_id).update(coins=db_f("coins") + coins_amount)
 
     if updated_count == 0:
         await callback.answer("❌ Питомец не найден! Сначала запусти игру.", show_alert=True)
