@@ -1,27 +1,29 @@
 @import "tailwindcss";
 
+/* 1. По умолчанию скрываем заглушку для ВСЕХ экранов */
 .rotate-warning {
-    display: none; /* Скрыто по умолчанию */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #1a1a1a;
-    color: #ffffff;
-    z-index: 999999;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    font-family: sans-serif;
-    padding: 20px;
-    box-sizing: border-box;
+    display: none;
 }
 
-/* Показываем заглушку ТОЛЬКО в ландшафтном (горизонтальном) режиме на мобильных */
-@media screen and (orientation: landscape) and (max-height: 600px) {
-    #rotate-warning {
-        display: flex;
+/* 2. Показываем ТОЛЬКО если ширина экрана больше высоты (альбомная ориентация)
+      и это мобильное устройство/планшет (высота не больше 700px) */
+@media screen and (orientation: landscape) and (max-height: 700px) {
+    .rotate-warning {
+        display: flex !important; /* !important перебьет стандартный display: none */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #111111;
+        color: #ffffff;
+        z-index: 999999;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-family: sans-serif;
+        padding: 20px;
+        box-sizing: border-box;
     }
 }
 body,html{
