@@ -44,7 +44,8 @@ async def schedule_addiction_reminder(tg_id):
         if pet and pet.addiction_streak > 0:
             # Проверяем активность и для зависимости тоже
             current_time = int(time.time())
-            if pet.last_update and (current_time - pet.last_update) < 35:
+            last_update_int = int(pet.last_update) if pet.last_update else 0
+            if last_update_int and (current_time - last_update_int) < 35:
                 return
 
             messages = [
