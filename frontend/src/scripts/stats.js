@@ -44,12 +44,12 @@ setInterval(() => {
             gameData.isDrunk = false
         }
     }
-    if (!gameData.isPooped && Math.random() < 1 / 45) {
-        gameData.isPooped = true
-    }
-    if (!gameData.stinky && Math.random() < 1 / 90) {
-        gameData.stinky = true
-    }
+    // if (!gameData.isPooped && Math.random() < 1 / 45) {
+    //     gameData.isPooped = true
+    // }
+    // if (!gameData.stinky && Math.random() < 1 / 90) {
+    //     gameData.stinky = true
+    // }
     if (isFoodZero || isEnergyZero) {
         gameData.badStatsMinutes++
 

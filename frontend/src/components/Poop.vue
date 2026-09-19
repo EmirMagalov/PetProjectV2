@@ -1,18 +1,13 @@
 <script setup>
 import { ref } from 'vue'
 import {gameData} from "@/scripts/useGameStore.js";
-import {addCoin} from "@/scripts/actions.js";
+import {addCoin, Clean} from "@/scripts/actions.js";
 import {addExp} from "@/scripts/level.js";
 
 // Генерируем случайные координаты ОДИН РАЗ при создании, чтобы какашка не прыгала
 const randomLeft = ref(Math.floor(Math.random() * 71) + 10)
 const randomBottom = ref(Math.floor(Math.random() * 15))
 
-const Clean = ()=>{
-  gameData.isPooped = false
-  addCoin(10)
-  addExp(20)
-}
 
 </script>
 

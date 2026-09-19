@@ -205,3 +205,8 @@ export function addCoin(coins = 1) {
     }, 150)
 }
 
+export const Clean = ()=>{
+    gameData.isPooped = false
+    addCoin(10)
+    addExp(20)
+}
