@@ -88,6 +88,7 @@ export function toggleSleep() {
         // Если просыпается принудительно
         gameData.sleep = false
         gameData.sleepEndTime = 0
+        sleepTimeRemaining.value = "00:00"
     }
 }
 

@@ -98,7 +98,6 @@ export async function initGameData() {
 
             isDataLoaded = true
             isLoading.value = false
-            console.log("✅ Данные успешно синхронизированы с сервером!")
             return;
 
         } catch (e) {
@@ -205,7 +204,7 @@ document.addEventListener('visibilitychange', () => {
 
     // 2. Когда пользователь возвращается в игру (развернул или открыл из бота)
     if (document.visibilityState === 'visible') {
-        console.log("👁️ Приложение на экране! Забираем лидерство и свежие данные...")
+
 
         // Захватываем статус главного окна
         claimTabActive()

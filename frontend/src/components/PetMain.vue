@@ -178,6 +178,7 @@ onUnmounted(() => {
 
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
           <div :key="animKey" class="absolute flex justify-center items-center animate-pop w-45 h-45">
+            <PetHeadwear/>
             <img :src="body" class="absolute w-45" alt="">
             <img :src="getHornAsset(gameData.level)" class="absolute w-45" alt="">
             <img v-show="gameData.isDrunk" src="/character/drunk.webp" class="absolute w-45" alt="">
@@ -234,9 +235,9 @@ onUnmounted(() => {
           <PetFoam :status-foam="statusFoam"/>
           <PetSmoke :status-smoke="statusSmoke"/>
           <PetShower :status-shower="statusShower"/>
-          <PetHeadwear/>
-          <Poop v-show="gameData.isPooped"/>
-          <PhotoFrame/>
+
+          <Poop v-show="gameData.isPooped && location==='home'"/>
+          <PhotoFrame v-show="location==='home'"/>
         </div>
       </div>
     </div>

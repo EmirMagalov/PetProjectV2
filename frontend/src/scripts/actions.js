@@ -134,9 +134,15 @@ export function energyFullShow() {
 }
 
 export function goSleep() {
+    // 🛡️ Если питомец уже спит, мы ВСЕГДА разрешаем нажать кнопку, чтобы разбудить его
+    if (gameData.sleep) {
+        toggleSleep()
+        return
+    }
+
+    // Если не спит, проверяем правила для укладывания
     if (gameData.energy < 80) {
         if (!showHunger.value) {
-            // gameData.sleep = !gameData.sleep
             toggleSleep()
         }
     } else {
