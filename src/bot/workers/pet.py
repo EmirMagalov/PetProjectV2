@@ -18,10 +18,14 @@ keyboard = types.InlineKeyboardMarkup(
     ]
 )
 
+
 async def send_telegram_message(pet, text):
-    # 🛑 Если с момента последнего пинга фронтенда прошло меньше 35 секунд — игрок в игре, глушим уведомление
     current_time = int(time.time())
-    if pet.last_update and (current_time - pet.last_update) < 35:
+
+    # Превращаем last_update в целое число (int), отбрасывая хвост .831037
+    last_update_int = int(pet.last_update) if pet.last_update else 0
+
+    if last_update_int and (current_time - last_update_int) < 35:
         return
 
     await bot.send_message(pet.tg_id, text, reply_markup=keyboard, parse_mode="HTML")
