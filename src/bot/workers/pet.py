@@ -1,3 +1,4 @@
+import time
 import asyncio
 import random
 from common.config import settings
@@ -17,8 +18,13 @@ keyboard = types.InlineKeyboardMarkup(
     ]
 )
 
-async def send_telegram_message(chat_id, text):
-    await bot.send_message(chat_id, text, reply_markup=keyboard, parse_mode="HTML")
+async def send_telegram_message(pet, text):
+    # 🛑 Если с момента последнего пинга фронтенда прошло меньше 35 секунд — игрок в игре, глушим уведомление
+    current_time = int(time.time())
+    if pet.last_update and (current_time - pet.last_update) < 35:
+        return
+
+    await bot.send_message(pet.tg_id, text, reply_markup=keyboard, parse_mode="HTML")
 
 addiction_timers = {}
 
@@ -32,10 +38,15 @@ async def schedule_addiction_reminder(tg_id):
 
         pet = await PetModel.get_or_none(tg_id=tg_id)
         if pet and pet.addiction_streak > 0:
+            # Проверяем активность и для зависимости тоже
+            current_time = int(time.time())
+            if pet.last_update and (current_time - pet.last_update) < 35:
+                return
+
             messages = [
                 "Трубка сама себя не покурит!",
             ]
-            await send_telegram_message(tg_id, random.choice(messages))
+            await bot.send_message(tg_id, random.choice(messages), reply_markup=keyboard, parse_mode="HTML")
 
     except asyncio.CancelledError:
         raise
@@ -71,7 +82,7 @@ async def check_pets_loop():
                 if pet.lives <= 0:
                     if not pet.game_over_notified:
                         await send_telegram_message(
-                            pet.tg_id,
+                            pet,
                             "💀 Питомец погиб из-за плохих условий!"
                         )
                         pet.game_over_notified = True
@@ -88,7 +99,7 @@ async def check_pets_loop():
                     if pet.lives == 2:
                         if not pet.low_lives_notified:
                             await send_telegram_message(
-                                pet.tg_id,
+                                pet,
                                 "❤️ У питомца осталось всего жизней: <b>2</b>!"
                             )
                             pet.low_lives_notified = True
@@ -102,7 +113,7 @@ async def check_pets_loop():
                     if pet.lives == 1:
                         if not pet.critical_life_notified:
                             await send_telegram_message(
-                                pet.tg_id,
+                                pet,
                                 "🚨 <b>Внимание!</b> У питомца осталась всего <b>1 жизнь</b>! Он на грани гибели!"
                             )
                             pet.critical_life_notified = True
@@ -116,7 +127,7 @@ async def check_pets_loop():
                 if pet.food_level < 20:
                     if not pet.hungry_notified:
                         await send_telegram_message(
-                            pet.tg_id,
+                            pet,
                             "🍽️ Питомец проголодался!"
                         )
                         pet.hungry_notified = True
@@ -130,7 +141,7 @@ async def check_pets_loop():
                 if pet.energy < 20:
                     if not pet.energy_notified:
                         await send_telegram_message(
-                            pet.tg_id,
+                            pet,
                             "😴 Питомец сильно устал и хочет спать!"
                         )
                         pet.energy_notified = True
@@ -144,7 +155,7 @@ async def check_pets_loop():
                 if pet.is_pooped:
                     if not pet.poop_notified:
                         await send_telegram_message(
-                            pet.tg_id,
+                            pet,
                             "💩 Питомец тут набедокурил... Надо убрать!"
                         )
                         pet.poop_notified = True
@@ -158,7 +169,7 @@ async def check_pets_loop():
                 if pet.stinky:
                     if not pet.stinky_notified:
                         await send_telegram_message(
-                            pet.tg_id,
+                            pet,
                             "🤢 Питомец начал сильно вонять! Пора его помыть!"
                         )
                         pet.stinky_notified = True
