@@ -177,6 +177,8 @@ export function spawnHeart() {
             gameData.isFat = false
             gameData.PlayCount = 0
             gameData.fastfoodStreak = 0
+            addExp(10)
+            addCoin(10)
         }
     }
 

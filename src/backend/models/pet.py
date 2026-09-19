@@ -34,5 +34,14 @@ class Pet(models.Model):
     addiction_level = fields.IntField(default=0)
     addiction_streak = fields.IntField(default=0)
 
+    # Флаги для защиты от спама уведомлениями
+    hungry_notified = fields.BooleanField(default=False)
+    energy_notified = fields.BooleanField(default=False)
+    poop_notified = fields.BooleanField(default=False)
+    stinky_notified = fields.BooleanField(default=False)
+    game_over_notified = fields.BooleanField(default=False)
+    low_lives_notified = fields.BooleanField(default=False)
+    critical_life_notified = fields.BooleanField(default=False)
+
     class Meta:
         db_table = "pet"

@@ -82,7 +82,8 @@ function formatNumber(num) {
 
       </div>
       <div v-show="gameData.isFat" class="absolute bottom-0 right-45 transition-transform duration-50 animate-pulse">
-        <img src="/gamePlay/fat_icon.webp" alt="" width="25">
+        <img class="relative" src="/gamePlay/fat_icon.webp" alt="" width="25">
+        <p class="absolute left-2 font-bold top-2 text-xs">{{30 - gameData.PlayCount}}</p>
       </div>
       <div v-show="gameData.addictionStreak >=2" class="absolute  animate-pulse bottom-0 right-38" >
         <img src="/gamePlay/drunk_icon.webp" alt="" width="25">
