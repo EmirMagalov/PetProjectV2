@@ -58,6 +58,8 @@ async def update_pet_stats(pet) -> bool:
                 if pet.addiction_streak <= 1:
                     pet.addiction_level = 1
                     pet.is_drunk = False
+        if pet.addiction_streak <= 1:
+            pet.is_drunk = False
         if not pet.is_pooped and capped_minutes > 0:
             poop_chance = 1 - ((1 - 1 / 45) ** capped_minutes)
             if random.random() < poop_chance:
