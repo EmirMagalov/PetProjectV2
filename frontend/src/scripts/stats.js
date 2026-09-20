@@ -44,6 +44,9 @@ setInterval(() => {
             gameData.isDrunk = false
         }
     }
+    if (gameData.addictionStreak <= 1) {
+        gameData.isDrunk = false
+    }
     // if (!gameData.isPooped && Math.random() < 1 / 45) {
     //     gameData.isPooped = true
     // }
@@ -68,6 +71,8 @@ setInterval(() => {
         gameData.badStatsMinutes = 0
     }
     gameData.lastUpdate = Date.now()
+
+
 
 
 }, 60000)

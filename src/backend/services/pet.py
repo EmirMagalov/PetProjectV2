@@ -51,7 +51,13 @@ async def update_pet_stats(pet) -> bool:
 
         energy_consumed = capped_minutes * 0.1
         pet.energy = max(0.0, pet.energy - energy_consumed)
-
+        if pet.addiction_streak > 1:
+            hours_passed = int(elapsed_seconds // 3600)
+            if hours_passed > 0:
+                pet.addiction_streak = 0
+                if pet.addiction_streak <= 1:
+                    pet.addiction_level = 1
+                    pet.is_drunk = False
         if not pet.is_pooped and capped_minutes > 0:
             poop_chance = 1 - ((1 - 1 / 45) ** capped_minutes)
             if random.random() < poop_chance:

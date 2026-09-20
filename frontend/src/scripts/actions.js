@@ -43,12 +43,7 @@ export function otherFeedPet(foodId) {
             if (drunkTimer) {
                 clearTimeout(drunkTimer)
             }
-            if (gameData.addictionStreak <= 1) {
-                drunkTimer = setTimeout(() => {
-                    gameData.isDrunk = false
-                    drunkTimer = null
-                }, 60000)
-            }
+
             gameData.energy = Math.min(80, gameData.foodLevel + 80)
         }
 
