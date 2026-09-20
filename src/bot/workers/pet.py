@@ -22,7 +22,6 @@ keyboard = types.InlineKeyboardMarkup(
 async def send_telegram_message(pet, text):
     current_time = int(time.time())
     last_update_int = int(pet.last_update) if pet.last_update else 0
-    print(current_time - last_update_int)
     if last_update_int and (current_time - last_update_int) < 35:
         return False  # Игрок в сети, сообщение не отправлено
 
@@ -73,7 +72,7 @@ async def schedule_addiction_reminder(tg_id):
 async def check_pets_loop():
     while True:
         try:
-            await asyncio.sleep(1)
+            await asyncio.sleep(60)
             print("w")
             pets = await PetModel.all()
             for pet in pets:
