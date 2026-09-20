@@ -40,7 +40,7 @@ services:
     container_name: pet_bot
     restart: always
     # Для бота используем watchfiles (ставится вместе с uvicorn/fastapi), чтобы он перезапускался при правках кода
-    command: ["watchfiles", "python -m bot.main"]
+    command: ["python", "-m", "watchfiles", "python -m bot.main"]
     volumes:
       - ./src:/app  # <--- Тоже прокидываем код для бота
     env_file:
