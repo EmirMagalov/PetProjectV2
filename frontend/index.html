@@ -16,4 +16,41 @@
     <div id="app"></div>
     <script type="module" src="/src/scripts/main.js"></script>
   </body>
+  <script>
+      function checkOrientation() {
+          const warning = document.getElementById('rotate-warning');
+          if (!warning) return;
+
+          // Проверяем, мобильное ли это устройство
+          const isMobile = window.matchMedia("(pointer: coarse)").matches;
+          if (!isMobile) {
+              warning.classList.remove('active');
+              return;
+          }
+
+          // Узнаем РЕАЛЬНУЮ физическую ориентацию устройства через системный API.
+          // Клавиатура НЕ меняет этот параметр (он остается portrait, пока телефон вертикален).
+          let isLandscape = false;
+          if (screen.orientation && screen.orientation.type) {
+              isLandscape = screen.orientation.type.includes('landscape');
+          } else {
+              // Запасной вариант для старых браузеров
+              isLandscape = window.innerWidth > window.innerHeight;
+          }
+
+          // Показываем предупреждение ТОЛЬКО если телефон реально повернут в альбом
+          if (isLandscape) {
+              warning.classList.add('active');
+          } else {
+              warning.classList.remove('active');
+          }
+      }
+
+      // Слушаем изменение ориентации и изменение размеров
+      window.addEventListener('resize', checkOrientation);
+      if (screen.orientation) {
+          screen.orientation.addEventListener('change', checkOrientation);
+      }
+      document.addEventListener('DOMContentLoaded', checkOrientation);
+  </script>
 </html>
