@@ -97,7 +97,10 @@ export async function initGameData() {
             gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
 
             isDataLoaded = true
-            isLoading.value = false
+            setTimeout(() => {
+                isLoading.value = false;
+            }, 50);
+
             return;
 
         } catch (e) {
