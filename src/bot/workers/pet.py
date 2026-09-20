@@ -73,7 +73,8 @@ async def schedule_addiction_reminder(tg_id):
 async def check_pets_loop():
     while True:
         try:
-            await asyncio.sleep(60)
+            await asyncio.sleep(1)
+            print("w")
             pets = await PetModel.all()
             for pet in pets:
                 await update_pet_stats(pet)
