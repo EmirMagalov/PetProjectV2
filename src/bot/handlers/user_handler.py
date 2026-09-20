@@ -91,10 +91,10 @@ async def broadcast_handler(message: types.Message):
 
 
 # Обработчик нажатия на кнопку бонуса
-from aiogram import F
+
 
 # Обработчик нажатия на любую кнопку бонуса из рассылки
-@user_router.callback_query(F.data.startswith("claim_bonus_"))
+@user_router.callback_query(aiogram_F.data.startswith("claim_bonus_"))
 async def claim_bonus_handler(callback: types.CallbackQuery):
     tg_id = callback.from_user.id
 
@@ -126,6 +126,98 @@ async def claim_bonus_handler(callback: types.CallbackQuery):
         pass
 
     await callback.answer("Бонус успешно получен! 🎉", show_alert=True)
+
+
+
+
+
+@user_router.message(Command("broadcast_lives"))
+async def broadcast_lives_handler(message: types.Message):
+    if message.from_user.id not in ADMIN_IDS:
+        return
+
+    # Разбираем сообщение на части: команда, количество жизней, текст
+    # Пример: /broadcast_lives 1 Получите жизнь в подарок!
+    command_parts = message.text.split(maxsplit=2)
+    if len(command_parts) < 3:
+        await message.answer(
+            "❌ Неверный формат! Пример:\n<code>/broadcast_lives 1 Текст сообщения</code>",
+            parse_mode="HTML"
+        )
+        return
+
+    # Проверяем, что вторым аргументом передано число (жизни)
+    try:
+        lives_amount = int(command_parts[1])
+    except ValueError:
+        await message.answer("❌ Второе слово должно быть числом (количеством жизней)! Пример:\n<code>/broadcast_lives 1 Текст</code>", parse_mode="HTML")
+        return
+
+    custom_text = command_parts[2]
+
+    # Уникальный callback_data для жизней
+    callback_data_str = f"claim_lives_{lives_amount}"
+
+    keyboard = types.InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                types.InlineKeyboardButton(
+                    text=f"❤️ Забрать +{lives_amount} жизнь!",
+                    callback_data=callback_data_str
+                )
+            ]
+        ]
+    )
+
+    # Получаем всех питомцев из базы
+    pets = await PetModel.all()
+
+    success_count = 0
+    for pet in pets:
+        try:
+            await message.bot.send_message(
+                chat_id=pet.tg_id,
+                text=custom_text,
+                reply_markup=keyboard,
+                parse_mode="HTML"
+            )
+            success_count += 1
+        except Exception as e:
+            print(f"Не удалось отправить сообщение для {pet.tg_id}: {e}")
+
+    await message.answer(f"✅ Рассылка жизней завершена. Успешно отправлено: {success_count}")
+
+
+# Обработчик нажатия на кнопку получения жизней
+@user_router.callback_query(aiogram_F.data.startswith("claim_lives_"))
+async def claim_lives_handler(callback: types.CallbackQuery):
+    tg_id = callback.from_user.id
+
+    try:
+        lives_amount = int(callback.data.split("_")[2])
+    except (IndexError, ValueError):
+        await callback.answer("❌ Ошибка обработки бонуса.", show_alert=True)
+        return
+
+    # Атомарно прибавляем жизни прямо в базе данных
+    updated_count = await PetModel.filter(tg_id=tg_id).update(lives=db_f("lives") + lives_amount)
+
+    if updated_count == 0:
+        await callback.answer("❌ Питомец не найден! Сначала запусти игру.", show_alert=True)
+        return
+
+    # Достаем свежие данные из базы, чтобы показать актуальное количество жизней
+    pet = await PetModel.filter(tg_id=tg_id).first()
+
+    try:
+        await callback.message.edit_text(
+            f"✅ Успешно! Вам начислено +{lives_amount} жизнь.\n❤️ Текущие жизни: {pet.lives}."
+        )
+    except Exception:
+        pass
+
+    await callback.answer("Жизнь успешно получена! 🎉", show_alert=True)
+
 
 
 
