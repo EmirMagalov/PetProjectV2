@@ -31,7 +31,7 @@ setInterval(() => {
     const isEnergyZero = gameData.energy === 0
     const nowSec = Math.floor(Date.now() / 1000)
 // Если прошло больше 1 часа (3600 секунд) с последнего употребления
-    if (gameData.addictionStreak > 0 && (nowSec - gameData.lastAddictionTime > 3600)) {
+    if (gameData.addictionStreak > 1 && (nowSec - gameData.lastAddictionTime > 3600)) {
         gameData.lastAddictionTime = nowSec // Сдвигаем таймер для следующего уменьшения
 
         // Если стрик упал ниже порогов, выключаем дебаффы
@@ -39,7 +39,7 @@ setInterval(() => {
             gameData.addictionLevel = 1
 
         }
-        gameData.addictionStreak--
+        gameData.addictionStreak = 0
         if (gameData.addictionStreak < 1) {
             gameData.isDrunk = false
         }

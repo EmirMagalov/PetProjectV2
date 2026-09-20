@@ -30,6 +30,7 @@ export function otherFeedPet(foodId) {
     if (foodItem && gameData.cart[targetId] > 0) {
         // 👇 Используем общую функцию списания
         removeFromCart(targetId)
+        console.log(gameData.addictionStreak)
         if (foodId === "pipe") {
             gameData.isDrunk = true
             gameData.addictionStreak = Math.min(4, gameData.addictionStreak + 1)
