@@ -236,8 +236,8 @@ onUnmounted(() => {
           <PetSmoke :status-smoke="statusSmoke"/>
           <PetShower :status-shower="statusShower"/>
 
-          <Poop v-show="gameData.isPooped && location==='home'"/>
-          <PhotoFrame v-show="location==='home'"/>
+          <Poop v-show="gameData.isPooped && (location==='home' || location==='food')"/>
+          <PhotoFrame v-show="(location==='home' || location==='food')"/>
         </div>
       </div>
     </div>
