@@ -42,7 +42,7 @@ async def broadcast_handler(message: types.Message):
     command_parts = message.text.split(maxsplit=2)
     if len(command_parts) < 3:
         await message.answer(
-            "❌ Неверный формат! Пример:\n<code>/broadcast 150 Текст сообщения</code>",
+            "❌ Неверный формат! Пример:\n<code>/broadcast_coins 150 Текст сообщения</code>",
             parse_mode="HTML"
         )
         return
@@ -51,7 +51,7 @@ async def broadcast_handler(message: types.Message):
     try:
         coins_amount = int(command_parts[1])
     except ValueError:
-        await message.answer("❌ Второе слово должно быть числом (количеством монет)! Пример:\n<code>/broadcast 150 Текст</code>", parse_mode="HTML")
+        await message.answer("❌ Второе слово должно быть числом (количеством монет)! Пример:\n<code>/broadcast_coins 150 Текст</code>", parse_mode="HTML")
         return
 
     custom_text = command_parts[2]
