@@ -126,3 +126,22 @@ async def claim_bonus_handler(callback: types.CallbackQuery):
         pass
 
     await callback.answer("Бонус успешно получен! 🎉", show_alert=True)
+
+
+
+@user_router.message(Command("reset_flags"))
+async def cmd_reset_flags(message: types.Message):
+    if message.from_user.id not in ADMIN_IDS:
+        return
+
+    updated_count = await PetModel.all().update(
+        hungry_notified=False,
+        energy_notified=False,
+        poop_notified=False,
+        stinky_notified=False,
+        game_over_notified=False,
+        low_lives_notified=False,
+        critical_life_notified=False
+    )
+
+    await message.answer(f"✅ Успешно сброшены флаги уведомлений для всех питомцев (затронуто: {updated_count}).")
