@@ -9,9 +9,9 @@ img {
 
 /* 2. Показываем ТОЛЬКО если ширина экрана больше высоты (альбомная ориентация)
       и это мобильное устройство/планшет (высота не больше 700px) */
-@media screen and (orientation: landscape) and (max-height: 700px) {
+@media screen and (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
     .rotate-warning {
-        display: flex !important; /* !important перебьет стандартный display: none */
+        display: flex !important;
         position: fixed;
         top: 0;
         left: 0;

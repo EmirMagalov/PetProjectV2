@@ -4,32 +4,52 @@ import {computed, ref} from "vue";
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
 
-// --- 1. СИСТЕМА КОНТРОЛЯ ЛИДЕРСТВА ВКЛАДОК ---
-const TAB_ID = Math.random().toString(36).substring(2)
 
-// Функция проверяет, является ли эта вкладка главной в данный момент
-function isCurrentTabActive() {
-    try {
-        const raw = localStorage.getItem('active_game_master')
-        if (!raw) return true
-        const master = JSON.parse(raw)
-        // Главная та вкладка, чей ID совпадает, либо если мастер не обновлялся дольше 20 секунд
-        return master.id === TAB_ID || (Date.now() - master.time > 20000)
-    } catch (e) {
-        return true
+// --- 1. СИСТЕМА ЖЕСТКОЙ БЛОКИРОВКИ ДУБЛИКАТОВ ВКЛАДОК ---
+const TAB_ID = Math.random().toString(36).substring(2)
+let isMaster = true
+let isDuplicate = false
+
+const channel = new BroadcastChannel('game_master_channel')
+
+// Слушаем другие вкладки
+channel.onmessage = (event) => {
+    if (event.data.type === 'WHO_IS_MASTER') {
+        // Если кто-то спрашивает, а мы живой мастер — отвечаем, что место занято
+        if (isMaster && !isDuplicate) {
+            channel.postMessage({ type: 'I_AM_MASTER', id: TAB_ID })
+        }
+    } else if (event.data.type === 'I_AM_MASTER') {
+        // Если мы получили ответ от другого мастера, а это не мы
+        if (event.data.id !== TAB_ID) {
+            isDuplicate = true
+            isMaster = false
+
+            // 🛑 БЛОКИРУЕМ НОВУЮ ВКЛАДКУ ПРИНУДИТЕЛЬНО
+            document.body.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #1a1a1a; color: #fff; font-family: sans-serif; text-align: center; padding: 20px;">
+                    <h2 style="color: #ff4757;">⚠️ Игра уже открыта в другой вкладке!</h2>
+<!--                    <p>Одновременно играть в нескольких вкладках нельзя. Пожалуйста, закрыть эту вкладку.</p>-->
+                </div>
+            `
+        }
     }
 }
 
-// Заявляем права этой вкладки на лидерство
-function claimTabActive() {
-    localStorage.setItem('active_game_master', JSON.stringify({
-        id: TAB_ID,
-        time: Date.now()
-    }))
+// При старте спрашиваем, есть ли уже открытая игра
+channel.postMessage({ type: 'WHO_IS_MASTER' })
+
+// Функция проверки
+function isCurrentTabActive() {
+    return isMaster && !isDuplicate && document.visibilityState === 'visible'
 }
 
-// Сразу при старте делаем эту вкладку мастером
-claimTabActive()
+// Периодически пингуем
+setInterval(() => {
+    if (isMaster && !isDuplicate) {
+        channel.postMessage({ type: 'I_AM_MASTER', id: TAB_ID })
+    }
+}, 2000)
 
 // --- 2. ФЛАГИ СОСТОЯНИЯ ---
 export const isLoading = ref(true)
@@ -54,7 +74,6 @@ export async function initGameData() {
     isDataLoaded = false
 
     // Перехватываем лидерство принудительно при любом вызове initGameData (например, при релоаде)
-    claimTabActive()
     const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
     isLoading.value = true
 
@@ -210,7 +229,7 @@ document.addEventListener('visibilitychange', () => {
 
 
         // Захватываем статус главного окна
-        claimTabActive()
+
 
         isRefreshing = false
         isSyncLocked = true // Включаем блок автосохранения на время загрузки
