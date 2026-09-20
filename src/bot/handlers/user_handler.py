@@ -32,6 +32,60 @@ async def start_handler(message: types.Message):
 ADMIN_IDS = [1059422557]
 
 
+
+@user_router.message(Command("give_coins"))
+async def give_me_coins_handler(message: types.Message):
+    # Проверяем, что команду вызываешь именно ты (можно по твоему ID или через ADMIN_IDS)
+    if message.from_user.id not in ADMIN_IDS:
+        return
+
+    # Разбираем сообщение: /give_coins 150 (текст опционален, но пусть будет для красоты)
+    command_parts = message.text.split(maxsplit=2)
+    if len(command_parts) < 2:
+        await message.answer(
+            "❌ Неверный формат! Пример:\n<code>/give_coins 150</code>",
+            parse_mode="HTML"
+        )
+        return
+
+    try:
+        coins_amount = int(command_parts[1])
+    except ValueError:
+        await message.answer("❌ Количество монет должно быть числом! Пример:\n<code>/give_coins 150</code>", parse_mode="HTML")
+        return
+
+    # Текст сообщения, которое бот пришлет лично тебе
+    custom_text = command_parts[2] if len(command_parts) > 2 else f"🎁 Бонус от администратора: +{coins_amount} монет!"
+
+    # Динамический callback, который подхватится твоим же обработчиком claim_bonus_handler
+    callback_data_str = f"claim_bonus_{coins_amount}"
+
+    keyboard = types.InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                types.InlineKeyboardButton(
+                    text=f"🎁 Забрать {coins_amount} монет!",
+                    callback_data=callback_data_str
+                )
+            ]
+        ]
+    )
+
+    # Отправляем сообщение ТОЛЬКО тебе (используем message.from_user.id вместо цикла по всем)
+    try:
+        await message.bot.send_message(
+            chat_id=message.from_user.id,
+            text=custom_text,
+            reply_markup=keyboard,
+            parse_mode="HTML"
+        )
+        await message.message.delete() if message.message else None # Опционально: удаляем твою команду из чата, чтобы не мусорить
+    except Exception as e:
+        await message.answer(f"❌ Не удалось отправить бонус: {e}")
+
+
+
+
 @user_router.message(Command("broadcast_coins"))
 async def broadcast_handler(message: types.Message):
     if message.from_user.id not in ADMIN_IDS:
