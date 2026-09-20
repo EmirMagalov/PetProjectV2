@@ -13,7 +13,6 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    # Добавляем проверку здоровья базы
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U pet_user -d pet_db"]
       interval: 3s
@@ -24,25 +23,31 @@ services:
     build: .
     container_name: pet_backend
     restart: always
-    command: sh -c "sleep 3 && uvicorn backend.main:app --host 0.0.0.0 --port 8000"
+    # Добавили флаг --reload для автоматического обновления FastAPI при сохранении файлов
+    command: sh -c "sleep 3 && uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload"
     ports:
       - "8000:8000"
+    volumes:
+      - ./src:/app  # <--- САМОЕ ВАЖНОЕ: связываем папку src на ПК с /app в контейнере
     env_file:
       - .env
     depends_on:
       db:
-        condition: service_healthy  # <--- Бэкенд ждет, пока база реально ответит
+        condition: service_healthy
 
   bot:
     build: .
     container_name: pet_bot
     restart: always
-    command: ["python", "-m", "bot.main"]
+    # Для бота используем watchfiles (ставится вместе с uvicorn/fastapi), чтобы он перезапускался при правках кода
+    command: ["watchfiles", "python -m bot.main"]
+    volumes:
+      - ./src:/app  # <--- Тоже прокидываем код для бота
     env_file:
       - .env
     depends_on:
       db:
-        condition: service_healthy  # <--- Бот тоже ждет базу
+        condition: service_healthy
       backend:
         condition: service_started
 
@@ -60,7 +65,7 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       db:
-        condition: service_healthy  # <--- Бот тоже ждет базу
+        condition: service_healthy
       backend:
         condition: service_started
 
