@@ -32,7 +32,7 @@ async def start_handler(message: types.Message):
 ADMIN_IDS = [1059422557]
 
 
-@user_router.message(Command("broadcast"))
+@user_router.message(Command("broadcast_coins"))
 async def broadcast_handler(message: types.Message):
     if message.from_user.id not in ADMIN_IDS:
         return
