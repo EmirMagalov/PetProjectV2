@@ -88,7 +88,7 @@ export function toggleSleep() {
         // Если просыпается принудительно
         gameData.sleep = false
         gameData.sleepEndTime = 0
-        sleepTimeRemaining.value = "00:00"
+        sleepTimeRemaining.value = ""
     }
 }
 
@@ -107,7 +107,7 @@ setInterval(() => {
         gameData.sleep = false
         addCoin(5)
         addExp(35)
-        sleepTimeRemaining.value = "00:00"
+        sleepTimeRemaining.value = ""
         gameData.sleepEndTime = 0
         return
     }
