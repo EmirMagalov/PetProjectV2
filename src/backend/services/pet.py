@@ -7,7 +7,11 @@ async def update_pet_stats(pet) -> bool:
     now = time.time()
     elapsed_seconds = now - pet.last_update
     elapsed_minutes = int(elapsed_seconds // 60)
-
+    # Защита на случай, если last_update еще не был задан
+    if not pet.last_update:
+        pet.last_update = now
+        await pet.save()
+        return False
     if elapsed_minutes <= 0:
         return False
 
@@ -66,6 +70,6 @@ async def update_pet_stats(pet) -> bool:
         else:
             pet.bad_stats_minutes = 0
 
-    pet.last_update = now
+    pet.last_update += elapsed_minutes * 60
     await pet.save()
     return True
