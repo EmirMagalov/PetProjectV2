@@ -52,7 +52,7 @@ async def update_pet_stats(pet) -> bool:
         energy_consumed = capped_minutes * 0.1
         pet.energy = max(0.0, pet.energy - energy_consumed)
         if pet.addiction_streak > 1:
-            hours_passed = int(elapsed_seconds // 3600)
+            hours_passed = int(elapsed_seconds // 1800)
             if hours_passed > 0:
                 pet.addiction_streak = 0
                 if pet.addiction_streak <= 1:
