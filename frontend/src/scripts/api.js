@@ -99,7 +99,7 @@ export async function initGameData() {
             isDataLoaded = true
             setTimeout(() => {
                 isLoading.value = false;
-            }, 50);
+            }, 1000);
 
             return;
 

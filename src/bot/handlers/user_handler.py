@@ -79,7 +79,6 @@ async def give_me_coins_handler(message: types.Message):
             reply_markup=keyboard,
             parse_mode="HTML"
         )
-        await message.message.delete() if message.message else None # Опционально: удаляем твою команду из чата, чтобы не мусорить
     except Exception as e:
         await message.answer(f"❌ Не удалось отправить бонус: {e}")
 
