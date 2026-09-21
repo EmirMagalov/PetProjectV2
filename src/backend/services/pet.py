@@ -67,7 +67,7 @@ async def update_pet_stats(pet) -> bool:
 
         if pet.is_pooped:
             pet.poop_bad_minutes += capped_minutes
-            if pet.poop_bad_minutes >= 30:
+            if pet.poop_bad_minutes >= 180:
                 pet.sick = True
         else:
             pet.poop_bad_minutes = 0
@@ -78,7 +78,7 @@ async def update_pet_stats(pet) -> bool:
                 pet.stinky = True
         if pet.stinky:
             pet.stinky_bad_minutes += capped_minutes
-            if pet.stinky_bad_minutes >= 45:  # Если воняет больше 45 минут — заболел!
+            if pet.stinky_bad_minutes >= 180:
                 pet.sick = True
         else:
             pet.stinky_bad_minutes = 0
