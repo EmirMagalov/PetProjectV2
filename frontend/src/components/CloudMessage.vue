@@ -20,11 +20,11 @@ const activeItems = computed(() => {
       class="inset-0 flex items-center  animate-thought-cloud justify-center pointer-events-none overflow-visible z-50">
     <!-- Облако -->
     <img src="/gamePlay/cloud.webp" class="relative opacity-60" width="85%" alt="">
-    <div
-        v-show="gameData.addictionLevel ===1"
-         :class="['absolute flex justify-center items-center top-10 left-44 w-10']">
-      <img src="/other/pipe.webp" alt="">
-    </div>
+<!--    <div-->
+<!--        v-show="gameData.addictionLevel ===1"-->
+<!--         :class="['absolute flex justify-center items-center top-10 left-44 w-10']">-->
+<!--      <img src="/other/pipe.webp" alt="">-->
+<!--    </div>-->
     <!-- Hunger -->
     <div v-show="gameData.addictionLevel !==1 && showHunger "
          :class="['absolute flex justify-center items-center', activeItems <= 1 ? 'top-10 left-44 w-10' : 'top-12 left-40 w-6']">

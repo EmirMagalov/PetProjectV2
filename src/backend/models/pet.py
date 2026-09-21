@@ -31,7 +31,7 @@ class Pet(models.Model):
     cart = fields.JSONField(default={})
     unlocked_heads = fields.JSONField(default=list)
 
-    addiction_level = fields.IntField(default=0)
+    sick=fields.BooleanField(default=False)
     addiction_streak = fields.IntField(default=0)
 
     # Флаги для защиты от спама уведомлениями
@@ -42,6 +42,12 @@ class Pet(models.Model):
     game_over_notified = fields.BooleanField(default=False)
     low_lives_notified = fields.BooleanField(default=False)
     critical_life_notified = fields.BooleanField(default=False)
+    sick_notified = fields.BooleanField(default=False)
+
+    # Пример для Tortoise ORM:
+    stinky_bad_minutes = fields.IntField(default=0)
+    poop_bad_minutes = fields.IntField(default=0)
+
 
     class Meta:
         db_table = "pet"

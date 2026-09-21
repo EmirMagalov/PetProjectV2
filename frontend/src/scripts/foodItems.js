@@ -42,7 +42,7 @@ export const foodList = [
         image: '/food/kiwi.webp',
         category: 'food',
         subcategory:'fruits',
-        foodGain: 20,
+        foodGain: 5,
         cost: 10
     },
     {
@@ -63,6 +63,17 @@ export const foodList = [
         subcategory:'potion',
         life:1,
         cost: 1000,
+
+    },
+
+    {
+        id: 'healthPotion',
+        name: 'Зелье здоровья',
+        image: '/other/health_potion.webp',
+        category: 'shaman',
+        subcategory:'potion',
+        health:1,
+        cost: 200,
 
     },
 ]

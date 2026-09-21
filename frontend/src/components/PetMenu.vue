@@ -96,6 +96,15 @@ const shouldPulse = computed(() => {
           </button>
 
         </div>
+        <div
+            @click="isShopOpen = true"
+            class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
+            style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+          <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
+               style="background-image: url('/gamePlay/market.webp')">
+          </div>
+          <button class="text-md font-bold text-gray-600 pointer-events-none">Магазин</button>
+        </div>
       </div>
 
       <!--  BATH -->

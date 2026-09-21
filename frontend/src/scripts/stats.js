@@ -17,13 +17,13 @@ import {batheStatus, isHovered, previousMouth} from "@/scripts/dragAndDrop.js";
 setInterval(() => {
 
     if (gameData.foodLevel > 0) {
-        const consumeAmount = gameData.isDrunk ? 0.3:0.1
+        const consumeAmount = gameData.sick ? 0.3:0.05
         gameData.foodLevel = Math.max(0, gameData.foodLevel - consumeAmount)
     }
 
     // 2. Уменьшаем энергию (если не спит)
     if (gameData.energy > 0 && !gameData.sleep) {
-        gameData.energy = Math.max(0, gameData.energy - 0.1)
+        gameData.energy = Math.max(0, gameData.energy - 0.05)
     }
 
     // 3. Проверка штрафов за голод или отсутствие энергии
@@ -35,18 +35,14 @@ setInterval(() => {
         gameData.lastAddictionTime = nowSec // Сдвигаем таймер для следующего уменьшения
 
         // Если стрик упал ниже порогов, выключаем дебаффы
-        if (gameData.addictionStreak === 1) {
-            gameData.addictionLevel = 1
-
-        }
         gameData.addictionStreak = 0
-        if (gameData.addictionStreak < 1) {
-            gameData.isDrunk = false
-        }
+        // if (gameData.addictionStreak < 1) {
+        //     gameData.isDrunk = false
+        // }
     }
-    if (gameData.addictionStreak <= 1) {
-        gameData.isDrunk = false
-    }
+    // if (gameData.addictionStreak <= 1) {
+    //     gameData.isDrunk = false
+    // }
     // if (!gameData.isPooped && Math.random() < 1 / 45) {
     //     gameData.isPooped = true
     // }
@@ -141,8 +137,8 @@ watch(
     ([hovered,isBathe,foodLevel,isFat]) => {
         const isLowEnergy = gameData.energy < 20
         const isHungry = gameData.foodLevel < 20
-        const isDrunk = gameData.addictionStreak >= 2
-        const hasIssues = isLowEnergy || isHungry || isDrunk
+        const isSick = gameData.sick
+        const hasIssues = isLowEnergy || isHungry || isSick
 
         // Приоритет 1: Если предмет перетаскивают над зоной — ВСЕГДА открытый рот
 
@@ -203,19 +199,19 @@ watch(() => gameData.lives, async (newLives) => {
 
 let addictionTimer = null
 
-watch(() => gameData.addictionLevel, (newAddictionLevel) => {
-    // Очищаем предыдущий таймер, если он уже был запущен
-    if (addictionTimer) {
-        clearTimeout(addictionTimer)
-        addictionTimer = null
-    }
-
-    if (newAddictionLevel === 1) {
-        addictionTimer = setTimeout(() => {
-            gameData.addictionLevel = 0
-            addictionTimer = null
-        }, 3000)
-    }
-})
+// watch(() => gameData.addictionLevel, (newAddictionLevel) => {
+//     // Очищаем предыдущий таймер, если он уже был запущен
+//     if (addictionTimer) {
+//         clearTimeout(addictionTimer)
+//         addictionTimer = null
+//     }
+//
+//     if (newAddictionLevel === 1) {
+//         addictionTimer = setTimeout(() => {
+//             gameData.addictionLevel = 0
+//             addictionTimer = null
+//         }, 3000)
+//     }
+// })
 
 

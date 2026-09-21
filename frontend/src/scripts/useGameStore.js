@@ -28,6 +28,26 @@ export const location = ref()
 // ==========================================
 // 3. АВТОМАТИЧЕСКОЕ СОХРАНЕНИЕ (WATCHERS)
 // ==========================================
+// Загружаем из localStorage или ставим 0
+export const fruitStreak = ref(
+    Number(localStorage.getItem('pet_fruitStreak')) || 0
+)
+
+// Автоматически сохраняем при любом изменении
+watch(fruitStreak, (newValue) => {
+    localStorage.setItem('pet_fruitStreak', newValue)
+})
+
+
+export const PlayCount = ref(
+    Number(localStorage.getItem('pet_PlayCount')) || 0
+)
+
+// Автоматически сохраняем при любом изменении
+watch(PlayCount, (newValue) => {
+    localStorage.setItem('pet_PlayCount', newValue)
+})
+
 
 export const body = ref("/character/main_body.webp")
 
@@ -49,14 +69,12 @@ export const defaultGameData = {
     equippedHead: null,
     foodStreak: 0,
     fastfoodStreak: 0,
-    fruitStreak: 0,
-    addictionLevel: 0,
+    sick: false,
     addictionStreak: 0,
     lastAddictionTime: 0,
     isFat: false,
-    isDrunk: false,
+    // isDrunk: false,
     isPooped: false,
-    PlayCount: 0,
     badStatsMinutes: 0,
     unlockedHeads: [],
     cart: {}

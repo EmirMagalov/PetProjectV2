@@ -40,7 +40,7 @@ async def schedule_addiction_reminder(tg_id):
     """Ждет случайное время (20, 30 или 40 минут) и отправляет сообщение, если зависимость все еще есть."""
     try:
         while True:  # Запускаем в цикле, чтобы таймер пересоздавался, если игрок в сети
-            delay_minutes = random.choice([20, 30, 40])
+            delay_minutes = random.choice([30, 40, 60])
             delay_seconds = delay_minutes * 60
 
             await asyncio.sleep(delay_seconds)
@@ -199,7 +199,19 @@ async def check_pets_loop():
                     if pet.stinky_notified:
                         pet.stinky_notified = False
                         is_updated = True
-
+                if pet.sick:
+                    if not pet.sick_notified:
+                        success = await send_telegram_message(
+                            pet,
+                            "🤒 Питомец заболел нужно его подлечить!"
+                        )
+                        if success:
+                            pet.sick_notified = True
+                            is_updated = True
+                else:
+                    if pet.sick_notified:
+                        pet.sick_notified = False
+                        is_updated = True
                 # Сохраняем изменения в базу только если какой-то флаг реально изменился
                 if is_updated:
                     await pet.save()

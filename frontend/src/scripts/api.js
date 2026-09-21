@@ -106,9 +106,9 @@ export async function initGameData() {
             gameData.sleepEndTime = serverData.sleep_end_time
             gameData.fastfoodStreak = serverData.fastfood_streak
             gameData.isFat = serverData.is_fat
-            gameData.isDrunk = serverData.is_drunk
+            gameData.sick = serverData.sick
             gameData.isPooped = serverData.is_pooped
-            gameData.addictionLevel = serverData.addiction_level
+            // gameData.addictionLevel = serverData.addiction_level
             gameData.addictionStreak = serverData.addiction_streak
             gameData.cart = serverData.cart
             gameData.unlockedHeads = serverData.unlocked_heads
@@ -173,9 +173,9 @@ export async function syncToBackend() {
             sleep_end_time: gameData.sleepEndTime,
             fastfood_streak: gameData.fastfoodStreak,
             is_fat: gameData.isFat,
-            is_drunk: gameData.isDrunk,
+            sick: gameData.sick,
             is_pooped: gameData.isPooped,
-            addiction_level: gameData.addictionLevel,
+
             addiction_streak: gameData.addictionStreak,
             last_update: Math.floor(Date.now() / 1000)
         })
@@ -213,9 +213,9 @@ document.addEventListener('visibilitychange', () => {
             sleep_end_time: gameData.sleepEndTime,
             fastfood_streak: gameData.fastfoodStreak,
             is_fat: gameData.isFat,
-            is_drunk: gameData.isDrunk,
+            sick: gameData.sick,
             is_pooped: gameData.isPooped,
-            addiction_level: gameData.addictionLevel,
+
             addiction_streak: gameData.addictionStreak,
             last_update: Math.floor(Date.now() / 1000)
         })

@@ -46,31 +46,42 @@ async def update_pet_stats(pet) -> bool:
     else:
         capped_minutes = min(elapsed_minutes, 1440)
 
-        food_consumed = capped_minutes * (0.3 if pet.is_drunk else 0.1)
+        food_consumed = capped_minutes * (0.3 if pet.sick else 0.05)
         pet.food_level = max(0.0, pet.food_level - food_consumed)
 
-        energy_consumed = capped_minutes * 0.1
+        energy_consumed = capped_minutes * 0.05
         pet.energy = max(0.0, pet.energy - energy_consumed)
         if pet.addiction_streak > 1:
             hours_passed = int(elapsed_seconds // 1800)
             if hours_passed > 0:
                 pet.addiction_streak = 0
-                if pet.addiction_streak <= 1:
-                    pet.addiction_level = 1
-                    pet.is_drunk = False
+
+
         if pet.addiction_streak <= 1:
             pet.addiction_streak = 0
-            pet.is_drunk = False
+
         if not pet.is_pooped and capped_minutes > 0:
-            poop_chance = 1 - ((1 - 1 / 45) ** capped_minutes)
+            poop_chance = 1 - ((1 - 1 / 90) ** capped_minutes)
             if random.random() < poop_chance:
                 pet.is_pooped = True
+
+        if pet.is_pooped:
+            pet.poop_bad_minutes += capped_minutes
+            if pet.poop_bad_minutes >= 30:
+                pet.sick = True
+        else:
+            pet.poop_bad_minutes = 0
 
         if not pet.stinky and capped_minutes > 0:
             stinky_chance = 1 - ((1 - 1 / 90) ** capped_minutes)
             if random.random() < stinky_chance:
                 pet.stinky = True
-
+        if pet.stinky:
+            pet.stinky_bad_minutes += capped_minutes
+            if pet.stinky_bad_minutes >= 45:  # Если воняет больше 45 минут — заболел!
+                pet.sick = True
+        else:
+            pet.stinky_bad_minutes = 0
         is_food_zero = pet.food_level == 0
         is_energy_zero = pet.energy == 0
 

@@ -181,7 +181,9 @@ onUnmounted(() => {
             <PetHeadwear/>
             <img :src="body" class="absolute w-45" alt="">
             <img :src="getHornAsset(gameData.level)" class="absolute w-45" alt="">
-            <img v-show="gameData.isDrunk" src="/character/drunk.webp" class="absolute w-45" alt="">
+            <img v-show="gameData.sick" src="/character/drunk.webp" class="absolute w-45" alt="">
+            <img v-show="gameData.sick && body==='/character/fat_body.webp'" src="/character/sick_fat.webp" class="absolute w-45" alt="">
+            <img v-show="gameData.sick && body!=='/character/fat_body.webp'" src="/character/sick.webp" class="absolute w-45" alt="">
             <div v-if="!blink && !gameData.sleep">
 
               <div v-show="lowEnergy" class="absolute inset-0 flex justify-center items-center z-10">

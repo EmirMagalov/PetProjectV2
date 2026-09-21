@@ -1,5 +1,5 @@
 <script setup>
-import {gameData} from "@/scripts/useGameStore.js";
+import {fruitStreak, gameData, PlayCount} from "@/scripts/useGameStore.js";
 import ProgressBar from "@/components/ProgressBar.vue";
 import {expPercentage} from "@/scripts/level.js";
 import {animKey} from "@/scripts/actions.js";
@@ -82,11 +82,14 @@ function formatNumber(num) {
 
       </div>
       <div v-show="gameData.isFat" class="absolute bottom-0 right-45 transition-transform duration-50 animate-pulse">
-        <img class="relative" src="/gamePlay/fat_icon.webp" alt="" width="25">
-        <p class="absolute left-2 font-bold top-2 text-xs">{{30 - gameData.PlayCount}}</p>
+        <img class="absolute left-2  top-2 w-5" src="/gamePlay/click_icon.webp" alt="">
+        <img class="relative -left-2" src="/gamePlay/fat_icon.webp" alt="" width="25">
+        <p class="absolute left-3  top-3 text-[10px]">{{30 - PlayCount}}</p>
       </div>
-      <div v-show="gameData.addictionStreak >=2" class="absolute  animate-pulse bottom-0 right-38" >
-        <img src="/gamePlay/drunk_icon.webp" alt="" width="25">
+      <div v-show="gameData.sick" class="absolute  animate-pulse bottom-0 right-38" >
+        <img class="absolute left-5 font-bold top-2 w-5" src="/food/kiwi.webp" alt="">
+        <img class="relative" src="/gamePlay/sick_icon.webp" alt="" width="25">
+        <p class="absolute left-6  top-3  text-[10px]">{{10 - fruitStreak}}</p>
       </div>
 
     </div>

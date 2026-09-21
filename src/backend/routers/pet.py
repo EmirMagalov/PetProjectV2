@@ -75,7 +75,7 @@ async def reset_pet(data: dict):
     pet.sleep_end_time = 0.0
     pet.fastfood_streak = 0
     pet.is_fat = False
-    pet.is_drunk = False
+    pet.sick = False
     pet.addiction_streak = 0
     pet.bad_stats_minutes = 0
     pet.cart = {'burger':1}

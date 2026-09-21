@@ -27,7 +27,13 @@ export const foamEl = ref()
 export const statusSmoke = ref(false)
 
 export const batheStatus = ref(false)
+// Время последнего успешного действия (в миллисекундах)
+let lastBathTime = 0
+// let lastFeedTime = 0
 
+// Кулдаун в миллисекундах (например, разрешать купать/кормить не чаще, чем раз в 10 секунд)
+const BATH_COOLDOWN = 5000
+// const FEED_COOLDOWN = 5000
 
 // Универсальная функция проверки зоны и открытия рта
 export function handleMove(event, itemType,foodId,foodCategory) {
@@ -88,6 +94,12 @@ export function handleMove(event, itemType,foodId,foodCategory) {
 
                 if (!actionTimer) {
                     actionTimer = setTimeout(() => {
+                        const now = Date.now()
+
+                        if (now - lastBathTime < BATH_COOLDOWN) {
+                            gameData.sick = true
+                        }
+                        lastBathTime = now
                         statusShower.value = false
                         statusFoam.value = false
                         showerCount.value += 1
