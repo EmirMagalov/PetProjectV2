@@ -27,6 +27,7 @@ async def send_telegram_message(pet, text):
 
     try:
         await bot.send_message(pet.tg_id, text, reply_markup=keyboard, parse_mode="HTML")
+        await asyncio.sleep(1.5)
         return True  # Успешно ушло!
     except Exception as e:
         print(f"Ошибка отправки сообщения: {e}")
