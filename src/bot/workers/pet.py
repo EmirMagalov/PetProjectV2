@@ -76,8 +76,14 @@ async def check_pets_loop():
         try:
             await asyncio.sleep(60)
             pets = await PetModel.all()
+            current_time = time.time()
             for pet in pets:
-                await update_pet_stats(pet)
+                last_update = pet.last_update or 0
+                is_online = (current_time - last_update) < 70
+
+                # ЕСЛИ ИГРОК ОФЛАЙН — обновляем ему статы через бэкенд
+                if not is_online:
+                    await update_pet_stats(pet)
 
                 # Флаг для отслеживания, нужно ли сохранять изменения в БД в конце итерации
                 is_updated = False
