@@ -27,10 +27,12 @@ async def send_telegram_message(pet, text):
 
     try:
         await bot.send_message(pet.tg_id, text, reply_markup=keyboard, parse_mode="HTML")
+        await asyncio.sleep(1.5)
         return True  # Успешно ушло!
     except Exception as e:
         print(f"Ошибка отправки сообщения: {e}")
         return False
+
 
 addiction_timers = {}
 
@@ -39,7 +41,7 @@ async def schedule_addiction_reminder(tg_id):
     """Ждет случайное время (20, 30 или 40 минут) и отправляет сообщение, если зависимость все еще есть."""
     try:
         while True:  # Запускаем в цикле, чтобы таймер пересоздавался, если игрок в сети
-            delay_minutes = random.choice([20, 30, 40])
+            delay_minutes = random.choice([30, 40, 60])
             delay_seconds = delay_minutes * 60
 
             await asyncio.sleep(delay_seconds)
@@ -73,7 +75,6 @@ async def check_pets_loop():
     while True:
         try:
             await asyncio.sleep(60)
-            print("w")
             pets = await PetModel.all()
             for pet in pets:
                 await update_pet_stats(pet)
@@ -143,7 +144,7 @@ async def check_pets_loop():
                 # 4. Уведомление о голоде
                 if pet.food_level < 20:
                     if not pet.hungry_notified:
-                        success =await send_telegram_message(
+                        success = await send_telegram_message(
                             pet,
                             "🍽️ Питомец проголодался!"
                         )
@@ -158,7 +159,7 @@ async def check_pets_loop():
                 # 5. Уведомление об энергии
                 if pet.energy < 20:
                     if not pet.energy_notified:
-                        success =await send_telegram_message(
+                        success = await send_telegram_message(
                             pet,
                             "😴 Питомец сильно устал и хочет спать!"
                         )
@@ -173,7 +174,7 @@ async def check_pets_loop():
                 # 6. Уведомление о какашке
                 if pet.is_pooped:
                     if not pet.poop_notified:
-                        success =await send_telegram_message(
+                        success = await send_telegram_message(
                             pet,
                             "💩 Питомец тут набедокурил... Надо убрать!"
                         )
@@ -188,7 +189,7 @@ async def check_pets_loop():
                 # 7. Уведомление о вони
                 if pet.stinky:
                     if not pet.stinky_notified:
-                        success =await send_telegram_message(
+                        success = await send_telegram_message(
                             pet,
                             "🤢 Питомец начал сильно вонять! Пора его помыть!"
                         )
@@ -199,7 +200,19 @@ async def check_pets_loop():
                     if pet.stinky_notified:
                         pet.stinky_notified = False
                         is_updated = True
-
+                if pet.sick:
+                    if not pet.sick_notified:
+                        success = await send_telegram_message(
+                            pet,
+                            "🤒 Питомец заболел нужно его подлечить!"
+                        )
+                        if success:
+                            pet.sick_notified = True
+                            is_updated = True
+                else:
+                    if pet.sick_notified:
+                        pet.sick_notified = False
+                        is_updated = True
                 # Сохраняем изменения в базу только если какой-то флаг реально изменился
                 if is_updated:
                     await pet.save()

@@ -17,13 +17,13 @@ import {batheStatus, isHovered, previousMouth} from "@/scripts/dragAndDrop.js";
 setInterval(() => {
 
     if (gameData.foodLevel > 0) {
-        const consumeAmountFood = gameData.sick ? 0.5:0.05
+        const consumeAmountFood = gameData.sick ? 0.1:0.05
         gameData.foodLevel = Math.max(0, gameData.foodLevel - consumeAmountFood)
     }
 
     // 2. Уменьшаем энергию (если не спит)
     if (gameData.energy > 0 && !gameData.sleep) {
-        const consumeAmountEnergy = gameData.sick ? 0.5:0.05
+        const consumeAmountEnergy = gameData.sick ? 0.1:0.05
         gameData.energy = Math.max(0, gameData.energy - consumeAmountEnergy)
     }
 

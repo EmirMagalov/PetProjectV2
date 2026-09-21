@@ -46,10 +46,10 @@ async def update_pet_stats(pet) -> bool:
     else:
         capped_minutes = min(elapsed_minutes, 1440)
 
-        food_consumed = capped_minutes * (0.5 if pet.sick else 0.05)
+        food_consumed = capped_minutes * (0.1 if pet.sick else 0.05)
         pet.food_level = max(0.0, pet.food_level - food_consumed)
 
-        energy_consumed =  capped_minutes * (0.5 if pet.sick else 0.05)
+        energy_consumed =  capped_minutes * (0.1 if pet.sick else 0.05)
         pet.energy = max(0.0, pet.energy - energy_consumed)
         if pet.addiction_streak > 1:
             hours_passed = int(elapsed_seconds // 1800)
@@ -61,7 +61,7 @@ async def update_pet_stats(pet) -> bool:
             pet.addiction_streak = 0
 
         if not pet.is_pooped and capped_minutes > 0:
-            poop_chance = 1 - ((1 - 1 / 180) ** capped_minutes)
+            poop_chance = 1 - ((1 - 1 / 360) ** capped_minutes)
             if random.random() < poop_chance:
                 pet.is_pooped = True
 
@@ -73,7 +73,7 @@ async def update_pet_stats(pet) -> bool:
             pet.poop_bad_minutes = 0
 
         if not pet.stinky and capped_minutes > 0:
-            stinky_chance = 1 - ((1 - 1 / 180) ** capped_minutes)
+            stinky_chance = 1 - ((1 - 1 / 360) ** capped_minutes)
             if random.random() < stinky_chance:
                 pet.stinky = True
         if pet.stinky:
