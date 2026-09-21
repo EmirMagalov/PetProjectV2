@@ -44,7 +44,7 @@ export function otherFeedPet(foodId) {
                 clearTimeout(drunkTimer)
             }
 
-            gameData.energy = Math.min(80, gameData.foodLevel + 80)
+            gameData.energy = Math.min(100, gameData.energy + 80)
         }
 
 
