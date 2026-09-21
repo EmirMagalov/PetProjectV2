@@ -35,7 +35,7 @@ export function otherFeedPet(foodId) {
             // gameData.isDrunk = true
             gameData.addictionStreak = Math.min(3, gameData.addictionStreak + 1)
             gameData.lastAddictionTime = Math.floor(Date.now() / 1000)
-            if (gameData.addictionStreak >=2) {
+            if (gameData.addictionStreak >= 2) {
                 gameData.sick = true
             }
             if (gameData.addictionStreak >= 3) {
@@ -90,9 +90,12 @@ export function feedPet(foodId) {
             gameData.stinky = true
         }
         if (gameData.foodLevel >= 100) {
-            gameData.foodStreak++
-            gameData.fastfoodStreak++
-            isLosingLife()
+
+            if (foodItem.subcategory === 'fastfood') {
+                gameData.foodStreak++
+                gameData.fastfoodStreak++
+                isLosingLife()
+            }
         }
 
         // Флаг, чтобы отследить, стал ли он толстым именно на этом шаге
@@ -112,12 +115,13 @@ export function feedPet(foodId) {
                 gameData.foodStreak = 2
                 becameFatNow = true
             }
-        }if (foodItem.subcategory === 'fruits') {
-            if (gameData.sick){
+        }
+        if (foodItem.subcategory === 'fruits') {
+            if (gameData.sick) {
                 fruitStreak.value++
-                if (fruitStreak.value >=10){
+                if (fruitStreak.value >= 10) {
                     gameData.sick = false
-                    fruitStreak.value= 0
+                    fruitStreak.value = 0
                 }
             }
 
@@ -194,7 +198,7 @@ export function spawnHeart() {
         addCoin(1)
     }
     addExp(1)
-    gameData.clickCounter ++
+    gameData.clickCounter++
     // Тратим энергию / сытость
     if (isBadMood.value) {
         gameData.energy = Math.max(0, gameData.energy - 0.02)
@@ -239,13 +243,13 @@ export function addCoin(coins = 1) {
     }, 150)
 }
 
-export const Clean = ()=>{
+export const Clean = () => {
     gameData.isPooped = false
     addCoin(10)
     addExp(20)
 }
 
-export function isLosingLife(){
+export function isLosingLife() {
     gameData.lives = Math.max(0, gameData.lives - 1)
     isLosingLifeStatus.value = true
     setTimeout(() => isLosingLifeStatus.value = false, 800)
