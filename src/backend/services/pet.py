@@ -120,8 +120,6 @@ async def update_pet_stats(pet) -> bool:
 
     # Запоминаем текущее время как последнюю фоновую проверку
     background_last_processed[pet.tg_id] = now
-    print("Стало",pet.food_level)
-    print("Стало",pet.energy)
     # ВНИМАНИЕ: pet.last_update мы НЕ трогаем!
     await pet.save()
     return True
