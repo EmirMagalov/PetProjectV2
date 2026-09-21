@@ -23,6 +23,7 @@ import Poop from "@/components/Poop.vue";
 import {preloadImages} from "@/scripts/preloadImages.js";
 import PhotoFrame from "@/components/PhotoFrame.vue";
 import {computed} from 'vue'
+import PetSideMenu from "@/components/PetSideMenu.vue";
 
 const activeStatus = computed(() => {
   // Приоритет 1: Смерть питомца
@@ -293,11 +294,14 @@ onUnmounted(() => {
           <PetFoam :status-foam="statusFoam"/>
           <PetSmoke :status-smoke="statusSmoke"/>
           <PetShower :status-shower="statusShower"/>
-
           <Poop v-show="gameData.isPooped && (location==='home' || location==='food')"/>
           <PhotoFrame v-show="(location==='home' || location==='food')"/>
+
+
         </div>
+
       </div>
+      <PetSideMenu/>
     </div>
 
     <!-- Меню -->

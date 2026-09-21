@@ -42,7 +42,7 @@ function formatNumber(num) {
 
             <!-- Текст уровня (поверх заливки) -->
             <span class="text-xs font-semibold text-gray-700 relative z-10">Ур.</span>
-            <span class="text-sm font-bold text-gray-900 relative z-10">{{ gameData.level }}</span>
+            <span class="text-sm font-bold  text-shadow-xs text-shadow-amber-50 text-gray-900 relative z-10">{{ gameData.level }}</span>
           </div>
 
           <!-- Монетки -->
@@ -81,16 +81,6 @@ function formatNumber(num) {
         </div>
 
       </div>
-      <div v-show="gameData.isFat" class="absolute bottom-0 right-45 transition-transform duration-50 animate-pulse">
-        <img class="absolute left-2  top-2 w-5" src="/gamePlay/click_icon.webp" alt="">
-        <img class="relative -left-2" src="/gamePlay/fat_icon.webp" alt="" width="25">
-        <p class="absolute left-3  top-3 text-[10px]">{{30 - PlayCount}}</p>
-      </div>
-      <div v-show="gameData.sick" class="absolute  animate-pulse bottom-0 right-38" >
-        <img class="absolute left-5 font-bold top-2 w-5" src="/food/kiwi.webp" alt="">
-        <img class="relative" src="/gamePlay/sick_icon.webp" alt="" width="25">
-        <p class="absolute left-6  top-3  text-[10px]">{{10 - fruitStreak}}</p>
-      </div>
 
     </div>
 
@@ -99,18 +89,7 @@ function formatNumber(num) {
 </template>
 
 <style scoped>
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1) translateY(0);
-  }
-  50% {
-    transform: scale(1.03) translateY(1px);
-  }
-}
 
-.animate-pulse {
-  animation: pulse 0.5s ease-in-out infinite;
-}
 
 @keyframes popCharacter {
   0% {
