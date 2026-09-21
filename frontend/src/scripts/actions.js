@@ -92,7 +92,7 @@ export function feedPet(foodId) {
         }
         if (gameData.foodLevel >= 100) {
 
-            if (foodItem.subcategory === 'fastfood') {
+            if (foodItem.subcategory === 'fastfood' && gameData.isFat) {
                 gameData.foodStreak++
                 gameData.fastfoodStreak++
                 isLosingLife()
