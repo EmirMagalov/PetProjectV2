@@ -70,7 +70,8 @@ export function otherFeedPet(foodId) {
 }
 
 let lastFatTime = 0
-const FAT_COOLDOWN = 10000 // 6 секунд
+const FAT_COOLDOWN = 10000 // 10 секунд
+
 export function feedPet(foodId) {
     const targetId = foodId || cartItemsList.value[currentIndex.value]?.id
     const foodItem = foodList.find(item => item.id === targetId)
@@ -90,33 +91,27 @@ export function feedPet(foodId) {
         if (gameData.feedCount > 3) {
             gameData.stinky = true
         }
-        if (gameData.foodLevel >= 100) {
-
-            if (foodItem.subcategory === 'fastfood' && gameData.isFat) {
-                gameData.foodStreak++
-                gameData.fastfoodStreak++
-                isLosingLife()
-            }
-        }
 
         // Флаг, чтобы отследить, стал ли он толстым именно на этом шаге
         let becameFatNow = false
 
-        // Проверяем обычный стрик еды
-        if (gameData.foodStreak >= 2 && !gameData.isFat) {
-            gameData.isFat = true
-            becameFatNow = true
-        }
-
-        // Проверяем категорию фастфуда
-        if (foodItem.subcategory === 'fastfood') {
-            gameData.fastfoodStreak++
-            if (gameData.fastfoodStreak >= 4 && !gameData.isFat) {
+        // 1. Проверка по шкале сытости (100%)
+        if (gameData.foodLevel >= 100 && foodItem.subcategory === 'fastfood') {
+            if (!gameData.isFat) {
                 gameData.isFat = true
-                gameData.foodStreak = 2
-                becameFatNow = true
+                becameFatNow = true // ✅ Сказали системе, что он только что потолстел!
+            } else {
+                isLosingLife()
             }
         }
+
+        // 2. Проверяем обычный стрик еды
+        if (gameData.foodStreak >= 2 && !gameData.isFat) {
+            gameData.isFat = true
+            becameFatNow = true // ✅ Тоже здесь
+        }
+
+        // 3. Логика фруктов (лечение)
         if (foodItem.subcategory === 'fruits') {
             if (gameData.sick) {
                 fruitStreak.value++
@@ -126,33 +121,19 @@ export function feedPet(foodId) {
                     addCoin(20)
                 }
             }
-
-            // if (gameData.fruitStreak >= 3) {
-            //     gameData.isFat = false // Здесь он худеет
-            // }
         }
 
-        // Если питомец ПРЯМО СЕЙЧАС стал толстым
+        // 4. Проверка кулдауна (если стал толстым прямо сейчас)
         if (becameFatNow) {
             const now = Date.now()
 
-            // Если с момента прошлого ожирения прошло меньше 6 секунд
+            // Если с момента ПРОШЛОГО ожирения прошло меньше 10 секунд
             if (lastFatTime > 0 && (now - lastFatTime < FAT_COOLDOWN)) {
-                // Наказываем за слишком частое раскабанение!
-                // gameData.lives = Math.max(0, gameData.lives - 1)
-                gameData.sick = true // Например, заболел от резких скачков веса
+                gameData.sick = true // 🤒 Заболел из-за спешки!
             }
 
-            // Запоминаем время последнего набора веса
+            // Запоминаем время текущего ожирения
             lastFatTime = now
-        }
-
-        // Штраф, если он уже был толстым и продолжает есть
-        if (gameData.isFat && !becameFatNow) {
-            if (foodItem.subcategory === 'fastfood') {
-                // gameData.lives = Math.max(0, gameData.lives - 1)
-                gameData.sick = true
-            }
         }
     }
 }

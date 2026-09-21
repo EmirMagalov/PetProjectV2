@@ -4,7 +4,7 @@ import {
     cloudShow, defaultGameData,
     gameData, isGameOver,
     lowEnergy,
-    mouth, resetLocal,
+    mouth, PlayCount, resetLocal,
     showHunger,
     sleepTimeRemaining
 } from "@/scripts/useGameStore.js";
@@ -17,13 +17,14 @@ import {batheStatus, isHovered, previousMouth} from "@/scripts/dragAndDrop.js";
 setInterval(() => {
 
     if (gameData.foodLevel > 0) {
-        const consumeAmount = gameData.sick ? 0.3:0.05
-        gameData.foodLevel = Math.max(0, gameData.foodLevel - consumeAmount)
+        const consumeAmountFood = gameData.sick ? 0.5:0.05
+        gameData.foodLevel = Math.max(0, gameData.foodLevel - consumeAmountFood)
     }
 
     // 2. Уменьшаем энергию (если не спит)
     if (gameData.energy > 0 && !gameData.sleep) {
-        gameData.energy = Math.max(0, gameData.energy - 0.05)
+        const consumeAmountEnergy = gameData.sick ? 0.5:0.05
+        gameData.energy = Math.max(0, gameData.energy - consumeAmountEnergy)
     }
 
     // 3. Проверка штрафов за голод или отсутствие энергии
@@ -145,6 +146,7 @@ watch(
         if (foodLevel <= 85) {
             gameData.foodStreak = 0
             gameData.isFat = false
+            PlayCount.value = 0
         }
 
         if (foodLevel<15){
