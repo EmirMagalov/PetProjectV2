@@ -22,7 +22,6 @@ const ENERGY_PER_HOUR_SICK    = 25;
 // ===================================================
 
 setInterval(() => {
-    console.log('До:', gameData.foodLevel);
     // Переводим часовой расход в минутный (потому что интервал = 1 минута)
     const foodPerMinute   = (gameData.sick ? FOOD_PER_HOUR_SICK   : FOOD_PER_HOUR_HEALTHY)   / 60;
     const energyPerMinute = (gameData.sick ? ENERGY_PER_HOUR_SICK : ENERGY_PER_HOUR_HEALTHY) / 60;
@@ -63,8 +62,7 @@ setInterval(() => {
     }
 
     gameData.lastUpdate = Date.now();
-    console.log('После:', gameData.foodLevel);
-    console.log('Ушло:', предыдущееЗначение - gameData.foodLevel);
+
 }, 60000);
 
 // Логика сна
