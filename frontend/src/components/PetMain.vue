@@ -17,12 +17,65 @@ import {
   mouth,
   lowEnergy,
   isVibrating, lastFedItem, isBadMood, isAnimating, gameData, blink, statusShower, statusFoam, feedStatus,
-  locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus
+  locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus, isLosingLifeStatus
 } from "@/scripts/useGameStore.js";
 import Poop from "@/components/Poop.vue";
 import {preloadImages} from "@/scripts/preloadImages.js";
 import PhotoFrame from "@/components/PhotoFrame.vue";
+import {computed} from 'vue'
 
+const activeStatus = computed(() => {
+  // Приоритет 1: Смерть питомца
+  if (isGameOver.value) {
+    return {
+      show: true,
+      text: "Питомец погиб!",
+      image: "/gamePlay/grave.webp",
+      bgColor: "bg-[#808080]"
+    }
+  }
+
+  // Приоритет 2: Повышение уровня
+  if (levelStatus.value) {
+    return {
+      show: true,
+      text: "Уровень повышен",
+      additional: gameData.level,
+      image: null // или дефолтная иконка уровня
+    }
+  }
+
+  // Приоритет 3: Потеря жизни (-1)
+  if (isLosingLifeStatus.value) {
+    return {
+      show: true,
+      text: "- 1 жизнь!",
+      image: "/gamePlay/heart-broken.svg"
+    }
+  }
+
+  // Приоритет 4: Получение жизни (+1)
+  if (lifeStatus.value) {
+    return {
+      show: true,
+      text: "+ 1 жизнь!",
+      image: "/gamePlay/heart.svg"
+    }
+  }
+
+  // Приоритет 5: Кормежка (ням-ням)
+  if (feedStatus.value) {
+    return {
+      show: true,
+      text: "Ням-ням!",
+      image: "/gamePlay/hunger.webp",
+      additional: `+${lastFedItem.value?.foodGain || 0}`
+    }
+  }
+
+  // Если ничего не происходит
+  return {show: false}
+})
 
 
 const pupilOffset = ref({x: 0, y: 0})
@@ -112,9 +165,6 @@ onUnmounted(() => {
 })
 
 
-
-
-
 </script>
 
 <template>
@@ -122,7 +172,8 @@ onUnmounted(() => {
       :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000 relative', gameData.sleep ? 'bg-linear-to-r from-blue-800 via-blue-900 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']">
 
     <!-- 🛑 ОВЕРЛЕЙ ЗАГРУЗКИ (БЛОКИРУЕТ ИНТЕРФЕЙС, ПОКА ДАННЫЕ НЕ ПРИШЛИ) -->
-    <div v-if="isLoading" class="fixed inset-0 z-200 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center gap-4">
+    <div v-if="isLoading"
+         class="fixed inset-0 z-200 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center gap-4">
       <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
       <p class="text-white font-bold text-sm tracking-wide">Загрузка...</p>
     </div>
@@ -182,8 +233,10 @@ onUnmounted(() => {
             <img :src="body" class="absolute w-45" alt="">
             <img :src="getHornAsset(gameData.level)" class="absolute w-45" alt="">
             <img v-show="gameData.sick" src="/character/drunk.webp" class="absolute w-45" alt="">
-            <img v-show="gameData.sick && body==='/character/fat_body.webp'" src="/character/sick_fat.webp" class="absolute w-45" alt="">
-            <img v-show="gameData.sick && body!=='/character/fat_body.webp'" src="/character/sick.webp" class="absolute w-45" alt="">
+            <img v-show="gameData.sick && body==='/character/fat_body.webp'" src="/character/sick_fat.webp"
+                 class="absolute w-45" alt="">
+            <img v-show="gameData.sick && body!=='/character/fat_body.webp'" src="/character/sick.webp"
+                 class="absolute w-45" alt="">
             <div v-if="!blink && !gameData.sleep">
 
               <div v-show="lowEnergy" class="absolute inset-0 flex justify-center items-center z-10">
@@ -228,11 +281,14 @@ onUnmounted(() => {
           </div>
 
           <!-- Индикаторы статусов -->
-          <Status v-if="!levelStatus && feedStatus" :status="feedStatus" text="Ням-ням!" image="/gamePlay/hunger.webp"
-                  :additional="`+${lastFedItem?.foodGain}`"/>
-          <Status v-if="!levelStatus && lifeStatus" :status="lifeStatus" text="+ 1 жизнь!" image="/gamePlay/heart.svg"/>
-          <Status :status="levelStatus" text="Уровеь повышен" :additional="gameData.level"/>
-          <Status :status="isGameOver" text="Питомец погиб!" image="/gamePlay/grave.webp" bg-color="bg-[#808080]"/>
+          <Status
+              v-if="activeStatus.show"
+              :status="true"
+              :text="activeStatus.text"
+              :image="activeStatus.image"
+              :additional="activeStatus.additional"
+              :bg-color="activeStatus.bgColor"
+          />
           <PetStinky/>
           <PetFoam :status-foam="statusFoam"/>
           <PetSmoke :status-smoke="statusSmoke"/>

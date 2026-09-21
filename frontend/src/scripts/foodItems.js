@@ -73,7 +73,7 @@ export const foodList = [
         category: 'shaman',
         subcategory:'potion',
         health:1,
-        cost: 200,
+        cost: 300,
 
     },
 ]

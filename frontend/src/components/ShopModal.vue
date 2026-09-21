@@ -19,28 +19,28 @@ const activeTab = ref('food')
 // Динамический список товаров в зависимости от выбранной вкладки
 const currentList = computed(() => {
   if (activeTab.value === 'food') {
-    // Еда (исключаем шаманские товары, если они в общем списке еды)
     return foodList.filter(item => item.category !== 'shaman')
   } else if (activeTab.value === 'shaman') {
-    // Вкладка Шамана — фильтруем по категории 'shaman'
     return foodList.filter(item => item.category === 'shaman')
   } else {
-    // Одежда
     return headItems
   }
 })
 
 const lastBought = ref(null)
+const lastBoughtQuantity = ref(1)
 let notificationTimer = null
 
 // Универсальная логика клика по кнопке товара
 function handleItemClick(item) {
   if (activeTab.value === 'food' || activeTab.value === 'shaman') {
-    // Покупка еды или предметов шамана
     if (gameData.coins >= item.cost) {
       gameData.coins -= item.cost
       addToCart(item.id)
-      showNotification(item)
+
+      // Получаем актуальное количество товара в корзине
+      const currentQty = gameData.cart[item.id] || 1
+      showNotification(item, currentQty)
     } else {
       alert("Не хватает монет!")
     }
@@ -52,7 +52,7 @@ function handleItemClick(item) {
       if (gameData.coins >= item.cost) {
         gameData.coins -= item.cost
         buyHeadwear(item.id)
-        showNotification(item)
+        showNotification(item, 1)
       } else {
         alert("Не хватает монет!")
       }
@@ -69,8 +69,9 @@ function selectHeadwear(headId) {
   }
 }
 
-function showNotification(item) {
+function showNotification(item, quantity = 1) {
   lastBought.value = item
+  lastBoughtQuantity.value = quantity
   if (notificationTimer) clearTimeout(notificationTimer)
   notificationTimer = setTimeout(() => {
     lastBought.value = null
@@ -82,14 +83,13 @@ const getItemBonuses = (item) => {
   if (item.foodGain) bonuses.push(`+ ${item.foodGain} сытости`)
   if (item.energyGain) bonuses.push(`+ ${item.energyGain} энергии`)
   if (item.life) bonuses.push(`+ ${item.life} жизнь`)
+  if (item.health) bonuses.push(`Востановление здоровья`)
   return bonuses
 }
-
-
 </script>
 
 <template>
-  <div v-if="isOpen" class="fixed inset-0  z-150 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+  <div v-if="isOpen" class="fixed inset-0 z-150 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
 
     <!-- Само окно магазина -->
     <div
@@ -119,7 +119,6 @@ const getItemBonuses = (item) => {
         </button>
         <button
             @click="activeTab = 'shaman'"
-
             :class="['flex-1 py-2 rounded-xl text-sm font-bold transition-all', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
           🪶 Шаман
@@ -134,7 +133,6 @@ const getItemBonuses = (item) => {
 
       <!-- Список товаров -->
       <div class="p-6 overflow-y-auto space-y-4 flex-1">
-
         <div
             v-for="item in currentList"
             :key="item.id"
@@ -142,19 +140,19 @@ const getItemBonuses = (item) => {
             :class="{'opacity-50 pointer-events-none': activeTab === 'shaman' && gameData.level < 5}"
         >
           <div v-if="activeTab === 'shaman' && gameData.level < 5"
-               class="absolute inset-0 z-20 bg-slate-950/70  flex items-center justify-center">
-          <span
-            class="text-amber-400 font-bold text-sm tracking-wide px-3 py-1 ">
-          🔒 Требуется 5 уровень
-          </span>
+               class="absolute inset-0 z-20 bg-slate-950/70 flex items-center justify-center">
+            <span class="text-amber-400 font-bold text-sm tracking-wide px-3 py-1">
+              🔒 Требуется 5 уровень
+            </span>
           </div>
+
           <!-- Картинка и описание -->
           <div class="flex items-center gap-3">
             <div class="w-15 h-15 shrink-0 bg-white/20 rounded-lg flex items-center justify-center p-1">
               <img :src="item.image" :alt="item.name" class="w-full h-full object-contain">
             </div>
             <div>
-              <h3 class="font-semibold text-sm text-white ">{{ item.name }}</h3>
+              <h3 class="font-semibold text-sm text-white">{{ item.name }}</h3>
               <p v-if="activeTab === 'food' || activeTab === 'shaman'" class="text-xs text-emerald-400">
                 <template v-for="(bonus, index) in getItemBonuses(item)" :key="index">
                   {{ bonus }}<br v-if="index < getItemBonuses(item).length - 1">
@@ -201,12 +199,18 @@ const getItemBonuses = (item) => {
           v-if="lastBought"
           class="absolute bottom-10 z-200 bg-emerald-600/90 border border-emerald-400 text-white px-5 py-3 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-3"
       >
-        <div class="w-8 h-8 bg-white/20 rounded-lg p-1 flex items-center justify-center shrink-0">
+        <div class="w-8 h-8 bg-white/20 rounded-lg p-1 flex items-center justify-center shrink-0 relative">
           <img :src="lastBought.image" class="w-full h-full object-contain">
+          <!-- Бейдж количества -->
+          <span v-if="lastBoughtQuantity > 1" class="absolute -top-2 -right-2 bg-amber-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow">
+            x{{ lastBoughtQuantity }}
+          </span>
         </div>
         <div>
           <p class="text-xs text-emerald-200 font-medium">Успешное приобретение!</p>
-          <p class="text-sm font-bold">{{ lastBought.name }}</p>
+          <p class="text-sm font-bold">
+            {{ lastBought.name }} <span v-if="lastBoughtQuantity > 1" class="text-amber-300 font-normal"></span>
+          </p>
         </div>
       </div>
     </transition>

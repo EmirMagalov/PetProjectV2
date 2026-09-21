@@ -2,7 +2,7 @@ import {
     cloudShow,
     energyFull, feedStatus, fruitStreak,
     gameData, hearts,
-    isAnimating, isBadMood,
+    isAnimating, isBadMood, isLosingLifeStatus,
     isVibrating,
     lastFedItem, lifeStatus, PlayCount,
     showHunger,
@@ -39,7 +39,7 @@ export function otherFeedPet(foodId) {
                 gameData.sick = true
             }
             if (gameData.addictionStreak >= 3) {
-                gameData.lives = Math.max(0, gameData.lives - 1)
+                isLosingLife()
             }
 
             if (drunkTimer) {
@@ -92,6 +92,7 @@ export function feedPet(foodId) {
         if (gameData.foodLevel >= 100) {
             gameData.foodStreak++
             gameData.fastfoodStreak++
+            isLosingLife()
         }
 
         // Флаг, чтобы отследить, стал ли он толстым именно на этом шаге
@@ -243,4 +244,10 @@ export const Clean = ()=>{
     gameData.isPooped = false
     addCoin(10)
     addExp(20)
+}
+
+export function isLosingLife(){
+    gameData.lives = Math.max(0, gameData.lives - 1)
+    isLosingLifeStatus.value = true
+    setTimeout(() => isLosingLifeStatus.value = false, 800)
 }
