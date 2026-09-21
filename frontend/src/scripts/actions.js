@@ -123,7 +123,7 @@ export function feedPet(foodId) {
                 if (fruitStreak.value >= 10) {
                     gameData.sick = false
                     fruitStreak.value = 0
-                    addExp(20)
+                    addCoin(20)
                 }
             }
 
