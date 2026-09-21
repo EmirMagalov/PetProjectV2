@@ -274,19 +274,30 @@ async def claim_lives_handler(callback: types.CallbackQuery):
         await callback.answer("❌ Ошибка обработки бонуса.", show_alert=True)
         return
 
-    # Атомарно прибавляем жизни прямо в базе данных
-    updated_count = await PetModel.filter(tg_id=tg_id).update(lives=db_f("lives") + lives_amount)
-
-    if updated_count == 0:
+    # 1. Сначала достаем питомца, чтобы проверить текущие жизни
+    pet = await PetModel.filter(tg_id=tg_id).first()
+    if not pet:
         await callback.answer("❌ Питомец не найден! Сначала запусти игру.", show_alert=True)
         return
 
-    # Достаем свежие данные из базы, чтобы показать актуальное количество жизней
-    pet = await PetModel.filter(tg_id=tg_id).first()
+    # 2. Если уже 3 или больше — прерываем
+    MAX_LIVES = 3
+    if pet.lives >= MAX_LIVES:
+        await callback.answer("❌ У вас уже максимальное количество жизней (3/3)! ❤️", show_alert=True)
+        return
+
+    # 3. Вычисляем, сколько реально можно добавить, чтобы не превысить лимит в 3
+    actual_add = min(lives_amount, MAX_LIVES - pet.lives)
+
+    # 4. Атомарно прибавляем только разрешенное количество
+    await PetModel.filter(tg_id=tg_id).update(lives=db_f("lives") + actual_add)
+
+    # Обновляем объект в памяти для актуального текста
+    pet.lives += actual_add
 
     try:
         await callback.message.edit_text(
-            f"✅ Успешно! Вам начислено +{lives_amount} жизнь.\n❤️ Текущие жизни: {pet.lives}."
+            f"✅ Успешно! Вам начислено +{actual_add} жизнь.\n❤️ Текущие жизни: {pet.lives}/{MAX_LIVES}."
         )
     except Exception:
         pass
