@@ -4,6 +4,14 @@ import time
 # Словарь в памяти для отслеживания фоновых пересчетов (не трогает last_update юзера)
 background_last_processed = {}
 
+# === Настройки расхода (легко менять) ===
+FOOD_PER_HOUR_HEALTHY   = 15    # ~6.7 часа
+FOOD_PER_HOUR_SICK      = 25   # ~4 часа
+
+ENERGY_PER_HOUR_HEALTHY = 15
+ENERGY_PER_HOUR_SICK    = 25
+# ======================================
+
 
 async def update_pet_stats(pet) -> bool:
     """Обновляет состояние питомца на основе прошедшего времени."""
@@ -22,10 +30,14 @@ async def update_pet_stats(pet) -> bool:
         last_check = pet.last_update
 
     elapsed_seconds = now - last_check
-    elapsed_minutes = int(elapsed_seconds // 60)
+    elapsed_hours = elapsed_seconds / 3600
 
-    if elapsed_minutes <= 0:
+    if elapsed_hours <= 0:
         return False
+
+    # Ограничиваем максимальный догон (не больше 24 часов за раз)
+    capped_hours = min(elapsed_hours, 24.0)
+    capped_minutes = int(capped_hours * 60)  # для старой логики какашек/вони/жизней
 
     # 1. ЕСЛИ ПИТОМЕЦ СПАЛ
     if pet.sleep:
@@ -40,26 +52,32 @@ async def update_pet_stats(pet) -> bool:
 
             if pet.energy >= 100:
                 pet.energy = 100
-                pet.sleep, pet.sleep_end_time = False, 0.0
+                pet.sleep = False
+                pet.sleep_end_time = 0.0
 
     # 2. ЕСЛИ ПИТОМЕЦ БОДРСТВОВАЛ
     else:
-        capped_minutes = min(elapsed_minutes, 1440)
+        # === Расход еды и энергии ===
+        if pet.sick:
+            food_rate = FOOD_PER_HOUR_SICK
+            energy_rate = ENERGY_PER_HOUR_SICK
+        else:
+            food_rate = FOOD_PER_HOUR_HEALTHY
+            energy_rate = ENERGY_PER_HOUR_HEALTHY
 
-        food_consumed = capped_minutes * (0.1 if pet.sick else 0.05)
-        pet.food_level = max(0.0, pet.food_level - food_consumed)
+        pet.food_level = max(0.0, pet.food_level - food_rate * capped_hours)
+        pet.energy = max(0.0, pet.energy - energy_rate * capped_hours)
 
-        energy_consumed =  capped_minutes * (0.1 if pet.sick else 0.05)
-        pet.energy = max(0.0, pet.energy - energy_consumed)
+        # Сброс зависимости
         if pet.addiction_streak > 1:
             hours_passed = int(elapsed_seconds // 1800)
             if hours_passed > 0:
                 pet.addiction_streak = 0
 
-
         if pet.addiction_streak <= 1:
             pet.addiction_streak = 0
 
+        # Какашка
         if not pet.is_pooped and capped_minutes > 0:
             poop_chance = 1 - ((1 - 1 / 360) ** capped_minutes)
             if random.random() < poop_chance:
@@ -72,16 +90,20 @@ async def update_pet_stats(pet) -> bool:
         else:
             pet.poop_bad_minutes = 0
 
+        # Вонь
         if not pet.stinky and capped_minutes > 0:
             stinky_chance = 1 - ((1 - 1 / 360) ** capped_minutes)
             if random.random() < stinky_chance:
                 pet.stinky = True
+
         if pet.stinky:
             pet.stinky_bad_minutes += capped_minutes
             if pet.stinky_bad_minutes >= 180:
                 pet.sick = True
         else:
             pet.stinky_bad_minutes = 0
+
+        # Потеря жизней при нулевой еде или энергии
         is_food_zero = pet.food_level == 0
         is_energy_zero = pet.energy == 0
 
@@ -100,8 +122,5 @@ async def update_pet_stats(pet) -> bool:
     background_last_processed[pet.tg_id] = now
 
     # ВНИМАНИЕ: pet.last_update мы НЕ трогаем!
-    # Он останется неизменным, пока юзер реально не откроет сайт.
-    # Благодаря этому проверка (current_time - last_update) < 35 начнет работать правильно.
-
     await pet.save()
     return True

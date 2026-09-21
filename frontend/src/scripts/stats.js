@@ -14,65 +14,58 @@ import {addCoin, drunkTimer} from "@/scripts/actions.js";
 import {batheStatus, isHovered, previousMouth} from "@/scripts/dragAndDrop.js";
 
 
-setInterval(() => {
+const FOOD_PER_HOUR_HEALTHY   = 15;     // ~6.7 часа
+const FOOD_PER_HOUR_SICK      = 25;     // ~4 часа
 
+const ENERGY_PER_HOUR_HEALTHY = 15;
+const ENERGY_PER_HOUR_SICK    = 25;
+// ===================================================
+
+setInterval(() => {
+    console.log('До:', gameData.foodLevel);
+    // Переводим часовой расход в минутный (потому что интервал = 1 минута)
+    const foodPerMinute   = (gameData.sick ? FOOD_PER_HOUR_SICK   : FOOD_PER_HOUR_HEALTHY)   / 60;
+    const energyPerMinute = (gameData.sick ? ENERGY_PER_HOUR_SICK : ENERGY_PER_HOUR_HEALTHY) / 60;
+
+    // 1. Уменьшаем еду
     if (gameData.foodLevel > 0) {
-        const consumeAmountFood = gameData.sick ? 0.1:0.05
-        gameData.foodLevel = Math.max(0, gameData.foodLevel - consumeAmountFood)
+        gameData.foodLevel = Math.max(0, gameData.foodLevel - foodPerMinute);
     }
 
     // 2. Уменьшаем энергию (если не спит)
     if (gameData.energy > 0 && !gameData.sleep) {
-        const consumeAmountEnergy = gameData.sick ? 0.1:0.05
-        gameData.energy = Math.max(0, gameData.energy - consumeAmountEnergy)
+        gameData.energy = Math.max(0, gameData.energy - energyPerMinute);
     }
 
     // 3. Проверка штрафов за голод или отсутствие энергии
-    const isFoodZero = gameData.foodLevel === 0
-    const isEnergyZero = gameData.energy === 0
-    const nowSec = Math.floor(Date.now() / 1000)
-// Если прошло больше 1 часа (3600 секунд) с последнего употребления
+    const isFoodZero = gameData.foodLevel === 0;
+    const isEnergyZero = gameData.energy === 0;
+    const nowSec = Math.floor(Date.now() / 1000);
+
     if (gameData.addictionStreak > 1 && (nowSec - gameData.lastAddictionTime > 1800)) {
-        gameData.lastAddictionTime = nowSec // Сдвигаем таймер для следующего уменьшения
-
-        // Если стрик упал ниже порогов, выключаем дебаффы
-        gameData.addictionStreak = 0
-        // if (gameData.addictionStreak < 1) {
-        //     gameData.isDrunk = false
-        // }
+        gameData.lastAddictionTime = nowSec;
+        gameData.addictionStreak = 0;
     }
-    // if (gameData.addictionStreak <= 1) {
-    //     gameData.isDrunk = false
-    // }
-    // if (!gameData.isPooped && Math.random() < 1 / 45) {
-    //     gameData.isPooped = true
-    // }
-    // if (!gameData.stinky && Math.random() < 1 / 90) {
-    //     gameData.stinky = true
-    // }
+
     if (isFoodZero || isEnergyZero) {
-        gameData.badStatsMinutes++
+        gameData.badStatsMinutes++;
 
-
-        const targetMinutes =  480
+        const targetMinutes = 480;
 
         if (gameData.badStatsMinutes >= targetMinutes) {
-
             if (gameData.lives > 0) {
-                gameData.lives -= 1
+                gameData.lives -= 1;
             }
-            gameData.badStatsMinutes = 0 // Сбрасываем счетчик
+            gameData.badStatsMinutes = 0;
         }
     } else {
-        // Если хотя бы один параметр восстановился, сбрасываем счетчик
-        gameData.badStatsMinutes = 0
+        gameData.badStatsMinutes = 0;
     }
-    gameData.lastUpdate = Date.now()
 
-
-
-
-}, 60000)
+    gameData.lastUpdate = Date.now();
+    console.log('После:', gameData.foodLevel);
+    console.log('Ушло:', предыдущееЗначение - gameData.foodLevel);
+}, 60000);
 
 // Логика сна
 const MS_PER_ENERGY_POINT = 3000
