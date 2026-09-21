@@ -58,6 +58,7 @@ export function otherFeedPet(foodId) {
         }
         if (foodId === "healthPotion") {
             gameData.sick = false
+            fruitStreak.value = 0
         }
         addCoin(1)
         addExp(20)
