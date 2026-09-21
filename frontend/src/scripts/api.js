@@ -39,9 +39,14 @@ channel.onmessage = (event) => {
 // При старте спрашиваем, есть ли уже открытая игра
 channel.postMessage({ type: 'WHO_IS_MASTER' })
 
-// Функция проверки
+// Функция проверки "мы мастер"
+function isMasterTab() {
+    return isMaster && !isDuplicate
+}
+
+// Функция проверки "мы активная вкладка"
 function isCurrentTabActive() {
-    return isMaster && !isDuplicate && document.visibilityState === 'visible'
+    return isMasterTab() && document.visibilityState === 'visible'
 }
 
 // Периодически пингуем
@@ -188,49 +193,50 @@ export async function syncToBackend() {
 setInterval(syncToBackend, 15000)
 
 // --- 5. ОБРАБОТЧИК ЖИЗНЕННОГО ЦИКЛА ---
+function sendBeaconUpdate() {
+    if (!isMasterTab() || !isDataLoaded) return
+
+    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    const payload = JSON.stringify({
+        tg_id: tgId,
+        name: gameData.name,
+        level: gameData.level,
+        exp: gameData.exp,
+        coins: gameData.coins,
+        cart: gameData.cart,
+        unlocked_heads: gameData.unlockedHeads,
+        equipped_head: gameData.equippedHead,
+        lives: gameData.lives,
+        food_level: gameData.foodLevel,
+        energy: gameData.energy,
+        stinky: gameData.stinky,
+        sleep: gameData.sleep,
+        click_counter: gameData.clickCounter,
+        sleep_end_time: gameData.sleepEndTime,
+        fastfood_streak: gameData.fastfoodStreak,
+        is_fat: gameData.isFat,
+        sick: gameData.sick,
+        is_pooped: gameData.isPooped,
+        addiction_streak: gameData.addictionStreak,
+        last_update: Math.floor(Date.now() / 1000)
+    })
+
+    const blob = new Blob([payload], { type: 'application/json' })
+    navigator.sendBeacon(`${API_URL}/update`, blob)
+}
+
 document.addEventListener('visibilitychange', () => {
-    // Если эта вкладка не является мастером — игнорируем любые события
-    if (!isCurrentTabActive()) return
+    // Игнорируем события только если мы не мастер
+    if (!isMasterTab()) return
 
-    // 1. Когда пользователь уходит из игры (сворачивает)
+    // 1. Когда пользователь уходит из игры (сворачивает / перезагружает / закрывает)
     if (document.visibilityState === 'hidden' && isDataLoaded) {
-        const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
-        const payload = JSON.stringify({
-            tg_id: tgId,
-            name: gameData.name,
-            level: gameData.level,
-            exp: gameData.exp,
-            coins: gameData.coins,
-            cart: gameData.cart,
-            unlocked_heads: gameData.unlockedHeads,
-            equipped_head: gameData.equippedHead,
-            lives: gameData.lives,
-            food_level: gameData.foodLevel,
-            energy: gameData.energy,
-            stinky: gameData.stinky,
-            sleep: gameData.sleep,
-            click_counter: gameData.clickCounter,
-            sleep_end_time: gameData.sleepEndTime,
-            fastfood_streak: gameData.fastfoodStreak,
-            is_fat: gameData.isFat,
-            sick: gameData.sick,
-            is_pooped: gameData.isPooped,
-
-            addiction_streak: gameData.addictionStreak,
-            last_update: Math.floor(Date.now() / 1000)
-        })
-
-        const blob = new Blob([payload], { type: 'application/json' })
-        navigator.sendBeacon(`${API_URL}/update`, blob)
+        sendBeaconUpdate()
     }
 
     // 2. Когда пользователь возвращается в игру (развернул или открыл из бота)
     if (document.visibilityState === 'visible') {
-
-
         // Захватываем статус главного окна
-
-
         isRefreshing = false
         isSyncLocked = true // Включаем блок автосохранения на время загрузки
 
@@ -243,6 +249,11 @@ document.addEventListener('visibilitychange', () => {
                 }, 500)
             })
     }
+})
+
+// Дополнительная страховка при перезагрузке / закрытии вкладки
+window.addEventListener('pagehide', () => {
+    sendBeaconUpdate()
 })
 
 // Говорим Telegram WebApp, что приложение готово

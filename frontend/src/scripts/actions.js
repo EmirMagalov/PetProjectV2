@@ -190,7 +190,6 @@ export const animKey = ref(0)
 
 export function spawnHeart() {
     gameData.sleep = false
-    console.log(lastFedItem.value)
     if (gameData.clickCounter % 3 === 0) {
         addCoin(1)
     }
