@@ -77,10 +77,13 @@ async def check_pets_loop():
             await asyncio.sleep(60)
             pets = await PetModel.all()
             for pet in pets:
-                await update_pet_stats(pet)
+                # 1. Обновляем статы (эта функция сама считает дельту, сохраняет в базу и двигает last_update)
+                updated = await update_pet_stats(pet)
+                if not updated:
+                    continue  # Если прошло меньше 30 секунд или обход не требуется — идем к следующему
 
-                # Флаг для отслеживания, нужно ли сохранять изменения в БД в конце итерации
-                is_updated = False
+                # Флаг для отслеживания уведомлений (чтобы сделать pet.save() строго 1 раз в конце, если что-то изменилось)
+                is_notified_changed = False
 
                 # Логика таймера зависимости
                 if pet.addiction_streak > 0:
@@ -104,14 +107,13 @@ async def check_pets_loop():
                             pet.game_over_notified = True
                             pet.low_lives_notified = False
                             pet.critical_life_notified = False
-                            is_updated = True
+                            is_notified_changed = True
                 else:
-                    # Если питомец воскрес / ожил
                     if pet.game_over_notified:
                         pet.game_over_notified = False
-                        is_updated = True
+                        is_notified_changed = True
 
-                    # 2. Предупреждение, когда осталось ровно 2 жизни
+                    # 2. Предупреждение (2 жизни)
                     if pet.lives == 2:
                         if not pet.low_lives_notified:
                             success = await send_telegram_message(
@@ -120,13 +122,13 @@ async def check_pets_loop():
                             )
                             if success:
                                 pet.low_lives_notified = True
-                                is_updated = True
+                                is_notified_changed = True
                     else:
                         if pet.low_lives_notified:
                             pet.low_lives_notified = False
-                            is_updated = True
+                            is_notified_changed = True
 
-                    # 3. Предупреждение, когда осталась ровно 1 жизнь (критическое состояние)
+                    # 3. Предупреждение (1 жизнь)
                     if pet.lives == 1:
                         if not pet.critical_life_notified:
                             success = await send_telegram_message(
@@ -135,86 +137,74 @@ async def check_pets_loop():
                             )
                             if success:
                                 pet.critical_life_notified = True
-                                is_updated = True
+                                is_notified_changed = True
                     else:
                         if pet.critical_life_notified:
                             pet.critical_life_notified = False
-                            is_updated = True
+                            is_notified_changed = True
 
                 # 4. Уведомление о голоде
                 if pet.food_level < 20:
                     if not pet.hungry_notified:
-                        success = await send_telegram_message(
-                            pet,
-                            "🍽️ Питомец проголодался!"
-                        )
+                        success = await send_telegram_message(pet, "🍽️ Питомец проголодался!")
                         if success:
                             pet.hungry_notified = True
-                            is_updated = True
+                            is_notified_changed = True
                 else:
                     if pet.hungry_notified:
                         pet.hungry_notified = False
-                        is_updated = True
+                        is_notified_changed = True
 
                 # 5. Уведомление об энергии
                 if pet.energy < 20:
                     if not pet.energy_notified:
-                        success = await send_telegram_message(
-                            pet,
-                            "😴 Питомец сильно устал и хочет спать!"
-                        )
+                        success = await send_telegram_message(pet, "😴 Питомец сильно устал и хочет спать!")
                         if success:
                             pet.energy_notified = True
-                            is_updated = True
+                            is_notified_changed = True
                 else:
                     if pet.energy_notified:
                         pet.energy_notified = False
-                        is_updated = True
+                        is_notified_changed = True
 
                 # 6. Уведомление о какашке
                 if pet.is_pooped:
                     if not pet.poop_notified:
-                        success = await send_telegram_message(
-                            pet,
-                            "💩 Питомец тут набедокурил... Надо убрать!"
-                        )
+                        success = await send_telegram_message(pet, "💩 Питомец тут набедокурил... Надо убрать!")
                         if success:
                             pet.poop_notified = True
-                            is_updated = True
+                            is_notified_changed = True
                 else:
                     if pet.poop_notified:
                         pet.poop_notified = False
-                        is_updated = True
+                        is_notified_changed = True
 
                 # 7. Уведомление о вони
                 if pet.stinky:
                     if not pet.stinky_notified:
-                        success = await send_telegram_message(
-                            pet,
-                            "🤢 Питомец начал сильно вонять! Пора его помыть!"
-                        )
+                        success = await send_telegram_message(pet, "🤢 Питомец начал сильно вонять! Пора его помыть!")
                         if success:
                             pet.stinky_notified = True
-                            is_updated = True
+                            is_notified_changed = True
                 else:
                     if pet.stinky_notified:
                         pet.stinky_notified = False
-                        is_updated = True
+                        is_notified_changed = True
+
+                # 8. Уведомление о болезни
                 if pet.sick:
                     if not pet.sick_notified:
-                        success = await send_telegram_message(
-                            pet,
-                            "🤒 Питомец заболел нужно его подлечить!"
-                        )
+                        success = await send_telegram_message(pet, "🤒 Питомец заболел нужно его подлечить!")
                         if success:
                             pet.sick_notified = True
-                            is_updated = True
+                            is_notified_changed = True
                 else:
                     if pet.sick_notified:
                         pet.sick_notified = False
-                        is_updated = True
-                # Сохраняем изменения в базу только если какой-то флаг реально изменился
-                if is_updated:
+                        is_notified_changed = True
+
+                # Если поменялись только флаги уведомлений — сохраняем их отдельно
+                if is_notified_changed:
                     await pet.save()
 
         except Exception as e:

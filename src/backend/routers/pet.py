@@ -3,8 +3,6 @@ from backend.schemas.pet import PetResponse, PetSyncRequest
 from backend.models.pet import Pet as PetModel
 import time
 
-from backend.services.pet import update_pet_stats
-
 pet_router = APIRouter(prefix="/api", tags=["api"])
 
 
