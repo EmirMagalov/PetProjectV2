@@ -22,6 +22,7 @@ keyboard = types.InlineKeyboardMarkup(
 async def send_telegram_message(pet, text):
     current_time = int(time.time())
     last_update_int = int(pet.last_update) if pet.last_update else 0
+    print(last_update_int)
     if last_update_int and (current_time - last_update_int) < 35:
         return False  # Игрок в сети, сообщение не отправлено
 
@@ -75,12 +76,11 @@ async def check_pets_loop():
     while True:
         try:
             await asyncio.sleep(60)
+
             pets = await PetModel.all()
             for pet in pets:
                 # 1. Обновляем статы (эта функция сама считает дельту, сохраняет в базу и двигает last_update)
-                updated = await update_pet_stats(pet)
-                if not updated:
-                    continue  # Если прошло меньше 30 секунд или обход не требуется — идем к следующему
+                await update_pet_stats(pet)
 
                 # Флаг для отслеживания уведомлений (чтобы сделать pet.save() строго 1 раз в конце, если что-то изменилось)
                 is_notified_changed = False
