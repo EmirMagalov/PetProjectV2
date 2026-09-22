@@ -42,6 +42,7 @@ async def update_pet(data: dict):
             setattr(pet, key, value)
 
     pet.last_update = time.time()
+    pet.last_interaction = time.time()
     await pet.save()
     return {"status": "success", "pet": pet}
 

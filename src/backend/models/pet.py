@@ -20,6 +20,8 @@ class Pet(models.Model):
     equipped_head = fields.CharField(max_length=255, null=True)
 
     last_update = fields.FloatField(default=0.0)
+    last_interaction = fields.FloatField(default=0.0)
+
     bad_stats_minutes = fields.IntField(default=0)
     # Дополнительные игровые механики
     fastfood_streak = fields.IntField(default=0)

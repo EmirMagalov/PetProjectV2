@@ -21,9 +21,11 @@ keyboard = types.InlineKeyboardMarkup(
 
 async def send_telegram_message(pet, text):
     current_time = int(time.time())
-    last_update_int = int(pet.last_update) if pet.last_update else 0
-    print(last_update_int)
-    if last_update_int and (current_time - last_update_int) < 35:
+
+
+    last_interaction_int = int(pet.last_interaction) if hasattr(pet, 'last_interaction') and pet.last_interaction else 0
+
+    if last_interaction_int and (current_time - last_interaction_int) < 35:
         return False  # Игрок в сети, сообщение не отправлено
 
     try:
@@ -81,7 +83,7 @@ async def check_pets_loop():
             for pet in pets:
                 # 1. Обновляем статы (эта функция сама считает дельту, сохраняет в базу и двигает last_update)
                 await update_pet_stats(pet)
-
+                await pet.refresh_from_db()
                 # Флаг для отслеживания уведомлений (чтобы сделать pet.save() строго 1 раз в конце, если что-то изменилось)
                 is_notified_changed = False
 
