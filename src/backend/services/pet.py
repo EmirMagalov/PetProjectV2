@@ -1,12 +1,9 @@
 import random
 import time
 
-# Словарь в памяти для отслеживания фоновых пересчетов (не трогает last_update юзера)
-background_last_processed = {}
-
 # === Настройки расхода (легко менять) ===
 FOOD_PER_HOUR_HEALTHY   = 15    # ~6.7 часа
-FOOD_PER_HOUR_SICK      = 25   # ~4 часа
+FOOD_PER_HOUR_SICK      = 25    # ~4 часа
 
 ENERGY_PER_HOUR_HEALTHY = 15
 ENERGY_PER_HOUR_SICK    = 25
@@ -19,39 +16,35 @@ async def update_pet_stats(pet) -> bool:
 
     if not pet.last_update:
         pet.last_update = now
-        background_last_processed[pet.tg_id] = now
         await pet.save()
         return False
 
-    # Берем время последнего фонового просчета.
-    # Если юзер заходил на сайт недавно, его pet.last_update новее — синхронизируемся с ним.
-    last_check = background_last_processed.get(pet.tg_id, pet.last_update)
-    if pet.last_update > last_check:
-        last_check = pet.last_update
-
-    elapsed_seconds = now - last_check
+    elapsed_seconds = now - pet.last_update
     elapsed_hours = elapsed_seconds / 3600
+
+    # Защита от слишком частых вызовов (если прошло меньше 30 секунд)
+    if elapsed_seconds < 30:
+        return False
 
     if elapsed_hours <= 0:
         return False
 
     # Ограничиваем максимальный догон (не больше 24 часов за раз)
     capped_hours = min(elapsed_hours, 24.0)
-    capped_minutes = int(capped_hours * 60)  # для старой логики какашек/вони/жизней
+    capped_minutes = int(capped_hours * 60)  # для какашек/вони/жизней
 
     # 1. ЕСЛИ ПИТОМЕЦ СПАЛ
     if pet.sleep:
         if now >= pet.sleep_end_time:
-            pet.energy = 100
+            pet.energy = 100.0
             pet.sleep = False
             pet.sleep_end_time = 0.0
         else:
-            elapsed_sleep_seconds = now - last_check
-            recovered_energy = int(elapsed_sleep_seconds // 3)
-            pet.energy = min(100, pet.energy + recovered_energy)
+            recovered_energy = int(elapsed_seconds // 3)
+            pet.energy = min(100.0, pet.energy + recovered_energy)
 
-            if pet.energy >= 100:
-                pet.energy = 100
+            if pet.energy >= 100.0:
+                pet.energy = 100.0
                 pet.sleep = False
                 pet.sleep_end_time = 0.0
 
@@ -69,12 +62,7 @@ async def update_pet_stats(pet) -> bool:
         pet.energy = max(0.0, pet.energy - energy_rate * capped_hours)
 
         # Сброс зависимости
-        if pet.addiction_streak > 1:
-            hours_passed = int(elapsed_seconds // 1800)
-            if hours_passed > 0:
-                pet.addiction_streak = 0
-
-        if pet.addiction_streak <= 1:
+        if pet.addiction_streak > 1 and elapsed_seconds >= 1800:
             pet.addiction_streak = 0
 
         # Какашка
@@ -118,8 +106,7 @@ async def update_pet_stats(pet) -> bool:
         else:
             pet.bad_stats_minutes = 0
 
-    # Запоминаем текущее время как последнюю фоновую проверку
-    background_last_processed[pet.tg_id] = now
-    # ВНИМАНИЕ: pet.last_update мы НЕ трогаем!
+    # ВСЕГДА обновляем last_update на текущее время, чтобы следующий тик считал честную дельту
+    pet.last_update = now
     await pet.save()
     return True
