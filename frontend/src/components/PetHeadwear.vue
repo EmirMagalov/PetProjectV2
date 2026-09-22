@@ -11,7 +11,9 @@ import {gameData} from "@/scripts/useGameStore.js";
        '-translate-y-1': gameData.level < 10,
        '-translate-y-4': gameData.level >= 10 && gameData.level < 15,
        '-translate-y-7': gameData.level >= 15 && gameData.level < 20,
-       '-translate-y-9': gameData.level >= 20
+       '-translate-y-9': gameData.level >= 20 && gameData.level < 25,
+       '-translate-y-10': gameData.level >= 25 && gameData.level < 30,
+       '-translate-y-13': gameData.level >= 30
      }">
 
   <img

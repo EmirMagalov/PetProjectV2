@@ -85,6 +85,8 @@ let lookInterval = null
 
 
 function getHornAsset(level) {
+  if (level >= 30) return '/horns/30lvl.webp'
+  if (level >= 25) return '/horns/25lvl.webp'
   if (level >= 20) return '/horns/20lvl.webp'
   if (level >= 15) return '/horns/15lvl.webp'
   if (level >= 10) return '/horns/10lvl.webp'
