@@ -24,11 +24,6 @@ async def get_pet(tg_id: int):
             "last_update": time.time()
         })
     else:
-        # 1. Сначала обновляем статы (голод, время и т.д.) внутри объекта в памяти
-        # await update_pet_stats(pet)
-
-        # 2. НО ЧТОБЫ НЕ ЗАТЕРЕТЬ БОНУСЫ ИЗ БОТА:
-        # Достаем актуальные монеты прямо из базы на текущую микросекунду
         pet.last_update = time.time()
         await pet.save()
 

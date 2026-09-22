@@ -8,8 +8,8 @@ class Pet(models.Model):
     coins = fields.IntField(default=0)
     lives = fields.IntegerField(default=0)
 
-    food_level = fields.IntField(default=0)
-    energy = fields.IntField(default=0)
+    food_level = fields.FloatField(default=0)
+    energy = fields.FloatField(default=0)
 
     # Статусы и флаги
     stinky = fields.BooleanField(default=False)
