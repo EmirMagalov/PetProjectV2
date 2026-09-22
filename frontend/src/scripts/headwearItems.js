@@ -29,5 +29,24 @@ export const headItems = [
         name: 'Сомбреро',
         image: '/headwear/sombrerohat.webp',
         cost: 2000
-    }
+    },
+    {
+        id: 'flat_hat',
+        name: 'Хулиганка',
+        image: '/headwear/flathat.webp',
+        cost: 720
+    },
+    {
+        id: 'women_hat',
+        name: 'Дамская шляпа',
+        image: '/headwear/womenhat.webp',
+        cost: 800
+    },
+    {
+        id: 'native_hat',
+        name: 'Шоляпа в индейском стиле',
+        image: '/headwear/nativeamericanhat.webp',
+        cost: 1200
+    },
+
 ]
