@@ -22,7 +22,6 @@ keyboard = types.InlineKeyboardMarkup(
 async def send_telegram_message(pet, text):
     current_time = int(time.time())
 
-
     last_interaction_int = int(pet.last_interaction) if hasattr(pet, 'last_interaction') and pet.last_interaction else 0
 
     if last_interaction_int and (current_time - last_interaction_int) < 35:
@@ -55,9 +54,9 @@ async def schedule_addiction_reminder(tg_id):
 
             # Проверяем активность
             current_time = int(time.time())
-            last_update_int = int(pet.last_update) if pet.last_update else 0
+            last_interaction_int = int(pet.last_interaction) if hasattr(pet,'last_interaction') and pet.last_interaction else 0
 
-            if last_update_int and (current_time - last_update_int) < 35:
+            if last_interaction_int and (current_time - last_interaction_int) < 35:
                 continue
 
             messages = [
@@ -183,7 +182,8 @@ async def check_pets_loop():
                     # 7. Уведомление о вони
                     if pet.stinky:
                         if not pet.stinky_notified:
-                            success = await send_telegram_message(pet, "🤢 Питомец начал сильно вонять! Пора его помыть!")
+                            success = await send_telegram_message(pet,
+                                                                  "🤢 Питомец начал сильно вонять! Пора его помыть!")
                             if success:
                                 pet.stinky_notified = True
                                 is_notified_changed = True
