@@ -58,7 +58,6 @@ async def schedule_addiction_reminder(tg_id):
             last_update_int = int(pet.last_update) if pet.last_update else 0
 
             if last_update_int and (current_time - last_update_int) < 35:
-                # Игрок сейчас в игре! Не шлем пуш сейчас, а уходим на следующий круг ожидания
                 continue
 
             messages = [

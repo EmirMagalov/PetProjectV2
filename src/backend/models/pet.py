@@ -35,7 +35,7 @@ class Pet(models.Model):
 
     sick=fields.BooleanField(default=False)
     addiction_streak = fields.IntField(default=0)
-
+    addiction_time = fields.FloatField(default=0.0)
     # Флаги для защиты от спама уведомлениями
     hungry_notified = fields.BooleanField(default=False)
     energy_notified = fields.BooleanField(default=False)

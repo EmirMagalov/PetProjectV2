@@ -62,9 +62,17 @@ async def update_pet_stats(pet) -> bool:
         pet.energy = max(0.0, pet.energy - energy_rate * capped_hours)
 
         # Сброс зависимости
-        if pet.addiction_streak >= 1 and pet.last_interaction:
-            if (now - pet.last_interaction) >= 1800:
+        if pet.addiction_streak > 0 and pet.addiction_time == 0:
+            pet.addiction_time = time.time()  # Запоминаем точное время старта
+
+            # 2. Проверяем, прошло ли 30 минут (1800 секунд) с момента старта
+        if pet.addiction_streak > 0:
+            if pet.addiction_time > 0 and (now - pet.addiction_time) >= 1800:
                 pet.addiction_streak = 0
+                pet.addiction_time = 0.0  # Сбрасываем таймер
+        else:
+            # Если зависимости нет вообще, обнуляем таймер
+            pet.addiction_time = 0.0
 
         # Какашка
         if not pet.is_pooped and capped_minutes > 0:
