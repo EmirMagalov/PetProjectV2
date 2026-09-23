@@ -192,7 +192,6 @@ watch(() => gameData.lives, async (newLives) => {
     }
 })
 
-let addictionTimer = null
 
 watch(() => gameData.sick, (newSick) => {
     if(newSick ===false && gameData.addictionStreak>=2){

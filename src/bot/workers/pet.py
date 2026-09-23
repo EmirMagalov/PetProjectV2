@@ -44,7 +44,7 @@ async def schedule_addiction_reminder(tg_id):
     """Ждет случайное время (20, 30 или 40 минут) и отправляет сообщение, если зависимость все еще есть."""
     try:
         while True:  # Запускаем в цикле, чтобы таймер пересоздавался, если игрок в сети
-            delay_minutes = random.choice([30, 40, 60])
+            delay_minutes = random.choice([20, 25, 30])
             delay_seconds = delay_minutes * 60
 
             await asyncio.sleep(delay_seconds)
