@@ -177,7 +177,7 @@ const getItemBonuses = (item) => {
               {{ gameData.equippedHead === item.id ? 'Снять' : 'Выбрать' }}
             </template>
             <template v-else>
-              <span class="w-5"><img src="/gamePlay/coin.svg" alt=""></span> {{ item.cost }}
+              <span class="w-5"><img src="/gamePlay/coin.webp" alt=""></span> {{ item.cost }}
             </template>
           </button>
         </div>
@@ -187,7 +187,7 @@ const getItemBonuses = (item) => {
       <div class="px-6 py-4 border-t border-slate-800 bg-slate-900/80 flex items-center justify-between">
         <span class="text-slate-400 text-sm">Баланс:</span>
         <span class="text-amber-400 font-bold text-lg flex items-center gap-1 tabular-nums">
-          🪙 {{ gameData.coins }}
+          <img class="w-5" src="/gamePlay/coin.webp" alt=""> {{ gameData.coins }}
         </span>
       </div>
 

@@ -280,7 +280,7 @@ onUnmounted(() => {
             <!-- Монетка с key для перезапуска анимации на каждый клик -->
             <img v-show="isAnimating" :key="animKey"
                  class="absolute w-5 z-50 animate-coinFly"
-                 src="/gamePlay/coin.svg" alt="">
+                 src="/gamePlay/coin.webp" alt="">
           </div>
 
           <!-- Индикаторы статусов -->

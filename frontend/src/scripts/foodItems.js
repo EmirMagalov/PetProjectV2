@@ -7,7 +7,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fastfood',
         foodGain: 25, // сколько добавляет сытости
-        cost: 15       // сколько стоит монет
+        cost: 12       // сколько стоит монет
     },
     {
         id: 'burger',
@@ -25,7 +25,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fastfood',
         foodGain: 20,
-        cost: 10
+        cost: 8
     },
     {
         id: 'banana',
