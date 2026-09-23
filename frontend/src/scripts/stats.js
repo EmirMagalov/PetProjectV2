@@ -194,19 +194,11 @@ watch(() => gameData.lives, async (newLives) => {
 
 let addictionTimer = null
 
-// watch(() => gameData.addictionLevel, (newAddictionLevel) => {
-//     // Очищаем предыдущий таймер, если он уже был запущен
-//     if (addictionTimer) {
-//         clearTimeout(addictionTimer)
-//         addictionTimer = null
-//     }
-//
-//     if (newAddictionLevel === 1) {
-//         addictionTimer = setTimeout(() => {
-//             gameData.addictionLevel = 0
-//             addictionTimer = null
-//         }, 3000)
-//     }
-// })
+watch(() => gameData.sick, (newSick) => {
+    if(newSick ===false && gameData.addictionStreak>=2){
+        gameData.addictionStreak=1
+    }
+
+})
 
 

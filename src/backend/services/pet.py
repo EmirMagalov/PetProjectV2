@@ -62,12 +62,13 @@ async def update_pet_stats(pet) -> bool:
         pet.energy = max(0.0, pet.energy - energy_rate * capped_hours)
 
         # Сброс зависимости
-        if pet.addiction_streak > 1 and elapsed_seconds >= 1800:
-            pet.addiction_streak = 0
+        if pet.addiction_streak >= 1 and pet.last_interaction:
+            if (now - pet.last_interaction) >= 1800:
+                pet.addiction_streak = 0
 
         # Какашка
         if not pet.is_pooped and capped_minutes > 0:
-            poop_chance = 1 - ((1 - 1 / 360) ** capped_minutes)
+            poop_chance = 1 - ((1 - 1 / 180) ** capped_minutes)
             if random.random() < poop_chance:
                 pet.is_pooped = True
 

@@ -114,7 +114,7 @@ export async function resetLocal() {
 
 
 export const isBadMood = computed(() => {
-    return showHunger.value || lowEnergy.value || gameData.addictionStreak >= 2
+    return showHunger.value || lowEnergy.value || gameData.sick
 })
 
 
