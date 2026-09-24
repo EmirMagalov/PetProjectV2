@@ -34,12 +34,13 @@ async def static_text(page: int, per_page: int = 5,bot=None):
         name = pet.name or "None"
         click_counter = pet.click_counter
         level = pet.level
+        coins = pet.coins
         try:
             chat_info = await bot.get_chat(tg_id)
             user_name = chat_info.first_name or "Неизвестен"
         except Exception:
             user_name = f"Неизвестен"
-        statistics += f"Пользователь: {user_name}({tg_id})\nИмя питомца: {name}\nКликов: {click_counter}\nУровень: {level}\n---------\n"
+        statistics += f"Пользователь: {user_name}({tg_id})\nИмя питомца: {name}\nКликов: {click_counter}\nУровень: {level}\nМонет: {coins}\n---------\n"
 
     return f"📊 <b>Всего пользователей:</b> {total_count} (Стр. {page})\n\n{statistics}", total_count
 
