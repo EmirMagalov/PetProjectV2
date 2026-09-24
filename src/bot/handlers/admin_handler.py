@@ -19,7 +19,7 @@ def keyboard_callback(callback:dict[str,str]):
     return keyboard.as_markup()
 
 
-async def static_text(page: int, per_page: int = 5):
+async def static_text(page: int, per_page: int = 5,bot=None):
     offset = (page - 1) * per_page
     total_count = await PetModel.all().count()
 
@@ -34,7 +34,12 @@ async def static_text(page: int, per_page: int = 5):
         name = pet.name or "None"
         click_counter = pet.click_counter
         level = pet.level
-        statistics += f"ID: {tg_id}\nИмя питомца: {name}\nКликов: {click_counter}\nУровень: {level}\n---------\n"
+        try:
+            chat_info = await bot.get_chat(tg_id)
+            user_name = chat_info.first_name or "Неизвестен"
+        except Exception:
+            user_name = f"Неизвестен"
+        statistics += f"Пользователь: {user_name}({tg_id})\nИмя питомца: {name}\nКликов: {click_counter}\nУровень: {level}\n---------\n"
 
     return f"📊 <b>Всего пользователей:</b> {total_count} (Стр. {page})\n\n{statistics}", total_count
 
