@@ -21,7 +21,7 @@ function finishEditing() {
 </script>
 
 <template>
-  <div class="absolute w-19 top-0 right-0">
+  <div class="absolute w-19 top-0 right-0 ">
     <div class="relative">
       <img src="/gamePlay/photo_frame.webp" alt="" class="w-full h-auto">
 

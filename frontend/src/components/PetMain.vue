@@ -85,6 +85,10 @@ let lookInterval = null
 
 
 function getHornAsset(level) {
+  if (level >= 50) return '/horns/50lvl.webp'
+  if (level >= 45) return '/horns/45lvl.webp'
+  if (level >= 40) return '/horns/40lvl.webp'
+  if (level >= 35) return '/horns/35lvl.webp'
   if (level >= 30) return '/horns/30lvl.webp'
   if (level >= 25) return '/horns/25lvl.webp'
   if (level >= 20) return '/horns/20lvl.webp'
@@ -229,12 +233,13 @@ onUnmounted(() => {
             <div class="absolute text-[#00BFFF] font-bold text-sm z-2 left-4 -top-3 drop-shadow-md">z</div>
           </div>
           <p class="bg-[#fbf3e0]"></p>
-
+          <PhotoFrame v-show="(location==='home' || location==='food')"/>
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
-          <div :key="animKey" class="absolute flex justify-center items-center animate-pop w-45 h-45">
+          <div :key="animKey" class="absolute  flex justify-center items-center animate-pop w-45 h-45">
+
             <PetHeadwear/>
             <img :src="body" class="absolute w-45" alt="">
-            <img :src="getHornAsset(gameData.level)" class="absolute w-45" alt="">
+            <img :src="getHornAsset(gameData.level)" class="absolute w-45 " alt="">
             <img v-show="gameData.sick" src="/character/drunk.webp" class="absolute w-45" alt="">
             <img v-show="gameData.sick && body==='/character/fat_body.webp'" src="/character/sick_fat.webp"
                  class="absolute w-45" alt="">
@@ -297,7 +302,7 @@ onUnmounted(() => {
           <PetSmoke :status-smoke="statusSmoke"/>
           <PetShower :status-shower="statusShower"/>
           <Poop v-show="gameData.isPooped && (location==='home' || location==='food')"/>
-          <PhotoFrame v-show="(location==='home' || location==='food')"/>
+
 
 
         </div>
