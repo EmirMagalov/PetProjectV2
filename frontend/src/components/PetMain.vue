@@ -128,7 +128,11 @@ function startRandomLooking() {
 
 watch(location, (newLocation) => {
   if (newLocation === 'home') {
+    if(statusFoam){
+      statusFoam.value = false;
+    }
     locationUrl.value = '/location/home.webp'
+
 
   } else if (newLocation === 'bath') {
     locationUrl.value = '/location/bath.webp'

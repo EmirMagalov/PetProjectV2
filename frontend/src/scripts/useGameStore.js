@@ -10,11 +10,11 @@ export const showHunger = ref(false)
 export const cloudShow = ref(false)
 export const energyFull = ref(false)
 export const lastFedItem = ref(null)
-
+export const sameFoodCount = ref(0)
 export const isAnimating = ref(false)
 export const isVibrating = ref(false)
 export const hearts = ref(false)
-
+export const showTongue = ref(false)
 
 export const dropZoneRef = ref()
 export const feedStatus = ref(false)

@@ -10,7 +10,7 @@ import {
     statusShower
 } from "@/scripts/useGameStore.js";
 
-import {currentFoodItem,} from "@/scripts/basket.js";
+import {currentBathItem, currentFoodItem, removeFromCart,} from "@/scripts/basket.js";
 import {addExp} from "@/scripts/level.js";
 
 export let actionTimer = null
@@ -114,6 +114,7 @@ export function handleMove(event, itemType,foodId,foodCategory) {
             }
         } else if (itemType === 'foam') {
             batheStatus.value = true
+
         }
     } else {
         isHovered.value = false
@@ -154,7 +155,13 @@ export function handleEnd(itemType, foodId, foodCategory) {
 
 
         } else if (itemType === 'foam') {
-            statusFoam.value = true
+            if(!statusFoam.value){
+                statusFoam.value = true
+                if (foodId) {
+                    removeFromCart(foodId)
+                }
+            }
+
         }
 
     }
@@ -227,6 +234,12 @@ export const foamDrag = useDraggable(foamEl, {
             foamDrag.y.value = rect.top
         }
     },
-    onMove: (pos, event) => handleMove(event, 'foam'),
-    onEnd: () => handleEnd('foam')
+    onMove: (pos, event) => {
+        const bathId = currentBathItem.value?.id // Берём текущий шампунь
+        handleMove(event, 'foam', bathId)
+    },
+    onEnd: () => {
+        const bathId = currentBathItem.value?.id // Берём текущий шампунь
+        handleEnd('foam', bathId)
+    }
 })

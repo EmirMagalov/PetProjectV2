@@ -1,4 +1,4 @@
-// src/data/foodItems.js
+// src/data/objectItems.js
 export const foodList = [
     {
         id: 'pizza',
@@ -6,7 +6,7 @@ export const foodList = [
         image: '/food/pizza.webp',
         category: 'food',
         subcategory:'fastfood',
-        foodGain: 25, // сколько добавляет сытости
+        foodGain: 15, // сколько добавляет сытости
         cost: 12       // сколько стоит монет
     },
     {
@@ -15,7 +15,7 @@ export const foodList = [
         image: '/food/burger.webp',
         category: 'food',
         subcategory:'fastfood',
-        foodGain: 40,
+        foodGain: 20,
         cost: 19
     },
     {
@@ -24,8 +24,8 @@ export const foodList = [
         image: '/food/hotdog.webp',
         category: 'food',
         subcategory:'fastfood',
-        foodGain: 20,
-        cost: 8
+        foodGain: 10,
+        cost: 9
     },
     {
         id: 'banana',
@@ -33,8 +33,8 @@ export const foodList = [
         image: '/food/banana.webp',
         category: 'food',
         subcategory:'fruits',
-        foodGain: 8,
-        cost: 5
+        foodGain: 2,
+        cost: 11
     },
     {
         id: 'kiwi',
@@ -42,7 +42,7 @@ export const foodList = [
         image: '/food/kiwi.webp',
         category: 'food',
         subcategory:'fruits',
-        foodGain: 5,
+        foodGain: 1,
         cost: 10
     },
     {
@@ -74,6 +74,24 @@ export const foodList = [
         subcategory:'potion',
         health:1,
         cost: 300,
+
+    },
+    {
+        id: 'shampoo',
+        name: 'Шампунь',
+        image: '/gamePlay/shampoo_icon.webp',
+        category: 'bath accessories',
+        subcategory:'shampoo',
+        cost: 70,
+
+    },
+    {
+        id: 'soap',
+        name: 'Мыло',
+        image: '/gamePlay/soap_icon.webp',
+        category: 'bath accessories',
+        subcategory:'soap',
+        cost: 70,
 
     },
 ]

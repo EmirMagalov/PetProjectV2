@@ -5,7 +5,7 @@ import {
     gameData, isGameOver,
     lowEnergy,
     mouth, PlayCount, resetLocal,
-    showHunger,
+    showHunger, showTongue,
     sleepTimeRemaining
 } from "@/scripts/useGameStore.js";
 import {addExp} from "@/scripts/level.js";
@@ -14,19 +14,17 @@ import {addCoin, drunkTimer} from "@/scripts/actions.js";
 import {batheStatus, isHovered, previousMouth} from "@/scripts/dragAndDrop.js";
 
 
-const FOOD_PER_HOUR_HEALTHY   = 15;     // ~6.7 часа
-const FOOD_PER_HOUR_SICK      = 25;     // ~4 часа
+const FOOD_PER_HOUR_HEALTHY = 15;     // ~6.7 часа
+const FOOD_PER_HOUR_SICK = 25;     // ~4 часа
 
 const ENERGY_PER_HOUR_HEALTHY = 15;
-const ENERGY_PER_HOUR_SICK    = 25;
+const ENERGY_PER_HOUR_SICK = 25;
 // ===================================================
 
 setInterval(() => {
     // Переводим часовой расход в минутный (потому что интервал = 1 минута)
-    const foodPerMinute   = (gameData.sick ? FOOD_PER_HOUR_SICK   : FOOD_PER_HOUR_HEALTHY)   / 60;
+    const foodPerMinute = (gameData.sick ? FOOD_PER_HOUR_SICK : FOOD_PER_HOUR_HEALTHY) / 60;
     const energyPerMinute = (gameData.sick ? ENERGY_PER_HOUR_SICK : ENERGY_PER_HOUR_HEALTHY) / 60;
-    console.log("Было",gameData.energy)
-    console.log("Было",gameData.foodLevel)
     // 1. Уменьшаем еду
     if (gameData.foodLevel > 0) {
         gameData.foodLevel = Math.max(0, gameData.foodLevel - foodPerMinute);
@@ -63,8 +61,6 @@ setInterval(() => {
     }
 
     gameData.lastUpdate = Date.now();
-    console.log("Стало",gameData.energy)
-    console.log("Стало",gameData.foodLevel)
 }, 60000);
 
 // Логика сна
@@ -122,13 +118,13 @@ watch(
     [
         isHovered,
         batheStatus,
+        showTongue,
+        () => gameData.foodLevel,
 
-        ()=>gameData.foodLevel,
-
-        ()=>gameData.isFat,
+        () => gameData.isFat,
 
     ],
-    ([hovered,isBathe,foodLevel,isFat]) => {
+    ([hovered, isBathe, isShowTongue, foodLevel, isFat]) => {
         const isLowEnergy = gameData.energy < 20
         const isHungry = gameData.foodLevel < 20
         const isSick = gameData.sick
@@ -142,24 +138,18 @@ watch(
             PlayCount.value = 0
         }
 
-        if (foodLevel<15){
+        if (foodLevel < 15) {
             body.value = '/character/skinny_body.webp'
-        }
-        else if (isFat){
+        } else if (isFat) {
             body.value = '/character/fat_body.webp'
-        }else {
+        } else {
             body.value = '/character/main_body.webp'
         }
-
-        if (hovered && !isBathe) {
+        if (isShowTongue) {
+            mouth.value = '/character/isPlayed_mouth.webp'
+        } else if (hovered && !isBathe) {
             mouth.value = '/character/open_mouth.webp'
-        }
-            // Приоритет 2: Если питомец спит (можно поставить спрайт спящего/закрытого рта, если есть)
-            // else if (isSleeping) {
-            //     mouth.value = '/character/sleep_mouth.webp' // или оставьте привычный
-            // }
-        // Приоритет 3: Если есть проблемы (голод, усталость, зависимость/дебафф) — грустный
-        else if (hasIssues) {
+        } else if (hasIssues) {
             mouth.value = '/character/sad_mouth.webp'
         }
         // Приоритет 4: Во всех остальных случаях — счастливый / нормальный
@@ -188,14 +178,13 @@ watch(() => gameData.lives, async (newLives) => {
         isGameOver.value = true
 
 
-
     }
 })
 
 
 watch(() => gameData.sick, (newSick) => {
-    if(newSick ===false && gameData.addictionStreak>=2){
-        gameData.addictionStreak=1
+    if (newSick === false && gameData.addictionStreak >= 2) {
+        gameData.addictionStreak = 1
     }
 
 })

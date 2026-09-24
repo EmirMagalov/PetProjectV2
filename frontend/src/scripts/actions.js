@@ -4,14 +4,14 @@ import {
     gameData, hearts,
     isAnimating, isBadMood, isLosingLifeStatus,
     isVibrating,
-    lastFedItem, lifeStatus, PlayCount,
-    showHunger,
+    lastFedItem, lifeStatus, PlayCount, sameFoodCount,
+    showHunger, showTongue,
 
 }
     from "@/scripts/useGameStore.js";
 import '@/scripts/stats.js'
 import {cartItemsList, currentFoodItem, currentIndex, removeFromCart} from "@/scripts/basket.js";
-import {foodList} from "@/scripts/foodItems.js";
+import {foodList} from "@/scripts/objectItems.js";
 import {addExp} from "@/scripts/level.js";
 
 import {toggleSleep} from "@/scripts/stats.js";
@@ -75,66 +75,84 @@ const FAT_COOLDOWN = 10000 // 10 секунд
 export function feedPet(foodId) {
     const targetId = foodId || cartItemsList.value[currentIndex.value]?.id
     const foodItem = foodList.find(item => item.id === targetId)
-    lastFedItem.value = currentFoodItem.value
 
-    if (foodItem && gameData.cart[targetId] > 0) {
-        removeFromCart(targetId)
+    if (!foodItem || gameData.cart[targetId] <= 0) return
 
-        gameData.foodLevel = Math.min(100, gameData.foodLevel + foodItem.foodGain)
-        gameData.coins += 1
-        gameData.feedCount += 1
-        addCoin(1)
-        addExp(20)
-        feedStatus.value = true
-        setTimeout(() => feedStatus.value = false, 800)
+    // 1. Проверяем, ел ли он это же блюдо до этого
+    if (lastFedItem.value === targetId) {
+        sameFoodCount.value++
+    } else {
+        lastFedItem.value = targetId
+        sameFoodCount.value = 1
+    }
 
-        if (gameData.feedCount > 3) {
-            gameData.stinky = true
-        }
+    // 2. Если съел 3 раза подряд — отказываемся
+    if (sameFoodCount.value >= 3) {
+        showTongue.value = true
 
-        // Флаг, чтобы отследить, стал ли он толстым именно на этом шаге
-        let becameFatNow = false
+        // 👇 Добавь этот таймер сброса, чтобы язык пропадал через 2 секунды
+        setTimeout(() => {
+            showTongue.value = false
+        }, 800)
 
-        // 1. Проверка по шкале сытости (100%)
-        if (gameData.foodLevel >= 100 && foodItem.subcategory === 'fastfood') {
-            if (!gameData.isFat) {
-                gameData.isFat = true
-                becameFatNow = true // ✅ Сказали системе, что он только что потолстел!
-            } else {
-                isLosingLife()
-            }
-        }
+        return false
+    }
 
-        // 2. Проверяем обычный стрик еды
-        if (gameData.foodStreak >= 2 && !gameData.isFat) {
+    // 3. Основная логика кормления
+    removeFromCart(targetId)
+
+    gameData.foodLevel = Math.min(100, gameData.foodLevel + foodItem.foodGain)
+    gameData.coins += 1
+    gameData.feedCount += 1
+    addCoin(1)
+    addExp(20)
+    feedStatus.value = true
+    setTimeout(() => feedStatus.value = false, 800)
+
+    if (gameData.feedCount > 3) {
+        gameData.stinky = true
+    }
+
+    // Флаг, чтобы отследить, стал ли он толстым именно на этом шаге
+    let becameFatNow = false
+
+    // 1. Проверка по шкале сытости (100%)
+    if (gameData.foodLevel >= 100 && foodItem.subcategory === 'fastfood') {
+        if (!gameData.isFat) {
             gameData.isFat = true
-            becameFatNow = true // ✅ Тоже здесь
+            becameFatNow = true
+        } else {
+            isLosingLife()
         }
+    }
 
-        // 3. Логика фруктов (лечение)
-        if (foodItem.subcategory === 'fruits') {
-            if (gameData.sick) {
-                fruitStreak.value++
-                if (fruitStreak.value >= 10) {
-                    gameData.sick = false
-                    fruitStreak.value = 0
-                    addCoin(20)
-                }
+    // 2. Проверяем обычный стрик еды
+    if (gameData.foodStreak >= 2 && !gameData.isFat) {
+        gameData.isFat = true
+        becameFatNow = true
+    }
+
+    // 3. Логика фруктов (лечение)
+    if (foodItem.subcategory === 'fruits') {
+        if (gameData.sick) {
+            fruitStreak.value++
+            if (fruitStreak.value >= 10) {
+                gameData.sick = false
+                fruitStreak.value = 0
+                addCoin(20)
             }
         }
+    }
 
-        // 4. Проверка кулдауна (если стал толстым прямо сейчас)
-        if (becameFatNow) {
-            const now = Date.now()
+    // 4. Проверка кулдауна (если стал толстым прямо сейчас)
+    if (becameFatNow) {
+        const now = Date.now()
 
-            // Если с момента ПРОШЛОГО ожирения прошло меньше 10 секунд
-            if (lastFatTime > 0 && (now - lastFatTime < FAT_COOLDOWN)) {
-                gameData.sick = true // 🤒 Заболел из-за спешки!
-            }
-
-            // Запоминаем время текущего ожирения
-            lastFatTime = now
+        if (lastFatTime > 0 && (now - lastFatTime < FAT_COOLDOWN)) {
+            gameData.sick = true
         }
+
+        lastFatTime = now
     }
 }
 

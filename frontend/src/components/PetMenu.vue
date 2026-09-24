@@ -2,7 +2,10 @@
 
 import ShopModal from '@/components/ShopModal.vue'
 
-import {cartItemsList, currentIndex, nextItem} from "@/scripts/basket.js";
+import {
+  cartItemsList, currentIndex, bathCartList, foodCartList,
+  currentBathIndex, nextItem, nextBathItem
+} from "@/scripts/basket.js";
 import {
   currentDraggedItem,
   feedStatus,
@@ -144,38 +147,55 @@ const shouldPulse = computed(() => {
 
         <!-- ШАМПУНЬ -->
         <div
-            class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
+            @click="nextBathItem()"
+            class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 cursor-pointer"
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
-          <div v-show="!feedStatus"
-               ref="foamEl"
-               :style="[
-               foamDrag.isDragging.value ? foamDrag.style.value : {},
-               {
-                   'touch-action': 'none',
-                   'background-image': `url('/gamePlay/shampoo_icon.webp')` // Заменили на динамический фон для шампуня
-               }
-             ]"
-               :class="[
-               foamDrag.isDragging.value ? 'fixed z-150' : 'relative',
-               currentDraggedItem === 'shower' && !statusFoam && showerCount === 0 ? 'animate-pulse' : ''
-             ]"
-               class="flex flex-col items-center cursor-move w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
-          ></div>
-          <div v-show="foamDrag.isDragging.value || feedStatus"
-               style="background-image: url('/gamePlay/shampoo_icon.webp')"
-               class="w-[70px] h-[70px] opacity-30 bg-contain">
 
-          </div>
-          <!--          <img v-show="foamDrag.isDragging.value || feedStatus" src="/gamePlay/shampoo_icon.webp" class="opacity-30 "-->
-          <!--               width="60px"-->
-          <!--               height="60px"-->
-          <!--               alt="">-->
-          <button class="text-xs font-bold text-gray-600">Шампунь</button>
+          <!-- 1. Если список банных принадлежностей пуст -->
+          <template v-if="bathCartList.length === 0">
+            <div
+                class="flex flex-col items-center justify-center w-[70px] h-[70px] opacity-30 bg-contain bg-no-repeat bg-center"
+                style="background-image: url('/gamePlay/shampoo_icon.webp')">
+            </div>
+          </template>
+
+          <!-- 2. Если в инвентаре есть шампунь/мыло -->
+          <template v-else>
+            <div v-show="!feedStatus"
+                 ref="foamEl"
+                 :style="[
+                   foamDrag.isDragging.value ? foamDrag.style.value : {},
+                   {
+                       'touch-action': 'none',
+                       'background-image': `url('${bathCartList[currentBathIndex]?.image}')`
+                   }
+                 ]"
+                 :class="[
+                   foamDrag.isDragging.value ? 'fixed z-150 pointer-events-none' : 'relative',
+                   currentDraggedItem === 'shower' && !statusFoam && showerCount === 0 ? 'animate-pulse' : ''
+                 ]"
+                 class="flex flex-col items-center cursor-move w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
+            ></div>
+
+            <div v-show="foamDrag.isDragging.value || feedStatus"
+                 :style="{ 'background-image': `url('${bathCartList[currentBathIndex]?.image}')` }"
+                 class="w-[70px] h-[70px] opacity-30 bg-contain bg-no-repeat bg-center">
+            </div>
+          </template>
+
+          <!-- Текст названия / статуса -->
+          <p class="text-xs absolute bottom-2 font-bold text-gray-600 pointer-events-none whitespace-nowrap">
+            {{
+              bathCartList.length > 0 && bathCartList[currentBathIndex]
+                  ? `${bathCartList[currentBathIndex].name} x${bathCartList[currentBathIndex].count}`
+                  : 'Полка пустая'
+            }}
+          </p>
         </div>
 
         <div
-            @click="[!statusFoam? location =  'home':'',showerCount=0]"
+            @click="location =  'home'"
             class="bg-[#fff6ef] justify-center h-25  flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
             style="box-shadow: inset 0 -5px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-20 h-20 bg-contain bg-no-repeat bg-center"
@@ -184,6 +204,8 @@ const shouldPulse = computed(() => {
           <button class="text-lg font-bold text-gray-600 pointer-events-none">Назад</button>
         </div>
       </div>
+
+      <!-- FOOD -->
 
       <!-- FOOD -->
 
@@ -196,15 +218,15 @@ const shouldPulse = computed(() => {
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
-          <!-- 1. Если холодильник пуст: показываем только заглушку и текст -->
-          <template v-if="cartItemsList.length === 0">
+          <!-- 1. Если холодильник пуст: используем foodCartList вместо cartItemsList -->
+          <template v-if="foodCartList.length === 0">
             <div
                 class="flex flex-col items-center justify-center w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
                 style="background-image: url('/gamePlay/fridge_empty.webp')">
             </div>
           </template>
 
-          <!-- 2. Если в холодильнике есть еда: показываем продукты и логику драг-н-драп -->
+          <!-- 2. Если в холодильнике есть еда -->
           <template v-else>
             <div v-show="!feedStatus"
                  ref="foodEl"
@@ -212,28 +234,27 @@ const shouldPulse = computed(() => {
                    (foodDrag.isDragging.value && !foodConsumedByPipe) ? foodDrag.style.value : {},
                    {
                      'touch-action': 'none',
-                     'background-image': `url('${cartItemsList[currentIndex]?.image}')`
+                     'background-image': `url('${foodCartList[currentIndex]?.image}')`
                    }
                  ]"
                  :class="[
                    (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative',
-
                  ]"
                  class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
             ></div>
 
             <img v-show="(foodDrag.isDragging.value || feedStatus) && !foodConsumedByPipe"
-                 :src="cartItemsList[currentIndex]?.image"
+                 :src="foodCartList[currentIndex]?.image"
                  class="opacity-30 relative"
                  width="80"
                  alt="">
           </template>
 
-          <!-- Текст названия / статуса -->
+          <!-- Текст названия / статуса с использованием foodCartList -->
           <p class="text-xs absolute bottom-1 font-bold text-gray-600 pointer-events-none whitespace-nowrap">
             {{
-              cartItemsList.length > 0 && cartItemsList[currentIndex]
-                  ? `${cartItemsList[currentIndex].name} x${gameData.cart[cartItemsList[currentIndex]?.id]}`
+              foodCartList.length > 0 && foodCartList[currentIndex]
+                  ? `${foodCartList[currentIndex].name} x${gameData.cart[foodCartList[currentIndex]?.id]}`
                   : 'Холодильник пуст'
             }}
           </p>

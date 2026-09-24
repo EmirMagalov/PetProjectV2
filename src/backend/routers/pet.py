@@ -18,7 +18,7 @@ async def get_pet(tg_id: int):
             "lives": 3,
             "feed_count": 3,
             "bad_stats_minutes": 0,
-            "cart": {'burger': 1},
+            "cart": {'burger': 1,'shampoo': 1},
             "last_update": time.time()
         })
     else:

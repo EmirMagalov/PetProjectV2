@@ -1,5 +1,5 @@
 <script setup>
-import {foodList} from '@/scripts/foodItems.js'
+import {foodList} from '@/scripts/objectItems.js'
 import {headItems} from '@/scripts/headwearItems.js'
 import {ref, computed} from 'vue'
 import {addToCart, buyHeadwear} from "@/scripts/basket.js"
@@ -19,9 +19,11 @@ const activeTab = ref('food')
 // Динамический список товаров в зависимости от выбранной вкладки
 const currentList = computed(() => {
   if (activeTab.value === 'food') {
-    return foodList.filter(item => item.category !== 'shaman')
+    return foodList.filter(item => item.category !== 'shaman' && item.category !== 'bath accessories')
   } else if (activeTab.value === 'shaman') {
     return foodList.filter(item => item.category === 'shaman')
+  } else if (activeTab.value === 'bath') {
+    return foodList.filter(item => item.category === 'bath accessories')
   } else {
     return headItems
   }
@@ -33,7 +35,7 @@ let notificationTimer = null
 
 // Универсальная логика клика по кнопке товара
 function handleItemClick(item) {
-  if (activeTab.value === 'food' || activeTab.value === 'shaman') {
+  if (activeTab.value === 'food' || activeTab.value === 'shaman' || activeTab.value === 'bath') {
     if (gameData.coins >= item.cost) {
       gameData.coins -= item.cost
       addToCart(item.id)
@@ -110,24 +112,42 @@ const getItemBonuses = (item) => {
       </div>
 
       <!-- Переключатель категорий -->
-      <div class="flex border-b border-slate-800 bg-slate-900/40 p-2 gap-2">
+      <div class="grid grid-cols-4 border-b border-slate-800 bg-slate-900/40 p-2 gap-1.5">
         <button
             @click="activeTab = 'food'"
-            :class="['flex-1 py-2 rounded-xl text-sm font-bold transition-all', activeTab === 'food' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate', activeTab === 'food' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
-          🍔 Еда
+          <div class="flex items-center justify-center gap-1">
+            <img class="w-5 h-5 object-contain" src="/food/burger.webp" alt="">
+            <span>Еда</span>
+          </div>
         </button>
         <button
             @click="activeTab = 'shaman'"
-            :class="['flex-1 py-2 rounded-xl text-sm font-bold transition-all', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
-          🪶 Шаман
+          <div class="flex items-center justify-center gap-1">
+            <img class="w-5 h-5 object-contain" src="/gamePlay/feather_icon.webp" alt="">
+            <span>Шаман</span>
+          </div>
+        </button>
+        <button
+            @click="activeTab = 'bath'"
+            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate', activeTab === 'bath' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+        >
+          <div class="flex items-center justify-center gap-1">
+            <img class="w-5 h-5 object-contain" src="/gamePlay/soap_icon.webp" alt="">
+            <span>Баня</span>
+          </div>
         </button>
         <button
             @click="activeTab = 'clothes'"
-            :class="['flex-1 py-2 rounded-xl text-sm font-bold transition-all', activeTab === 'clothes' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate', activeTab === 'clothes' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
-          🧢 Одежда
+          <div class="flex items-center justify-center gap-1">
+            <img class="w-5 h-5 object-contain" src="/headwear/cowboyhat.webp" alt="">
+            <span>Гардероб</span>
+          </div>
         </button>
       </div>
 
@@ -153,7 +173,7 @@ const getItemBonuses = (item) => {
             </div>
             <div>
               <h3 class="font-semibold text-sm text-white">{{ item.name }}</h3>
-              <p v-if="activeTab === 'food' || activeTab === 'shaman'" class="text-xs text-emerald-400">
+              <p v-if="activeTab === 'food' || activeTab === 'shaman' || activeTab === 'bath'" class="text-xs text-emerald-400">
                 <template v-for="(bonus, index) in getItemBonuses(item)" :key="index">
                   {{ bonus }}<br v-if="index < getItemBonuses(item).length - 1">
                 </template>
