@@ -3,13 +3,13 @@ from aiogram import Bot, Dispatcher
 from tortoise import Tortoise
 from common.config import settings
 from bot.handlers.user_handler import user_router
+from bot.handlers.admin_handler import admin_router
 
 bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)
 dp = Dispatcher()
 
 
 async def main():
-    # 👉 1. Инициализируем подключение к базе данных ПЕРЕД запуском бота
     await Tortoise.init(
         db_url=settings.DATABASE_URL,
         modules={"models": ["backend.models.pet"]}
@@ -17,6 +17,7 @@ async def main():
     print("✅ База данных успешно подключена в боте!")
 
     dp.include_router(user_router)
+    dp.include_router(admin_router)
 
     try:
         await dp.start_polling(bot)
