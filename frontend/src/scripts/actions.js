@@ -86,8 +86,8 @@ export function feedPet(foodId) {
         sameFoodCount.value = 1
     }
 
-    // 2. Если съел 3 раза подряд — отказываемся
-    if (sameFoodCount.value >= 3) {
+    const randomLimit = Math.floor(Math.random() * 3) + 3
+    if (sameFoodCount.value >= randomLimit) {
         showTongue.value = true
 
         // 👇 Добавь этот таймер сброса, чтобы язык пропадал через 2 секунды
