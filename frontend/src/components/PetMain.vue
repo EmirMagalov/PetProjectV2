@@ -24,6 +24,7 @@ import {preloadImages} from "@/scripts/preloadImages.js";
 import PhotoFrame from "@/components/PhotoFrame.vue";
 import {computed} from 'vue'
 import PetSideMenu from "@/components/PetSideMenu.vue";
+import {foodList} from "@/scripts/objectItems.js";
 
 const activeStatus = computed(() => {
   // Приоритет 1: Смерть питомца
@@ -66,11 +67,14 @@ const activeStatus = computed(() => {
 
   // Приоритет 5: Кормежка (ням-ням)
   if (feedStatus.value) {
+    // Находим сам объект еды по ID, который сохранен в lastFedItem
+    const fedItemObj = foodList.find(item => item.id === lastFedItem.value)
+
     return {
       show: true,
       text: "Ням-ням!",
       image: "/gamePlay/hunger.webp",
-      additional: `+${lastFedItem.value?.foodGain || 0}`
+      additional: `+${fedItemObj?.foodGain || 0}`
     }
   }
 

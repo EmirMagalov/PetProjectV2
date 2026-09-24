@@ -6,6 +6,7 @@ import {
   cartItemsList, currentIndex, bathCartList, foodCartList,
   currentBathIndex, nextItem, nextBathItem
 } from "@/scripts/basket.js";
+
 import {
   currentDraggedItem,
   feedStatus,
