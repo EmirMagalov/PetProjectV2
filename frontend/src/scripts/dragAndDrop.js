@@ -1,6 +1,6 @@
 import {useDraggable} from "@vueuse/core";
 import {computed, ref} from "vue";
-import {addCoin, feedPet, otherFeedPet} from "@/scripts/actions.js";
+import {addCoin, feedPet, isLosingLife, otherFeedPet} from "@/scripts/actions.js";
 import {
     currentDraggedItem,
     dropZoneRef,
@@ -95,7 +95,9 @@ export function handleMove(event, itemType,foodId,foodCategory) {
                 if (!actionTimer) {
                     actionTimer = setTimeout(() => {
                         const now = Date.now()
-
+                        if(gameData.sick){
+                            isLosingLife()
+                        }
                         if (now - lastBathTime < BATH_COOLDOWN) {
                             gameData.sick = true
                         }
