@@ -10,7 +10,7 @@ import {gameData} from "@/scripts/useGameStore.js";
        :class="{
        '-translate-y-1': gameData.level < 10,
        '-translate-y-5': gameData.level >= 10 && gameData.level < 15,
-       '-translate-y-8  -translate-x-7 rotate-25': gameData.level >= 15 && gameData.level < 20,
+       '-translate-y-8  -translate-x-7 rotate-20': gameData.level >= 15 && gameData.level < 20,
        '-translate-y-10  -translate-x-7 rotate-25': gameData.level >= 20 && gameData.level < 25,
        '-translate-y-11  -translate-x-7 rotate-25': gameData.level >= 25 && gameData.level < 30,
        '-translate-y-13  -translate-x-7 rotate-25': gameData.level >= 30  && gameData.level < 35,
