@@ -22,6 +22,10 @@ async def update_pet_stats(pet) -> bool:
     elapsed_seconds = now - pet.last_update
     elapsed_hours = elapsed_seconds / 3600
 
+    if pet.last_interaction and pet.last_interaction > 0:
+        time_since_last_visit = (now - pet.last_interaction) / 60
+    else:
+        time_since_last_visit = 999999
     # Защита от слишком частых вызовов (если прошло меньше 30 секунд)
     if elapsed_seconds < 30:
         return False
@@ -74,11 +78,14 @@ async def update_pet_stats(pet) -> bool:
             # Если зависимости нет вообще, обнуляем таймер
             pet.addiction_time = 0.0
 
-        # Какашка
-        if not pet.is_pooped and capped_minutes > 0:
-            poop_chance = 1 - ((1 - 1 / 180) ** capped_minutes)
-            if random.random() < poop_chance:
-                pet.is_pooped = True
+
+
+        if time_since_last_visit >= 20 and capped_minutes > 0:
+            # Какашка
+            if not pet.is_pooped:
+                poop_chance = 1 - ((1 - 1 / 90) ** capped_minutes)
+                if random.random() < poop_chance:
+                    pet.is_pooped = True
 
         if pet.is_pooped:
             pet.poop_bad_minutes += capped_minutes
@@ -88,10 +95,11 @@ async def update_pet_stats(pet) -> bool:
             pet.poop_bad_minutes = 0
 
         # Вонь
-        if not pet.stinky and capped_minutes > 0:
-            stinky_chance = 1 - ((1 - 1 / 360) ** capped_minutes)
-            if random.random() < stinky_chance:
-                pet.stinky = True
+        if time_since_last_visit >= 20 and capped_minutes > 0:
+            if not pet.stinky:
+                stinky_chance = 1 - ((1 - 1 / 90) ** capped_minutes)
+                if random.random() < stinky_chance:
+                    pet.stinky = True
 
         if pet.stinky:
             pet.stinky_bad_minutes += capped_minutes
