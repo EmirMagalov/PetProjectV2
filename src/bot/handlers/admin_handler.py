@@ -53,7 +53,7 @@ async def statistics_handler(message: types.Message, bot: Bot):
     per_page = 5
 
     # Получаем текст и общее количество записей из функции
-    text, total_count = await static_text(page=page, per_page=per_page)
+    text, total_count = await static_text(page=page, per_page=per_page,bot=bot)
 
     # Формируем кнопки с защитой
     buttons = {}
@@ -67,11 +67,11 @@ async def statistics_handler(message: types.Message, bot: Bot):
 
 
 @admin_router.callback_query(aiogram_F.data.startswith('page_'))
-async def pagination_handler(call: types.CallbackQuery):
+async def pagination_handler(call: types.CallbackQuery,bot:Bot):
     page = int(call.data.split('_')[1])
     per_page = 5
 
-    text, total_count = await static_text(page=page, per_page=per_page)
+    text, total_count = await static_text(page=page, per_page=per_page,bot=bot)
 
     buttons = {}
 
