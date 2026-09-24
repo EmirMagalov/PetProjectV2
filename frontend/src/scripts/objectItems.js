@@ -1,9 +1,10 @@
-// src/data/objectItems.js
+import {APP_VERSION} from "@/scripts/api.js";
+
 export const foodList = [
     {
         id: 'pizza',
         name: 'Пицца',
-        image: '/food/pizza.webp',
+        image: `/food/pizza.webp?v=${APP_VERSION}`,
         category: 'food',
         subcategory:'fastfood',
         foodGain: 15, // сколько добавляет сытости
@@ -12,7 +13,7 @@ export const foodList = [
     {
         id: 'burger',
         name: 'Бургер',
-        image: '/food/burger.webp',
+        image: `/food/burger.webp?v=${APP_VERSION}`,
         category: 'food',
         subcategory:'fastfood',
         foodGain: 20,
@@ -21,7 +22,7 @@ export const foodList = [
     {
         id: 'hotdog',
         name: 'Хотдог',
-        image: '/food/hotdog.webp',
+        image: `/food/hotdog.webp?v=${APP_VERSION}`,
         category: 'food',
         subcategory:'fastfood',
         foodGain: 10,
@@ -30,7 +31,7 @@ export const foodList = [
     {
         id: 'banana',
         name: 'Банан',
-        image: '/food/banana.webp',
+        image: `/food/banana.webp?v=${APP_VERSION}`,
         category: 'food',
         subcategory:'fruits',
         foodGain: 2,
@@ -39,7 +40,7 @@ export const foodList = [
     {
         id: 'kiwi',
         name: 'Киви',
-        image: '/food/kiwi.webp',
+        image: `/food/kiwi.webp?v=${APP_VERSION}`,
         category: 'food',
         subcategory:'fruits',
         foodGain: 1,
@@ -48,7 +49,7 @@ export const foodList = [
     {
         id: 'pipe',
         name: 'Трубка Шамана',
-        image: '/other/pipe.webp',
+        image: `/other/pipe.webp?v=${APP_VERSION}`,
         category: 'shaman',
         subcategory:'pipe',
         energyGain: 80,
@@ -58,7 +59,7 @@ export const foodList = [
     {
         id: 'lifePotion',
         name: 'Зелье жизни',
-        image: '/other/life_potion.webp',
+        image: `/other/life_potion.webp?v=${APP_VERSION}`,
         category: 'shaman',
         subcategory:'potion',
         life:1,
@@ -69,7 +70,7 @@ export const foodList = [
     {
         id: 'healthPotion',
         name: 'Зелье здоровья',
-        image: '/other/health_potion.webp',
+        image: `/other/health_potion.webp?v=${APP_VERSION}`,
         category: 'shaman',
         subcategory:'potion',
         health:1,
@@ -79,7 +80,7 @@ export const foodList = [
     {
         id: 'shampoo',
         name: 'Шампунь',
-        image: '/gamePlay/shampoo_icon.webp',
+        image: `/gamePlay/shampoo_icon.webp?v=${APP_VERSION}`,
         category: 'bath accessories',
         subcategory:'shampoo',
         cost: 70,
@@ -88,7 +89,7 @@ export const foodList = [
     {
         id: 'soap',
         name: 'Мыло',
-        image: '/gamePlay/soap_icon.webp',
+        image: `/gamePlay/soap_icon.webp?v=${APP_VERSION}`,
         category: 'bath accessories',
         subcategory:'soap',
         cost: 70,

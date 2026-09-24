@@ -4,7 +4,7 @@ import {computed, ref} from "vue";
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
 
-
+export const APP_VERSION = '1.0.1'
 // --- 1. СИСТЕМА ЖЕСТКОЙ БЛОКИРОВКИ ДУБЛИКАТОВ ВКЛАДОК ---
 const TAB_ID = Math.random().toString(36).substring(2)
 let isMaster = true
