@@ -100,7 +100,10 @@ const getItemBonuses = (item) => {
       <!-- Шапка модалки -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
-          🛒 Магазин
+          <div class="flex gap-1 items-center">
+            <img src="/gamePlay/shoppingСart_icon.webp" class="w-6 h-6" alt="">
+            <p class="text-lg">Магазин</p>
+          </div>
         </h2>
 
         <button

@@ -87,14 +87,10 @@ export function feedPet(foodId) {
     }
 
     const randomLimit = Math.floor(Math.random() * 3) + 3
-    if (sameFoodCount.value >= randomLimit) {
+
+    if ((!gameData.sick && sameFoodCount.value >= randomLimit) || (gameData.isFat && !gameData.sick && foodItem.subcategory === 'fruits')) {
         showTongue.value = true
-
-        // 👇 Добавь этот таймер сброса, чтобы язык пропадал через 2 секунды
-        setTimeout(() => {
-            showTongue.value = false
-        }, 800)
-
+        setTimeout(() => { showTongue.value = false }, 800)
         return false
     }
 
