@@ -112,7 +112,7 @@ function handleRestart() {
 
 <template>
   <div
-      class="rounded-4xl p-4 mx-5 bg-[#fff6ef] h-65 mt-1 border-2 border-[#f7c9a5] flex flex-col items-center justify-between relative overflow-hidden"
+      class="rounded-4xl p-4 mx-5 bg-[#fff6ef] h-65  border-2 border-[#f7c9a5] flex flex-col items-center justify-between relative overflow-hidden"
   >
     <RouterLink to="/">
       <div
@@ -202,7 +202,7 @@ function handleRestart() {
           @click="handleConfirmBet"
           :disabled="userCoins < selectedBet || isDealing"
           :class="[
-        'px-6 py-1.5 rounded-xl transition text-white font-bold shadow-md mt-1',
+        'h-10 w-25 rounded-xl transition text-white font-bold shadow-md mt-1',
         (userCoins < selectedBet || isDealing)
           ? 'bg-gray-400 opacity-60 cursor-not-allowed'
           : 'bg-emerald-500 hover:bg-emerald-400 active:scale-95 cursor-pointer'
