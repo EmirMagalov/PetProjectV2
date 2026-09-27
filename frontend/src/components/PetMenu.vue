@@ -14,7 +14,7 @@ import {
   isShopOpen,
   showHunger,
   sleepTimeRemaining,
-  statusFoam, location, isGameOver, handleRestart
+  statusFoam, location, isGameOver, handleRestart, warning, lowEnergy
 } from "@/scripts/useGameStore.js";
 import {goSleep} from "@/scripts/actions.js";
 import {
@@ -27,6 +27,7 @@ import {
   foamEl, foodConsumedByPipe
 } from "@/scripts/dragAndDrop.js";
 import {computed} from "vue";
+import {router} from "@/scripts/main.js";
 
 const shouldPulse = computed(() => {
   const list = cartItemsList.value || cartItemsList;
@@ -39,6 +40,16 @@ const shouldPulse = computed(() => {
   }
   return list[currentIndex.value].category !== 'shaman';
 });
+
+function goToSaloon() {
+  if (gameData.coins < 50) {
+    alert('Нужно минимум 50 монет, чтобы зайти в Салун!')
+    return
+  }
+  router.push('/saloon')
+}
+
+
 </script>
 
 <template>
@@ -100,16 +111,36 @@ const shouldPulse = computed(() => {
           </button>
 
         </div>
-        <div
-            @click="isShopOpen = true"
-            class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
-            style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-          <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
-               style="background-image: url('/gamePlay/market.webp')">
+        <div class="relative rounded-4xl overflow-hidden">
+
+          <!-- Блокирующий оверлей (как в магазине) -->
+          <div
+              v-if="gameData.level < 5"
+              class="absolute inset-0 z-20 bg-slate-950/70 flex flex-col items-center justify-center p-1 text-center"
+          >
+        <span class="text-amber-400 font-bold text-xs tracking-wide leading-tight">
+          🔒 Нужен<br>5 уровень
+        </span>
           </div>
-          <button class="text-md font-bold text-gray-600 pointer-events-none">Магазин</button>
+
+          <!-- Кнопка Салуна -->
+          <div
+              @click="goToSaloon"
+              class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
+              :class="{'opacity-50 pointer-events-none': gameData.level < 5}"
+              style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
+          >
+            <div
+                class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
+                style="background-image: url('/gamePlay/saloon.webp')"
+            ></div>
+            <button class="text-md font-bold text-gray-600 pointer-events-none">Салун(Beta)</button>
+          </div>
+
         </div>
+
       </div>
+
 
       <!--  BATH -->
 
@@ -119,6 +150,9 @@ const shouldPulse = computed(() => {
         <div
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
         >
+          <div v-show="gameData.sick && statusFoam" class="absolute pointer-events-none w-20 opacity-50 animate-pulse">
+            <img src="/gamePlay/warning_icons.webp" alt="">
+          </div>
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
           <div v-show="!feedStatus"
                ref="showerEl"
@@ -218,7 +252,6 @@ const shouldPulse = computed(() => {
 
       <!-- FOOD -->
 
-      <!-- FOOD -->
 
       <div v-show="location==='food'" class="grid grid-cols-2 gap-x-4 gap-y-1.5 w-60 place-self-center">
 
@@ -249,11 +282,18 @@ const shouldPulse = computed(() => {
                    }
                  ]"
                  :class="[
-                   (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative',
+                   (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative ',
+                   !foodDrag.isDragging.value && foodCartList[currentIndex]?.category === 'food' && showHunger ? 'animate-pulse' : '',
+                    !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'healthPotion' && gameData.sick ? 'animate-pulse' : '',
+                    !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'pipe' && lowEnergy.value ? 'animate-pulse' : '',
+
                  ]"
                  class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
             ></div>
-
+            <div v-show="gameData.foodLevel >= 100 && gameData.isFat"
+                 class="absolute w-20 opacity-50 animate-pulse pointer-events-none">
+              <img src="/gamePlay/warning_icons.webp" alt="">
+            </div>
             <img v-show="(foodDrag.isDragging.value || feedStatus) && !foodConsumedByPipe"
                  :src="foodCartList[currentIndex]?.image"
                  class="opacity-30 relative"

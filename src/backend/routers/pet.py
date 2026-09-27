@@ -67,6 +67,7 @@ async def reset_pet(data: dict):
     pet.fastfood_streak = 0
     pet.is_fat = False
     pet.sick = False
+    pet.is_pooped = False
     pet.addiction_streak = 0
     pet.bad_stats_minutes = 0
     pet.cart = {'burger':1}

@@ -16,7 +16,7 @@ import {addExp} from "@/scripts/level.js";
 
 import {toggleSleep} from "@/scripts/stats.js";
 
-import {ref} from "vue";
+import {computed, ref, watch} from "vue";
 
 let hideTrackerTimer = null
 export let drunkTimer = null
@@ -88,7 +88,7 @@ export function feedPet(foodId) {
 
     const randomLimit = Math.floor(Math.random() * 3) + 3
 
-    if ((!gameData.sick && sameFoodCount.value >= randomLimit) || (gameData.isFat && !gameData.sick && foodItem.subcategory === 'fruits')) {
+    if (sameFoodCount.value >= randomLimit) {
         showTongue.value = true
         setTimeout(() => { showTongue.value = false }, 800)
         return false
@@ -105,7 +105,7 @@ export function feedPet(foodId) {
     feedStatus.value = true
     setTimeout(() => feedStatus.value = false, 800)
 
-    if (gameData.feedCount > 3) {
+    if (gameData.feedCount >= 10) {
         gameData.stinky = true
     }
 
@@ -251,3 +251,6 @@ export function isLosingLife() {
     isLosingLifeStatus.value = true
     setTimeout(() => isLosingLifeStatus.value = false, 800)
 }
+
+
+// <span class="text-xs font-bold text-amber-900">Сделайте ставку:</span>

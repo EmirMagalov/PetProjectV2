@@ -15,7 +15,6 @@ export const isAnimating = ref(false)
 export const isVibrating = ref(false)
 export const hearts = ref(false)
 export const showTongue = ref(false)
-
 export const dropZoneRef = ref()
 export const feedStatus = ref(false)
 export const lifeStatus = ref(false)
@@ -26,10 +25,10 @@ export const currentDraggedItem = ref(null)
 export const blink = ref(false)
 export const locationUrl = ref()
 export const location = ref()
-// ==========================================
-// 3. АВТОМАТИЧЕСКОЕ СОХРАНЕНИЕ (WATCHERS)
-// ==========================================
-// Загружаем из localStorage или ставим 0
+
+export const warning = ref(false)
+
+
 export const fruitStreak = ref(
     Number(localStorage.getItem('pet_fruitStreak')) || 0
 )
@@ -93,6 +92,8 @@ export const gameData = reactive({
 export async function handleRestart() {
     isGameOver.value = false
     isLoading.value = true
+    fruitStreak.value = 0
+    localStorage.clear()
     await resetPet()
     await resetLocal()
     // Просто обновляем поля до дефолтных без дублирования портянки кода

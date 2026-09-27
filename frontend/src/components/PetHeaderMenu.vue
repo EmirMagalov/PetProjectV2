@@ -1,5 +1,5 @@
 <script setup>
-import {fruitStreak, gameData, PlayCount} from "@/scripts/useGameStore.js";
+import {fruitStreak, gameData, isGameOver, PlayCount} from "@/scripts/useGameStore.js";
 import ProgressBar from "@/components/ProgressBar.vue";
 import {expPercentage} from "@/scripts/level.js";
 import {animKey} from "@/scripts/actions.js";

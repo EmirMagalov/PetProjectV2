@@ -83,11 +83,6 @@ const activeStatus = computed(() => {
 })
 
 
-const pupilOffset = ref({x: 0, y: 0})
-let blinkInterval = null
-let lookInterval = null
-
-
 function getHornAsset(level) {
   if (level >= 50) return '/horns/50lvl.webp'
   if (level >= 45) return '/horns/45lvl.webp'
@@ -101,6 +96,25 @@ function getHornAsset(level) {
   if (level >= 5) return '/horns/5lvl.webp'
   return '/horns/1lvl.webp'
 }
+
+
+watch(location, (newLocation) => {
+  if (newLocation === 'home') {
+    if (statusFoam) {
+      statusFoam.value = false;
+    }
+    locationUrl.value = '/location/home.webp'
+
+
+  } else if (newLocation === 'bath') {
+    locationUrl.value = '/location/bath.webp'
+    gameData.sleep = false
+  }
+})
+// Запускаем рандомный взгляд при монтировании компонента
+const pupilOffset = ref({x: 0, y: 0})
+let blinkInterval = null
+let lookInterval = null
 
 // Функция рандомного взгляда
 function startRandomLooking() {
@@ -130,21 +144,6 @@ function startRandomLooking() {
   }, 3500)
 }
 
-watch(location, (newLocation) => {
-  if (newLocation === 'home') {
-    if(statusFoam){
-      statusFoam.value = false;
-    }
-    locationUrl.value = '/location/home.webp'
-
-
-  } else if (newLocation === 'bath') {
-    locationUrl.value = '/location/bath.webp'
-    gameData.sleep = false
-  }
-})
-// Запускаем рандомный взгляд при монтировании компонента
-
 const handleVisibilityChange = () => {
   if (document.visibilityState === 'visible') {
     initGameData()
@@ -165,12 +164,7 @@ onMounted(async () => {
   preloadImages()
   startRandomLooking()
 
-  // 👉 САМОЕ ГЛАВНОЕ: Обязательно загружаем данные с бэкенда при самом первом открытии!
-  try {
-    await initGameData()
-  } catch (e) {
-    console.error("Ошибка при первоначальной загрузке:", e)
-  }
+
 })
 
 onUnmounted(() => {
@@ -186,12 +180,6 @@ onUnmounted(() => {
   <div
       :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000 relative', gameData.sleep ? 'bg-linear-to-r from-blue-800 via-blue-900 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']">
 
-    <!-- 🛑 ОВЕРЛЕЙ ЗАГРУЗКИ (БЛОКИРУЕТ ИНТЕРФЕЙС, ПОКА ДАННЫЕ НЕ ПРИШЛИ) -->
-    <div v-if="isLoading"
-         class="fixed inset-0 z-200 bg-slate-950 backdrop-blur-md flex flex-col items-center justify-center gap-4">
-      <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-      <p class="text-white font-bold text-sm tracking-wide">Загрузка...</p>
-    </div>
 
     <PetHeaderMenu/>
 
@@ -310,7 +298,6 @@ onUnmounted(() => {
           <PetSmoke :status-smoke="statusSmoke"/>
           <PetShower :status-shower="statusShower"/>
           <Poop v-show="gameData.isPooped && (location==='home' || location==='food')"/>
-
 
 
         </div>
