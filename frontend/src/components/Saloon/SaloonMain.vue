@@ -10,7 +10,7 @@ import {
   gameStarted,
   pupilOffset, randomCharacterImage,
   result
-} from "@/scripts/saloon/twentyOneGame.js";
+} from "@/scripts/saloonScripts/twentyOneGame.js";
 import SaloonHeaderMenu from "@/components/Saloon/SaloonHeaderMenu.vue";
 
 // =====================================================

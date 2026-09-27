@@ -15,7 +15,7 @@ import {
   determineWinner,
   currentBet,
   isDealing
-} from "@/scripts/saloon/twentyOneGame.js";
+} from "@/scripts/saloonScripts/twentyOneGame.js";
 import {gameData} from "@/scripts/useGameStore.js";
 
 const userCoins = computed(() => {
