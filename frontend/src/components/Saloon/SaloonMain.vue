@@ -143,7 +143,7 @@ onUnmounted(() => {
         <!-- FLUFFY (ПЕРСОНАЖ) -->
         <div class="absolute inset-0 z-20 flex justify-center items-center cursor-pointer pointer-events-none">
           <img
-              v-if="randomCharacterImage"
+              v-if="randomCharacterImage && randomCharacterImage.includes('.webp')"
               :src="randomCharacterImage"
               alt="Fluffy Body"
               class="absolute"
