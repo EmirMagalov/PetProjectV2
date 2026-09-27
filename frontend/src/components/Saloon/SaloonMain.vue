@@ -112,15 +112,15 @@ onUnmounted(() => {
               alt="Fluffy Body"
               class="absolute"
           />
-          <img src="/saloon/location/saloon.webp" alt="location saloon" class="object-contain"/>
+          <img src="/saloonPhotos/location/saloon.webp" alt="location saloon" class="object-contain"/>
 
           <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
             <div
                 class="absolute inset-0 flex justify-center items-center transition-transform duration-300 ease-out"
                 :style="{ transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)` }"
             >
-              <img src="/saloon/characters/pupils_left.webp" class="absolute" alt=""/>
-              <img src="/saloon/characters/pupils_right.webp" class="absolute" alt=""/>
+              <img src="/saloonPhotos/characters/pupils_left.webp" class="absolute" alt=""/>
+              <img src="/saloonPhotos/characters/pupils_right.webp" class="absolute" alt=""/>
             </div>
           </div>
         </div>

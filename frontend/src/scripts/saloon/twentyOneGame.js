@@ -19,9 +19,9 @@ export const currentBet = ref(0);
 export const suits = ["hearts", "diamonds", "clubs", "spades"];
 
 const characterImages = [
-    '/saloon/characters/Fluffy_body.webp',
-    '/saloon/characters/Rozi_body.webp',
-    '/saloon/characters/Sanny_body.webp',
+    '/saloonPhotos/characters/Fluffy_body.webp',
+    '/saloonPhotos/characters/Rozi_body.webp',
+    '/saloonPhotos/characters/Sanny_body.webp',
 ];
 
 // Код за пределами функций выполняется строго 1 раз при загрузке приложения

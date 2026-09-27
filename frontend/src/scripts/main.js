@@ -7,7 +7,7 @@ import App from '../App.vue'
 
 const routes = [
     {path: '/', component: PetMain},
-    {path: '/saloon', component: SaloonMain},
+    {path: '/saloonPhotos', component: SaloonMain},
 ]
 export const router = createRouter({
     history: createWebHistory(),
