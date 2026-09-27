@@ -153,6 +153,8 @@ function handleRestart() {
             <img
                 :src="card.image"
                 :alt="`${card.name} of ${card.suit}`"
+                loading="eager"
+                decoding="sync"
                 class="w-full h-full object-contain drop-shadow-md"
             />
           </div>

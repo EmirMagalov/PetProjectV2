@@ -45,6 +45,20 @@ export const cardTypes = [
     { name: "ace", value: 11 }
 ];
 
+
+export function preloadCardImages() {
+    suits.forEach((suit) => {
+        cardTypes.forEach((card) => {
+            const img = new Image();
+            // Точный путь, как в createDeck()
+            img.src = `/saloon/svg-cards/${card.name}_of_${suit}.svg`;
+        });
+    });
+}
+
+// ИСПРАВЛЕНИЕ 2: Вызываем предзагрузку сразу при импорте модуля
+preloadCardImages();
+
 function createDeck() {
     const newDeck = [];
     for (const suit of suits) {
