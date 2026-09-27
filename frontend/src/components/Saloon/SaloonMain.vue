@@ -1,8 +1,8 @@
 <script setup>
 import SaloonMenu from "@/components/Saloon/SaloonMenu.vue";
 
-import {onMounted, onUnmounted, ref} from "vue";
-import {blink} from "@/scripts/useGameStore.js";
+import { onMounted, onUnmounted, ref } from "vue";
+import { blink } from "@/scripts/useGameStore.js";
 import {
   dealerCards,
   dealerScore, deckRef,
@@ -13,6 +13,10 @@ import {
 } from "@/scripts/saloon/twentyOneGame.js";
 import SaloonHeaderMenu from "@/components/Saloon/SaloonHeaderMenu.vue";
 
+// =====================================================
+// СОСТОЯНИЕ ЗАГРУЗКИ (LOADER)
+// =====================================================
+const isLoading = ref(true);
 
 // =====================================================
 // АНИМАЦИЯ FLUFFY
@@ -23,10 +27,10 @@ let lookInterval = null;
 function startRandomLooking() {
   lookInterval = setInterval(() => {
     const directions = [
-      {x: 0, y: 0},
-      {x: -0.3, y: 0.5},
-      {x: 0, y: 0},
-      {x: 0, y: -1}
+      { x: 0, y: 0 },
+      { x: -0.3, y: 0.5 },
+      { x: 0, y: 0 },
+      { x: 0, y: -1 }
     ];
     pupilOffset.value = directions[Math.floor(Math.random() * directions.length)];
   }, 2000);
@@ -44,15 +48,13 @@ function startRandomLooking() {
 // =====================================================
 const dealerCardsZone = ref(null);
 
-function animateFlyTo({targetEl, isDealer = false}) {
-  // Если целевой элемент не передан, берём зону дилера по умолчанию
+function animateFlyTo({ targetEl, isDealer = false }) {
   const target = targetEl || dealerCardsZone.value;
   if (!deckRef.value || !target) return;
 
   const startRect = deckRef.value.getBoundingClientRect();
   const endRect = target.getBoundingClientRect();
 
-  // Создаем летящую карту
   const flyer = document.createElement("div");
   flyer.className =
       "fixed z-[999] w-[42px] h-[58px] rounded-md bg-red-800 border-2 border-amber-300 shadow-2xl pointer-events-none transition-all duration-500 ease-out flex items-center justify-center";
@@ -82,6 +84,11 @@ function animateFlyTo({targetEl, isDealer = false}) {
 onMounted(() => {
   result.value = "Начнем игру?";
   startRandomLooking();
+
+  // Имитируем загрузку на 1.8 секунды для плавности
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 1800);
 });
 
 onUnmounted(() => {
@@ -92,7 +99,36 @@ onUnmounted(() => {
 
 <template>
   <div
-      class="min-h-dvh flex flex-col justify-between bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600 overflow-hidden">
+      class="relative min-h-dvh flex flex-col justify-between bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600 overflow-hidden">
+
+    <!-- ПОЛНОЭКРАННЫЙ ЭКРАН ЗАГРУЗКИ (LOADER) -->
+    <Transition name="fade">
+      <div
+          v-if="isLoading"
+          class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-amber-950 via-red-950 to-black text-white"
+      >
+        <div class="relative flex items-center justify-center mb-4">
+          <!-- Пульсирующее свечение -->
+          <div class="absolute w-24 h-24 rounded-full bg-amber-500/20 animate-ping"></div>
+
+          <!-- Анимированный логотип/иконка -->
+          <div class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
+            <div class="w-full h-full bg-red-900 rounded-full flex items-center justify-center border border-amber-300/40">
+              <img src="/gamePlay/logo_icons.webp" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
+            </div>
+          </div>
+        </div>
+
+        <!-- Текст загрузки -->
+        <span class="text-amber-200 font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
+          Входим в Салун...
+        </span>
+
+        <!-- Спиннер -->
+        <div class="mt-4 w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></div>
+      </div>
+    </Transition>
+
     <SaloonHeaderMenu/>
 
     <!-- САЛУН -->
@@ -140,7 +176,6 @@ onUnmounted(() => {
               </p>
             </div>
 
-
             <div ref="deckRef" class="relative w-[42px] h-[58px]">
               <div
                   class="absolute inset-0 translate-x-[4px] translate-y-[4px] rounded-md bg-red-950 border border-black/50 shadow-md"></div>
@@ -159,7 +194,7 @@ onUnmounted(() => {
             </p>
           </div>
 
-          <!-- КАРТЫ ДИЛЕРА (Показываются лицом только при завершении игры) -->
+          <!-- КАРТЫ ДИЛЕРА -->
           <div v-if="gameStarted" ref="dealerCardsZone"
                class="absolute top-33 flex items-center justify-center min-h-[58px] mt-0.5">
             <div
@@ -202,3 +237,13 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Анимация исчезновения лоадера */
+.fade-leave-active {
+  transition: opacity 0.4s ease-in-out;
+}
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
