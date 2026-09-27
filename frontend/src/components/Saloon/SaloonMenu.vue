@@ -70,14 +70,13 @@ function handleConfirmBet() {
 // 3. Игрок берет карту («Ещё»)
 async function handleHit() {
   isDealing.value = true;
-  emit("animate-draw", {targetEl: playerCardsZone.value, isDealer: false});
+  emit("animate-draw", { targetEl: playerCardsZone.value, isDealer: false });
   await sleep(500);
   hit();
   isDealing.value = false;
 
-  if (playerScore.value >= 21 && !gameFinished.value) {
-    await handleStand();
-  }
+  // Если у игрока больше 21 или игра уже автоматически закончилась (ровно 21), останавливаемся.
+  // Иначе, если игра всё еще идет — даем продолжить.
 }
 
 // 4. Игрок завершает ход («Хватит») -> Дилер ходит по очереди
@@ -252,11 +251,12 @@ function handleRestart() {
         @click="handleStartGame"
         :disabled="userCoins < 50"
         :class="[
-          'w-35 h-12 my-auto rounded-2xl font-bold text-md shadow-lg transition',
+          'w-32 h-25 my-auto rounded-2xl font-bold text-md shadow-lg transition bg-[#fff6ef]  rounded-4xl border-2 border-[#f7c9a5]',
           userCoins < 50
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
-            : 'bg-yellow-400 hover:bg-yellow-300 active:scale-95 cursor-pointer'
+            : 'hover:bg-yellow-300 active:scale-95 cursor-pointer'
         ]"
+        style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
     >
       {{ userCoins >= 50 ? ' Играть' : 'Минимальная ставка 50' }}
     </button>

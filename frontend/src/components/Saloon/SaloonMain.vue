@@ -133,7 +133,7 @@ onUnmounted(() => {
 
     <!-- САЛУН -->
     <div class="relative flex justify-center items-center w-full my-auto">
-      <div class="relative w-[280px] h-[270px] overflow-hidden rounded-3xl border-2 border-red-400/80 shadow-2xl">
+      <div class="relative w-[320px] h-[270px] overflow-hidden rounded-3xl border-2 border-red-400/80 shadow-2xl">
         <img
             src="/location/saloon.webp"
             class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"

@@ -189,7 +189,7 @@ onUnmounted(() => {
 
       <div
           :class="[
-      'relative w-[280px] h-[270px] overflow-hidden border-2 border-red-400 rounded-2xl object-cover transition-colors duration-1000',
+      'relative w-[320px] h-[270px] overflow-hidden border-2 border-red-400 rounded-2xl object-cover transition-colors duration-1000',
       gameData.sleep ? 'bg-[#0F175C]' : 'bg-amber-200'
     ]">
 

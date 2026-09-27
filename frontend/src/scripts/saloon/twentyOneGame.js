@@ -24,14 +24,9 @@ const characterImages = [
     '/saloonPhotos/characters/Sanny_body.webp',
 ];
 
-// Код за пределами функций выполняется строго 1 раз при загрузке приложения
 const getRandomImage = () => characterImages[Math.floor(Math.random() * characterImages.length)];
 
 export const randomCharacterImage = ref(getRandomImage());
-
-
-
-
 
 export const cardTypes = [
     { name: "6", value: 6 },
@@ -45,18 +40,15 @@ export const cardTypes = [
     { name: "ace", value: 11 }
 ];
 
-
 export function preloadCardImages() {
     suits.forEach((suit) => {
         cardTypes.forEach((card) => {
             const img = new Image();
-            // Точный путь, как в createDeck()
-            img.src = `/saloon/svg-cards/${card.name}_of_${suit}.svg`;
+            img.src = `/saloonPhotos/svg-cards/${card.name}_of_${suit}.svg`;
         });
     });
 }
 
-// ИСПРАВЛЕНИЕ 2: Вызываем предзагрузку сразу при импорте модуля
 preloadCardImages();
 
 function createDeck() {
@@ -67,7 +59,7 @@ function createDeck() {
                 name: card.name,
                 value: card.value,
                 suit,
-                image: `/saloon/svg-cards/${card.name}_of_${suit}.svg`
+                image: `/saloonPhotos/svg-cards/${card.name}_of_${suit}.svg`
             });
         }
     }
@@ -97,6 +89,11 @@ function calculateScore(cards) {
     for (const card of cards) {
         score += card.value;
         if (card.name === "ace") aces++;
+    }
+
+    // Если на руках ровно 2 туза и всего 2 карты — это "Золотое очко" (автопобеда)
+    if (aces === 2 && cards.length === 2) {
+        return 21;
     }
 
     while (score > 21 && aces > 0) {
@@ -129,7 +126,6 @@ export function addDealerCard() {
     dealerCards.value.push(drawCard());
 }
 
-// 1. Исправленный свал денег при ставке
 export async function placeBet(amount) {
     if (gameData.value ? gameData.value.coins < amount : gameData.coins < amount) {
         return false;
@@ -137,7 +133,6 @@ export async function placeBet(amount) {
 
     currentBet.value = amount;
 
-    // Проверяем, является ли gameData реактивным ref или обычным объектом
     if (gameData.value !== undefined) {
         gameData.value.coins -= amount;
     } else {
@@ -145,9 +140,8 @@ export async function placeBet(amount) {
     }
 
     bettingPhase.value = false;
-    result.value = ""; // Очищаем текст "Сделайте ставку!" после клика
+    result.value = "";
 
-    // Сохраняем списание ставки на бэкенд сразу
     await syncToBackend();
     return true;
 }
@@ -157,23 +151,30 @@ export function hit() {
 
     playerCards.value.push(drawCard());
 
-    if (playerScore.value > 21) {
+    const currentScore = playerScore.value;
+    const acesCount = playerCards.value.filter(c => c.name === "ace").length;
+
+    // 1. Проверка на "Золотое очко" (2 туза) или 21 очко
+    if ((acesCount === 2 && playerCards.value.length === 2) || currentScore === 21) {
+        finishGame("win");
+    }
+    // 2. Перебор
+    else if (currentScore > 21) {
         finishGame("bust");
     }
 }
 
-// 2. Добавлен синхронный/асинхронный расчет выигрыша и отправка на бэкенд
 export async function finishGame(type) {
     gameFinished.value = true;
 
     const coinsRef = gameData.value !== undefined ? gameData.value : gameData;
 
     if (type === "bust") {
-        result.value = "Перебор! Вы проиграли";
+        result.value = "Перебор! Ты проиграл";
     } else if (type === "lose") {
         result.value = "Дилер выиграл!";
     } else if (type === "win") {
-        result.value = "Ты выиграл!";
+        result.value = "Поздравляю! Ты выиграл!";
         coinsRef.coins += currentBet.value * 2;
     } else if (type === "push") {
         result.value = "Ничья!";
@@ -184,16 +185,11 @@ export async function finishGame(type) {
 }
 
 export async function determineWinner() {
-    // 1. Сначала проверяем перебор у игрока
     if (playerScore.value > 21) {
         await finishGame("bust");
-    }
-    // 2. Если у игрока нет перебора, но перебрал дилер — победа игрока
-    else if (dealerScore.value > 21) {
+    } else if (dealerScore.value > 21) {
         await finishGame("win");
-    }
-    // 3. Сравниваем очки, если у обоих нет перебора
-    else if (playerScore.value > dealerScore.value) {
+    } else if (playerScore.value > dealerScore.value) {
         await finishGame("win");
     } else if (playerScore.value < dealerScore.value) {
         await finishGame("lose");
