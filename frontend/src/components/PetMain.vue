@@ -231,7 +231,7 @@ onUnmounted(() => {
           <p class="bg-[#fbf3e0]"></p>
           <PhotoFrame v-show="(location==='home' || location==='food')"/>
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
-          <div :key="animKey" class="absolute  flex justify-center items-center animate-pop w-45 h-45">
+          <div  :key="animKey" :class="['absolute flex justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '']">
 
             <PetHeadwear/>
             <img :src="body" class="absolute w-45" alt="">

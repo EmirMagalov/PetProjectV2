@@ -85,10 +85,10 @@ export function feedPet(foodId) {
         lastFedItem.value = targetId
         sameFoodCount.value = 1
     }
-
     const randomLimit = Math.floor(Math.random() * 3) + 3
+    const isSickAndFruit = gameData.sick && foodItem?.subcategory === 'fruits'
 
-    if (sameFoodCount.value >= randomLimit) {
+    if (!isSickAndFruit && sameFoodCount.value >= randomLimit) {
         showTongue.value = true
         setTimeout(() => { showTongue.value = false }, 800)
         return false

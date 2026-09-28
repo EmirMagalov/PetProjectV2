@@ -290,7 +290,7 @@ function goToSaloon() {
                  ]"
                  class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
             ></div>
-            <div v-show="gameData.foodLevel >= 100 && gameData.isFat"
+            <div v-show="gameData.foodLevel >= 100 && gameData.isFat && foodCartList[currentIndex]?.subcategory !=='fruits'"
                  class="absolute w-20 opacity-50 animate-pulse pointer-events-none">
               <img src="/gamePlay/warning_icons.webp" alt="">
             </div>

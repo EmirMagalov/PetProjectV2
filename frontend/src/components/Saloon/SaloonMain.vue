@@ -164,14 +164,14 @@ onUnmounted(() => {
         <!-- ИГРОВОЙ ИНТЕРФЕЙС ДИЛЕРА -->
         <div class="absolute inset-x-0 top-0 z-30 p-2.5 flex flex-col items-center gap-1.5 pointer-events-auto">
           <span
-              class="text-[11px] font-semibold text-amber-200 bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full shadow-sm">
+              class="text-[11px] font-semibold text-amber-200 bg-black/80 px-2.5 py-0.5 rounded-full shadow-sm">
             Дилер<template v-if="gameFinished"> · {{ dealerScore }}</template>
           </span>
 
           <!-- КОЛОДА КАРТ -->
           <div class="absolute top-28 left-3 flex flex-col items-center gap-2">
             <div>
-              <p class="text-white font-bold text-[11px]  bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full shadow-sm">
+              <p class="text-white font-bold text-[11px]  bg-black/80 px-2.5 py-0.5 rounded-full shadow-sm">
                 21 Очко
               </p>
             </div>
@@ -189,7 +189,7 @@ onUnmounted(() => {
                 </span>
               </div>
             </div>
-            <p class="text-white font-bold text-[8px]  bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full shadow-sm">
+            <p class="text-white font-bold text-[8px]  bg-black/80 px-2.5 py-0.5 rounded-full shadow-sm">
               36 карт
             </p>
           </div>
@@ -223,7 +223,7 @@ onUnmounted(() => {
           <!-- РЕЗУЛЬТАТ МАТЧА -->
           <div
               v-if="result"
-              class="mt-1 bg-black/75 backdrop-blur-md text-amber-300 border border-amber-400/30 px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-bounce z-40"
+              class="mt-1 bg-black/85 backdrop-blur-md text-amber-300 border border-amber-400/30 px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-bounce z-40"
           >
             {{ result }}
           </div>
