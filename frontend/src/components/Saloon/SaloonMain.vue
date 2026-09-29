@@ -232,7 +232,7 @@ onUnmounted(() => {
     </div>
 
     <!-- НИЖНЕЕ МЕНЮ -->
-    <div class="pb-4 shrink-0">
+    <div class="mt-auto pb-4 shrink-0">
       <SaloonMenu @animate-draw="animateFlyTo"/>
     </div>
   </div>

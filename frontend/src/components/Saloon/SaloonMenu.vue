@@ -124,7 +124,7 @@ function handleRestart() {
 <template>
   <!-- Главный контейнер меню с фиксом для Safari -->
   <div
-      class="saloon-container rounded-4xl p-4 mx-5 bg-[#fff6ef] h-65 border-2 border-[#f7c9a5] flex flex-col items-center justify-between relative"
+      class="saloon-container rounded-4xl p-4 mx-5 bg-[#fff6ef] h-65 border-2 border-[#f7c9a5] flex flex-col mt-1 items-center justify-between relative"
   >
     <!-- Кнопка "Назад" -->
     <RouterLink to="/" class="z-30">
