@@ -1,5 +1,6 @@
 import {computed, reactive, ref, watch} from "vue";
 import {
+    activeTab,
     gameData,
     isShopOpen
 } from "@/scripts/useGameStore.js";
@@ -72,7 +73,7 @@ watch(() => gameData.cart, () => {
             console.error("Ошибка синхронизации корзины:", e)
         }
     })()
-}, { deep: true })
+}, {deep: true})
 
 watch(gameData.unlockedHeads, (newList) => {
     localStorage.setItem('unlockedHeads', JSON.stringify(newList))
@@ -100,7 +101,7 @@ export function addToCart(foodId) {
 export function removeFromCart(targetId) {
     if (gameData.cart[targetId] > 0) {
         // Создаем копию для корректного обновления реактивного объекта
-        const updatedCart = { ...gameData.cart }
+        const updatedCart = {...gameData.cart}
         updatedCart[targetId]--
 
         if (updatedCart[targetId] <= 0) {
@@ -127,6 +128,7 @@ export function removeFromCart(targetId) {
 export function nextItem() {
     if (!foodCartList.value || foodCartList.value.length === 0) {
         isShopOpen.value = true
+        activeTab.value = 'food'
     } else {
         currentIndex.value = (currentIndex.value + 1) % foodCartList.value.length
     }
@@ -136,6 +138,7 @@ export function nextItem() {
 export function nextBathItem() {
     if (!bathCartList.value || bathCartList.value.length === 0) {
         isShopOpen.value = true
+        activeTab.value = 'bath'
     } else {
         currentBathIndex.value = (currentBathIndex.value + 1) % bathCartList.value.length
     }

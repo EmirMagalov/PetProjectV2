@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, computed, onMounted, onUnmounted } from "vue";
+import {ref, nextTick, computed, onMounted, onUnmounted} from "vue";
 import {
   gameFinished,
   gameStarted,
@@ -16,7 +16,7 @@ import {
   currentBet,
   isDealing
 } from "@/scripts/saloonScripts/twentyOneGame.js";
-import { gameData } from "@/scripts/useGameStore.js";
+import {gameData} from "@/scripts/useGameStore.js";
 
 // Безопасный расчет монет
 const userCoins = computed(() => {
@@ -43,13 +43,13 @@ function resetGameState() {
   playerCards.value = [];
 }
 
-onMounted(() => {
-  resetGameState();
-});
+// onMounted(() => {
+//   resetGameState();
+// });
 
-onUnmounted(() => {
-  resetGameState();
-});
+// onUnmounted(() => {
+//   resetGameState();
+// });
 
 async function handleStartGame() {
   if (userCoins.value < 50) {
@@ -66,11 +66,11 @@ async function handleStartGame() {
   await nextTick();
   await sleep(100);
 
-  emit("animate-draw", { targetEl: playerCardsZone.value, isDealer: false });
+  emit("animate-draw", {targetEl: playerCardsZone.value, isDealer: false});
   await sleep(400);
   addPlayerCard();
 
-  emit("animate-draw", { isDealer: true });
+  emit("animate-draw", {isDealer: true});
   await sleep(400);
   addDealerCard();
 
@@ -80,12 +80,13 @@ async function handleStartGame() {
 
 function handleConfirmBet() {
   if (userCoins.value < selectedBet.value) return;
+  handleHit()
   placeBet(selectedBet.value);
 }
 
 async function handleHit() {
   isDealing.value = true;
-  emit("animate-draw", { targetEl: playerCardsZone.value, isDealer: false });
+  emit("animate-draw", {targetEl: playerCardsZone.value, isDealer: false});
   await sleep(400);
   hit();
   isDealing.value = false;
@@ -95,7 +96,7 @@ async function handleStand() {
   isDealing.value = true;
 
   while (dealerScore.value < 17) {
-    emit("animate-draw", { isDealer: true });
+    emit("animate-draw", {isDealer: true});
     await sleep(400);
     addDealerCard();
     await sleep(300);
@@ -125,11 +126,12 @@ function handleRestart() {
   <!-- Главный контейнер меню с фиксом для Safari -->
   <div
       class="saloon-container rounded-4xl p-4 mx-5 bg-[#fff6ef] h-65 border-2 border-[#f7c9a5] flex flex-col mt-1 items-center justify-between relative"
+      style="background-image: url('/gamePlay/poker_table.webp'); background-size: cover; "
   >
     <!-- Кнопка "Назад" -->
     <RouterLink to="/" class="z-30">
       <div
-          class="ios-btn bg-[#fff6ef] absolute left-2 top-2 h-15 w-15 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer z-30"
+          class="bg-[#fff6ef] absolute left-2 top-2 h-15 w-15 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer z-30"
           style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
       >
         <div
@@ -184,7 +186,7 @@ function handleRestart() {
             @click="selectedBet = bet"
             :disabled="userCoins < bet || isDealing"
             :class="[
-          'ios-btn px-3 py-1 rounded-lg font-bold text-sm transition border',
+          'px-3 py-1 rounded-lg font-bold text-md transition border',
           (userCoins < bet || isDealing)
             ? 'opacity-40 bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed'
             : selectedBet === bet
@@ -200,7 +202,7 @@ function handleRestart() {
           @click="handleConfirmBet"
           :disabled="userCoins < selectedBet || isDealing"
           :class="[
-        'ios-btn h-10 w-25 rounded-xl transition text-white font-bold shadow-md mt-1',
+        'w-35 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50',
         (userCoins < selectedBet || isDealing)
           ? 'bg-gray-400 opacity-60 cursor-not-allowed'
           : 'bg-emerald-500 hover:bg-emerald-400 active:scale-95 cursor-pointer'
@@ -211,21 +213,21 @@ function handleRestart() {
     </div>
 
     <!-- 2. ФАЗА ДОБОРА ("ЕЩЁ" / "ХВАТИТ") -->
-    <div v-else-if="gameStarted && !bettingPhase && !gameFinished" class="flex gap-3 mb-2 z-20">
-      <button
-          @click="handleHit"
-          :disabled="isDealing"
-          class="ios-btn px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
-      >
-        Ещё
-      </button>
+    <div v-else-if="gameStarted && !bettingPhase && !gameFinished" class="flex gap-3  mb-2 z-20">
 
       <button
           @click="handleStand"
           :disabled="isDealing"
-          class="ios-btn px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
+          class="w-25 px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
       >
         Хватит
+      </button>
+      <button
+          @click="handleHit"
+          :disabled="isDealing"
+          class=" w-25 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
+      >
+        Ещё
       </button>
     </div>
 
@@ -235,7 +237,7 @@ function handleRestart() {
         @click="handleRestart"
         :disabled="userCoins < 50"
         :class="[
-          'ios-btn w-35 h-12 mb-2 rounded-lg font-bold text-md shadow-lg transition z-20',
+          'w-35 h-12 mb-2 rounded-lg font-bold text-md shadow-lg transition z-20',
           userCoins < 50
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
             : 'bg-yellow-400 hover:bg-yellow-300 active:scale-95 cursor-pointer'
@@ -249,7 +251,7 @@ function handleRestart() {
         @click="handleStartGame"
         :disabled="userCoins < 50"
         :class="[
-          'ios-btn w-32 h-25 my-auto font-bold text-md shadow-lg transition bg-[#fff6ef] rounded-4xl border-2 border-[#f7c9a5] z-20',
+          'w-32 h-25 my-auto font-bold text-md shadow-lg transition bg-[#fff6ef] rounded-4xl border-2 border-[#f7c9a5] z-20',
           userCoins < 50
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
             : 'hover:bg-yellow-300 active:scale-95 cursor-pointer'
@@ -271,18 +273,6 @@ function handleRestart() {
   isolation: isolate;
 }
 
-/* Сброс багов Safari на кнопках */
-.ios-btn {
-  -webkit-appearance: none;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
 
 .card-render-wrapper {
   animation: cardAppear 0.3s ease-out forwards;

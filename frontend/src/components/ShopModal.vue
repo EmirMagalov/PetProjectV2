@@ -3,9 +3,10 @@ import {foodList} from '@/scripts/objectItems.js'
 import {headItems} from '@/scripts/headwearItems.js'
 import {ref, computed} from 'vue'
 import {addToCart, buyHeadwear} from "@/scripts/basket.js"
-import {gameData} from "@/scripts/useGameStore.js"
+import {activeTab, gameData} from "@/scripts/useGameStore.js"
 
 defineProps({
+  activeTab:String,
   isOpen: {
     type: Boolean,
     required: true
@@ -14,7 +15,6 @@ defineProps({
 
 defineEmits(['close'])
 
-const activeTab = ref('food')
 
 // Динамический список товаров в зависимости от выбранной вкладки
 const currentList = computed(() => {

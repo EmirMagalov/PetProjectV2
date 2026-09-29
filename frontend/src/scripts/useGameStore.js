@@ -25,7 +25,7 @@ export const currentDraggedItem = ref(null)
 export const blink = ref(false)
 export const locationUrl = ref()
 export const location = ref()
-
+export const activeTab = ref('food')
 export const warning = ref(false)
 
 

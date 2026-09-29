@@ -27,13 +27,13 @@ const activeItems = computed(() => {
 <!--    </div>-->
     <!-- Hunger -->
     <div v-show="showHunger "
-         :class="['absolute flex justify-center items-center', activeItems <= 1 ? 'top-10 left-49 w-10' : 'top-13 left-47 w-8']">
+         :class="['absolute flex justify-center items-center', activeItems <= 1 ? 'top-12 left-51 w-10' : 'top-13 left-47 w-8']">
       <img src="/food/burger.webp" alt="">
     </div>
 
     <!-- Energy -->
     <div v-show="energyFull || lowEnergy"
-         :class="['absolute flex justify-center items-center gap-1', activeItems <= 1 ? 'top-9 left-50 w-12' : 'top-13 left-56 w-8']">
+         :class="['absolute flex justify-center items-center gap-1', activeItems <= 1 ? 'top-11 left-50 w-12' : 'top-13 left-56 w-8']">
       <img :src="energyFull?'/gamePlay/energy_full.webp':(lowEnergy?'/gamePlay/energy_low.webp':'')"  alt="">
 <!--      <p class="font-bold text-md text-[#47B949]">{{ gameData.energy }}%</p>-->
     </div>

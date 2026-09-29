@@ -14,7 +14,7 @@ const props = defineProps({
 <template>
   <div
       v-show="props.status"
-      class="absolute text-yellow-300 text-shadow-sm text-shadow-black inset-0 -mt-5  rounded-2xl flex flex-col items-center justify-center  font-bold text-2xl z-150"
+      class="absolute text-yellow-300 text-shadow-sm text-shadow-black w-full h-full  rounded-2xl flex flex-col items-center justify-center  font-bold text-2xl z-150"
       :class="[bgColor]"
   >
 

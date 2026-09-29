@@ -14,7 +14,7 @@ import {
   isShopOpen,
   showHunger,
   sleepTimeRemaining,
-  statusFoam, location, isGameOver, handleRestart, warning, lowEnergy
+  statusFoam, location, isGameOver, handleRestart, warning, lowEnergy, activeTab
 } from "@/scripts/useGameStore.js";
 import {goSleep} from "@/scripts/actions.js";
 import {
@@ -39,7 +39,8 @@ const shouldPulse = computed(() => {
   }
   return list[currentIndex.value].category !== 'shaman';
 });
-import {useRouter} from 'vue-router'; // <-- Подключаем официальный хук
+import {useRouter} from 'vue-router';
+import {currentBet} from "@/scripts/saloonScripts/twentyOneGame.js"; // <-- Подключаем официальный хук
 
 const router = useRouter();
 
@@ -47,8 +48,16 @@ function goToSaloon() {
   // Безопасный расчет монет (поддерживает ref и обычный объект)
   const coins = Number(gameData?.value?.coins ?? gameData?.coins) || 0;
 
-  if (coins < 50) {
+  if (coins < 50 && !currentBet.value) {
     alert('Нужно минимум 50 монет, чтобы зайти в Салун!');
+    return;
+  }
+  if (gameData.foodLevel < 20) {
+    alert('Чтобы зайти в Салун нужно быть сытым!');
+    return;
+  }
+  if (gameData.energy < 20) {
+    alert('Чтобы зайти в Салун нужно быть бодрым!');
     return;
   }
 
@@ -59,8 +68,10 @@ function goToSaloon() {
 
   if (isIOS) {
     // Жёсткая перезагрузка для iOS: очищает застрявший WebKit/GPU кэш Safari
+    console.log('iOS')
     window.location.href = '/saloon';
   } else {
+    console.log('Android')
     // Для Android и ПК оставляем быструю SPA-навигацию
     router.push('/saloon');
   }
@@ -87,7 +98,17 @@ function goToSaloon() {
       </div>
     </div>
     <div v-else>
-      <div v-show="location==='home'" class="grid grid-cols-2 gap-x-4  gap-y-1.5 w-60 place-self-center  ">
+      <div v-show="location==='home'" class="grid grid-cols-2 gap-8 relative  gap-y-1.5 w-65 place-self-center  ">
+        <div
+            @click="isShopOpen = true"
+            class="bg-[#fff6ef] absolute p-1 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 justify-center h-14 w-14 overflow-hidden  flex flex-col items-center rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
+            style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+          <div class="w-[100px] h-[100px]  bg-contain bg-no-repeat bg-center"
+               style="background-image: url('/gamePlay/market.webp')">
+          </div>
+          <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
+        </div>
+
         <div
             @click="location = 'food'"
             class="bg-[#fff6ef] justify-center h-25 flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95"
@@ -142,10 +163,26 @@ function goToSaloon() {
           <!-- Кнопка Салуна -->
           <div
               @click="goToSaloon"
-              class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
+              class="bg-[#fff6ef] relative justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
               :class="{'opacity-50 pointer-events-none': gameData.level < 5}"
               style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
           >
+            <div class="flex absolute top-1 right-2">
+              <div class="relative w-5">
+                <img src="/gamePlay/coin.webp" class="" alt="">
+                <p class="absolute text-white text-shadow-lg text-shadow-black top-1 text-xs left-1 font-bold">50</p>
+              </div>
+              <!--              <div class="relative w-5">-->
+              <!--                <img src="/gamePlay/energy.webp "  class=" " alt="">-->
+              <!--&lt;!&ndash;                <p class="absolute text-white text-shadow-md text-shadow-black -bottom-1 left-1 font-bold">50</p>&ndash;&gt;-->
+              <!--              </div>-->
+              <!--              <div class="relative w-5">-->
+              <!--                <img src="/gamePlay/hunger.webp "  class=" " alt="">-->
+              <!--                &lt;!&ndash;                <p class="absolute text-white text-shadow-md text-shadow-black -bottom-1 left-1 font-bold">50</p>&ndash;&gt;-->
+              <!--              </div>-->
+
+            </div>
+
             <div
                 class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
                 style="background-image: url('/gamePlay/saloon.webp')"
@@ -160,7 +197,7 @@ function goToSaloon() {
 
       <!--  BATH -->
 
-      <div v-show="location==='bath'" class="grid grid-cols-2 gap-x-4 gap-y-1.5 w-60 place-self-center">
+      <div v-show="location==='bath'" class="grid grid-cols-2 gap-8 relative  gap-y-1.5 w-65 place-self-center  ">
 
         <!-- ДУШ -->
         <div
@@ -181,7 +218,7 @@ function goToSaloon() {
              ]"
                :class="[
                showerDrag.isDragging.value ? 'fixed z-150' : 'relative',
-               statusFoam && !showerDrag.isDragging.value ? 'animate-pulse' : ''
+               statusFoam && !showerDrag.isDragging.value && !gameData.sick ? 'animate-pulse' : ''
              ]"
                class="flex flex-col items-center cursor-move w-[70px] h-[70px]  bg-contain bg-no-repeat bg-center"
           ></div>
@@ -256,7 +293,7 @@ function goToSaloon() {
           <button class="text-lg font-bold text-gray-600 pointer-events-none">Назад</button>
         </div>
         <div
-            @click="isShopOpen = true"
+            @click="isShopOpen = true;activeTab='bath'"
             class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
@@ -269,7 +306,7 @@ function goToSaloon() {
       <!-- FOOD -->
 
 
-      <div v-show="location==='food'" class="grid grid-cols-2 gap-x-4 gap-y-1.5 w-60 place-self-center">
+      <div v-show="location==='food'" class="grid grid-cols-2 gap-8 relative  gap-y-1.5 w-65 place-self-center  ">
 
         <div
             @click="nextItem()"
@@ -330,7 +367,7 @@ function goToSaloon() {
         </div>
 
         <div
-            @click="isShopOpen = true"
+            @click="isShopOpen = true;activeTab='food'"
             class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"

@@ -7,7 +7,14 @@ import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import CloudMessage from "@/components/CloudMessage.vue";
 import PetStinky from "@/components/PetStinky.vue";
 import PetHeadwear from "@/components/PetHeadwear.vue";
-import {animKey, spawnHeart} from "@/scripts/actions.js";
+import {
+  animKey, coinAnimKey,
+  comboAnimKey,
+  comboMultiplier,
+  isCoinAnimating,
+  isComboAnimating,
+  spawnHeart
+} from "@/scripts/actions.js";
 import Status from "@/components/Status.vue";
 import {levelStatus} from "@/scripts/level.js";
 import {statusSmoke} from "@/scripts/dragAndDrop.js";
@@ -97,6 +104,12 @@ function getHornAsset(level) {
   return '/horns/1lvl.webp'
 }
 
+function getCombo() {
+  if (comboMultiplier.value >= 20) return '/gamePlay/x20_icons.webp'
+  if (comboMultiplier.value >= 10) return '/gamePlay/x10_icons.webp'
+  if (comboMultiplier.value >= 5) return '/gamePlay/x5_icons.webp'
+  return '/gamePlay/x1_icons.webp'
+}
 
 watch(location, (newLocation) => {
   if (newLocation === 'home') {
@@ -212,16 +225,31 @@ onUnmounted(() => {
         <!-- Зона персонажа (сюда перетаскиваем яблоко) -->
 
         <div ref="dropZoneRef"
-             class="absolute inset-0 z-30 flex justify-center  items-center cursor-pointer">
+             class="absolute inset-0 z-30 flex justify-center top-8 items-center cursor-pointer">
 
-          <div @click="spawnHeart" class="absolute top-15 z-120 w-40 h-40"></div>
+          <div @click="spawnHeart" class="absolute  z-120 w-40 h-40"></div>
 
           <!-- Сердечко с key для перезапуска анимации на каждый клик -->
           <img
+              v-if="animKey > 0"
               :key="animKey"
               :src="isBadMood ? '/gamePlay/angry_icon.webp' : '/gamePlay/happy_icon.webp'"
               class="absolute text-2xl w-5 select-none z-20 animate-float-heart"
               alt="">
+          <img
+              v-if="isComboAnimating"
+              :key="comboAnimKey"
+              :src="getCombo()"
+              class="absolute text-2xl w-12 select-none z-50 animate-float-combo pointer-events-none"
+              alt="">
+
+          <img
+              v-if="isCoinAnimating"
+              :key="coinAnimKey"
+              src="/gamePlay/coin.webp"
+              class="absolute w-5 z-50 animate-coinFly pointer-events-none"
+              alt="">
+
 
           <div v-show="gameData.sleep"
                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-40">
@@ -231,7 +259,8 @@ onUnmounted(() => {
           <p class="bg-[#fbf3e0]"></p>
           <PhotoFrame v-show="(location==='home' || location==='food')"/>
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
-          <div  :key="animKey" :class="['absolute flex justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '']">
+          <div :key="animKey"
+               :class="['absolute flex justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '']">
 
             <PetHeadwear/>
             <img :src="body" class="absolute w-45" alt="">
@@ -279,20 +308,10 @@ onUnmounted(() => {
             <CloudMessage/>
 
             <!-- Монетка с key для перезапуска анимации на каждый клик -->
-            <img v-show="isAnimating" :key="animKey"
-                 class="absolute w-5 z-50 animate-coinFly"
-                 src="/gamePlay/coin.webp" alt="">
+
           </div>
 
-          <!-- Индикаторы статусов -->
-          <Status
-              v-if="activeStatus.show"
-              :status="true"
-              :text="activeStatus.text"
-              :image="activeStatus.image"
-              :additional="activeStatus.additional"
-              :bg-color="activeStatus.bgColor"
-          />
+
           <PetStinky/>
           <PetFoam :status-foam="statusFoam"/>
           <PetSmoke :status-smoke="statusSmoke"/>
@@ -301,7 +320,15 @@ onUnmounted(() => {
 
 
         </div>
-
+        <!-- Индикаторы статусов -->
+        <Status
+            v-if="activeStatus.show"
+            :status="true"
+            :text="activeStatus.text"
+            :image="activeStatus.image"
+            :additional="activeStatus.additional"
+            :bg-color="activeStatus.bgColor"
+        />
       </div>
       <PetSideMenu/>
     </div>
@@ -333,6 +360,43 @@ onUnmounted(() => {
 
 .animate-float-heart {
   animation: floatHeart 0.5s ease-out forwards;
+}
+
+@keyframes floatCombo {
+  0% {
+    transform: translate(40px, -50px) scale(1) rotate(5deg);
+    opacity: 1;
+  }
+
+  50% {
+    transform: translate(60px, -70px) scale(1.5) rotate(12deg);
+  }
+  100% {
+    transform: translate(60px, -70px) scale(0.8) rotate(-12deg);
+    opacity: 0;
+  }
+}
+
+.animate-float-combo {
+  animation: floatCombo 1s ease-out forwards;
+}
+
+@keyframes coinFly {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(30px, -50px) scale(1.2) ;
+  }
+  100% {
+    transform: translate(50px, -80px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.animate-coinFly {
+  animation: coinFly 0.8s ease-out forwards;
 }
 
 @keyframes popCharacter {
@@ -443,21 +507,9 @@ onUnmounted(() => {
   transform-origin: center bottom;
 }
 
-@keyframes coinFly {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: translate(30px, -50px) scale(1.2);
-  }
-  100% {
-    transform: translate(150px, -150px) scale(0.8);
-    opacity: 1;
-  }
-}
 
-.animate-coinFly {
-  animation: coinFly 0.2s ease-out forwards;
-}
+
+
+
+
 </style>

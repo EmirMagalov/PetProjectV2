@@ -18,6 +18,27 @@ export const currentBet = ref(0);
 
 export const suits = ["hearts", "diamonds", "clubs", "spades"];
 
+
+watch([playerCards, dealerCards, gameStarted, currentBet], () => {
+    localStorage.setItem('saloon_game_state', JSON.stringify({
+        playerCards: playerCards.value,
+        dealerCards: dealerCards.value,
+        gameStarted: gameStarted.value,
+        currentBet: currentBet.value
+    }));
+}, { deep: true });
+
+// При загрузке скрипта — восстанавливаем
+const savedState = localStorage.getItem('saloon_game_state');
+if (savedState) {
+    const parsed = JSON.parse(savedState);
+    playerCards.value = parsed.playerCards || [];
+    dealerCards.value = parsed.dealerCards || [];
+    gameStarted.value = parsed.gameStarted || false;
+    currentBet.value = parsed.currentBet || null;
+}
+
+
 const characterImages = [
     '/saloonPhotos/characters/Fluffy_body.webp',
     '/saloonPhotos/characters/Rozi_body.webp',

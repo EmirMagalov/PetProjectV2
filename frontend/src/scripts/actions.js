@@ -88,7 +88,7 @@ export function feedPet(foodId) {
     const randomLimit = Math.floor(Math.random() * 3) + 3
     const isSickAndFruit = gameData.sick && foodItem?.subcategory === 'fruits'
 
-    if (!isSickAndFruit && sameFoodCount.value >= randomLimit) {
+    if (!isSickAndFruit && sameFoodCount.value >= randomLimit && gameData.foodLevel >=50) {
         showTongue.value = true
         setTimeout(() => { showTongue.value = false }, 800)
         return false
@@ -187,23 +187,75 @@ export function goSleep() {
 
 
 // Переменная для хранения ссылки на таймер анимации вне функции
+
 export const animKey = ref(0)
+
+// --- НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ КОМБО ---
+export const comboClicks = ref(0)     // Счетчик кликов подряд
+export const comboMultiplier = ref(1) // Текущий множитель (1, 5, 10, 20)
+export const comboAnimKey = ref(0);
+export const isComboAnimating = ref(false);
+export const coinAnimKey = ref(0)
+export const isCoinAnimating = ref(false)
+let comboTimer = null                // Таймер сброса комбо
 
 export function spawnHeart() {
     gameData.sleep = false
-    if (gameData.clickCounter % 3 === 0) {
-        addCoin(1)
-    }
-    addExp(1)
+
+    // 1. Увеличиваем клик-счётчик
     gameData.clickCounter++
-    // Тратим энергию / сытость
-    if (isBadMood.value) {
-        gameData.energy = Math.max(0, gameData.energy - 0.02)
-        gameData.foodLevel = Math.max(0, gameData.foodLevel - 0.02)
+
+    // 2. Логика комбо
+    comboClicks.value++
+    if (comboTimer) clearTimeout(comboTimer)
+
+    if (comboClicks.value >= 100) {
+        comboMultiplier.value = 20
+    } else if (comboClicks.value >= 50) {
+        comboMultiplier.value = 10
+    } else if (comboClicks.value >= 20) {
+        comboMultiplier.value = 5
     } else {
-        gameData.energy = Math.max(0, gameData.energy - 0.01)
-        gameData.foodLevel = Math.max(0, gameData.foodLevel - 0.01)
+        comboMultiplier.value = 1
     }
+
+    comboTimer = setTimeout(() => {
+        comboClicks.value = 0
+        comboMultiplier.value = 1
+    }, 1200)
+
+    // 3. АНИМАЦИЯ КОМБО (Запускается на клик, если предыдущая еще не идет)
+    if (!isComboAnimating.value) {
+        isComboAnimating.value = true
+        comboAnimKey.value++
+
+        setTimeout(() => {
+            isComboAnimating.value = false
+        }, 800) // 800мс — длительность floatCombo
+    }
+    if (gameData.clickCounter % 2 === 0) {
+        addCoin(1 * comboMultiplier.value)
+
+        if (!isCoinAnimating.value) {
+            isCoinAnimating.value = true
+            coinAnimKey.value++
+
+            setTimeout(() => {
+                isCoinAnimating.value = false
+            }, 500) // 500мс — длительность coinFly
+        }
+    }
+    // Начисление монет (оставляем как у тебя)
+    if (gameData.clickCounter % 2 === 0) {
+        addCoin(1 * comboMultiplier.value)
+    }
+
+    addExp(1)
+
+    // Тратим энергию / сытость
+    const cost = isBadMood.value ? 0.02 : 0.01
+    gameData.energy = Math.max(0, gameData.energy - cost)
+    gameData.foodLevel = Math.max(0, gameData.foodLevel - cost)
 
     if (gameData.isFat) {
         PlayCount.value++
@@ -214,14 +266,12 @@ export function spawnHeart() {
             addExp(10)
             addCoin(10)
         }
-
     }
 
-    // Увеличиваем ключ — это мгновенно перезапустит анимации сердечка и монетки с нуля
+    // Увеличиваем ключ для персонажа и сердечка
     animKey.value++
     isVibrating.value = true
 
-    // Короткий сброс вибрации рта
     setTimeout(() => {
         isVibrating.value = false
     }, 150)
@@ -237,7 +287,7 @@ export function addCoin(coins = 1) {
     setTimeout(() => {
         isAnimating.value = false
 
-    }, 150)
+    }, 5000)
 }
 
 export const Clean = () => {
