@@ -27,7 +27,6 @@ import {
   foamEl, foodConsumedByPipe
 } from "@/scripts/dragAndDrop.js";
 import {computed} from "vue";
-import {router} from "@/scripts/main.js";
 
 const shouldPulse = computed(() => {
   const list = cartItemsList.value || cartItemsList;
@@ -40,7 +39,9 @@ const shouldPulse = computed(() => {
   }
   return list[currentIndex.value].category !== 'shaman';
 });
+import {useRouter} from 'vue-router'; // <-- Подключаем официальный хук
 
+const router = useRouter(); // <-- Инициализируем роутер внутри компонента
 function goToSaloon() {
   if (gameData.coins < 50) {
     alert('Нужно минимум 50 монет, чтобы зайти в Салун!')
@@ -290,8 +291,9 @@ function goToSaloon() {
                  ]"
                  class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
             ></div>
-            <div v-show="gameData.foodLevel >= 100 && gameData.isFat && foodCartList[currentIndex]?.subcategory !=='fruits'"
-                 class="absolute w-20 opacity-50 animate-pulse pointer-events-none">
+            <div
+                v-show="gameData.foodLevel >= 100 && gameData.isFat && foodCartList[currentIndex]?.subcategory !=='fruits'"
+                class="absolute w-20 opacity-50 animate-pulse pointer-events-none">
               <img src="/gamePlay/warning_icons.webp" alt="">
             </div>
             <img v-show="(foodDrag.isDragging.value || feedStatus) && !foodConsumedByPipe"
