@@ -6,7 +6,7 @@ import { createApp } from 'vue'
 import App from '../App.vue'
 
 // 1. Принудительный сброс кэша для iOS Safari / Telegram WebApp
-const APP_VERSION = '1.0.1'; // Меняй версию при каждом обновлении
+const APP_VERSION = '1.0.2'; // Меняй версию при каждом обновлении
 const currentVersion = localStorage.getItem('app_version');
 
 async function clearCacheAndReload() {
