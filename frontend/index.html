@@ -1,117 +1,56 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
+<html lang="">
+  <head>
     <meta charset="UTF-8">
     <link rel="icon" href="/gamePlay/favicon.ico">
-
-    <!-- 1. ИСПРАВЛЕННЫЙ VIEWPORT (Добавлен viewport-fit=cover и сброс шрифтов) -->
-    <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-    >
-
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+      <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <title>Vite App</title>
+  </head>
+  <body>
+  <div id="rotate-warning" class="rotate-warning">
+      <div class="warning-content">
+          📱 Пожалуйста, поверните телефон вертикально!
+      </div>
+  </div>
+    <div id="app"></div>
+    <script type="module" src="/src/scripts/main.js"></script>
+  </body>
+  <script>
+      function checkOrientation() {
+          const warning = document.getElementById('rotate-warning');
+          if (!warning) return;
 
-    <!-- 2. CSS-ХАКИ ДЛЯ ИДЕНТИЧНОЙ ШИРИНЫ НА IOS И ANDROID -->
-    <style>
-        /* Расширяем WebApp на весь экран в Telegram */
-        :root {
-            --tg-viewport-height: 100vh;
-            --tg-viewport-stable-height: 100vh;
-        }
+          // Проверяем, мобильное ли это устройство
+          const isMobile = window.matchMedia("(pointer: coarse)").matches;
+          if (!isMobile) {
+              warning.classList.remove('active');
+              return;
+          }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            /* Запрещаем iOS авто-масштабировать шрифты */
-            -webkit-text-size-adjust: 100%;
-            text-size-adjust: 100%;
-            /* Фикс для точного расчета border/padding */
-            box-sizing: border-box;
-        }
+          // Узнаем РЕАЛЬНУЮ физическую ориентацию устройства через системный API.
+          // Клавиатура НЕ меняет этот параметр (он остается portrait, пока телефон вертикален).
+          let isLandscape = false;
+          if (screen.orientation && screen.orientation.type) {
+              isLandscape = screen.orientation.type.includes('landscape');
+          } else {
+              // Запасной вариант для старых браузеров
+              isLandscape = window.innerWidth > window.innerHeight;
+          }
 
-        *, ::before, ::after {
-            box-sizing: inherit;
-        }
+          // Показываем предупреждение ТОЛЬКО если телефон реально повернут в альбом
+          if (isLandscape) {
+              warning.classList.add('active');
+          } else {
+              warning.classList.remove('active');
+          }
+      }
 
-        /* Стили для плашки поворота */
-        .rotate-warning {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            background: rgba(0, 0, 0, 0.9);
-            color: #fff;
-            align-items: center;
-            justify-content: center;
-            font-family: sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .rotate-warning.active {
-            display: flex;
-        }
-    </style>
-</head>
-<body>
-<div id="rotate-warning" class="rotate-warning">
-    <div class="warning-content">
-        📱 Пожалуйста, поверните телефон вертикально!
-    </div>
-</div>
-
-<div id="app"></div>
-
-<script type="module" src="/src/scripts/main.js"></script>
-</body>
-
-<script>
-    // 3. ИНИЦИАЛИЗАЕЦА TELEGRAM WEBAPP ДЛЯ ВСЕХ ЭКРАНОВ
-    if (window.Telegram && window.Telegram.WebApp) {
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand(); // Разворачивает окно WebApp на всю высоту
-
-        // Включаем полноэкранный режим если поддерживается (Telegram SDK v7.0+)
-        if (tg.requestFullscreen) {
-            tg.requestFullscreen();
-        }
-    }
-
-    // 4. ПРОВЕРКА ОРИЕНТАЦИИ (Твой улучшенный скрипт)
-    function checkOrientation() {
-        const warning = document.getElementById('rotate-warning');
-        if (!warning) return;
-
-        const isMobile = window.matchMedia("(pointer: coarse)").matches;
-        if (!isMobile) {
-            warning.classList.remove('active');
-            return;
-        }
-
-        let isLandscape = false;
-        if (screen.orientation && screen.orientation.type) {
-            isLandscape = screen.orientation.type.includes('landscape');
-        } else {
-            isLandscape = window.innerWidth > window.innerHeight;
-        }
-
-        if (isLandscape) {
-            warning.classList.add('active');
-        } else {
-            warning.classList.remove('active');
-        }
-    }
-
-    window.addEventListener('resize', checkOrientation);
-    if (screen.orientation) {
-        screen.orientation.addEventListener('change', checkOrientation);
-    }
-    document.addEventListener('DOMContentLoaded', checkOrientation);
-</script>
+      // Слушаем изменение ориентации и изменение размеров
+      window.addEventListener('resize', checkOrientation);
+      if (screen.orientation) {
+          screen.orientation.addEventListener('change', checkOrientation);
+      }
+      document.addEventListener('DOMContentLoaded', checkOrientation);
+  </script>
 </html>
