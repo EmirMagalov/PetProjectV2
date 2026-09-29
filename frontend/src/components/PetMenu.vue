@@ -47,7 +47,7 @@ function goToSaloon() {
     alert('Нужно минимум 50 монет, чтобы зайти в Салун!')
     return
   }
-  router.push('/saloonPhotos')
+  router.push('/saloon')
 }
 
 
