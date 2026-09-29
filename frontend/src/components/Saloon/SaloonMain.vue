@@ -85,10 +85,10 @@ onMounted(() => {
   result.value = "Начнем игру?";
   startRandomLooking();
 
-  // Имитируем загрузку на 1.8 секунды для плавности
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 1800);
+  isLoading.value = false;
+  // setTimeout(() => {
+  //   isLoading.value = false;
+  // }, 1800);
 });
 
 onUnmounted(() => {

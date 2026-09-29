@@ -21,7 +21,7 @@ import { gameData } from "@/scripts/useGameStore.js";
 // Безопасный расчет монет
 const userCoins = computed(() => {
   if (!gameData) return 0;
-  const coins = gameData.value !== undefined ? gameData.value?.coins : gameData?.coins;
+  const coins = gameData?.coins;
   return Number(coins) || 0;
 });
 

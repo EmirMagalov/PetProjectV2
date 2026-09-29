@@ -167,7 +167,7 @@ export function hit() {
 export async function finishGame(type) {
     gameFinished.value = true;
 
-    const coinsRef = gameData.value !== undefined ? gameData.value : gameData;
+    const coinsRef =  gameData;
 
     if (type === "bust") {
         result.value = "Перебор! Ты проиграл";
