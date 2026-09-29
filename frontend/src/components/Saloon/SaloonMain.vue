@@ -1,7 +1,7 @@
 <script setup>
 import SaloonMenu from "@/components/Saloon/SaloonMenu.vue";
 
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref,nextTick } from "vue";
 import { blink } from "@/scripts/useGameStore.js";
 import {
   dealerCards,
@@ -85,12 +85,17 @@ onMounted(() => {
   result.value = "Начнем игру?";
   startRandomLooking();
 
-  // Имитируем загрузку на 1.8 секунды для плавности
-  setTimeout(() => {
+  // 1. Ждем 1.2 секунды для визуального эффекта
+  setTimeout(async () => {
+    // 2. Скрываем лоадер
     isLoading.value = false;
-  }, 1800);
-});
 
+    // 3. Ждем, пока Vue скроет лоадер из DOM и отрисует меню
+    await nextTick();
+
+    // Теперь элементы гарантированно появились на странице и готовыми к кликам
+  }, 1200);
+});
 onUnmounted(() => {
   clearInterval(lookInterval);
   clearInterval(blinkInterval);
