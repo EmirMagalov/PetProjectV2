@@ -1,7 +1,7 @@
 <script setup>
 import SaloonMenu from "@/components/Saloon/SaloonMenu.vue";
 
-import {nextTick, onMounted, onUnmounted, ref} from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { blink } from "@/scripts/useGameStore.js";
 import {
   dealerCards,
@@ -48,55 +48,47 @@ function startRandomLooking() {
 // =====================================================
 const dealerCardsZone = ref(null);
 
-async function animateFlyTo({ targetEl, isDealer = false }) {
-  // 1. Ждем до следующего тика, чтобы refs точно привязались в DOM
-  await nextTick();
-
+function animateFlyTo({ targetEl, isDealer = false }) {
   const target = targetEl || dealerCardsZone.value;
-
-  // Если элементов нет в DOM, просто пропускаем анимацию, НЕ ломая логику игры
   if (!deckRef.value || !target) return;
 
   const startRect = deckRef.value.getBoundingClientRect();
   const endRect = target.getBoundingClientRect();
 
-  // Защита от нулевых координат на айфоне (если элемент скрыт)
-  if (startRect.width === 0 || endRect.width === 0) return;
-
   const flyer = document.createElement("div");
   flyer.className =
-      "fixed z-[9999] w-[42px] h-[58px] rounded-md bg-red-800 border-2 border-amber-300 shadow-2xl pointer-events-none transition-all duration-500 ease-out flex items-center justify-center";
+      "fixed z-[999] w-[42px] h-[58px] rounded-md bg-red-800 border-2 border-amber-300 shadow-2xl pointer-events-none transition-all duration-500 ease-out flex items-center justify-center";
 
   flyer.innerHTML = `<span class="text-amber-200 text-sm font-bold"><img src="/gamePlay/logo_icons.webp" class="w-7 object-contain" alt="" /></span>`;
 
   flyer.style.left = `${startRect.left}px`;
   flyer.style.top = `${startRect.top}px`;
-  flyer.style.willChange = "left, top, transform"; // Подсказка для GPU Safari
 
   document.body.appendChild(flyer);
 
-  // Используем setTimeout вместо двойного requestAnimationFrame для 100% стабильности в Safari
-  setTimeout(() => {
-    flyer.style.left = `${endRect.left + endRect.width / 2 - 21}px`;
-    flyer.style.top = `${endRect.top + endRect.height / 2 - 29}px`;
-    flyer.style.transform = isDealer ? "scale(1.0) rotate(-5deg)" : "scale(1.2) rotate(10deg)";
-  }, 20);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      flyer.style.left = `${endRect.left + endRect.width / 2 - 21}px`;
+      flyer.style.top = `${endRect.top + endRect.height / 2 - 29}px`;
+      flyer.style.transform = isDealer ? "scale(1.0) rotate(-5deg)" : "scale(1.2) rotate(10deg)";
+    });
+  });
 
   setTimeout(() => {
-    if (flyer && flyer.parentNode) {
+    if (flyer.parentNode) {
       flyer.parentNode.removeChild(flyer);
     }
-  }, 520);
+  }, 500);
 }
 
 onMounted(() => {
   result.value = "Начнем игру?";
   startRandomLooking();
-  isLoading.value = false;
+
   // Имитируем загрузку на 1.8 секунды для плавности
-  // setTimeout(() => {
-  //
-  // }, 1800);
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 1800);
 });
 
 onUnmounted(() => {
