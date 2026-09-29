@@ -240,7 +240,7 @@ onUnmounted(() => {
               v-if="isComboAnimating"
               :key="comboAnimKey"
               :src="getCombo()"
-              class="absolute text-2xl w-12 select-none z-50 animate-float-combo pointer-events-none"
+              class="absolute text-2xl w-15 select-none z-50 animate-float-combo pointer-events-none"
               alt="">
 
           <img
