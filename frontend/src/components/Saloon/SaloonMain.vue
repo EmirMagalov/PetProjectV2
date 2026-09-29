@@ -99,7 +99,7 @@ onUnmounted(() => {
 
 <template>
   <div
-      class="relative min-h-dvh flex flex-col justify-between bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600 overflow-hidden">
+      class="relative min-h-dvh justify-between bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600 overflow-hidden">
 
     <!-- ПОЛНОЭКРАННЫЙ ЭКРАН ЗАГРУЗКИ (LOADER) -->
     <Transition name="fade">
