@@ -46,7 +46,7 @@ clearCacheAndReload();
 // 2. Инициализация роутера и приложения
 const routes = [
     { path: '/', component: PetMain },
-    { path: '/saloonPhotos', component: SaloonMain },
+    { path: '/saloon', component: SaloonMain },
 ];
 
 export const router = createRouter({
