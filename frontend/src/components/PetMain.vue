@@ -268,6 +268,18 @@ onUnmounted(() => {
                 class="absolute w-5 z-50 animate-coinFly pointer-events-none"
                 alt="">
           </template>
+          <!--          <template v-if="isCoinAnimating">-->
+          <!--            <img-->
+          <!--                v-for="i in comboMultiplier"-->
+          <!--                :key="`${coinAnimKey}-${i}`"-->
+          <!--                :style="{-->
+          <!--        '&#45;&#45;i': i - 1,-->
+          <!--        animationDelay: `${(i - 1) * 0.04}s`-->
+          <!--      }"-->
+          <!--                src="/gamePlay/coin.webp"-->
+          <!--                class="absolute w-5 z-50 animate-coinFly pointer-events-none"-->
+          <!--                alt="">-->
+          <!--          </template>-->
 
 
           <div v-show="gameData.sleep"
@@ -413,39 +425,26 @@ onUnmounted(() => {
 
 @keyframes coinFly {
   0% {
-    transform: translate(0px, 0px) scale(0.5) rotate(0deg);
+    /* Каждая монетка фиксируется в своей точке веера СРАЗУ, даже до старта анимации */
+    //transform: translate(calc(60px + (var(--i) * 10px)), -30px) scale(0.6);
     opacity: 0;
   }
-  10% {
+  15% {
     opacity: 1;
-    /* Легкое подбрасывание вверх и веерное расхождение */
-    transform: translate(calc((var(--i) * -8px) + 15px), -25px) scale(1);
-  }
-  25% {
-    transform: translate(calc((var(--i) * -6px) + 40px), -50px) scale(1);
   }
   40% {
-    transform: translate(calc((var(--i) * -3px) + 75px), -85px) scale(1);
-  }
-  55% {
-    transform: translate(115px, -125px) scale(1);
+    /* Плавный взлет по дуге */
+    transform: translate(calc(60px + (var(--i) * 12px)), -80px) scale(1) rotate(10deg);
   }
   70% {
-    transform: translate(160px, -165px) scale(1);
+    transform: translate(calc(150px + (var(--i) * 12px)), -190px) scale(1) rotate(25deg);
   }
-  85% {
-    opacity: 0.9;
-    transform: translate(205px, -205px) scale(1);
-  }
-  100% {
-    transform: translate(250px, -250px) scale(1);
-    opacity: 0;
-  }
+
 }
 
 .animate-coinFly {
-  /* cubic-bezier задает идеальное сглаживание между всеми 8 шагами */
-  animation: coinFly 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  /* Важно: 'both' применяет кадр 0% ДО начала задержки animationDelay */
+  animation: coinFly 0.65s cubic-bezier(0.15, 0.85, 0.35, 1.2) both;
 }
 
 @keyframes popCharacter {

@@ -254,11 +254,6 @@ export function spawnHeart() {
     }, 800)
 
 
-    if (gameData.clickCounter % 2 === 0) {
-        addCoin(1 * comboMultiplier.value)
-
-
-    }
     // Начисление монет (оставляем как у тебя)
     if (gameData.clickCounter % 2 === 0) {
         addCoin(1 * comboMultiplier.value)
