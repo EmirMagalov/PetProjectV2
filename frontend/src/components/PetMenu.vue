@@ -245,6 +245,7 @@ function goToSaloon() {
           <template v-if="bathCartList.length === 0">
             <div
                 class="flex flex-col items-center justify-center w-[70px] h-[70px] opacity-30 bg-contain bg-no-repeat bg-center"
+                :class="currentDraggedItem === 'shower' && !statusFoam && showerCount === 0 ? 'animate-pulse' : ''"
                 style="background-image: url('/gamePlay/shampoo_icon.webp')">
             </div>
           </template>
@@ -270,11 +271,12 @@ function goToSaloon() {
             <div v-show="foamDrag.isDragging.value || feedStatus"
                  :style="{ 'background-image': `url('${bathCartList[currentBathIndex]?.image}')` }"
                  class="w-[70px] h-[70px] opacity-30 bg-contain bg-no-repeat bg-center">
+
             </div>
           </template>
 
           <!-- Текст названия / статуса -->
-          <p class="text-xs absolute bottom-2 font-bold text-gray-600 pointer-events-none whitespace-nowrap">
+          <p class="text-xs absolute bottom-2 font-bold text-gray-600 pointer-events-none whitespace-nowrap" >
             {{
               bathCartList.length > 0 && bathCartList[currentBathIndex]
                   ? `${bathCartList[currentBathIndex].name} x${bathCartList[currentBathIndex].count}`

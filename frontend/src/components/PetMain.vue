@@ -105,10 +105,10 @@ function getHornAsset(level) {
 }
 
 function getCombo() {
-  if (comboMultiplier.value >= 5) return '/gamePlay/x5_icons.webp'
-  if (comboMultiplier.value >= 3) return '/gamePlay/x3_icons.webp'
-  if (comboMultiplier.value >= 2) return '/gamePlay/x2_icons.webp'
-  return '/gamePlay/x1_icons.webp'
+  if (comboMultiplier.value >= 5) return '/gamePlay/x5_combo_icons.webp'
+  if (comboMultiplier.value >= 3) return '/gamePlay/x3_combo_icons.webp'
+  if (comboMultiplier.value >= 2) return '/gamePlay/x2_combo_icons.webp'
+  return '/gamePlay/x1_combo_icons.webp'
 }
 
 watch(location, (newLocation) => {
