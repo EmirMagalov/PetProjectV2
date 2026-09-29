@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, computed } from "vue";
+import { ref, nextTick, computed, onMounted, onUnmounted } from "vue";
 import {
   gameFinished,
   gameStarted,
@@ -18,8 +18,11 @@ import {
 } from "@/scripts/saloonScripts/twentyOneGame.js";
 import { gameData } from "@/scripts/useGameStore.js";
 
+// Безопасный расчет монет
 const userCoins = computed(() => {
-  return gameData.value !== undefined ? gameData.value.coins : gameData.coins;
+  if (!gameData) return 0;
+  const coins = gameData.value !== undefined ? gameData.value?.coins : gameData?.coins;
+  return Number(coins) || 0;
 });
 
 const emit = defineEmits(["animate-draw"]);
@@ -29,6 +32,24 @@ const selectedBet = ref(50);
 const betOptions = [50, 100, 250, 500];
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Гарантированный сброс состояния при входе/выходе для SPA
+function resetGameState() {
+  gameStarted.value = false;
+  gameFinished.value = false;
+  bettingPhase.value = false;
+  isDealing.value = false;
+  currentBet.value = null;
+  playerCards.value = [];
+}
+
+onMounted(() => {
+  resetGameState();
+});
+
+onUnmounted(() => {
+  resetGameState();
+});
 
 async function handleStartGame() {
   if (userCoins.value < 50) {
@@ -43,13 +64,14 @@ async function handleStartGame() {
   isDealing.value = true;
 
   await nextTick();
+  await sleep(100);
 
   emit("animate-draw", { targetEl: playerCardsZone.value, isDealer: false });
-  await sleep(500);
+  await sleep(400);
   addPlayerCard();
 
   emit("animate-draw", { isDealer: true });
-  await sleep(500);
+  await sleep(400);
   addDealerCard();
 
   isDealing.value = false;
@@ -64,7 +86,7 @@ function handleConfirmBet() {
 async function handleHit() {
   isDealing.value = true;
   emit("animate-draw", { targetEl: playerCardsZone.value, isDealer: false });
-  await sleep(500);
+  await sleep(400);
   hit();
   isDealing.value = false;
 }
@@ -74,9 +96,9 @@ async function handleStand() {
 
   while (dealerScore.value < 17) {
     emit("animate-draw", { isDealer: true });
-    await sleep(500);
-    addDealerCard();
     await sleep(400);
+    addDealerCard();
+    await sleep(300);
   }
 
   isDealing.value = false;
@@ -100,43 +122,44 @@ function handleRestart() {
 </script>
 
 <template>
+  <!-- Главный контейнер меню с фиксом для Safari -->
   <div
-      class="rounded-4xl p-4 mx-5 bg-[#fff6ef] h-65 border-2 border-[#f7c9a5] flex flex-col items-center justify-between relative overflow-hidden"
+      class="saloon-container rounded-4xl p-4 mx-5 bg-[#fff6ef] h-65 border-2 border-[#f7c9a5] flex flex-col items-center justify-between relative"
   >
-    <RouterLink to="/">
+    <!-- Кнопка "Назад" -->
+    <RouterLink to="/" class="z-30">
       <div
-          class="bg-[#fff6ef] absolute left-2 h-15 w-15 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer z-20"
+          class="ios-btn bg-[#fff6ef] absolute left-2 top-2 h-15 w-15 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer z-30"
           style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
       >
         <div
             class="w-10 h-10 bg-contain bg-no-repeat bg-center"
             style="background-image: url('/gamePlay/back_icon.webp')"
         ></div>
-        <button class="text-xs font-bold text-gray-600 pointer-events-none">Назад</button>
+        <span class="text-xs font-bold text-gray-600 pointer-events-none">Назад</span>
       </div>
     </RouterLink>
 
-    <div class="w-full flex justify-center items-center px-2 text-sm font-bold text-amber-900 z-10">
+    <!-- Текст ставки -->
+    <div class="w-full flex justify-center items-center px-2 text-sm font-bold text-amber-900 z-20">
       <div v-if="gameStarted && currentBet" class="bg-amber-100 px-3 py-1 rounded-full border border-amber-300">
         Ставка: {{ currentBet }}
       </div>
     </div>
 
-    <!-- Игровая область игрока -->
-    <div v-if="gameStarted" class="flex flex-col items-center gap-2 my-auto z-10 w-full">
+    <!-- Игровая область карт -->
+    <div v-if="gameStarted" class="flex flex-col items-center gap-2 my-auto z-20 w-full">
       <div v-show="playerScore > 0" class="inline-flex items-center justify-center">
-        <!-- Убран backdrop-blur-sm, заменен на чистый bg-black/80 для iOS -->
         <span class="bg-black/80 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
           Ты: {{ playerScore }}
         </span>
       </div>
 
-      <!-- Зона карт игрока БЕЗ TransitionGroup -->
-      <div ref="playerCardsZone" class="flex items-center justify-center min-h-[80px] w-full relative">
+      <div ref="playerCardsZone" class="flex items-center justify-center min-h-[80px] w-full relative z-20">
         <div
             v-for="(card, index) in playerCards"
             :key="card.suit + card.name + index"
-            class="card-animate w-16 h-20 -ml-6 first:ml-0 relative shrink-0"
+            class="card-render-wrapper w-16 h-20 -ml-6 first:ml-0 relative shrink-0"
         >
           <img
               :src="card.image"
@@ -152,7 +175,7 @@ function handleRestart() {
     <!-- 1. ФАЗА СТАВОК -->
     <div
         v-if="gameStarted && !currentBet && (bettingPhase || isDealing)"
-        class="flex flex-col items-center gap-2 mb-2 duration-300 z-10"
+        class="flex flex-col items-center gap-2 mb-2 duration-300 z-20"
     >
       <div class="flex gap-2">
         <button
@@ -161,7 +184,7 @@ function handleRestart() {
             @click="selectedBet = bet"
             :disabled="userCoins < bet || isDealing"
             :class="[
-          'px-3 py-1 rounded-lg font-bold text-sm transition border',
+          'ios-btn px-3 py-1 rounded-lg font-bold text-sm transition border',
           (userCoins < bet || isDealing)
             ? 'opacity-40 bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed'
             : selectedBet === bet
@@ -177,7 +200,7 @@ function handleRestart() {
           @click="handleConfirmBet"
           :disabled="userCoins < selectedBet || isDealing"
           :class="[
-        'h-10 w-25 rounded-xl transition text-white font-bold shadow-md mt-1',
+        'ios-btn h-10 w-25 rounded-xl transition text-white font-bold shadow-md mt-1',
         (userCoins < selectedBet || isDealing)
           ? 'bg-gray-400 opacity-60 cursor-not-allowed'
           : 'bg-emerald-500 hover:bg-emerald-400 active:scale-95 cursor-pointer'
@@ -187,12 +210,12 @@ function handleRestart() {
       </button>
     </div>
 
-    <!-- 2. ФАЗА ДОБОРА -->
-    <div v-else-if="gameStarted && !bettingPhase && !gameFinished" class="flex gap-3 mb-2 z-10">
+    <!-- 2. ФАЗА ДОБОРА ("ЕЩЁ" / "ХВАТИТ") -->
+    <div v-else-if="gameStarted && !bettingPhase && !gameFinished" class="flex gap-3 mb-2 z-20">
       <button
           @click="handleHit"
           :disabled="isDealing"
-          class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
+          class="ios-btn px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
       >
         Ещё
       </button>
@@ -200,7 +223,7 @@ function handleRestart() {
       <button
           @click="handleStand"
           :disabled="isDealing"
-          class="px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
+          class="ios-btn px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
       >
         Хватит
       </button>
@@ -212,7 +235,7 @@ function handleRestart() {
         @click="handleRestart"
         :disabled="userCoins < 50"
         :class="[
-          'w-35 h-12 mb-2 rounded-lg font-bold text-md shadow-lg transition z-10',
+          'ios-btn w-35 h-12 mb-2 rounded-lg font-bold text-md shadow-lg transition z-20',
           userCoins < 50
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
             : 'bg-yellow-400 hover:bg-yellow-300 active:scale-95 cursor-pointer'
@@ -222,11 +245,11 @@ function handleRestart() {
     </button>
 
     <button
-        v-if="!gameStarted"
+        v-if="!gameStarted && !gameFinished"
         @click="handleStartGame"
         :disabled="userCoins < 50"
         :class="[
-          'w-32 h-25 my-auto rounded-2xl font-bold text-md shadow-lg transition bg-[#fff6ef] rounded-4xl border-2 border-[#f7c9a5] z-10',
+          'ios-btn w-32 h-25 my-auto font-bold text-md shadow-lg transition bg-[#fff6ef] rounded-4xl border-2 border-[#f7c9a5] z-20',
           userCoins < 50
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
             : 'hover:bg-yellow-300 active:scale-95 cursor-pointer'
@@ -239,17 +262,38 @@ function handleRestart() {
 </template>
 
 <style scoped>
-/* Надежная CSS-анимация прилета карты напрямую через GPU */
-.card-animate {
-  animation: cardAppear 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-  will-change: transform, opacity;
+/* Принудительное включение GPU-слоя для родителя без урезания детей */
+.saloon-container {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  isolation: isolate;
+}
+
+/* Сброс багов Safari на кнопках */
+.ios-btn {
+  -webkit-appearance: none;
+  -webkit-touch-callout: none;
   -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.card-render-wrapper {
+  animation: cardAppear 0.3s ease-out forwards;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 @keyframes cardAppear {
   0% {
     opacity: 0;
-    transform: translateY(-20px) scale(0.6);
+    transform: translateY(-15px) scale(0.7);
   }
   100% {
     opacity: 1;
