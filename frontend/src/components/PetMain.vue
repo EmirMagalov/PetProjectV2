@@ -260,10 +260,7 @@ onUnmounted(() => {
             <img
                 v-for="i in comboMultiplier"
                 :key="`${coinAnimKey}-${i}`"
-                :style="{
-        '--i': i - 1,
-        animationDelay: `${(i - 1) * 0.04}s`
-      }"
+                :style="{ '--i': i - 1 }"
                 src="/gamePlay/coin.webp"
                 class="absolute w-5 z-50 animate-coinFly pointer-events-none"
                 alt="">
@@ -425,27 +422,38 @@ onUnmounted(() => {
 
 @keyframes coinFly {
   0% {
-    /* Каждая монетка фиксируется в своей точке веера СРАЗУ, даже до старта анимации */
-    //transform: translate(calc(60px + (var(--i) * 10px)), -30px) scale(0.6);
+    transform: translate(calc(10px + (var(--i) * 10px)), -10px) scale(0.6);
     opacity: 0;
   }
-  15% {
+  10% {
     opacity: 1;
+    transform: translate(calc(30px + (var(--i) * 10px)), -30px) scale(1);
   }
+  20% {
+    transform: translate(calc(60px + (var(--i) * 10px)), -60px) scale(1.5);
+  }
+  30% {
+    transform: translate(calc(65px + (var(--i) * 10px)), -65px) scale(1.7);
+  }
+  /* Короткое замедление/увеличение в воздухе */
   40% {
-    /* Плавный взлет по дуге */
-    transform: translate(calc(60px + (var(--i) * 12px)), -80px) scale(1) rotate(10deg);
+    transform: translate(calc(70px + (var(--i) * 10px)), -70px) scale(1.3);
   }
   70% {
-    transform: translate(calc(150px + (var(--i) * 12px)), -190px) scale(1) rotate(25deg);
+    transform: translate(calc(180px + (var(--i) * 6px)), -180px) scale(0.9);
   }
-
+  100% {
+    /* Финальный прилет и уменьшение */
+    transform: translate(310px, -320px) scale(0.4);
+    opacity: 0;
+  }
 }
 
 .animate-coinFly {
-  /* Важно: 'both' применяет кадр 0% ДО начала задержки animationDelay */
-  animation: coinFly 0.65s cubic-bezier(0.15, 0.85, 0.35, 1.2) both;
+  /* Замени кривую без overshoot (1.2), чтобы не было залипания */
+  animation: coinFly 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
+
 
 @keyframes popCharacter {
   0% {
