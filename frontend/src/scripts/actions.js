@@ -88,9 +88,11 @@ export function feedPet(foodId) {
     const randomLimit = Math.floor(Math.random() * 3) + 3
     const isSickAndFruit = gameData.sick && foodItem?.subcategory === 'fruits'
 
-    if (!isSickAndFruit && sameFoodCount.value >= randomLimit && gameData.foodLevel >=50) {
+    if (!isSickAndFruit && sameFoodCount.value >= randomLimit && gameData.foodLevel >= 50) {
         showTongue.value = true
-        setTimeout(() => { showTongue.value = false }, 800)
+        setTimeout(() => {
+            showTongue.value = false
+        }, 800)
         return false
     }
 
@@ -197,7 +199,11 @@ export const comboAnimKey = ref(0);
 export const isComboAnimating = ref(false);
 export const coinAnimKey = ref(0)
 export const isCoinAnimating = ref(false)
+export const sunMoonAnimKey = ref(0)
+export const sunMoonAnimating = ref(false)
 let comboTimer = null                // Таймер сброса комбо
+let comboHideTimer = null
+let sunMoonHideTimer = null
 
 export function spawnHeart() {
     gameData.sleep = false
@@ -210,11 +216,11 @@ export function spawnHeart() {
     if (comboTimer) clearTimeout(comboTimer)
 
     if (comboClicks.value >= 100) {
-        comboMultiplier.value = 20
-    } else if (comboClicks.value >= 50) {
-        comboMultiplier.value = 10
-    } else if (comboClicks.value >= 20) {
         comboMultiplier.value = 5
+    } else if (comboClicks.value >= 50) {
+        comboMultiplier.value = 3
+    } else if (comboClicks.value >= 20) {
+        comboMultiplier.value = 2
     } else {
         comboMultiplier.value = 1
     }
@@ -222,17 +228,32 @@ export function spawnHeart() {
     comboTimer = setTimeout(() => {
         comboClicks.value = 0
         comboMultiplier.value = 1
-    }, 1200)
+    }, 1000)
 
     // 3. АНИМАЦИЯ КОМБО (Запускается на клик, если предыдущая еще не идет)
-    if (!isComboAnimating.value) {
-        isComboAnimating.value = true
-        comboAnimKey.value++
 
-        setTimeout(() => {
-            isComboAnimating.value = false
-        }, 800) // 800мс — длительность floatCombo
+    isComboAnimating.value = true
+    comboAnimKey.value++
+    sunMoonAnimating.value = true
+    sunMoonAnimKey.value++
+
+    if (comboHideTimer) {
+        clearTimeout(comboHideTimer)
     }
+    if (sunMoonHideTimer) {
+        clearTimeout(sunMoonHideTimer)
+    }
+
+    // 3. Запускаем таймер заново: скроется только через 1000мс ПОСЛЕ ПОСЛЕДНЕГО КЛИКА
+    comboHideTimer = setTimeout(() => {
+        isComboAnimating.value = false
+    }, 800)
+
+    sunMoonHideTimer = setTimeout(() => {
+        sunMoonAnimating.value = false
+    }, 800)
+
+
     if (gameData.clickCounter % 2 === 0) {
         addCoin(1 * comboMultiplier.value)
 
@@ -242,6 +263,7 @@ export function spawnHeart() {
     if (gameData.clickCounter % 2 === 0) {
         addCoin(1 * comboMultiplier.value)
     }
+
 
     addExp(1)
 

@@ -220,9 +220,9 @@ const getItemBonuses = (item) => {
     <transition name="toast">
       <div
           v-if="lastBought"
-          class="absolute bottom-10 z-200 bg-emerald-600/90 border border-emerald-400 text-white px-5 py-3 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-3"
+          class="absolute bottom-10 z-200 bg-emerald-600/70 border border-emerald-400 text-white px-5 py-3 rounded-2xl shadow-2xl  flex items-center gap-3"
       >
-        <div class="w-8 h-8 bg-white/20 rounded-lg p-1 flex items-center justify-center shrink-0 relative">
+        <div class="w-10 h-10 bg-white/20 rounded-lg p-1 flex items-center justify-center shrink-0 relative">
           <img :src="lastBought.image" class="w-full h-full object-contain">
           <!-- Бейдж количества -->
           <span v-if="lastBoughtQuantity > 1" class="absolute -top-2 -right-2 bg-amber-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow">
@@ -230,8 +230,8 @@ const getItemBonuses = (item) => {
           </span>
         </div>
         <div>
-          <p class="text-xs text-emerald-200 font-medium">Успешное приобретение!</p>
-          <p class="text-sm font-bold">
+          <p class="text-xs text-white font-medium">Успешное приобретение!</p>
+          <p class="text-sm text-amber-500 font-bold">
             {{ lastBought.name }} <span v-if="lastBoughtQuantity > 1" class="text-amber-300 font-normal"></span>
           </p>
         </div>

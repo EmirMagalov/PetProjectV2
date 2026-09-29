@@ -13,7 +13,7 @@ import {
   comboMultiplier,
   isCoinAnimating,
   isComboAnimating,
-  spawnHeart
+  spawnHeart, sunMoonAnimating, sunMoonAnimKey
 } from "@/scripts/actions.js";
 import Status from "@/components/Status.vue";
 import {levelStatus} from "@/scripts/level.js";
@@ -105,9 +105,9 @@ function getHornAsset(level) {
 }
 
 function getCombo() {
-  if (comboMultiplier.value >= 20) return '/gamePlay/x20_icons.webp'
-  if (comboMultiplier.value >= 10) return '/gamePlay/x10_icons.webp'
   if (comboMultiplier.value >= 5) return '/gamePlay/x5_icons.webp'
+  if (comboMultiplier.value >= 3) return '/gamePlay/x3_icons.webp'
+  if (comboMultiplier.value >= 2) return '/gamePlay/x2_icons.webp'
   return '/gamePlay/x1_icons.webp'
 }
 
@@ -209,10 +209,25 @@ onUnmounted(() => {
         <!-- Солнце с плавной анимацией появления/исчезновения и движения -->
         <div
             :class="[
-         'absolute w-20 h-20 bg-yellow-300 rounded-full sun-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
+         'relative w-20 h-20 bg-yellow-300 rounded-full sun-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
          gameData.sleep ? '-top-20 left-[-50px] opacity-0 scale-50' : 'top-0 left-2 opacity-100 scale-100'
-       ]"></div>
-
+         
+       ]">
+          <Transition name="fade-moon">
+            <img
+                v-if="sunMoonAnimating"
+                :src="isBadMood ? '/gamePlay/sun_moon_angry.webp' : '/gamePlay/sun_moon_smile.webp'"
+                class="absolute left-2 w-17"
+                alt=""
+            >
+          </Transition>
+        </div>
+        <!--        <img-->
+        <!--            v-if="animKey > 0"-->
+        <!--            :key="animKey"-->
+        <!--            :src="isBadMood ? '/gamePlay/angry_icon.webp' : '/gamePlay/happy_icon.webp'"-->
+        <!--            class="absolute text-2xl w-5 select-none z-20 animate-float-heart"-->
+        <!--            alt="">-->
         <!-- Луна с плавной анимацией появления/исчезновения и движения -->
         <div
             :class="[
@@ -220,35 +235,39 @@ onUnmounted(() => {
          gameData.sleep ? 'top-0 left-2 opacity-100 scale-100' : '-top-20 left-[-50px] opacity-0 scale-50'
        ]"></div>
         <img :src="locationUrl"
-             class="absolute inset-0 w-full h-full object-cover z-20 pointer-events-none"/>
+             class="absolute inset-0  z-20 pointer-events-none w-[320px] h-[270px]"/>
 
         <!-- Зона персонажа (сюда перетаскиваем яблоко) -->
 
         <div ref="dropZoneRef"
-             class="absolute inset-0 z-30 flex justify-center top-8 items-center cursor-pointer">
+             class="absolute inset-0 z-30 flex justify-center
 
-<!--          <div class="absolute z-120 w-40 h-40"></div>-->
+              items-center cursor-pointer">
+
+          <!--          <div class="absolute z-120 w-40 h-40"></div>-->
 
           <!-- Сердечко с key для перезапуска анимации на каждый клик -->
-          <img
-              v-if="animKey > 0"
-              :key="animKey"
-              :src="isBadMood ? '/gamePlay/angry_icon.webp' : '/gamePlay/happy_icon.webp'"
-              class="absolute text-2xl w-5 select-none z-20 animate-float-heart"
-              alt="">
-          <img
-              v-if="isComboAnimating"
-              :key="comboAnimKey"
-              :src="getCombo()"
-              class="absolute text-2xl w-15 select-none z-50 animate-float-combo pointer-events-none"
-              alt="">
 
-          <img
-              v-if="isCoinAnimating"
-              :key="coinAnimKey"
-              src="/gamePlay/coin.webp"
-              class="absolute w-5 z-50 animate-coinFly pointer-events-none"
-              alt="">
+          <Transition name="combo-fade">
+            <img
+                v-if="isComboAnimating"
+                :src="getCombo()"
+                class="absolute text-2xl  select-none z-50 animate-float-combo pointer-events-none"
+                :class="{ 'w-12': comboMultiplier >= 1,'w-15': comboMultiplier >= 2,'w-20': comboMultiplier >= 3,'w-25': comboMultiplier >= 5 }"
+                alt="">
+          </Transition>
+          <template v-if="isCoinAnimating">
+            <img
+                v-for="i in comboMultiplier"
+                :key="`${coinAnimKey}-${i}`"
+                :style="{
+        '--i': i - 1,
+        animationDelay: `${(i - 1) * 0.04}s`
+      }"
+                src="/gamePlay/coin.webp"
+                class="absolute w-5 z-50 animate-coinFly pointer-events-none"
+                alt="">
+          </template>
 
 
           <div v-show="gameData.sleep"
@@ -311,7 +330,14 @@ onUnmounted(() => {
             <!-- Монетка с key для перезапуска анимации на каждый клик -->
 
           </div>
-
+          <Status
+              v-if="activeStatus.show"
+              :status="true"
+              :text="activeStatus.text"
+              :image="activeStatus.image"
+              :additional="activeStatus.additional"
+              :bg-color="activeStatus.bgColor"
+          />
 
           <PetStinky/>
           <PetFoam :status-foam="statusFoam"/>
@@ -322,14 +348,7 @@ onUnmounted(() => {
 
         </div>
         <!-- Индикаторы статусов -->
-        <Status
-            v-if="activeStatus.show"
-            :status="true"
-            :text="activeStatus.text"
-            :image="activeStatus.image"
-            :additional="activeStatus.additional"
-            :bg-color="activeStatus.bgColor"
-        />
+
       </div>
       <PetSideMenu/>
     </div>
@@ -345,59 +364,88 @@ onUnmounted(() => {
 
 
 <style scoped>
-@keyframes floatHeart {
-  0% {
-    transform: translate(-15px, -15px) scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: translate(-40px, -30px) scale(1.5);
-  }
-  100% {
-    transform: translate(-40px, -30px) scale(0.8);
-    opacity: 0;
-  }
+.fade-moon-enter-active,
+.fade-moon-leave-active {
+  transition: opacity 1s ease;
 }
 
-.animate-float-heart {
-  animation: floatHeart 0.5s ease-out forwards;
+.fade-moon-enter-from,
+.fade-moon-leave-to {
+  opacity: 0;
+  transform: scale(1);
 }
 
+/* 1. Твоя анимация покачивания (бесконечный цикл, пока висит плашка) */
 @keyframes floatCombo {
   0% {
-    transform: translate(40px, -50px) scale(1) rotate(5deg);
-    opacity: 1;
+    transform: translate(70px, -70px) scale(1) rotate(15deg);
   }
-
+  25% {
+    transform: translate(70px, -70px) scale(1) rotate(-15deg);
+  }
   50% {
-    transform: translate(60px, -70px) scale(1.5) rotate(12deg);
+    transform: translate(70px, -70px) scale(1) rotate(15deg);
+  }
+  75% {
+    transform: translate(70px, -70px) scale(1) rotate(-15deg);
   }
   100% {
-    transform: translate(60px, -70px) scale(0.8) rotate(-12deg);
-    opacity: 0;
+    transform: translate(70px, -70px) scale(1) rotate(15deg);
   }
 }
 
 .animate-float-combo {
-  animation: floatCombo 1s ease-out forwards;
+  animation: floatCombo 0.5s ease-in-out infinite;
+}
+
+/* 2. Плавное появление и плавное растворение во Vue Transition */
+.combo-fade-enter-active,
+.combo-fade-leave-active {
+  transition: opacity 1s ease, transform 0.5s ease;
+}
+
+/* Состояние до появления и после исчезновения */
+.combo-fade-enter-from,
+.combo-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.6) translateY(10px);
 }
 
 @keyframes coinFly {
   0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 1;
+    transform: translate(0px, 0px) scale(0.5) rotate(0deg);
+    opacity: 0;
   }
-  50% {
-    transform: translate(30px, -50px) scale(1.2) ;
+  10% {
+    opacity: 1;
+    /* Легкое подбрасывание вверх и веерное расхождение */
+    transform: translate(calc((var(--i) * -8px) + 15px), -25px) scale(1);
+  }
+  25% {
+    transform: translate(calc((var(--i) * -6px) + 40px), -50px) scale(1);
+  }
+  40% {
+    transform: translate(calc((var(--i) * -3px) + 75px), -85px) scale(1);
+  }
+  55% {
+    transform: translate(115px, -125px) scale(1);
+  }
+  70% {
+    transform: translate(160px, -165px) scale(1);
+  }
+  85% {
+    opacity: 0.9;
+    transform: translate(205px, -205px) scale(1);
   }
   100% {
-    transform: translate(50px, -80px) scale(0.8);
+    transform: translate(250px, -250px) scale(1);
     opacity: 0;
   }
 }
 
 .animate-coinFly {
-  animation: coinFly 0.8s ease-out forwards;
+  /* cubic-bezier задает идеальное сглаживание между всеми 8 шагами */
+  animation: coinFly 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 
 @keyframes popCharacter {
@@ -507,10 +555,6 @@ onUnmounted(() => {
   cloudFloat 3s ease-in-out 0.4s infinite;
   transform-origin: center bottom;
 }
-
-
-
-
 
 
 </style>

@@ -24,7 +24,8 @@ watch([playerCards, dealerCards, gameStarted, currentBet], () => {
         playerCards: playerCards.value,
         dealerCards: dealerCards.value,
         gameStarted: gameStarted.value,
-        currentBet: currentBet.value
+        currentBet: currentBet.value,
+        bettingPhase: bettingPhase.value,
     }));
 }, { deep: true });
 
@@ -36,6 +37,7 @@ if (savedState) {
     dealerCards.value = parsed.dealerCards || [];
     gameStarted.value = parsed.gameStarted || false;
     currentBet.value = parsed.currentBet || null;
+    bettingPhase.value = parsed.bettingPhase || false;
 }
 
 
