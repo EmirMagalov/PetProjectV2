@@ -41,15 +41,30 @@ const shouldPulse = computed(() => {
 });
 import {useRouter} from 'vue-router'; // <-- Подключаем официальный хук
 
-const router = useRouter(); // <-- Инициализируем роутер внутри компонента
-function goToSaloon() {
-  if (gameData.coins < 50) {
-    alert('Нужно минимум 50 монет, чтобы зайти в Салун!')
-    return
-  }
-  router.push('/saloon')
-}
+const router = useRouter();
 
+function goToSaloon() {
+  // Безопасный расчет монет (поддерживает ref и обычный объект)
+  const coins = Number(gameData?.value?.coins ?? gameData?.coins) || 0;
+
+  if (coins < 50) {
+    alert('Нужно минимум 50 монет, чтобы зайти в Салун!');
+    return;
+  }
+
+  // Определение устройства iOS (iPhone, iPad, iPod)
+  const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  if (isIOS) {
+    // Жёсткая перезагрузка для iOS: очищает застрявший WebKit/GPU кэш Safari
+    window.location.href = '/saloon';
+  } else {
+    // Для Android и ПК оставляем быструю SPA-навигацию
+    router.push('/saloon');
+  }
+}
 
 </script>
 

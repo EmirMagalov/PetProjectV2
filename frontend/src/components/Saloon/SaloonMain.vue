@@ -88,7 +88,7 @@ onMounted(() => {
   // Имитируем загрузку на 1.8 секунды для плавности
   setTimeout(() => {
     isLoading.value = false;
-  }, 1800);
+  }, 800);
 });
 
 onUnmounted(() => {
