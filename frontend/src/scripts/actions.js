@@ -236,14 +236,7 @@ export function spawnHeart() {
     if (gameData.clickCounter % 2 === 0) {
         addCoin(1 * comboMultiplier.value)
 
-        if (!isCoinAnimating.value) {
-            isCoinAnimating.value = true
-            coinAnimKey.value++
 
-            setTimeout(() => {
-                isCoinAnimating.value = false
-            }, 500) // 500мс — длительность coinFly
-        }
     }
     // Начисление монет (оставляем как у тебя)
     if (gameData.clickCounter % 2 === 0) {
@@ -278,7 +271,14 @@ export function spawnHeart() {
 }
 
 export function addCoin(coins = 1) {
+    if (!isCoinAnimating.value) {
+        isCoinAnimating.value = true
+        coinAnimKey.value++
 
+        setTimeout(() => {
+            isCoinAnimating.value = false
+        }, 500) // 500мс — длительность coinFly
+    }
     gameData.coins += coins
 
     // 2. Включаем флаги анимации

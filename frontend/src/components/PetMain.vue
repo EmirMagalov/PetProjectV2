@@ -227,7 +227,7 @@ onUnmounted(() => {
         <div ref="dropZoneRef"
              class="absolute inset-0 z-30 flex justify-center top-8 items-center cursor-pointer">
 
-          <div @click="spawnHeart" class="absolute  z-120 w-40 h-40"></div>
+<!--          <div class="absolute z-120 w-40 h-40"></div>-->
 
           <!-- Сердечко с key для перезапуска анимации на каждый клик -->
           <img
@@ -260,6 +260,7 @@ onUnmounted(() => {
           <PhotoFrame v-show="(location==='home' || location==='food')"/>
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
           <div :key="animKey"
+               @click="spawnHeart"
                :class="['absolute flex justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '']">
 
             <PetHeadwear/>
