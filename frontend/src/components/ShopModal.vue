@@ -6,7 +6,6 @@ import {addToCart, buyHeadwear} from "@/scripts/basket.js"
 import {activeTab, gameData} from "@/scripts/useGameStore.js"
 
 defineProps({
-  activeTab:String,
   isOpen: {
     type: Boolean,
     required: true
@@ -91,8 +90,11 @@ const getItemBonuses = (item) => {
 </script>
 
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-150 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-
+  <div
+      v-if="isOpen"
+      class="fixed inset-0 z-150 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 touch-none select-none"
+      @touchmove.prevent
+  >
     <!-- Само окно магазина -->
     <div
         class="relative w-full max-w-md h-180 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
@@ -155,7 +157,8 @@ const getItemBonuses = (item) => {
       </div>
 
       <!-- Список товаров -->
-      <div class="p-6 overflow-y-auto space-y-4 flex-1">
+      <!-- ИСПРАВЛЕННЫЙ ВАРИАНТ: -->
+      <div class="p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain touch-auto" @touchmove.stop>
         <div
             v-for="item in currentList"
             :key="item.id"
