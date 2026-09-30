@@ -47,5 +47,49 @@ function Skip() {
         </div>
       </div>
     </div>
+
+    <div v-if="tutorialStep === 4" class="absolute z-280 bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center text-center pointer-events-auto">
+      <div class="bg-white text-slate-900 font-bold px-4 py-2 rounded-2xl shadow-lg flex items-center w-70 h-20 text-sm animate-bounce">
+        <div class="flex flex-col h-full items-center justify-between">
+          <span>Пехали дальше!</span>
+          <button @click="Skip" class="text-amber-500 hover:text-amber-600 font-bold cursor-pointer pointer-events-auto">
+            Пропустить туториал
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="tutorialStep === 5" class="absolute z-280 bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center text-center pointer-events-auto">
+      <div class="bg-white text-slate-900 font-bold px-4 py-2 rounded-2xl shadow-lg flex items-center w-70 h-20 text-sm animate-bounce">
+        <div class="flex flex-col h-full items-center justify-between">
+          <span>Питомец испачкался, нужно его помыть!</span>
+          <button @click="Skip" class="text-amber-500 hover:text-amber-600 font-bold cursor-pointer pointer-events-auto">
+            Пропустить туториал
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="tutorialStep === 6" class="absolute z-280 bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center text-center pointer-events-auto">
+      <div class="bg-white text-slate-900 font-bold px-4 py-2 rounded-2xl shadow-lg flex items-center w-70 h-20 text-sm animate-bounce">
+        <div class="flex flex-col h-full items-center justify-between">
+          <span>Перетащи шампунь на питомца!</span>
+          <button @click="Skip" class="text-amber-500 hover:text-amber-600 font-bold cursor-pointer pointer-events-auto">
+            Пропустить туториал
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="tutorialStep === 7" class="absolute z-280 bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center text-center pointer-events-auto">
+      <div class="bg-white text-slate-900 font-bold px-4 py-2 rounded-2xl shadow-lg flex items-center w-70 h-20 text-sm animate-bounce">
+        <div class="flex flex-col h-full items-center justify-between">
+          <span>Перетащи и держи душ  чтобы смыть пену!</span>
+          <button @click="Skip" class="text-amber-500 hover:text-amber-600 font-bold cursor-pointer pointer-events-auto">
+            Пропустить туториал
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

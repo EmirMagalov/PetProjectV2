@@ -121,8 +121,9 @@ function goToSaloon() {
           <button class="text-md font-bold text-gray-600">Кормить</button>
         </div>
         <div
-            @click="location = 'bath'"
+            @click="location = 'bath',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center flex flex-col h-25   items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
+            :class=" tutorialStep === 5 ? 'z-205' : ''"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
 
           <div class="w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
@@ -172,14 +173,6 @@ function goToSaloon() {
                 <img src="/gamePlay/coin.webp" class="" alt="">
                 <p class="absolute text-white text-shadow-lg text-shadow-black top-1 text-xs left-1 font-bold">50</p>
               </div>
-              <!--              <div class="relative w-5">-->
-              <!--                <img src="/gamePlay/energy.webp "  class=" " alt="">-->
-              <!--&lt;!&ndash;                <p class="absolute text-white text-shadow-md text-shadow-black -bottom-1 left-1 font-bold">50</p>&ndash;&gt;-->
-              <!--              </div>-->
-              <!--              <div class="relative w-5">-->
-              <!--                <img src="/gamePlay/hunger.webp "  class=" " alt="">-->
-              <!--                &lt;!&ndash;                <p class="absolute text-white text-shadow-md text-shadow-black -bottom-1 left-1 font-bold">50</p>&ndash;&gt;-->
-              <!--              </div>-->
 
             </div>
 
@@ -202,6 +195,7 @@ function goToSaloon() {
         <!-- ДУШ -->
         <div
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
+            :class=" tutorialStep === 7 ? 'z-205 bg-white' : ''"
         >
           <div v-show="gameData.sick && statusFoam" class="absolute pointer-events-none w-20 opacity-50 animate-pulse">
             <img src="/gamePlay/warning_icons.webp" alt="">
@@ -227,9 +221,7 @@ function goToSaloon() {
                class="w-[70px] h-[70px] opacity-30 bg-contain">
 
           </div>
-          <!--          <img v-show="showerDrag.isDragging.value || feedStatus" src="/gamePlay/shower_icon.webp" class="opacity-30"-->
-          <!--               width="70"-->
-          <!--               alt="">-->
+
           <button class="text-xs font-bold text-gray-600">Душ</button>
 
         </div>
@@ -238,6 +230,7 @@ function goToSaloon() {
         <div
             @click="nextBathItem()"
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 cursor-pointer"
+            :class="tutorialStep === 6 ? 'z-205 bg-white' : ''"
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
@@ -313,7 +306,7 @@ function goToSaloon() {
         <div
             @click="nextItem()"
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
-            :class="tutorialStep === 2 && foodCartList.length > 0 ? 'z-205 pointer-events-auto' : 'z-30'"
+            :class="tutorialStep === 2 && foodCartList.length > 0 ? 'z-205 pointer-events-auto bg-white' : 'z-30'"
 
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
@@ -384,8 +377,9 @@ function goToSaloon() {
         </div>
 
         <div
-            @click="location = 'home'"
+            @click="location = 'home',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
+            :class=" tutorialStep === 4 ? 'z-205' : ''"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-20 h-20 bg-contain bg-no-repeat bg-center"
                style="background-image: url('/gamePlay/back_icon.webp')">

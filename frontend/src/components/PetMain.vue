@@ -271,18 +271,6 @@ onUnmounted(() => {
                 class="absolute w-5 z-50 animate-coinFly pointer-events-none"
                 alt="">
           </template>
-          <!--          <template v-if="isCoinAnimating">-->
-          <!--            <img-->
-          <!--                v-for="i in comboMultiplier"-->
-          <!--                :key="`${coinAnimKey}-${i}`"-->
-          <!--                :style="{-->
-          <!--        '&#45;&#45;i': i - 1,-->
-          <!--        animationDelay: `${(i - 1) * 0.04}s`-->
-          <!--      }"-->
-          <!--                src="/gamePlay/coin.webp"-->
-          <!--                class="absolute w-5 z-50 animate-coinFly pointer-events-none"-->
-          <!--                alt="">-->
-          <!--          </template>-->
 
 
           <div v-show="gameData.sleep"
@@ -295,7 +283,7 @@ onUnmounted(() => {
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
           <div :key="animKey"
                @click="spawnHeart"
-               :class="['absolute flex justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '',tutorialStep === 3 ? 'z-205' : 'z-10 ']">
+               :class="['absolute flex justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '',tutorialStep === 3 ||tutorialStep === 6 || tutorialStep === 7  ? 'z-205' : 'z-10 ']">
 
             <PetHeadwear/>
             <img :src="body" class="absolute w-45" alt="">
@@ -355,10 +343,10 @@ onUnmounted(() => {
               :bg-color="activeStatus.bgColor"
           />
 
-          <PetStinky/>
-          <PetFoam :status-foam="statusFoam"/>
+          <PetStinky :class=" tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
+          <PetFoam :status-foam="statusFoam" :class=" tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
           <PetSmoke :status-smoke="statusSmoke"/>
-          <PetShower :status-shower="statusShower"/>
+          <PetShower :status-shower="statusShower" :class=" tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
           <Poop v-show="gameData.isPooped && (location==='home' || location==='food')"/>
 
 

@@ -65,7 +65,7 @@ export const defaultGameData = {
     stinky: false,
     sleep: false,
     sleepEndTime: 0,
-    feedCount: 8,
+    feedCount: 9,
     equippedHead: null,
     foodStreak: 0,
     fastfoodStreak: 0,
@@ -133,7 +133,7 @@ export const tutorialStep = ref(localStorage.getItem('tutorial_completed') ? 0 :
 export function nextTutorialStep() {
     if (tutorialStep.value > 0) {
         tutorialStep.value++
-        if (tutorialStep.value > 3) { // Всего 3 шага, например
+        if (tutorialStep.value > 7) { // Всего 3 шага, например
             tutorialStep.value = 0
             localStorage.setItem('tutorial_completed', 'true') // Чтобы больше не показывать
         }

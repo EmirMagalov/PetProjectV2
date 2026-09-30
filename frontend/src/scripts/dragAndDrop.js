@@ -105,6 +105,7 @@ export function handleMove(event, itemType,foodId,foodCategory) {
                         statusFoam.value = false
                         showerCount.value += 1
                         gameData.stinky = false
+                        nextTutorialStep()
                         addCoin(2)
                         addExp(25)
                         gameData.feedCount = 0
@@ -157,6 +158,7 @@ export function handleEnd(itemType, foodId, foodCategory) {
         } else if (itemType === 'foam') {
             if(!statusFoam.value){
                 statusFoam.value = true
+                nextTutorialStep()
                 if (foodId) {
                     removeFromCart(foodId)
                 }

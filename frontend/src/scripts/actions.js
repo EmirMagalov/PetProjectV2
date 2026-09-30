@@ -5,7 +5,7 @@ import {
     isAnimating, isBadMood, isLosingLifeStatus,
     isVibrating,
     lastFedItem, lifeStatus, nextTutorialStep, PlayCount, sameFoodCount,
-    showHunger, showTongue,
+    showHunger, showTongue, tutorialStep,
 
 }
     from "@/scripts/useGameStore.js";
@@ -206,7 +206,10 @@ let comboHideTimer = null
 let sunHideTimer = null
 
 export function spawnHeart() {
-    nextTutorialStep()
+    if (tutorialStep.value === 3){
+        nextTutorialStep()
+    }
+
     gameData.sleep = false
 
     // 1. Увеличиваем клик-счётчик
