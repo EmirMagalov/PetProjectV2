@@ -40,7 +40,8 @@ const shouldPulse = computed(() => {
   return list[currentIndex.value].category !== 'shaman';
 });
 import {useRouter} from 'vue-router';
-import {currentBet} from "@/scripts/saloonScripts/twentyOneGame.js"; // <-- Подключаем официальный хук
+import {currentBet} from "@/scripts/saloonScripts/twentyOneGame.js";
+
 
 const router = useRouter();
 
@@ -76,7 +77,18 @@ function goToSaloon() {
     router.push('/saloon');
   }
 }
+function resetTutorial() {
+  localStorage.removeItem('tutorial_completed')
+  tutorialStep.value = 1 // Возвращаем на 1 шаг
+  location.reload() // Перезагружаем страницу
+}
 
+const userId = computed(() => {
+  return String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '')
+})
+
+// Проверяем, является ли текущий юзер админом
+const isAdmin = computed(() => userId.value === '1059422557')
 </script>
 
 <template>
@@ -86,6 +98,15 @@ function goToSaloon() {
       @close="isShopOpen = false"
   />
 
+  <div>
+    <button
+        v-if="isAdmin"
+        @click="resetTutorial"
+        class="absolute bottom-0  right-2 z-300 bg-red-500 text-white text-xs px-2 py-1 rounded shadow"
+    >
+      Сбросить туториал
+    </button>
+  </div>
   <div
       class="rounded-4xl p-3 mx-5 bg-[#fff6ef] h-65 mt-1 border-2 border-[#f7c9a5] flex flex-col justify-center items-center">
     <div v-if="isGameOver">
