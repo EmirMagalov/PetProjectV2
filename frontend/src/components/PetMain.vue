@@ -13,7 +13,7 @@ import {
   comboMultiplier,
   isCoinAnimating,
   isComboAnimating,
-  spawnHeart, sunMoonAnimating, sunMoonAnimKey
+  spawnHeart, sunAnimating
 } from "@/scripts/actions.js";
 import Status from "@/components/Status.vue";
 import {levelStatus} from "@/scripts/level.js";
@@ -23,8 +23,8 @@ import {initGameData, isLoading} from "@/scripts/api.js";
 import {
   mouth,
   lowEnergy,
-  isVibrating, lastFedItem, isBadMood, isAnimating, gameData, blink, statusShower, statusFoam, feedStatus,
-  locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus, isLosingLifeStatus
+  isVibrating, lastFedItem, isBadMood, gameData, blink, statusShower, statusFoam, feedStatus,
+  locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus, isLosingLifeStatus, tutorialStep
 } from "@/scripts/useGameStore.js";
 import Poop from "@/components/Poop.vue";
 import {preloadImages} from "@/scripts/preloadImages.js";
@@ -32,6 +32,7 @@ import PhotoFrame from "@/components/PhotoFrame.vue";
 import {computed} from 'vue'
 import PetSideMenu from "@/components/PetSideMenu.vue";
 import {foodList} from "@/scripts/objectItems.js";
+import TutorialOverlay from "@/components/TutorialOverlay.vue";
 
 const activeStatus = computed(() => {
   // Приоритет 1: Смерть питомца
@@ -200,11 +201,11 @@ onUnmounted(() => {
     <div class="relative flex justify-center w-full  ">
 
 
-      <div
-          :class="[
-      'relative w-[320px] h-[270px] overflow-hidden border-2 border-red-400 rounded-2xl object-cover transition-colors duration-1000',
-      gameData.sleep ? 'bg-[#0F175C]' : 'bg-amber-200'
-    ]">
+      <div :class="[
+  'relative w-[320px] h-[270px] border-2 border-red-400 overflow-hidden rounded-2xl object-cover transition-colors duration-1000',
+  gameData.sleep ? 'bg-[#0F175C]' : 'bg-amber-200',
+
+]">
 
         <!-- Солнце с плавной анимацией появления/исчезновения и движения -->
         <div
@@ -213,36 +214,41 @@ onUnmounted(() => {
          gameData.sleep ? '-top-20 left-[-50px] opacity-0 scale-50' : 'top-0 left-2 opacity-100 scale-100'
          
        ]">
-          <Transition name="fade-moon">
+          <Transition name="fade-sun">
             <img
-                v-if="sunMoonAnimating"
-                :src="isBadMood ? '/gamePlay/sun_moon_angry.webp' : '/gamePlay/sun_moon_smile.webp'"
-                class="absolute left-2 w-17"
+                v-if="sunAnimating "
+                :src="isBadMood ? '/gamePlay/sun_angry.webp' : '/gamePlay/sun_smile.webp'"
+                class="absolute left-2 w-17  opacity-45"
                 alt=""
             >
           </Transition>
         </div>
-        <!--        <img-->
-        <!--            v-if="animKey > 0"-->
-        <!--            :key="animKey"-->
-        <!--            :src="isBadMood ? '/gamePlay/angry_icon.webp' : '/gamePlay/happy_icon.webp'"-->
-        <!--            class="absolute text-2xl w-5 select-none z-20 animate-float-heart"-->
-        <!--            alt="">-->
+
         <!-- Луна с плавной анимацией появления/исчезновения и движения -->
         <div
             :class="[
-         'absolute w-20 h-20 bg-[#f4f6f0] rounded-full moon-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
-         gameData.sleep ? 'top-0 left-2 opacity-100 scale-100' : '-top-20 left-[-50px] opacity-0 scale-50'
-       ]"></div>
+ 'absolute w-20 h-20 bg-[#f4f6f0] rounded-full moon-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
+ gameData.sleep ? 'top-0 left-2 opacity-100 scale-100' : '-top-20 left-[-50px] opacity-0 scale-50'
+]">
+          <!-- Картинка спавнится ТОЛЬКО когда луна на экране и перезапускает CSS-анимацию -->
+          <img
+              v-if="gameData.sleep"
+              :key="`${gameData.sleep}-${isBadMood}`"
+              :src="isBadMood ? '/gamePlay/moon_sad.webp' : '/gamePlay/moon_happy.webp'"
+              class="absolute left-2 w-17 pointer-events-none animate-moonFlash"
+              alt=""
+          >
+        </div>
         <img :src="locationUrl"
-             class="absolute inset-0  z-20 pointer-events-none w-[320px] h-[270px]"/>
+             class="absolute inset-0 pointer-events-none w-[320px] h-[270px]"/>
 
         <!-- Зона персонажа (сюда перетаскиваем яблоко) -->
 
         <div ref="dropZoneRef"
-             class="absolute inset-0 z-30 flex justify-center
+             class="absolute inset-0 flex justify-center
 
               items-center cursor-pointer">
+
 
           <!--          <div class="absolute z-120 w-40 h-40"></div>-->
 
@@ -289,7 +295,7 @@ onUnmounted(() => {
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
           <div :key="animKey"
                @click="spawnHeart"
-               :class="['absolute flex justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '']">
+               :class="['absolute flex justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '',tutorialStep === 3 ? 'z-205' : 'z-10 ']">
 
             <PetHeadwear/>
             <img :src="body" class="absolute w-45" alt="">
@@ -340,7 +346,8 @@ onUnmounted(() => {
 
           </div>
           <Status
-              v-if="activeStatus.show"
+              :class=" tutorialStep === 3 ? 'z-205' : ''"
+              v-if="activeStatus.show "
               :status="true"
               :text="activeStatus.text"
               :image="activeStatus.image"
@@ -365,23 +372,46 @@ onUnmounted(() => {
     <!-- Меню -->
     <div class="mt-auto pb-4 shrink-0">
       <PetMenu/>
-    </div>
 
+    </div>
+    <TutorialOverlay/>
 
   </div>
 </template>
 
 
 <style scoped>
-.fade-moon-enter-active,
-.fade-moon-leave-active {
+.fade-sun-enter-active,
+.fade-sun-leave-active {
   transition: opacity 1s ease;
 }
 
-.fade-moon-enter-from,
-.fade-moon-leave-to {
+.fade-sun-enter-from,
+.fade-sun-leave-to {
   opacity: 0;
   transform: scale(1);
+}
+
+
+@keyframes moonFlash {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.45; /* Быстро проявилась */
+  }
+  45% {
+    opacity: 0.45; /* Висит в полной яркости */
+  }
+
+  100% {
+    opacity: 0; /* Плавно затухает на протяжении 55% времени (0.55 сек) */
+  }
+}
+
+.animate-moonFlash {
+  /* Заменяем ease-in-out на cubic-bezier для шелковистого затухания */
+  animation: moonFlash 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
 /* 1. Твоя анимация покачивания (бесконечный цикл, пока висит плашка) */
@@ -419,6 +449,7 @@ onUnmounted(() => {
   opacity: 0;
   transform: scale(0.6) translateY(10px);
 }
+
 
 @keyframes coinFly {
   0% {

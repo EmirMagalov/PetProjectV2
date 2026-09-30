@@ -1,10 +1,10 @@
 import {
     cloudShow,
     energyFull, feedStatus, fruitStreak,
-    gameData, hearts,
+    gameData,
     isAnimating, isBadMood, isLosingLifeStatus,
     isVibrating,
-    lastFedItem, lifeStatus, PlayCount, sameFoodCount,
+    lastFedItem, lifeStatus, nextTutorialStep, PlayCount, sameFoodCount,
     showHunger, showTongue,
 
 }
@@ -200,12 +200,13 @@ export const isComboAnimating = ref(false);
 export const coinAnimKey = ref(0)
 export const isCoinAnimating = ref(false)
 export const sunMoonAnimKey = ref(0)
-export const sunMoonAnimating = ref(false)
+export const sunAnimating = ref(false)
 let comboTimer = null                // Таймер сброса комбо
 let comboHideTimer = null
-let sunMoonHideTimer = null
+let sunHideTimer = null
 
 export function spawnHeart() {
+    nextTutorialStep()
     gameData.sleep = false
 
     // 1. Увеличиваем клик-счётчик
@@ -234,14 +235,14 @@ export function spawnHeart() {
 
     isComboAnimating.value = true
     comboAnimKey.value++
-    sunMoonAnimating.value = true
-    sunMoonAnimKey.value++
+    sunAnimating.value = true
+    // sunMoonAnimKey.value++
 
     if (comboHideTimer) {
         clearTimeout(comboHideTimer)
     }
-    if (sunMoonHideTimer) {
-        clearTimeout(sunMoonHideTimer)
+    if (sunHideTimer) {
+        clearTimeout(sunHideTimer)
     }
 
     // 3. Запускаем таймер заново: скроется только через 1000мс ПОСЛЕ ПОСЛЕДНЕГО КЛИКА
@@ -249,8 +250,8 @@ export function spawnHeart() {
         isComboAnimating.value = false
     }, 800)
 
-    sunMoonHideTimer = setTimeout(() => {
-        sunMoonAnimating.value = false
+    sunHideTimer = setTimeout(() => {
+        sunAnimating.value = false
     }, 800)
 
 

@@ -4,8 +4,7 @@ import {addCoin, feedPet, isLosingLife, otherFeedPet} from "@/scripts/actions.js
 import {
     currentDraggedItem,
     dropZoneRef,
-    feedStatus,
-    gameData,
+    gameData, nextTutorialStep,
     statusFoam,
     statusShower
 } from "@/scripts/useGameStore.js";
@@ -147,6 +146,7 @@ export function handleEnd(itemType, foodId, foodCategory) {
             if (foodCategory === 'food') {
 
                 feedPet(foodId)
+                nextTutorialStep()
             } else {
                 if (!(foodId === 'lifePotion' && gameData.lives >= 3)) {
                     otherFeedPet(foodId)

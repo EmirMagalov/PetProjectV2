@@ -14,7 +14,7 @@ import {
   isShopOpen,
   showHunger,
   sleepTimeRemaining,
-  statusFoam, location, isGameOver, handleRestart, warning, lowEnergy, activeTab
+  statusFoam, location, isGameOver, handleRestart, warning, lowEnergy, activeTab, tutorialStep, nextTutorialStep
 } from "@/scripts/useGameStore.js";
 import {goSleep} from "@/scripts/actions.js";
 import {
@@ -110,9 +110,9 @@ function goToSaloon() {
         </div>
 
         <div
-            @click="location = 'food'"
-            class="bg-[#fff6ef] justify-center h-25 flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95"
-            :class="showHunger?'animate-pulse':''"
+            @click="location = 'food',nextTutorialStep()"
+            class="bg-[#fff6ef] justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95"
+            :class="[showHunger?'animate-pulse':'',tutorialStep === 1 ? 'z-205 pointer-events-auto': 'z-30']"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
 
           <div class="w-[80px] h-[80px] bg-contain bg-no-repeat bg-center cursor-pointer"
@@ -276,7 +276,7 @@ function goToSaloon() {
           </template>
 
           <!-- Текст названия / статуса -->
-          <p class="text-xs absolute bottom-2 font-bold text-gray-600 pointer-events-none whitespace-nowrap" >
+          <p class="text-xs absolute bottom-2 font-bold text-gray-600 pointer-events-none whitespace-nowrap">
             {{
               bathCartList.length > 0 && bathCartList[currentBathIndex]
                   ? `${bathCartList[currentBathIndex].name} x${bathCartList[currentBathIndex].count}`
@@ -308,11 +308,12 @@ function goToSaloon() {
       <!-- FOOD -->
 
 
-      <div v-show="location==='food'" class="grid grid-cols-2 gap-8 relative  gap-y-1.5 w-65 place-self-center  ">
+      <div v-show="location==='food'" class="grid grid-cols-2 gap-8 relative  gap-y-1.5 w-65 place-self-center " >
 
         <div
             @click="nextItem()"
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
+            :class="tutorialStep === 2 && foodCartList.length > 0 ? 'z-205 pointer-events-auto' : 'z-30'"
 
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
@@ -320,13 +321,16 @@ function goToSaloon() {
           <!-- 1. Если холодильник пуст: используем foodCartList вместо cartItemsList -->
           <template v-if="foodCartList.length === 0">
             <div
+                :class="!foodDrag.isDragging.value  && showHunger ? 'animate-pulse' : ''"
                 class="flex flex-col items-center justify-center w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
+
                 style="background-image: url('/gamePlay/fridge_empty.webp')">
+
             </div>
           </template>
 
           <!-- 2. Если в холодильнике есть еда -->
-          <template v-else>
+          <template v-else >
             <div v-show="!feedStatus"
                  ref="foodEl"
                  :style="[
@@ -338,9 +342,10 @@ function goToSaloon() {
                  ]"
                  :class="[
                    (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative ',
-                   !foodDrag.isDragging.value && foodCartList[currentIndex]?.category === 'food' && showHunger ? 'animate-pulse' : '',
+                   !foodDrag.isDragging.value &&( foodCartList[currentIndex]?.category === 'food') && showHunger ? 'animate-pulse' : '',
                     !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'healthPotion' && gameData.sick ? 'animate-pulse' : '',
                     !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'pipe' && lowEnergy.value ? 'animate-pulse' : '',
+
 
                  ]"
                  class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"

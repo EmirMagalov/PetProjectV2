@@ -65,7 +65,7 @@ export const defaultGameData = {
     stinky: false,
     sleep: false,
     sleepEndTime: 0,
-    feedCount: 3,
+    feedCount: 8,
     equippedHead: null,
     foodStreak: 0,
     fastfoodStreak: 0,
@@ -125,4 +125,18 @@ document.addEventListener('contextmenu', e => {
     }
 });
 
+
+
+// Шаг онбординга: 0 — выключен, 1 — кормежка, 2 — мытье, 3 — сон и т.д.
+export const tutorialStep = ref(localStorage.getItem('tutorial_completed') ? 0 : 1)
+
+export function nextTutorialStep() {
+    if (tutorialStep.value > 0) {
+        tutorialStep.value++
+        if (tutorialStep.value > 3) { // Всего 3 шага, например
+            tutorialStep.value = 0
+            localStorage.setItem('tutorial_completed', 'true') // Чтобы больше не показывать
+        }
+    }
+}
 
