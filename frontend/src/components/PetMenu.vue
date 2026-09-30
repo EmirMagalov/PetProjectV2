@@ -77,18 +77,25 @@ function goToSaloon() {
     router.push('/saloon');
   }
 }
+
 function resetTutorial() {
   localStorage.removeItem('tutorial_completed')
   tutorialStep.value = 1 // Возвращаем на 1 шаг
   location.reload() // Перезагружаем страницу
 }
 
+const ADMIN_IDS = [
+  '1059422557',
+  '2101015196'
+
+]
+
 const userId = computed(() => {
   return String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '')
 })
 
-// Проверяем, является ли текущий юзер админом
-const isAdmin = computed(() => userId.value === '1059422557')
+// Проверяем, входит ли текущий userId в список админов
+const isAdmin = computed(() => ADMIN_IDS.includes(userId.value))
 </script>
 
 <template>
@@ -104,7 +111,7 @@ const isAdmin = computed(() => userId.value === '1059422557')
         @click="resetTutorial"
         class="absolute bottom-0  right-2 z-300 bg-red-500 text-white text-xs px-2 py-1 rounded shadow"
     >
-      Сбросить туториал
+      Сбросить обучение
     </button>
   </div>
   <div
@@ -322,7 +329,7 @@ const isAdmin = computed(() => userId.value === '1059422557')
       <!-- FOOD -->
 
 
-      <div v-show="location==='food'" class="grid grid-cols-2 gap-8 relative  gap-y-1.5 w-65 place-self-center " >
+      <div v-show="location==='food'" class="grid grid-cols-2 gap-8 relative  gap-y-1.5 w-65 place-self-center ">
 
         <div
             @click="nextItem()"
@@ -344,7 +351,7 @@ const isAdmin = computed(() => userId.value === '1059422557')
           </template>
 
           <!-- 2. Если в холодильнике есть еда -->
-          <template v-else >
+          <template v-else>
             <div v-show="!feedStatus"
                  ref="foodEl"
                  :style="[
