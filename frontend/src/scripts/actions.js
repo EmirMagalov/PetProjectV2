@@ -210,7 +210,9 @@ export function spawnHeart() {
         if(gameData.clickCounter > 10) nextTutorialStep()
 
     }
-
+    if (tutorialStep.value === 6 || tutorialStep.value === 7){
+        return
+    }
     gameData.sleep = false
 
     // 1. Увеличиваем клик-счётчик
