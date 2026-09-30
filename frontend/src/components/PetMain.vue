@@ -180,7 +180,7 @@ onUnmounted(() => {
           <img
               v-if="gameData.sleep"
               :key="`${gameData.sleep}-${isBadMood}`"
-              :src="isBadMood ? '/gamePlay/moon_sad.webp' : '/gamePlay/moon_happy.webp'"
+              :src="isBadMood ? '/gamePlay/sad_moon.webp' : '/gamePlay/happy_moon.webp'"
               class="absolute left-2 w-17 pointer-events-none animate-moonFlash"
               alt=""
           >
