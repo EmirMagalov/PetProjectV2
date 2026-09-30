@@ -8,7 +8,7 @@ function Skip() {
 </script>
 
 <template>
-  <div v-if="tutorialStep > 0" class="fixed inset-0 z-200 pointer-events-none">
+  <div v-if="tutorialStep > 0" class="fixed inset-0 overflow-hidden z-200 pointer-events-none">
     <!-- Тёмная подложка (кликабельная) -->
     <div class="absolute inset-0 bg-black/60 transition-opacity duration-500 pointer-events-auto"></div>
 
