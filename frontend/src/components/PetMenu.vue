@@ -230,7 +230,7 @@ function goToSaloon() {
         <div
             @click="nextBathItem()"
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 cursor-pointer"
-            :class="tutorialStep === 6 ? 'z-205 bg-white' : ''"
+            :class="tutorialStep === 6 && bathCartList.length > 0? 'z-205 bg-white' : ''"
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
