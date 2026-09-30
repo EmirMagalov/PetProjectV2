@@ -24,7 +24,7 @@ import {
   mouth,
   lowEnergy,
   isVibrating, lastFedItem, isBadMood, gameData, blink, statusShower, statusFoam, feedStatus,
-  locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus, isLosingLifeStatus, tutorialStep
+  locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus, isLosingLifeStatus, tutorialStep, activeStatus
 } from "@/scripts/useGameStore.js";
 import Poop from "@/components/Poop.vue";
 import {preloadImages} from "@/scripts/preloadImages.js";
@@ -34,61 +34,7 @@ import PetSideMenu from "@/components/PetSideMenu.vue";
 import {foodList} from "@/scripts/objectItems.js";
 import TutorialOverlay from "@/components/TutorialOverlay.vue";
 
-const activeStatus = computed(() => {
-  // Приоритет 1: Смерть питомца
-  if (isGameOver.value) {
-    return {
-      show: true,
-      text: "Питомец погиб!",
-      image: "/gamePlay/grave.webp",
-      bgColor: "bg-[#808080]"
-    }
-  }
 
-  // Приоритет 2: Повышение уровня
-  if (levelStatus.value) {
-    return {
-      show: true,
-      text: "Уровень повышен",
-      additional: gameData.level,
-      image: null // или дефолтная иконка уровня
-    }
-  }
-
-  // Приоритет 3: Потеря жизни (-1)
-  if (isLosingLifeStatus.value) {
-    return {
-      show: true,
-      text: "- 1 жизнь!",
-      image: "/gamePlay/heart-broken.svg"
-    }
-  }
-
-  // Приоритет 4: Получение жизни (+1)
-  if (lifeStatus.value) {
-    return {
-      show: true,
-      text: "+ 1 жизнь!",
-      image: "/gamePlay/heart.svg"
-    }
-  }
-
-  // Приоритет 5: Кормежка (ням-ням)
-  if (feedStatus.value) {
-    // Находим сам объект еды по ID, который сохранен в lastFedItem
-    const fedItemObj = foodList.find(item => item.id === lastFedItem.value)
-
-    return {
-      show: true,
-      text: "Ням-ням!",
-      image: "/gamePlay/hunger.webp",
-      additional: `+${fedItemObj?.foodGain || 0}`
-    }
-  }
-
-  // Если ничего не происходит
-  return {show: false}
-})
 
 
 function getHornAsset(level) {
@@ -250,16 +196,12 @@ onUnmounted(() => {
               items-center cursor-pointer">
 
 
-          <!--          <div class="absolute z-120 w-40 h-40"></div>-->
-
-          <!-- Сердечко с key для перезапуска анимации на каждый клик -->
-
           <Transition name="combo-fade">
             <img
                 v-if="isComboAnimating"
                 :src="getCombo()"
                 class="absolute text-2xl  select-none z-50 animate-float-combo pointer-events-none"
-                :class="{ 'w-12': comboMultiplier >= 1,'w-15': comboMultiplier >= 2,'w-20': comboMultiplier >= 3,'w-25': comboMultiplier >= 5 }"
+                :class="{ 'w-12': comboMultiplier >= 1,'w-15': comboMultiplier >= 2,'w-20': comboMultiplier >= 3,'w-25': comboMultiplier >= 5,'z-205':tutorialStep === 3 }"
                 alt="">
           </Transition>
           <template v-if="isCoinAnimating">
@@ -269,6 +211,7 @@ onUnmounted(() => {
                 :style="{ '--i': i - 1 }"
                 src="/gamePlay/coin.webp"
                 class="absolute w-5 z-50 animate-coinFly pointer-events-none"
+                :class="{'z-205':tutorialStep === 3}"
                 alt="">
           </template>
 

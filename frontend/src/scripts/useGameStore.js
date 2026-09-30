@@ -3,6 +3,8 @@ import {ref, reactive, watch, computed} from 'vue'
 export const mouth = ref('/character/happy_mouth.webp')
 export const sleepTimeRemaining = ref("")
 import {initGameData, isLoading, resetPet} from "@/scripts/api.js";
+import {foodList} from "@/scripts/objectItems.js";
+import {levelStatus} from "@/scripts/level.js";
 
 export const isShopOpen = ref(false)
 export const lowEnergy = ref(false)
@@ -140,3 +142,58 @@ export function nextTutorialStep() {
     }
 }
 
+export const activeStatus = computed(() => {
+    // Приоритет 1: Смерть питомца
+    if (isGameOver.value) {
+        return {
+            show: true,
+            text: "Питомец погиб!",
+            image: "/gamePlay/grave.webp",
+            bgColor: "bg-[#808080]"
+        }
+    }
+
+    // Приоритет 2: Повышение уровня
+    if (levelStatus.value) {
+        return {
+            show: true,
+            text: "Уровень повышен",
+            additional: gameData.level,
+            image: null // или дефолтная иконка уровня
+        }
+    }
+
+    // Приоритет 3: Потеря жизни (-1)
+    if (isLosingLifeStatus.value) {
+        return {
+            show: true,
+            text: "- 1 жизнь!",
+            image: "/gamePlay/heart-broken.svg"
+        }
+    }
+
+    // Приоритет 4: Получение жизни (+1)
+    if (lifeStatus.value) {
+        return {
+            show: true,
+            text: "+ 1 жизнь!",
+            image: "/gamePlay/heart.svg"
+        }
+    }
+
+    // Приоритет 5: Кормежка (ням-ням)
+    if (feedStatus.value) {
+        // Находим сам объект еды по ID, который сохранен в lastFedItem
+        const fedItemObj = foodList.find(item => item.id === lastFedItem.value)
+
+        return {
+            show: true,
+            text: "Ням-ням!",
+            image: "/gamePlay/hunger.webp",
+            additional: `+${fedItemObj?.foodGain || 0}`
+        }
+    }
+
+    // Если ничего не происходит
+    return {show: false}
+})

@@ -207,7 +207,8 @@ let sunHideTimer = null
 
 export function spawnHeart() {
     if (tutorialStep.value === 3){
-        nextTutorialStep()
+        if(gameData.clickCounter > 10) nextTutorialStep()
+
     }
 
     gameData.sleep = false
