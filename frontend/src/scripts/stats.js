@@ -217,7 +217,7 @@ export const activeStatus = computed(() => {
         return {
             show: true,
             text: "- 1 жизнь!",
-            image: "/gamePlay/heart-broken.svg"
+            image: "/gamePlay/heart_broken.webp"
         }
     }
 
@@ -226,7 +226,7 @@ export const activeStatus = computed(() => {
         return {
             show: true,
             text: "+ 1 жизнь!",
-            image: "/gamePlay/heart.svg"
+            image: "/gamePlay/heart.webp"
         }
     }
 

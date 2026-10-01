@@ -22,7 +22,7 @@ function formatNumber(num) {
     <div class="relative shadow-2xl rounded-2xl bg-white/20 backdrop-blur-md ">
       <div class="flex justify-between gap-2 p-2">
         <div class="flex flex-col gap-1">
-          <!--        <ProgressBar image="/gamePlay/heart.svg" name="Здоровье" :value="gameData.health" color="#FF0000"/>-->
+
           <ProgressBar image="/gamePlay/hunger.webp" name="Сытость" :value="gameData.foodLevel" color="#FFF700"/>
           <ProgressBar image="/gamePlay/energy.webp" name="Энергия" :value="gameData.energy" color="#44B846"/>
 
@@ -74,7 +74,7 @@ function formatNumber(num) {
           <img
               v-for="i in 3"
               :key="i"
-              :src="i <= gameData.lives ? '/gamePlay/heart.svg' : '/gamePlay/heart_empty.svg'"
+              :src="i <= gameData.lives ? '/gamePlay/heart.webp' : '/gamePlay/heart_empty.webp'"
               alt="Жизнь"
               width="18"
           >

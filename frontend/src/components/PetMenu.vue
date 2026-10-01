@@ -372,7 +372,7 @@ const isAdmin = computed(() => ADMIN_IDS.includes(userId.value))
                  class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
             ></div>
             <div
-                v-show="gameData.isFat && foodCartList[currentIndex]?.subcategory !=='fruits'"
+                v-show="gameData.isFat && foodCartList[currentIndex]?.subcategory ==='fastfood'"
                 class="absolute w-20 opacity-50 animate-pulse pointer-events-none">
               <img src="/gamePlay/warning_icons.webp" alt="">
             </div>
