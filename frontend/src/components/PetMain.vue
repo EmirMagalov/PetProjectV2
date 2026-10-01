@@ -9,30 +9,29 @@ import PetStinky from "@/components/PetStinky.vue";
 import PetHeadwear from "@/components/PetHeadwear.vue";
 import {
   animKey, coinAnimKey,
-  comboAnimKey,
   comboMultiplier,
   isCoinAnimating,
   isComboAnimating,
   spawnHeart, sunAnimating
 } from "@/scripts/actions.js";
 import Status from "@/components/Status.vue";
-import {levelStatus} from "@/scripts/level.js";
 import {statusSmoke} from "@/scripts/dragAndDrop.js";
 import PetSmoke from "@/components/PetSmoke.vue";
-import {initGameData, isLoading} from "@/scripts/api.js";
+import {initGameData} from "@/scripts/api.js";
 import {
   mouth,
   lowEnergy,
-  isVibrating, lastFedItem, isBadMood, gameData, blink, statusShower, statusFoam, feedStatus,
-  locationUrl, location, dropZoneRef, body, isGameOver, lifeStatus, isLosingLifeStatus, tutorialStep, activeStatus
+  isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
+  locationUrl, location, dropZoneRef, body, tutorialStep
 } from "@/scripts/useGameStore.js";
 import Poop from "@/components/Poop.vue";
 import {preloadImages} from "@/scripts/preloadImages.js";
 import PhotoFrame from "@/components/PhotoFrame.vue";
-import {computed} from 'vue'
+
 import PetSideMenu from "@/components/PetSideMenu.vue";
-import {foodList} from "@/scripts/objectItems.js";
+
 import TutorialOverlay from "@/components/TutorialOverlay.vue";
+import {activeStatus} from "@/scripts/stats.js";
 
 
 
@@ -83,8 +82,8 @@ function startRandomLooking() {
     // Случайный выбор смещения зрачков (в пределах небольшой зоны, чтобы не вылезли из глаз)
     const directions = [
       {x: 0, y: 0},   // прямо
-      {x: -3, y: -1}, // влево-вверх
-      {x: 3, y: -1},  // вправо-вверх
+      {x: -2, y: -1}, // влево-вверх
+      {x: 2, y: -1},  // вправо-вверх
       {x: -2, y: 2},  // влево-вниз
       {x: 2, y: 2},   // вправо-вниз
       {x: 0, y: -2}   // просто вверх
@@ -138,7 +137,7 @@ onUnmounted(() => {
 
 <template>
   <div
-      :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000 relative', gameData.sleep ? 'bg-linear-to-r from-blue-800 via-blue-900 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']">
+      :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000 relative', gameData.sleep ? 'bg-linear-to-r from-blue-900 via-blue-800 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']">
 
 
     <PetHeaderMenu/>
@@ -158,13 +157,13 @@ onUnmounted(() => {
             :class="[
          'relative w-20 h-20 bg-yellow-300 rounded-full sun-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
          gameData.sleep ? '-top-20 left-[-50px] opacity-0 scale-50' : 'top-0 left-2 opacity-100 scale-100'
-         
+
        ]">
           <Transition name="fade-sun">
             <img
                 v-if="sunAnimating "
                 :src="isBadMood ? '/gamePlay/sun_angry.webp' : '/gamePlay/sun_smile.webp'"
-                class="absolute left-2 w-17  opacity-45"
+                class="absolute left-2 w-17  opacity-45 "
                 alt=""
             >
           </Transition>
@@ -173,17 +172,18 @@ onUnmounted(() => {
         <!-- Луна с плавной анимацией появления/исчезновения и движения -->
         <div
             :class="[
- 'absolute w-20 h-20 bg-[#f4f6f0] rounded-full moon-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
- gameData.sleep ? 'top-0 left-2 opacity-100 scale-100' : '-top-20 left-[-50px] opacity-0 scale-50'
-]">
+             'absolute w-20 h-20 bg-[#f4f6f0] rounded-full moon-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
+             gameData.sleep ? 'top-0 left-2 opacity-100 scale-100' : '-top-20 left-[-50px] opacity-0 scale-50'
+            ]">
           <!-- Картинка спавнится ТОЛЬКО когда луна на экране и перезапускает CSS-анимацию -->
+          <Transition name="fade-sun">
           <img
-              v-if="gameData.sleep"
-              :key="`${gameData.sleep}-${isBadMood}`"
+              v-if="sunAnimating "
               :src="isBadMood ? '/gamePlay/sad_moon.webp' : '/gamePlay/happy_moon.webp'"
-              class="absolute left-2 w-17 pointer-events-none animate-moonFlash"
+              class="absolute left-2 w-17 opacity-45 pointer-events-none "
               alt=""
           >
+          </Transition>
         </div>
         <img :src="locationUrl"
              class="absolute inset-0 pointer-events-none w-[320px] h-[270px]"/>

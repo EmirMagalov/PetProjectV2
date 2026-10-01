@@ -1,9 +1,9 @@
 <script setup>
-import {foodList} from '@/scripts/objectItems.js'
-import {headItems} from '@/scripts/headwearItems.js'
-import {ref, computed} from 'vue'
-import {addToCart, buyHeadwear} from "@/scripts/basket.js"
-import {activeTab, gameData} from "@/scripts/useGameStore.js"
+import { foodList } from '@/scripts/objectItems.js'
+import { headItems } from '@/scripts/headwearItems.js'
+import { ref, computed } from 'vue'
+import { addToCart, buyHeadwear } from "@/scripts/basket.js"
+import { activeTab, gameData } from "@/scripts/useGameStore.js"
 
 defineProps({
   isOpen: {
@@ -13,7 +13,6 @@ defineProps({
 })
 
 defineEmits(['close'])
-
 
 // Динамический список товаров в зависимости от выбранной вкладки
 const currentList = computed(() => {
@@ -32,8 +31,23 @@ const lastBought = ref(null)
 const lastBoughtQuantity = ref(1)
 let notificationTimer = null
 
+// Проверка заблокирован ли товар по уровню
+function isItemLocked(item) {
+  if (activeTab.value === 'shaman') {
+    return gameData.level < 5
+  }
+  if (activeTab.value === 'clothes') {
+    const isUnlocked = gameData.unlockedHeads?.includes(item.id)
+    return !isUnlocked && Boolean(item.level) && gameData.level < item.level
+  }
+  return false
+}
+
 // Универсальная логика клика по кнопке товара
 function handleItemClick(item) {
+  // Защита от клика по заблокированному товару
+  if (isItemLocked(item)) return
+
   if (activeTab.value === 'food' || activeTab.value === 'shaman' || activeTab.value === 'bath') {
     if (gameData.coins >= item.cost) {
       gameData.coins -= item.cost
@@ -100,7 +114,7 @@ const getItemBonuses = (item) => {
         class="relative w-full max-w-md h-180 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
 
       <!-- Шапка модалки -->
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80 shrink-0">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <div class="flex gap-1 items-center">
             <img src="/gamePlay/shoppingСart_icon.webp" class="w-6 h-6" alt="">
@@ -110,17 +124,17 @@ const getItemBonuses = (item) => {
 
         <button
             @click="$emit('close')"
-            class="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-800"
+            class="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-800 cursor-pointer"
         >
           ✕
         </button>
       </div>
 
       <!-- Переключатель категорий -->
-      <div class="grid grid-cols-4 border-b border-slate-800 bg-slate-900/40 p-2 gap-1.5">
+      <div class="grid grid-cols-4 border-b border-slate-800 bg-slate-900/40 p-2 gap-1.5 shrink-0">
         <button
             @click="activeTab = 'food'"
-            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate', activeTab === 'food' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate cursor-pointer', activeTab === 'food' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
           <div class="flex items-center justify-center gap-1">
             <img class="w-5 h-5 object-contain" src="/food/burger.webp" alt="">
@@ -129,7 +143,7 @@ const getItemBonuses = (item) => {
         </button>
         <button
             @click="activeTab = 'shaman'"
-            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate cursor-pointer', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
           <div class="flex items-center justify-center gap-1">
             <img class="w-5 h-5 object-contain" src="/gamePlay/feather_icon.webp" alt="">
@@ -138,7 +152,7 @@ const getItemBonuses = (item) => {
         </button>
         <button
             @click="activeTab = 'bath'"
-            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate', activeTab === 'bath' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate cursor-pointer', activeTab === 'bath' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
           <div class="flex items-center justify-center gap-1">
             <img class="w-5 h-5 object-contain" src="/gamePlay/soap_icon.webp" alt="">
@@ -147,7 +161,7 @@ const getItemBonuses = (item) => {
         </button>
         <button
             @click="activeTab = 'clothes'"
-            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate', activeTab === 'clothes' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate cursor-pointer', activeTab === 'clothes' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
           <div class="flex items-center justify-center gap-1">
             <img class="w-5 h-5 object-contain" src="/headwear/cowboyhat.webp" alt="">
@@ -157,18 +171,20 @@ const getItemBonuses = (item) => {
       </div>
 
       <!-- Список товаров -->
-      <!-- ИСПРАВЛЕННЫЙ ВАРИАНТ: -->
       <div class="p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain touch-auto" @touchmove.stop>
         <div
             v-for="item in currentList"
             :key="item.id"
-            class="relative flex items-center justify-between bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 hover:border-slate-600 transition-all"
-            :class="{'opacity-50 pointer-events-none': activeTab === 'shaman' && gameData.level < 5}"
+            class="relative flex items-center justify-between bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 hover:border-slate-600 transition-all overflow-hidden"
+            :class="{'opacity-50 pointer-events-none': isItemLocked(item)}"
         >
-          <div v-if="activeTab === 'shaman' && gameData.level < 5"
-               class="absolute inset-0 z-20 bg-slate-950/70 flex items-center justify-center">
+          <!-- Плашка блокировки по уровню (для Шамана и Шляп) -->
+          <div
+              v-if="isItemLocked(item)"
+              class="absolute inset-0 z-20 bg-slate-950/70 flex items-center justify-center rounded-xl"
+          >
             <span class="text-amber-400 font-bold text-sm tracking-wide px-3 py-1">
-              🔒 Требуется 5 уровень
+              🔒 Требуется {{ activeTab === 'shaman' ? 5 : item.level }} уровень
             </span>
           </div>
 
@@ -191,7 +207,7 @@ const getItemBonuses = (item) => {
           <button
               @click="handleItemClick(item)"
               :class="[
-                'px-4 py-2 min-w-23 font-bold rounded-lg text-sm transition-all active:scale-90 flex justify-center items-center gap-1.5 shrink-0',
+                'px-4 py-2 min-w-23 font-bold rounded-lg text-sm transition-all active:scale-90 flex justify-center items-center gap-1.5 shrink-0 cursor-pointer',
                 activeTab === 'clothes' && gameData.unlockedHeads?.includes(item.id)
                   ? (gameData.equippedHead === item.id
                       ? 'bg-slate-700 text-slate-300 cursor-default'
@@ -210,7 +226,7 @@ const getItemBonuses = (item) => {
       </div>
 
       <!-- Подвал модалки (баланс) -->
-      <div class="px-6 py-4 border-t border-slate-800 bg-slate-900/80 flex items-center justify-between">
+      <div class="px-6 py-4 border-t border-slate-800 bg-slate-900/80 flex items-center justify-between shrink-0">
         <span class="text-slate-400 text-sm">Баланс:</span>
         <span class="text-amber-400 font-bold text-lg flex items-center gap-1 tabular-nums">
           <img class="w-5" src="/gamePlay/coin.webp" alt=""> {{ gameData.coins }}
@@ -223,7 +239,7 @@ const getItemBonuses = (item) => {
     <transition name="toast">
       <div
           v-if="lastBought"
-          class="absolute bottom-10 z-200 bg-emerald-600/70 border border-emerald-400 text-white px-5 py-3 rounded-2xl shadow-2xl  flex items-center gap-3"
+          class="absolute bottom-10 z-200 bg-emerald-600/70 border border-emerald-400 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-none"
       >
         <div class="w-10 h-10 bg-white/20 rounded-lg p-1 flex items-center justify-center shrink-0 relative">
           <img :src="lastBought.image" class="w-full h-full object-contain">
@@ -235,7 +251,7 @@ const getItemBonuses = (item) => {
         <div>
           <p class="text-xs text-white font-medium">Успешное приобретение!</p>
           <p class="text-sm text-amber-500 font-bold">
-            {{ lastBought.name }} <span v-if="lastBoughtQuantity > 1" class="text-amber-300 font-normal"></span>
+            {{ lastBought.name }}
           </p>
         </div>
       </div>

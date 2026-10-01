@@ -1,5 +1,6 @@
 <script setup>
-import {tutorialStep, location, activeStatus} from "@/scripts/useGameStore.js";
+import {tutorialStep, location} from "@/scripts/useGameStore.js";
+import {activeStatus} from "@/scripts/stats.js";
 
 function Skip() {
   tutorialStep.value = 0 // Исправлено: работаем через .value

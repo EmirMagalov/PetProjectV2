@@ -17,6 +17,8 @@ export const deckRef = ref(null);
 export const currentBet = ref(0);
 
 export const suits = ["hearts", "diamonds", "clubs", "spades"];
+export const selectedBet = ref(50);
+export const betOptions = [50, 100,250 ,500,1000];
 
 
 watch([playerCards, dealerCards, gameStarted, currentBet], () => {

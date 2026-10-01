@@ -1,17 +1,18 @@
-import {watch} from "vue";
+import {computed, watch} from "vue";
 import {
     body,
-    cloudShow, defaultGameData,
-    gameData, isGameOver,
+    cloudShow, defaultGameData, feedStatus,
+    gameData, isGameOver, isLosingLifeStatus, lastFedItem, lifeStatus,
     lowEnergy,
     mouth, PlayCount, resetLocal,
     showHunger, showTongue,
     sleepTimeRemaining
 } from "@/scripts/useGameStore.js";
-import {addExp} from "@/scripts/level.js";
+import {addExp, levelStatus} from "@/scripts/level.js";
 
-import {addCoin, drunkTimer} from "@/scripts/actions.js";
+import {addCoin, drunkTimer, sunAnimating} from "@/scripts/actions.js";
 import {batheStatus, isHovered, previousMouth} from "@/scripts/dragAndDrop.js";
+import {foodList} from "@/scripts/objectItems.js";
 
 
 const FOOD_PER_HOUR_HEALTHY = 15;     // ~6.7 часа
@@ -190,3 +191,78 @@ watch(() => gameData.sick, (newSick) => {
 })
 
 
+export const activeStatus = computed(() => {
+    // Приоритет 1: Смерть питомца
+    if (isGameOver.value) {
+        return {
+            show: true,
+            text: "Питомец погиб!",
+            image: "/gamePlay/grave.webp",
+            bgColor: "bg-[#808080]"
+        }
+    }
+
+    // Приоритет 2: Повышение уровня
+    if (levelStatus.value) {
+        return {
+            show: true,
+            text: "Уровень повышен",
+            additional: gameData.level,
+            image: null // или дефолтная иконка уровня
+        }
+    }
+
+    // Приоритет 3: Потеря жизни (-1)
+    if (isLosingLifeStatus.value) {
+        return {
+            show: true,
+            text: "- 1 жизнь!",
+            image: "/gamePlay/heart-broken.svg"
+        }
+    }
+
+    // Приоритет 4: Получение жизни (+1)
+    if (lifeStatus.value) {
+        return {
+            show: true,
+            text: "+ 1 жизнь!",
+            image: "/gamePlay/heart.svg"
+        }
+    }
+
+    // Приоритет 5: Кормежка (ням-ням)
+    if (feedStatus.value) {
+        // Находим сам объект еды по ID, который сохранен в lastFedItem
+        const fedItemObj = foodList.find(item => item.id === lastFedItem.value)
+
+        return {
+            show: true,
+            text: "Ням-ням!",
+            image: "/gamePlay/hunger.webp",
+            additional: `+${fedItemObj?.foodGain || 0}`
+        }
+    }
+
+    // Если ничего не происходит
+    return {show: false}
+})
+
+let sunTimer = null
+
+watch(() => gameData.sleep, () => {
+    // Выключаем анимацию эмоции, если она уже шла
+
+    sunAnimating.value = false
+
+    if (sunTimer) clearTimeout(sunTimer)
+
+    // Запускаем эмоцию ТОЛЬКО после того, как солнце/луна прилетят на место (например, через 400мс)
+    sunTimer = setTimeout(() => {
+        sunAnimating.value = true
+
+        // Гасим эмоцию через 800мс
+        sunTimer = setTimeout(() => {
+            sunAnimating.value = false
+        }, 500)
+    }, 700)
+})

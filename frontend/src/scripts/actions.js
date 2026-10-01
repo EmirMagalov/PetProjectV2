@@ -206,15 +206,29 @@ let comboHideTimer = null
 let sunHideTimer = null
 
 export function spawnHeart() {
-    if (tutorialStep.value === 3){
-        if(gameData.clickCounter > 10) nextTutorialStep()
+    if (tutorialStep.value === 3) {
+        if (gameData.clickCounter > 10) nextTutorialStep()
 
     }
-    if (tutorialStep.value === 6 || tutorialStep.value === 7){
+    if (tutorialStep.value === 6 || tutorialStep.value === 7) {
         return
     }
-    gameData.sleep = false
+    if (comboHideTimer) {
+        clearTimeout(comboHideTimer)
+    }
+    if (sunHideTimer) {
+        clearTimeout(sunHideTimer)
+    }
 
+    if (!gameData.sleep) {
+        sunAnimating.value = true
+    }
+    if (!gameData.sleep) {
+        sunHideTimer = setTimeout(() => {
+            sunAnimating.value = false
+        }, 800)
+    }
+    gameData.sleep = false
     // 1. Увеличиваем клик-счётчик
     gameData.clickCounter++
 
@@ -241,24 +255,15 @@ export function spawnHeart() {
 
     isComboAnimating.value = true
     comboAnimKey.value++
-    sunAnimating.value = true
-    // sunMoonAnimKey.value++
 
-    if (comboHideTimer) {
-        clearTimeout(comboHideTimer)
-    }
-    if (sunHideTimer) {
-        clearTimeout(sunHideTimer)
-    }
+
 
     // 3. Запускаем таймер заново: скроется только через 1000мс ПОСЛЕ ПОСЛЕДНЕГО КЛИКА
     comboHideTimer = setTimeout(() => {
         isComboAnimating.value = false
     }, 800)
 
-    sunHideTimer = setTimeout(() => {
-        sunAnimating.value = false
-    }, 800)
+
 
 
     // Начисление монет (оставляем как у тебя)

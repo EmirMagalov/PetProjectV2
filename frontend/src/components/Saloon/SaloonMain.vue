@@ -2,7 +2,7 @@
 import SaloonMenu from "@/components/Saloon/SaloonMenu.vue";
 
 import { onMounted, onUnmounted, ref } from "vue";
-import { blink } from "@/scripts/useGameStore.js";
+import {blink, gameData} from "@/scripts/useGameStore.js";
 import {
   dealerCards,
   dealerScore, deckRef,
@@ -99,9 +99,9 @@ onUnmounted(() => {
 
 <template>
   <div
-      class="relative min-h-dvh justify-between bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600 overflow-hidden">
+      :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000 relative', gameData.sleep ? 'bg-linear-to-r from-blue-900 via-blue-800 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']">
 
-    <!-- ПОЛНОЭКРАННЫЙ ЭКРАН ЗАГРУЗКИ (LOADER) -->
+  <!-- ПОЛНОЭКРАННЫЙ ЭКРАН ЗАГРУЗКИ (LOADER) -->
     <Transition name="fade">
       <div
           v-if="isLoading"

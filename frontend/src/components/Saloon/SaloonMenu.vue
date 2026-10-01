@@ -14,7 +14,7 @@ import {
   placeBet,
   determineWinner,
   currentBet,
-  isDealing
+  isDealing, betOptions, selectedBet
 } from "@/scripts/saloonScripts/twentyOneGame.js";
 import {gameData} from "@/scripts/useGameStore.js";
 
@@ -28,8 +28,6 @@ const userCoins = computed(() => {
 const emit = defineEmits(["animate-draw"]);
 const playerCardsZone = ref(null);
 
-const selectedBet = ref(50);
-const betOptions = [50, 100, 250, 500];
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -125,7 +123,7 @@ function handleRestart() {
 <template>
   <!-- Главный контейнер меню с фиксом для Safari -->
   <div
-      class="saloon-container rounded-4xl p-4 mx-5 bg-[#fff6ef] h-65 border-2 border-[#f7c9a5] flex flex-col mt-1 items-center justify-between relative"
+      class="saloon-container rounded-4xl p-2 mx-5 bg-[#fff6ef] h-65 border-2 border-[#f7c9a5] flex flex-col mt-1 items-center justify-between relative"
       style="background-image: url('/gamePlay/poker_table.webp'); background-size: cover; "
   >
     <!-- Кнопка "Назад" -->
@@ -150,7 +148,7 @@ function handleRestart() {
     </div>
 
     <!-- Игровая область карт -->
-    <div v-if="gameStarted" class="flex flex-col items-center gap-2 my-auto z-20 w-full">
+    <div v-if="gameStarted" class="flex flex-col items-center gap-1 my-auto z-20 w-full">
       <div v-show="playerScore > 0" class="inline-flex items-center justify-center">
         <span class="bg-black/80 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
           Ты: {{ playerScore }}
@@ -177,16 +175,16 @@ function handleRestart() {
     <!-- 1. ФАЗА СТАВОК -->
     <div
         v-if="gameStarted && !currentBet && (bettingPhase || isDealing)"
-        class="flex flex-col items-center gap-2 mb-2 duration-300 z-20"
+        class="flex flex-col items-center gap-2  duration-300 z-20"
     >
-      <div class="flex gap-2">
+      <div class="grid grid-cols-4 gap-1">
         <button
             v-for="bet in betOptions"
             :key="bet"
             @click="selectedBet = bet"
             :disabled="userCoins < bet || isDealing"
             :class="[
-          'px-3 py-1 rounded-lg font-bold text-md transition border',
+          'px-3 py-1 rounded-lg font-bold text-sm transition border',
           (userCoins < bet || isDealing)
             ? 'opacity-40 bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed'
             : selectedBet === bet
@@ -202,7 +200,7 @@ function handleRestart() {
           @click="handleConfirmBet"
           :disabled="userCoins < selectedBet || isDealing"
           :class="[
-        'w-35 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50',
+        'w-35 px-5 py-1 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50',
         (userCoins < selectedBet || isDealing)
           ? 'bg-gray-400 opacity-60 cursor-not-allowed'
           : 'bg-emerald-500 hover:bg-emerald-400 active:scale-95 cursor-pointer'
@@ -215,19 +213,21 @@ function handleRestart() {
     <!-- 2. ФАЗА ДОБОРА ("ЕЩЁ" / "ХВАТИТ") -->
     <div v-else-if="gameStarted && !bettingPhase && !gameFinished" class="flex gap-3  mb-2 z-20">
 
-      <button
-          @click="handleStand"
-          :disabled="isDealing"
-          class="w-25 px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
-      >
-        Хватит
-      </button>
+
       <button
           @click="handleHit"
           :disabled="isDealing"
           class=" w-25 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
       >
         Ещё
+      </button>
+
+      <button
+          @click="handleStand"
+          :disabled="isDealing"
+          class="w-25 px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
+      >
+        Хватит
       </button>
     </div>
 
