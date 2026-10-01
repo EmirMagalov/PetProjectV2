@@ -177,7 +177,7 @@ function handleRestart() {
         v-if="gameStarted && !currentBet && (bettingPhase || isDealing)"
         class="flex flex-col items-center gap-2  duration-300 z-20"
     >
-      <div class="grid grid-cols-4 gap-1">
+      <div class="grid grid-cols-3 gap-1">
         <button
             v-for="bet in betOptions"
             :key="bet"
