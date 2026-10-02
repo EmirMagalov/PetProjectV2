@@ -1,4 +1,5 @@
 const imagesToPreload = [
+    '/gamePlay/logo_icons.webp',
     '/location/home.webp',
     '/location/bath.webp',
     '/gamePlay/fridge.webp',
@@ -9,14 +10,19 @@ const imagesToPreload = [
     '/gamePlay/shampoo_icon.webp',
     '/gamePlay/back_icon.webp',
     '/gamePlay/market.webp',
-    '/gamePlay/fridge_empty.webp'
+    '/gamePlay/fridge_empty.webp',
+
 ]
 
 export function preloadImages() {
-    imagesToPreload.forEach((src) => {
-        const img = new Image()
-        img.src = src
+    const promises = imagesToPreload.map((src) => {
+        return new Promise((resolve) => {
+            const img = new Image()
+            img.src = src
+            img.onload = () => resolve(src)
+            img.onerror = () => resolve(src) // Ошибка не блокирует всю загрузку
+        })
     })
-}
 
-console.log('Предзагружено картинок:', imagesToPreload.length)
+    return Promise.all(promises)
+}

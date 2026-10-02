@@ -1,20 +1,31 @@
 <script setup>
 import PetMain from "@/components/PetMain.vue";
 import Test from "@/components/Test.vue";
-import {onMounted} from "vue";
-import {initGameData, isLoading} from "@/scripts/api.js";
+import { onMounted } from "vue";
+import { initGameData, isLoading } from "@/scripts/api.js";
+import { preloadImages } from "@/scripts/preloadImages.js";
+
 onMounted(async () => {
-  // 👉 САМОЕ ГЛАВНОЕ: Обязательно загружаем данные с бэкенда при самом первом открытии!
+  // Устанавливаем статус загрузки в true
+  isLoading.value = true
+
   try {
-    await initGameData()
+    // Запускаем загрузку данных и картинок параллельно
+    await Promise.all([
+      initGameData(),
+      preloadImages()
+    ])
   } catch (e) {
     console.error("Ошибка при первоначальной загрузке:", e)
+  } finally {
+    // Снимаем оверлей только когда всё загружено
+    isLoading.value = false
   }
 })
 </script>
 
 <template>
-  <!-- 🛑 ОВЕРЛЕЙ ЗАГРУЗКИ (БЛОКИРУЕТ ИНТЕРФЕЙС, ПОКА ДАННЫЕ НЕ ПРИШЛИ) -->
+  <!-- 🛑 ОВЕРЛЕЙ ЗАГРУЗКИ (БЛОКИРУЕТ ИНТЕРФЕЙС, ПОКА ДАННЫЕ И КАРТИНКИ НЕ ПРИШЛИ) -->
   <Transition name="fade">
     <div
         v-if="isLoading"
@@ -26,7 +37,7 @@ onMounted(async () => {
 
         <!-- Анимированный логотип/иконка -->
         <div class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
-          <div class="w-full h-full bg-red-900 rounded-full flex items-center justify-center border ">
+          <div class="w-full h-full bg-red-900 rounded-full flex items-center justify-center border">
             <img src="/gamePlay/logo_icons.webp" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
           </div>
         </div>
@@ -34,17 +45,15 @@ onMounted(async () => {
 
       <!-- Текст загрузки -->
       <span class="text-amber-200 font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
-          Загрузка игры...
-        </span>
+        Загрузка игры...
+      </span>
 
       <!-- Спиннер -->
       <div class="mt-4 w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></div>
     </div>
-    <main v-else>
 
+    <main v-else>
       <RouterView />
     </main>
   </Transition>
-
-
 </template>

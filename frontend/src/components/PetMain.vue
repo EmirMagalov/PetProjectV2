@@ -229,7 +229,7 @@ onUnmounted(() => {
              @pointercancel="handlePointerEnd"
              @pointerleave="handlePointerEnd"
              class="absolute brightness-100 animate-dark-base inset-0 flex justify-center items-center cursor-pointer touch-none select-none"
-             :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
+             :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out',tutorialStep === 3 ||tutorialStep === 6 || tutorialStep === 7  ? 'z-205' : ''"
         >
 
           <div v-show="gameData.sleep"
@@ -242,7 +242,7 @@ onUnmounted(() => {
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
           <div :key="animKey"
 
-               :class="['absolute flex  justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '',tutorialStep === 3 ||tutorialStep === 6 || tutorialStep === 7  ? 'z-205' : 'z-10 ']">
+               :class="['absolute flex  justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '']">
 
             <PetHeadwear/>
             <img :src="body" class="absolute w-45" alt="">
@@ -261,7 +261,7 @@ onUnmounted(() => {
 
               <div class="absolute inset-0 flex justify-center items-center  pointer-events-none">
 
-                <img src="/character/eye_left.webp" class="absolute w-45" alt="">
+                <img src="/character/eye_left.webp?v=1" class="absolute w-45" alt="">
                 <img src="/character/eye_right.webp" class="absolute w-45" alt="">
               </div>
 
@@ -286,8 +286,9 @@ onUnmounted(() => {
           </div>
 
         </div>
+        <!-- Зона атрибутов -->
         <div
-            class="animate-dark-base absolute inset-0 w-full h-full pointer-events-none"
+            class="animate-dark-base z-205 absolute inset-0 w-full h-full pointer-events-none"
             :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
         >
           <!-- Отрисовываем каждую кликнутую монетку отдельно -->
@@ -314,7 +315,7 @@ onUnmounted(() => {
                 v-if="isComboAnimating"
                 :src="getCombo()"
                 class="absolute text-2xl right-30 top-30 select-none z-50 animate-float-combo pointer-events-none"
-                :class="{ 'w-14': comboMultiplier >= 1,'w-15': comboMultiplier >= 2,'w-17': comboMultiplier >= 3,'w-19': comboMultiplier >= 5,'z-205':tutorialStep === 3 }"
+                :class="{ 'w-14': comboMultiplier >= 1,'w-15': comboMultiplier >= 2,'w-17': comboMultiplier >= 3,'w-19': comboMultiplier >= 5,'z-205': tutorialStep === 3 || tutorialStep === 6 || tutorialStep === 7 }"
                 alt="">
           </Transition>
 
@@ -345,12 +346,12 @@ onUnmounted(() => {
               class="pointer-events-auto"
           />
 
-          <PhotoFrame
-              class="z-15 pointer-events-auto"
-              v-show="(location==='home' || location==='food')"
-          />
-        </div>
 
+        </div>
+        <PhotoFrame
+            class="z-10 pointer-events-auto"
+            v-show="(location==='home' || location==='food')"
+        />
       </div>
       <PetSideMenu/>
     </div>
