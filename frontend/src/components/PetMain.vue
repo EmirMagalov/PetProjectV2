@@ -9,7 +9,7 @@ import PetStinky from "@/components/PetStinky.vue";
 import PetHeadwear from "@/components/PetHeadwear.vue";
 import {
   animKey, coinAnimKey,
-  comboMultiplier,
+  comboMultiplier, handleMultiTouch,
   isCoinAnimating,
   isComboAnimating,
   spawnHeart, sunAnimating
@@ -32,8 +32,6 @@ import PetSideMenu from "@/components/PetSideMenu.vue";
 
 import TutorialOverlay from "@/components/TutorialOverlay.vue";
 import {activeStatus} from "@/scripts/stats.js";
-
-
 
 
 function getHornAsset(level) {
@@ -177,23 +175,51 @@ onUnmounted(() => {
             ]">
           <!-- Картинка спавнится ТОЛЬКО когда луна на экране и перезапускает CSS-анимацию -->
           <Transition name="fade-sun">
-          <img
-              v-if="sunAnimating "
-              :src="isBadMood ? '/gamePlay/sad_moon.webp' : '/gamePlay/happy_moon.webp'"
-              class="absolute left-2 w-17 opacity-45 pointer-events-none "
-              alt=""
-          >
+            <img
+                v-if="sunAnimating "
+                :src="isBadMood ? '/gamePlay/sad_moon.webp' : '/gamePlay/happy_moon.webp'"
+                class="absolute left-2 w-17 opacity-45 pointer-events-none "
+                alt=""
+            >
           </Transition>
         </div>
-        <img :src="locationUrl"
-             class="absolute inset-0 pointer-events-none w-[320px] h-[270px]"/>
 
+        <img
+            :src="locationUrl"
+            class="absolute animate-dark-base inset-0 pointer-events-none w-[320px] h-[270px] brightness-100 transition-all duration-500"
+            :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
+        />
+        <div class="relative flex items-center justify-center p-12">
+          <!-- 1. Самый дальний мягкий ореол -->
+          <div v-show="gameData.sleep" class="absolute top-4 right-10 z-20 flex items-center justify-center">
+            <!-- 1. Направляющий конусный луч (живой свет) -->
+            <div class="absolute -top-6 -right-5 w-52 h-56 rotate-[-25deg] blur-lg opacity-70 pointer-events-none">
+              <div
+                  class="w-full h-full bg-[conic-gradient(from_150deg_at_50%_0%,rgba(253,224,71,0.6)_0deg,rgba(251,191,36,0.1)_40deg,transparent_60deg)]"></div>
+            </div>
+
+            <!-- 2. Мягкое объемное облако света (без резких круглых границ) -->
+            <div class="absolute w-36 h-36 bg-amber-300/30 blur-2xl pointer-events-none "></div>
+
+            <!-- 3. Яркая вспышка-блик (эллипс, а не круг) -->
+            <div
+                class="relative z-10 w-6 h-6 bg-yellow-100 rounded-full rotate-12 blur-[5px] shadow-[0_0_20px_#fde047]"></div>
+          </div>
+
+          <!-- 2. Среднее яркое свечение -->
+          <!--          <div class="absolute w-12 h-12 bg-amber-400/60 rounded-full blur-md pointer-events-none"></div>-->
+
+          <!--          &lt;!&ndash; 3. Ядро лампочки (самый центр) &ndash;&gt;-->
+          <!--          <div class="relative z-10 w-6 h-6 bg-white rounded-full shadow-[0_0_20px_#fde047]"></div>-->
+        </div>
         <!-- Зона персонажа (сюда перетаскиваем яблоко) -->
 
-        <div ref="dropZoneRef"
-             class="absolute inset-0 flex justify-center
 
-              items-center cursor-pointer">
+        <div ref="dropZoneRef"
+             @pointerdown="handleMultiTouch"
+             class="absolute brightness-100 animate-dark-base   inset-0 flex justify-center items-center cursor-pointer"
+             :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
+        >
 
 
           <Transition name="combo-fade">
@@ -225,8 +251,8 @@ onUnmounted(() => {
           <PhotoFrame v-show="(location==='home' || location==='food')"/>
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
           <div :key="animKey"
-               @click="spawnHeart"
-               :class="['absolute flex justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '',tutorialStep === 3 ||tutorialStep === 6 || tutorialStep === 7  ? 'z-205' : 'z-10 ']">
+
+               :class="['absolute flex  justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '',tutorialStep === 3 ||tutorialStep === 6 || tutorialStep === 7  ? 'z-205' : 'z-10 ']">
 
             <PetHeadwear/>
             <img :src="body" class="absolute w-45" alt="">
@@ -321,6 +347,51 @@ onUnmounted(() => {
 .fade-sun-leave-to {
   opacity: 0;
   transform: scale(1);
+}
+
+.animate-dark-base {
+  /* Фиксирует начальное состояние до запуска анимации */
+  filter: brightness(1);
+}
+@keyframes animateDarkIn {
+  0% {
+    filter: brightness(1);
+  }
+  /* Убраны промежуточные кадры (15%, 45%) — cubic-bezier сделает перепад между 1 и 0.3 идеально плавным */
+  100% {
+    filter: brightness(0.3);
+  }
+}
+
+@keyframes animateDarkOut {
+  0% {
+    filter: brightness(0.3);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+.animate-dark-in,
+.animate-dark-out {
+  /* Жесткий форс GPU без перерисовок */
+  will-change: filter;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+
+  /* Изоляция слоя: предотвращает артефакты размытия по краям */
+  contain: paint;
+  isolation: isolate;
+}
+
+.animate-dark-in {
+  /* Кривая cubic-bezier(0.16, 1, 0.3, 1) даёт ультра-плавный "доводчик" в конце */
+  animation: animateDarkIn 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-dark-out {
+  animation: animateDarkOut 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 

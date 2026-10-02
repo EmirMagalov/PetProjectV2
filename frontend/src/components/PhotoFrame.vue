@@ -1,29 +1,28 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, watch } from 'vue'
 import { gameData } from "@/scripts/useGameStore.js";
+// Импортируем состояние и функцию из actions.js
+import { isEditing, finishEditing } from "@/scripts/actions.js";
 
-const isEditing = ref(false)
 const inputRef = ref(null)
 
-async function startEditing() {
+function startEditing() {
   isEditing.value = true
-  await nextTick()
-  inputRef.value?.focus()
 }
 
-function finishEditing() {
-  // Если стерли имя полностью и оставили пустым — возвращаем дефолт
-  if (!gameData.name.trim()) {
-    gameData.name = 'Имя:'
+// Следим за переключением isEditing, чтобы ставить фокус
+watch(isEditing, async (newVal) => {
+  if (newVal) {
+    await nextTick()
+    inputRef.value?.focus()
   }
-  isEditing.value = false
-}
+})
 </script>
 
 <template>
-  <div class="absolute w-19 top-0 right-0 ">
+  <div class="absolute w-19 top-3 right-0">
     <div class="relative">
-      <img src="/gamePlay/photo_frame.webp" alt="" class="w-full h-auto">
+      <img src="/gamePlay/photo_frame.webp?v=1" alt="" class="w-full h-auto">
 
       <!-- Отображение имени -->
       <div
@@ -34,7 +33,7 @@ function finishEditing() {
         {{ gameData.name }}
       </div>
 
-      <!-- Редактирование: пишем СРАЗУ в gameData.name через v-model -->
+      <!-- Редактирование -->
       <div v-else class="absolute inset-0 flex items-center justify-center px-1">
         <input
             ref="inputRef"
@@ -43,7 +42,8 @@ function finishEditing() {
             maxlength="15"
             @blur="finishEditing"
             @keydown.enter="finishEditing"
-            class="w-full bg-transparent text-center font-bold text-[10px] text-black outline-none "
+            @pointerdown.stop
+            class="w-full bg-transparent text-center font-bold text-[10px] text-black outline-none"
         />
       </div>
     </div>

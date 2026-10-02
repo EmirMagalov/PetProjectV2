@@ -205,30 +205,46 @@ let comboTimer = null                // Таймер сброса комбо
 let comboHideTimer = null
 let sunHideTimer = null
 
+let vibrateTimer = null
+let coinHideTimer = null
+export const isEditing = ref(false);
+
+export function finishEditing() {
+    if (!gameData.name || !gameData.name.trim()) {
+        gameData.name = 'Имя:';
+    }
+    isEditing.value = false;
+}
+export function handleMultiTouch(event) {
+    if (isEditing.value) {
+        finishEditing();
+    }
+    if (event.cancelable) {
+        event.preventDefault();
+    }
+    spawnHeart();
+}
+
 export function spawnHeart() {
     if (tutorialStep.value === 3) {
         if (gameData.clickCounter > 10) nextTutorialStep()
-
     }
     if (tutorialStep.value === 6 || tutorialStep.value === 7) {
         return
     }
-    if (comboHideTimer) {
-        clearTimeout(comboHideTimer)
-    }
-    if (sunHideTimer) {
-        clearTimeout(sunHideTimer)
-    }
+
+    // Очищаем предыдущие таймеры скрытия
+    if (comboHideTimer) clearTimeout(comboHideTimer)
+    if (sunHideTimer) clearTimeout(sunHideTimer)
 
     if (!gameData.sleep) {
         sunAnimating.value = true
-    }
-    if (!gameData.sleep) {
         sunHideTimer = setTimeout(() => {
             sunAnimating.value = false
         }, 800)
     }
     gameData.sleep = false
+
     // 1. Увеличиваем клик-счётчик
     gameData.clickCounter++
 
@@ -251,26 +267,18 @@ export function spawnHeart() {
         comboMultiplier.value = 1
     }, 1000)
 
-    // 3. АНИМАЦИЯ КОМБО (Запускается на клик, если предыдущая еще не идет)
-
+    // 3. Анимация комбо
     isComboAnimating.value = true
     comboAnimKey.value++
 
-
-
-    // 3. Запускаем таймер заново: скроется только через 1000мс ПОСЛЕ ПОСЛЕДНЕГО КЛИКА
     comboHideTimer = setTimeout(() => {
         isComboAnimating.value = false
     }, 800)
 
-
-
-
-    // Начисление монет (оставляем как у тебя)
+    // Начисление монет
     if (gameData.clickCounter % 2 === 0) {
         addCoin(1 * comboMultiplier.value)
     }
-
 
     addExp(1)
 
@@ -290,35 +298,35 @@ export function spawnHeart() {
         }
     }
 
-    // Увеличиваем ключ для персонажа и сердечка
+    // Перезапуск анимации персонажа (pop)
     animKey.value++
-    isVibrating.value = true
 
-    setTimeout(() => {
+    // Перезапускаем вибрацию так, чтобы она не гасла во время серийных кликов
+    if (vibrateTimer) clearTimeout(vibrateTimer)
+    isVibrating.value = true
+    vibrateTimer = setTimeout(() => {
         isVibrating.value = false
     }, 150)
 }
 
 export function addCoin(coins = 1) {
-    if (!isCoinAnimating.value) {
-        isCoinAnimating.value = true
-        coinAnimKey.value++
+    // Перезапускаем ключ анимации вылета монетки на КАЖДЫЙ вызов
+    if (coinHideTimer) clearTimeout(coinHideTimer)
 
-        setTimeout(() => {
-            isCoinAnimating.value = false
-        }, 500) // 500мс — длительность coinFly
-    }
+    isCoinAnimating.value = true
+    coinAnimKey.value++
+
+    coinHideTimer = setTimeout(() => {
+        isCoinAnimating.value = false
+    }, 500) // Длительность анимации coinFly
+
     gameData.coins += coins
 
-    // 2. Включаем флаги анимации
     isAnimating.value = true
-
     setTimeout(() => {
         isAnimating.value = false
-
     }, 5000)
 }
-
 export const Clean = () => {
     gameData.isPooped = false
     addCoin(10)
@@ -330,6 +338,7 @@ export function isLosingLife() {
     isLosingLifeStatus.value = true
     setTimeout(() => isLosingLifeStatus.value = false, 800)
 }
+
 
 
 // <span class="text-xs font-bold text-amber-900">Сделайте ставку:</span>
