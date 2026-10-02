@@ -206,7 +206,7 @@ onUnmounted(() => {
           <!-- 1. Самый дальний мягкий ореол -->
           <div v-show="gameData.sleep" class="absolute top-4 right-10 z-20 flex items-center justify-center">
             <!-- 1. Направляющий конусный луч (живой свет) -->
-            <div class="absolute -top-6 -right-5 w-52 h-56 rotate-[-25deg] blur-lg opacity-70 pointer-events-none">
+            <div class="absolute -top-6 -right-5 w-52 h-56 rotate-[-30deg] blur-lg opacity-70 pointer-events-none">
               <div
                   class="w-full h-full bg-[conic-gradient(from_150deg_at_50%_0%,rgba(253,224,71,0.6)_0deg,rgba(251,191,36,0.1)_40deg,transparent_60deg)]"></div>
             </div>
