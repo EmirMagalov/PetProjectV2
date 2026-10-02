@@ -28,7 +28,7 @@ watch(isEditing, async (newVal) => {
       <div
           v-if="!isEditing"
           @click="startEditing"
-          class="absolute inset-0 w-full min-w-0 flex font-bold items-center justify-center text-center px-1 text-[10px] leading-tight break-all cursor-pointer select-none"
+          class="absolute  inset-0 w-full min-w-0 flex font-bold items-center justify-center text-center px-1 text-[10px] leading-tight break-all cursor-pointer select-none"
       >
         {{ gameData.name }}
       </div>

@@ -7,33 +7,33 @@ import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import CloudMessage from "@/components/CloudMessage.vue";
 import PetStinky from "@/components/PetStinky.vue";
 import PetHeadwear from "@/components/PetHeadwear.vue";
-import {
-  animKey, coinAnimKey,
-  comboMultiplier, handleMultiTouch,
-  isCoinAnimating,
-  isComboAnimating,
-  spawnHeart, sunAnimating
-} from "@/scripts/actions.js";
 import Status from "@/components/Status.vue";
 import {statusSmoke} from "@/scripts/dragAndDrop.js";
 import PetSmoke from "@/components/PetSmoke.vue";
 import {initGameData} from "@/scripts/api.js";
+import Poop from "@/components/Poop.vue";
+import {preloadImages} from "@/scripts/preloadImages.js";
+import PhotoFrame from "@/components/PhotoFrame.vue";
+import PetSideMenu from "@/components/PetSideMenu.vue";
+import TutorialOverlay from "@/components/TutorialOverlay.vue";
+import {activeStatus} from "@/scripts/stats.js";
 import {
   mouth,
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
   locationUrl, location, dropZoneRef, body, tutorialStep
 } from "@/scripts/useGameStore.js";
-import Poop from "@/components/Poop.vue";
-import {preloadImages} from "@/scripts/preloadImages.js";
-import PhotoFrame from "@/components/PhotoFrame.vue";
+import {
+  animKey, coinAnimKey,
+  comboMultiplier, handleMultiTouch,
+  isCoinAnimating,
+  isComboAnimating,
+  sunAnimating
+} from "@/scripts/actions.js";
 
-import PetSideMenu from "@/components/PetSideMenu.vue";
-
-import TutorialOverlay from "@/components/TutorialOverlay.vue";
-import {activeStatus} from "@/scripts/stats.js";
-
-
+const pupilOffset = ref({x: 0, y: 0})
+let blinkInterval = null
+let lookInterval = null
 function getHornAsset(level) {
   if (level >= 50) return '/horns/50lvl.webp'
   if (level >= 45) return '/horns/45lvl.webp'
@@ -69,9 +69,7 @@ watch(location, (newLocation) => {
   }
 })
 // Запускаем рандомный взгляд при монтировании компонента
-const pupilOffset = ref({x: 0, y: 0})
-let blinkInterval = null
-let lookInterval = null
+
 
 // Функция рандомного взгляда
 function startRandomLooking() {
@@ -203,17 +201,11 @@ onUnmounted(() => {
 
             <!-- 3. Яркая вспышка-блик (эллипс, а не круг) -->
             <div
-                class="relative z-10 w-6 h-6 bg-yellow-100 rounded-full rotate-12 blur-[5px] shadow-[0_0_20px_#fde047]"></div>
+                class="relative z-10 w-4 h-4 top-2 -left-1 bg-yellow-100 rounded-full rotate-12 blur-[5px] shadow-[0_0_20px_#fde047]"></div>
           </div>
 
-          <!-- 2. Среднее яркое свечение -->
-          <!--          <div class="absolute w-12 h-12 bg-amber-400/60 rounded-full blur-md pointer-events-none"></div>-->
-
-          <!--          &lt;!&ndash; 3. Ядро лампочки (самый центр) &ndash;&gt;-->
-          <!--          <div class="relative z-10 w-6 h-6 bg-white rounded-full shadow-[0_0_20px_#fde047]"></div>-->
         </div>
         <!-- Зона персонажа (сюда перетаскиваем яблоко) -->
-
 
         <div ref="dropZoneRef"
              @pointerdown="handleMultiTouch"
@@ -221,34 +213,13 @@ onUnmounted(() => {
              :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
         >
 
-
-          <Transition name="combo-fade">
-            <img
-                v-if="isComboAnimating"
-                :src="getCombo()"
-                class="absolute text-2xl  select-none z-50 animate-float-combo pointer-events-none"
-                :class="{ 'w-12': comboMultiplier >= 1,'w-15': comboMultiplier >= 2,'w-20': comboMultiplier >= 3,'w-25': comboMultiplier >= 5,'z-205':tutorialStep === 3 }"
-                alt="">
-          </Transition>
-          <template v-if="isCoinAnimating">
-            <img
-                v-for="i in comboMultiplier"
-                :key="`${coinAnimKey}-${i}`"
-                :style="{ '--i': i - 1 }"
-                src="/gamePlay/coin.webp"
-                class="absolute w-5 z-50 animate-coinFly pointer-events-none"
-                :class="{'z-205':tutorialStep === 3}"
-                alt="">
-          </template>
-
-
           <div v-show="gameData.sleep"
                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-40">
             <div class="absolute text-[#00BFFF]  font-extrabold text-xl z-1 drop-shadow-md">Z</div>
             <div class="absolute text-[#00BFFF] font-bold text-sm z-2 left-4 -top-3 drop-shadow-md">z</div>
           </div>
           <p class="bg-[#fbf3e0]"></p>
-          <PhotoFrame v-show="(location==='home' || location==='food')"/>
+
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
           <div :key="animKey"
 
@@ -295,13 +266,36 @@ onUnmounted(() => {
             <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''" class="absolute w-45" alt="">
           </div>
 
+        </div>
+        <div
+            class="animate-dark-base absolute inset-0 w-full h-full pointer-events-none"
+            :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
+        >
+          <template v-if="isCoinAnimating">
+            <img
+                v-for="i in comboMultiplier"
+                :key="`${coinAnimKey}-${i}`"
+                :style="{ '--i': i - 1 }"
+                src="/gamePlay/coin.webp"
+                class="absolute w-5 z-50 right-40 top-25 animate-coinFly pointer-events-none"
+                :class="{'z-205':tutorialStep === 3}"
+                alt="">
+          </template>
+
+          <Transition name="combo-fade">
+            <img
+                v-if="isComboAnimating"
+                :src="getCombo()"
+                class="absolute text-2xl right-25 top-20 select-none z-50 animate-float-combo pointer-events-none"
+                :class="{ 'w-12': comboMultiplier >= 1,'w-15': comboMultiplier >= 2,'w-20': comboMultiplier >= 3,'w-25': comboMultiplier >= 5,'z-205':tutorialStep === 3 }"
+                alt="">
+          </Transition>
 
           <div class="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible z-30">
-            <CloudMessage/>
-
-            <!-- Монетка с key для перезапуска анимации на каждый клик -->
-
+            <!-- Добавь pointer-events-auto, если CloudMessage кликабелен -->
+            <CloudMessage class="pointer-events-auto"/>
           </div>
+
           <Status
               :class=" tutorialStep === 3 ? 'z-205' : ''"
               v-if="activeStatus.show "
@@ -310,17 +304,25 @@ onUnmounted(() => {
               :image="activeStatus.image"
               :additional="activeStatus.additional"
               :bg-color="activeStatus.bgColor"
+              class="pointer-events-auto"
           />
 
           <PetStinky :class=" tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
           <PetFoam :status-foam="statusFoam" :class=" tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
           <PetSmoke :status-smoke="statusSmoke"/>
           <PetShower :status-shower="statusShower" :class=" tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
-          <Poop v-show="gameData.isPooped && (location==='home' || location==='food')"/>
 
+          <!-- Включаем клики обратно для Poop и PhotoFrame -->
+          <Poop
+              v-show="gameData.isPooped && (location==='home' || location==='food')"
+              class="pointer-events-auto"
+          />
 
+          <PhotoFrame
+              class="z-15 pointer-events-auto"
+              v-show="(location==='home' || location==='food')"
+          />
         </div>
-        <!-- Индикаторы статусов -->
 
       </div>
       <PetSideMenu/>
