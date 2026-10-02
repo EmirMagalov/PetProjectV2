@@ -13,13 +13,30 @@ import '@/scripts/stats.js'
 import {cartItemsList, currentFoodItem, currentIndex, removeFromCart} from "@/scripts/basket.js";
 import {foodList} from "@/scripts/objectItems.js";
 import {addExp} from "@/scripts/level.js";
-
 import {toggleSleep} from "@/scripts/stats.js";
+import {ref} from "vue";
 
-import {computed, ref, watch} from "vue";
+export const animKey = ref(0)
+export const comboClicks = ref(0)     // Счетчик кликов подряд
+export const comboMultiplier = ref(1) // Текущий множитель (1, 5, 10, 20)
+export const comboAnimKey = ref(0);
+export const isComboAnimating = ref(false);
+export const coinAnimKey = ref(0)
+export const isCoinAnimating = ref(false)
+export const sunAnimating = ref(false)
+export const pupilOffset = ref({x: 0, y: 0})
+export const isEditing = ref(false);
+export let drunkTimer = null
 
 let hideTrackerTimer = null
-export let drunkTimer = null
+let lastFatTime = 0
+const FAT_COOLDOWN = 10000 // 10 секунд
+let comboTimer = null                // Таймер сброса комбо
+let comboHideTimer = null
+let sunHideTimer = null
+let vibrateTimer = null
+let coinHideTimer = null
+let lookResetTimer = null;
 
 
 export function otherFeedPet(foodId) {
@@ -50,7 +67,6 @@ export function otherFeedPet(foodId) {
         }
 
 
-        // gameData.coins += 1
         if (foodId === "lifePotion") {
             lifeStatus.value = true
             gameData.lives = Math.min(3, gameData.lives + 1)
@@ -63,14 +79,10 @@ export function otherFeedPet(foodId) {
         addCoin(1)
         addExp(20)
 
-        // if (gameData.feedCount > 6) {
-        //     gameData.stinky = true
-        // }
+
     }
 }
 
-let lastFatTime = 0
-const FAT_COOLDOWN = 10000 // 10 секунд
 
 export function feedPet(foodId) {
     const targetId = foodId || cartItemsList.value[currentIndex.value]?.id
@@ -188,33 +200,61 @@ export function goSleep() {
 }
 
 
-// Переменная для хранения ссылки на таймер анимации вне функции
-
-export const animKey = ref(0)
-
-// --- НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ КОМБО ---
-export const comboClicks = ref(0)     // Счетчик кликов подряд
-export const comboMultiplier = ref(1) // Текущий множитель (1, 5, 10, 20)
-export const comboAnimKey = ref(0);
-export const isComboAnimating = ref(false);
-export const coinAnimKey = ref(0)
-export const isCoinAnimating = ref(false)
-export const sunMoonAnimKey = ref(0)
-export const sunAnimating = ref(false)
-let comboTimer = null                // Таймер сброса комбо
-let comboHideTimer = null
-let sunHideTimer = null
-
-let vibrateTimer = null
-let coinHideTimer = null
-export const isEditing = ref(false);
-
 export function finishEditing() {
     if (!gameData.name || !gameData.name.trim()) {
         gameData.name = 'Имя:';
     }
     isEditing.value = false;
 }
+
+export const isUserLooking = ref(false); // Флаг: пользователь держит/ведет палец
+
+
+// scripts/actions.js
+
+export function updateEyeLook(event) {
+    if (!event) return;
+
+    isUserLooking.value = true;
+
+    // Считываем позицию из touch или из mouse/pointer события
+    const touch = (event.touches && event.touches.length > 0)
+        ? event.touches[0]
+        : (event.changedTouches && event.changedTouches.length > 0)
+            ? event.changedTouches[0]
+            : event;
+
+    if (!touch || touch.clientX === undefined) return;
+
+    // Находим главный контейнер игры по селектору или берем экран
+    const gameCanvas = document.querySelector('.w-\\[320px\\]') || document.body;
+    const rect = gameCanvas.getBoundingClientRect();
+
+    const clickX = touch.clientX - rect.left;
+    const clickY = touch.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const deltaX = clickX - centerX;
+    const deltaY = clickY - centerY;
+
+    const maxOffset = 3; // Амплитуда смещения зрачков
+
+    const pupilX = Math.max(-maxOffset, Math.min(maxOffset, (deltaX / centerX) * maxOffset));
+    const pupilY = Math.max(-maxOffset, Math.min(maxOffset, (deltaY / centerY) * maxOffset));
+
+    pupilOffset.value = { x: pupilX, y: pupilY };
+}
+export function resetEyeLook(delay = 1000) {
+    if (lookResetTimer) clearTimeout(lookResetTimer);
+
+    lookResetTimer = setTimeout(() => {
+        pupilOffset.value = {x: 0, y: 0};
+        isUserLooking.value = false; // Возвращаем возможность рандомного взгляда
+    }, delay);
+}
+
 export function handleMultiTouch(event) {
     if (isEditing.value) {
         finishEditing();
@@ -222,10 +262,27 @@ export function handleMultiTouch(event) {
     if (event.cancelable) {
         event.preventDefault();
     }
-    spawnHeart();
+
+    let x = 160;
+    let y = 135;
+
+    if (event) {
+        const rect = event.currentTarget?.getBoundingClientRect();
+        const touch = event.touches && event.touches.length > 0 ? event.touches[0] : event;
+        if (rect && touch) {
+            x = touch.clientX - rect.left;
+            y = touch.clientY - rect.top;
+        }
+    }
+
+    // Обновляем позицию зрачков при нажатии
+    updateEyeLook(event);
+    resetEyeLook(1200);
+
+    spawnHeart(x, y);
 }
 
-export function spawnHeart() {
+export function spawnHeart(x = 160, y = 135) {
     if (tutorialStep.value === 3) {
         if (gameData.clickCounter > 10) nextTutorialStep()
     }
@@ -233,7 +290,6 @@ export function spawnHeart() {
         return
     }
 
-    // Очищаем предыдущие таймеры скрытия
     if (comboHideTimer) clearTimeout(comboHideTimer)
     if (sunHideTimer) clearTimeout(sunHideTimer)
 
@@ -245,10 +301,8 @@ export function spawnHeart() {
     }
     gameData.sleep = false
 
-    // 1. Увеличиваем клик-счётчик
     gameData.clickCounter++
 
-    // 2. Логика комбо
     comboClicks.value++
     if (comboTimer) clearTimeout(comboTimer)
 
@@ -267,7 +321,6 @@ export function spawnHeart() {
         comboMultiplier.value = 1
     }, 1000)
 
-    // 3. Анимация комбо
     isComboAnimating.value = true
     comboAnimKey.value++
 
@@ -275,14 +328,13 @@ export function spawnHeart() {
         isComboAnimating.value = false
     }, 800)
 
-    // Начисление монет
+    // 3. Передаем координаты в addCoin
     if (gameData.clickCounter % 2 === 0) {
-        addCoin(1 * comboMultiplier.value)
+        addCoin(1 * comboMultiplier.value, x, y)
     }
 
     addExp(1)
 
-    // Тратим энергию / сытость
     const cost = isBadMood.value ? 0.02 : 0.01
     gameData.energy = Math.max(0, gameData.energy - cost)
     gameData.foodLevel = Math.max(0, gameData.foodLevel - cost)
@@ -294,14 +346,12 @@ export function spawnHeart() {
             PlayCount.value = 0
             gameData.fastfoodStreak = 0
             addExp(10)
-            addCoin(10)
+            addCoin(10, x, y)
         }
     }
 
-    // Перезапуск анимации персонажа (pop)
     animKey.value++
 
-    // Перезапускаем вибрацию так, чтобы она не гасла во время серийных кликов
     if (vibrateTimer) clearTimeout(vibrateTimer)
     isVibrating.value = true
     vibrateTimer = setTimeout(() => {
@@ -309,16 +359,18 @@ export function spawnHeart() {
     }, 150)
 }
 
-export function addCoin(coins = 1) {
-    // Перезапускаем ключ анимации вылета монетки на КАЖДЫЙ вызов
+export function addCoin(coins = 1, x = 160, y = 135) {
     if (coinHideTimer) clearTimeout(coinHideTimer)
+
+    // Передаем фиксированную пачку из 5 визуальных монеток и координаты клика
+    triggerCoinAnimation(1 * comboMultiplier.value, x, y)
 
     isCoinAnimating.value = true
     coinAnimKey.value++
 
     coinHideTimer = setTimeout(() => {
         isCoinAnimating.value = false
-    }, 500) // Длительность анимации coinFly
+    }, 500)
 
     gameData.coins += coins
 
@@ -327,6 +379,7 @@ export function addCoin(coins = 1) {
         isAnimating.value = false
     }, 5000)
 }
+
 export const Clean = () => {
     gameData.isPooped = false
     addCoin(10)
@@ -339,6 +392,22 @@ export function isLosingLife() {
     setTimeout(() => isLosingLifeStatus.value = false, 800)
 }
 
+export const activeCoins = ref([])
 
+export function triggerCoinAnimation(count = 5, startX = 160, startY = 135) {
+    const id = Date.now() + Math.random()
 
-// <span class="text-xs font-bold text-amber-900">Сделайте ставку:</span>
+    const coins = Array.from({length: count}, (_, i) => ({
+        id: `${id}-${i}`,
+        // Каждая монетка из группы спавнится около точки клика с неболшим разбросом
+        x: startX + (count > 1 ? (Math.random() - 0.5) * 40 : 0),
+        y: startY + (count > 1 ? (Math.random() - 0.5) * 20 : 0),
+        delay: i * 0.04
+    }))
+
+    activeCoins.value.push({id, coins})
+
+    setTimeout(() => {
+        activeCoins.value = activeCoins.value.filter(c => c.id !== id)
+    }, 1000)
+}

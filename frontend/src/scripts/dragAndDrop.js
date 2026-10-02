@@ -1,6 +1,7 @@
 import {useDraggable} from "@vueuse/core";
 import {computed, ref} from "vue";
-import {addCoin, feedPet, isLosingLife, otherFeedPet} from "@/scripts/actions.js";
+// 1. Добавляем импорты функций слежения глаз
+import {addCoin, feedPet, isLosingLife, otherFeedPet, updateEyeLook, resetEyeLook} from "@/scripts/actions.js";
 import {
     currentDraggedItem,
     dropZoneRef,
@@ -28,14 +29,12 @@ export const statusSmoke = ref(false)
 export const batheStatus = ref(false)
 // Время последнего успешного действия (в миллисекундах)
 let lastBathTime = 0
-// let lastFeedTime = 0
 
-// Кулдаун в миллисекундах (например, разрешать купать/кормить не чаще, чем раз в 10 секунд)
+// Кулдаун в миллисекундах
 const BATH_COOLDOWN = 5000
-// const FEED_COOLDOWN = 5000
 
 // Универсальная функция проверки зоны и открытия рта
-export function handleMove(event, itemType,foodId,foodCategory) {
+export function handleMove(event, itemType, foodId, foodCategory) {
     if (itemType === 'food' && foodConsumedByPipe.value) {
         foodDrag.x.value = -9999
         foodDrag.y.value = -9999
@@ -73,20 +72,11 @@ export function handleMove(event, itemType,foodId,foodCategory) {
 
                         statusSmoke.value = false
                         actionTimer = null
-
-                        // if (gameData.addictionStreak >= 2) {
-                        //     mouth.value = "/character/sad_mouth.webp"
-                        //     previousMouth = "/character/sad_mouth.webp"
-                        // }
                     }, 3000)
                 }
             }
             gameData.sleep = false
-
-
-            // mouth.value = '/character/open_mouth.webp'
         } else if (itemType === 'shower') {
-
             batheStatus.value = true
             if (statusFoam.value === true) {
                 statusShower.value = true
@@ -114,7 +104,6 @@ export function handleMove(event, itemType,foodId,foodCategory) {
             }
         } else if (itemType === 'foam') {
             batheStatus.value = true
-
         }
     } else {
         isHovered.value = false
@@ -124,28 +113,22 @@ export function handleMove(event, itemType,foodId,foodCategory) {
             actionTimer = null
         }
         statusSmoke.value = false
-        // Возвращаем тот рот, который был надет ДО поднятия предмета
-
     }
 }
 
 // Универсальная функция окончания перетаскивания
 export function handleEnd(itemType, foodId, foodCategory) {
-    // Если еда уже была съедена конусом через таймер
     if (foodConsumedByPipe.value || foodId === 'pipe') {
         statusSmoke.value = false
         foodConsumedByPipe.value = false
         isHovered.value = false
         currentDraggedItem.value = null
-
         return
     }
 
     if (isHovered.value) {
-
         if (itemType === 'food') {
             if (foodCategory === 'food') {
-
                 feedPet(foodId)
                 nextTutorialStep()
             } else {
@@ -153,8 +136,6 @@ export function handleEnd(itemType, foodId, foodCategory) {
                     otherFeedPet(foodId)
                 }
             }
-
-
         } else if (itemType === 'foam') {
             if(!statusFoam.value){
                 statusFoam.value = true
@@ -163,9 +144,7 @@ export function handleEnd(itemType, foodId, foodCategory) {
                     removeFromCart(foodId)
                 }
             }
-
         }
-
     }
     batheStatus.value = false
     isHovered.value = false
@@ -174,19 +153,17 @@ export function handleEnd(itemType, foodId, foodCategory) {
     statusSmoke.value = false
     foodConsumedByPipe.value = false
 
-
     window.getSelection()?.removeAllRanges()
     document.activeElement?.blur()
 }
 
-// Настраиваем useDraggable для каждого предмета отдельно
+// Настраиваем useDraggable для каждого предмета
 export const foodDrag = useDraggable(foodEl, {
     disabled: computed(() => Object.keys(gameData.cart).length === 0),
     preventDefault: true,
     onStart: (pos, event) => {
         currentDraggedItem.value = 'food'
         foodConsumedByPipe.value = false
-        // Жестко фиксируем стартовые координаты с экрана в момент касания
         if (foodEl.value) {
             const rect = foodEl.value.getBoundingClientRect()
             foodDrag.x.value = rect.left
@@ -194,10 +171,11 @@ export const foodDrag = useDraggable(foodEl, {
         }
     },
     onMove: (pos, event) => {
-        // Актуальные id и category берем на каждый сдвиг из текущего элемента
+        // Передаем событие движения
+        updateEyeLook(event)
+
         const foodId = currentFoodItem.value?.id
         const foodCategory = currentFoodItem.value?.category
-
         handleMove(event, 'food', foodId, foodCategory)
     },
     onEnd: () => {
@@ -209,6 +187,8 @@ export const foodDrag = useDraggable(foodEl, {
         }
         statusSmoke.value = false
         handleEnd('food', foodId, foodCategory)
+
+        resetEyeLook(600)
     }
 })
 
@@ -222,8 +202,14 @@ export const showerDrag = useDraggable(showerEl, {
             showerDrag.y.value = rect.top
         }
     },
-    onMove: (pos, event) => handleMove(event, 'shower'),
-    onEnd: () => handleEnd('shower')
+    onMove: (pos, event) => {
+        updateEyeLook(event)
+        handleMove(event, 'shower')
+    },
+    onEnd: () => {
+        handleEnd('shower')
+        resetEyeLook(600)
+    }
 })
 
 export const foamDrag = useDraggable(foamEl, {
@@ -237,11 +223,15 @@ export const foamDrag = useDraggable(foamEl, {
         }
     },
     onMove: (pos, event) => {
-        const bathId = currentBathItem.value?.id // Берём текущий шампунь
+        updateEyeLook(event)
+
+        const bathId = currentBathItem.value?.id
         handleMove(event, 'foam', bathId)
     },
     onEnd: () => {
-        const bathId = currentBathItem.value?.id // Берём текущий шампунь
+        const bathId = currentBathItem.value?.id
         handleEnd('foam', bathId)
+
+        resetEyeLook(600)
     }
 })

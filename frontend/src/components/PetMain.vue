@@ -24,14 +24,15 @@ import {
   locationUrl, location, dropZoneRef, body, tutorialStep
 } from "@/scripts/useGameStore.js";
 import {
+  activeCoins,
   animKey, coinAnimKey,
   comboMultiplier, handleMultiTouch,
   isCoinAnimating,
-  isComboAnimating,
-  sunAnimating
+  isComboAnimating, isUserLooking, pupilOffset, resetEyeLook,
+  sunAnimating, updateEyeLook
 } from "@/scripts/actions.js";
 
-const pupilOffset = ref({x: 0, y: 0})
+
 let blinkInterval = null
 let lookInterval = null
 function getHornAsset(level) {
@@ -70,32 +71,46 @@ watch(location, (newLocation) => {
 })
 // Запускаем рандомный взгляд при монтировании компонента
 
+let isDragging = false // Флаг удержания пальца/курсора
 
-// Функция рандомного взгляда
+function handlePointerDown(event) {
+  isDragging = true
+  handleMultiTouch(event) // Вызывает спавн монетки и первоначальный поворот глаз
+}
+
+function handlePointerMove(event) {
+  // Следим за движением ВСЕГДА, когда палец движется по зоне или зажат
+  if (isDragging || event.buttons > 0) {
+    updateEyeLook(event)
+  }
+}
+
+function handlePointerEnd() {
+  isDragging = false
+  resetEyeLook(800)
+}
+
 function startRandomLooking() {
-
   lookInterval = setInterval(() => {
-    // Случайный выбор смещения зрачков (в пределах небольшой зоны, чтобы не вылезли из глаз)
+    if (isUserLooking.value || isDragging) return
+
     const directions = [
-      {x: 0, y: 0},   // прямо
-      {x: -2, y: -1}, // влево-вверх
-      {x: 2, y: -1},  // вправо-вверх
-      {x: -2, y: 2},  // влево-вниз
-      {x: 2, y: 2},   // вправо-вниз
-      {x: 0, y: -2}   // просто вверх
+      {x: 0, y: 0},
+      {x: -2, y: -2},
+      {x: 2, y: -2},
+      {x: -2, y: 2},
+      {x: 2, y: 2},
+      {x: 0, y: -2}
     ]
-
-
-    // Выбираем случайное направление
     const randomDir = directions[Math.floor(Math.random() * directions.length)]
     pupilOffset.value = randomDir
+  }, 2500)
 
-  }, 2500) // Меняем взгляд каждые 2.5 секунды
   blinkInterval = setInterval(() => {
     blink.value = true
     setTimeout(() => {
       blink.value = false
-    }, 150) // Глаза закрыты 150 миллисекунд
+    }, 150)
   }, 3500)
 }
 
@@ -205,11 +220,15 @@ onUnmounted(() => {
           </div>
 
         </div>
-        <!-- Зона персонажа (сюда перетаскиваем яблоко) -->
 
+        <!-- Зона персонажа -->
         <div ref="dropZoneRef"
-             @pointerdown="handleMultiTouch"
-             class="absolute brightness-100 animate-dark-base   inset-0 flex justify-center items-center cursor-pointer"
+             @pointerdown="handlePointerDown($event)"
+             @pointermove="handlePointerMove($event)"
+             @pointerup="handlePointerEnd"
+             @pointercancel="handlePointerEnd"
+             @pointerleave="handlePointerEnd"
+             class="absolute brightness-100 animate-dark-base inset-0 flex justify-center items-center cursor-pointer touch-none select-none"
              :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
         >
 
@@ -254,8 +273,8 @@ onUnmounted(() => {
                 transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)`
               }"
                 >
-                  <img src="/character/pupils_left.webp" class="absolute w-45" alt=""/>
-                  <img src="/character/pupils_right.webp" class="absolute w-45" alt=""/>
+                  <img src="/character/eye_pupils_left.webp" class="absolute w-45" alt=""/>
+                  <img src="/character/eye_pupils_right.webp" class="absolute w-45" alt=""/>
 
                 </div>
 
@@ -271,23 +290,31 @@ onUnmounted(() => {
             class="animate-dark-base absolute inset-0 w-full h-full pointer-events-none"
             :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
         >
-          <template v-if="isCoinAnimating">
-            <img
-                v-for="i in comboMultiplier"
-                :key="`${coinAnimKey}-${i}`"
-                :style="{ '--i': i - 1 }"
-                src="/gamePlay/coin.webp"
-                class="absolute w-5 z-50 right-40 top-25 animate-coinFly pointer-events-none"
-                :class="{'z-205':tutorialStep === 3}"
-                alt="">
-          </template>
+          <!-- Отрисовываем каждую кликнутую монетку отдельно -->
+
+          <div class="absolute inset-0 pointer-events-none overflow-hidden z-50">
+            <template v-for="group in activeCoins" :key="group.id">
+              <img
+                  v-for="coin in group.coins"
+                  :key="coin.id"
+                  :style="{
+        left: `${coin.x}px`,
+        top: `${coin.y}px`,
+        animationDelay: `${coin.delay}s`
+      }"
+                  src="/gamePlay/coin.webp"
+                  class="absolute w-5 animate-coinFly pointer-events-none"
+                  alt=""
+              />
+            </template>
+          </div>
 
           <Transition name="combo-fade">
             <img
                 v-if="isComboAnimating"
                 :src="getCombo()"
-                class="absolute text-2xl right-25 top-20 select-none z-50 animate-float-combo pointer-events-none"
-                :class="{ 'w-12': comboMultiplier >= 1,'w-15': comboMultiplier >= 2,'w-20': comboMultiplier >= 3,'w-25': comboMultiplier >= 5,'z-205':tutorialStep === 3 }"
+                class="absolute text-2xl right-30 top-30 select-none z-50 animate-float-combo pointer-events-none"
+                :class="{ 'w-14': comboMultiplier >= 1,'w-15': comboMultiplier >= 2,'w-17': comboMultiplier >= 3,'w-19': comboMultiplier >= 5,'z-205':tutorialStep === 3 }"
                 alt="">
           </Transition>
 
@@ -457,38 +484,26 @@ onUnmounted(() => {
 
 @keyframes coinFly {
   0% {
-    transform: translate(calc(10px + (var(--i) * 10px)), -10px) scale(0.6);
+    transform: translate(0, 0) scale(0.5);
     opacity: 0;
   }
-  10% {
-    opacity: 1;
-    transform: translate(calc(30px + (var(--i) * 10px)), -30px) scale(1);
-  }
   20% {
-    transform: translate(calc(60px + (var(--i) * 10px)), -60px) scale(1.5);
-  }
-  30% {
-    transform: translate(calc(65px + (var(--i) * 10px)), -65px) scale(1.7);
-  }
-  /* Короткое замедление/увеличение в воздухе */
-  40% {
-    transform: translate(calc(70px + (var(--i) * 10px)), -70px) scale(1.3);
-  }
-  70% {
-    transform: translate(calc(180px + (var(--i) * 6px)), -180px) scale(0.9);
+    opacity: 1;
+    /* Монетка слегка взлетает вверх относительно точки клика */
+    transform: translate(0, -30px) scale(1.2);
   }
   100% {
-    /* Финальный прилет и уменьшение */
-    transform: translate(310px, -320px) scale(0.4);
+    /* Финальный прилёт в угол (счётчик) */
+    transform: translate(120px, -200px) scale(0.3);
     opacity: 0;
   }
 }
 
 .animate-coinFly {
-  /* Замени кривую без overshoot (1.2), чтобы не было залипания */
-  animation: coinFly 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: coinFly 0.7s cubic-bezier(0.25, 1, 0.5, 1) both;
+  will-change: transform, opacity;
+  pointer-events: none;
 }
-
 
 @keyframes popCharacter {
   0% {

@@ -286,16 +286,17 @@ const foodWarning = computed(() => {
             <div v-show="!feedStatus"
                  ref="foamEl"
                  :style="[
-                   foamDrag.isDragging.value ? foamDrag.style.value : {},
-                   {
-                       'touch-action': 'none',
-                       'background-image': `url('${bathCartList[currentBathIndex]?.image}')`
-                   }
-                 ]"
+       foamDrag.isDragging.value ? foamDrag.style.value : {},
+       {
+           'touch-action': 'none',
+           'background-image': `url('${bathCartList[currentBathIndex]?.image}')`
+       }
+     ]"
                  :class="[
-                   foamDrag.isDragging.value ? 'fixed z-150 pointer-events-none' : 'relative',
-                   currentDraggedItem === 'shower' && !statusFoam && showerCount === 0 ? 'animate-pulse' : ''
-                 ]"
+       /* УБИРАЕМ pointer-events-none, чтобы событие перетаскивания не теряло позицию */
+       foamDrag.isDragging.value ? 'fixed z-150' : 'relative',
+       currentDraggedItem === 'shower' && !statusFoam && showerCount === 0 ? 'animate-pulse' : ''
+     ]"
                  class="flex flex-col items-center cursor-move w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
             ></div>
 
