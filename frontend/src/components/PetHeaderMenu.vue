@@ -96,6 +96,7 @@ function formatFullNumber(num) {
     <Transition name="fade">
       <div
           v-if="showStatsModal"
+          @touchmove.prevent
           class="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           @click.self="showStatsModal = false"
       >

@@ -8,7 +8,14 @@ import App from '../App.vue'
 // 1. Принудительный сброс кэша для iOS Safari / Telegram WebApp
 const APP_VERSION = '1.0.2'; // Меняй версию при каждом обновлении
 const currentVersion = localStorage.getItem('app_version');
+if (window.Telegram?.WebApp) {
+    const tg = window.Telegram.WebApp;
 
+    // Отключает вертикальные свайпы/растягивание
+    if (typeof tg.disableVerticalSwipes === 'function') {
+        tg.disableVerticalSwipes();
+    }
+}
 async function clearCacheAndReload() {
     if (currentVersion !== APP_VERSION) {
         const tasks = [];
