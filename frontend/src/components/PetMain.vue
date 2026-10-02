@@ -348,11 +348,13 @@ onUnmounted(() => {
 
 
         </div>
-        <PhotoFrame
+        <div
+            class="absolute inset-0 z-10 pointer-events-auto animate-dark-base"
             :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
-            class="z-10 animate-dark-base pointer-events-auto"
-            v-show="(location==='home' || location==='food')"
-        />
+            v-show="(location === 'home' || location === 'food')"
+        >
+          <PhotoFrame />
+        </div>
       </div>
       <PetSideMenu />
     </div>
