@@ -31,6 +31,7 @@ class Pet(models.Model):
     play_count = fields.IntField(default=0)
 
     cart = fields.JSONField(default={})
+
     unlocked_heads = fields.JSONField(default=list)
     equipped_head = fields.CharField(max_length=255, null=True)
 
