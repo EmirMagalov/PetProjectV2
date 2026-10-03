@@ -23,18 +23,21 @@ export const selectedBet = ref(50);
 export const betOptions = [50, 100,250 ,500,1000];
 
 
-watch([playerCards, dealerCards, gameStarted, currentBet], () => {
-    localStorage.setItem('saloon_game_state', JSON.stringify({
-        playerCards: playerCards.value,
-        dealerCards: dealerCards.value,
-        gameStarted: gameStarted.value,
-        currentBet: currentBet.value,
-        bettingPhase: bettingPhase.value,
-        gameFinished: gameFinished.value, // ✅ Сохраняем флаг завершения
-        result: result.value,             // ✅ Сохраняем текст результата
-    }));
-}, { deep: true });
-
+watch(
+    [playerCards, dealerCards, gameStarted, bettingPhase, gameFinished, currentBet, result],
+    () => {
+        localStorage.setItem('saloon_game_state', JSON.stringify({
+            playerCards: playerCards.value,
+            dealerCards: dealerCards.value,
+            gameStarted: gameStarted.value,
+            currentBet: currentBet.value,
+            bettingPhase: bettingPhase.value,
+            gameFinished: gameFinished.value,
+            result: result.value,
+        }));
+    },
+    { deep: true }
+);
 // При загрузке скрипта — восстанавливаем
 const savedState = localStorage.getItem('saloon_game_state');
 if (savedState) {
@@ -45,8 +48,8 @@ if (savedState) {
         gameStarted.value = parsed.gameStarted || false;
         currentBet.value = parsed.currentBet || null;
         bettingPhase.value = parsed.bettingPhase || false;
-        gameFinished.value = parsed.gameFinished || false; // ✅ Восстанавливаем флаг
-        result.value = parsed.result || "";                // ✅ Восстанавливаем текст
+        gameFinished.value = parsed.gameFinished || false;
+        result.value = parsed.result || "";
     } catch (e) {
         console.error("Ошибка при восстановлении состояния игры:", e);
     }
@@ -239,9 +242,8 @@ export async function determineWinner() {
 watch(
     [gameStarted, bettingPhase],
     ([started, betting]) => {
-        if (started && betting) {
+        if (started && betting && !gameFinished.value) {
             result.value = "Сделайте ставку!";
         }
-    },
-    { immediate: true }
+    }
 );
