@@ -360,3 +360,61 @@ async def cmd_reset_flags(message: types.Message):
     )
 
     await message.answer(f"✅ Успешно сброшены флаги уведомлений для всех питомцев (затронуто: {updated_count}).")
+
+
+@admin_router.message(Command("send_coins"))
+async def send_coins_to_user_handler(message: types.Message):
+    if message.from_user.id not in ADMIN_IDS:
+        return
+
+    # Разбираем сообщение: /send_coins 123456789 150 Сообщение для тебя!
+    command_parts = message.text.split(maxsplit=3)
+    if len(command_parts) < 3:
+        await message.answer(
+            "❌ Неверный формат! Пример:\n<code>/send_coins 123456789 150 [Текст]</code>",
+            parse_mode="HTML"
+        )
+        return
+
+    try:
+        target_tg_id = int(command_parts[1])
+        coins_amount = int(command_parts[2])
+    except ValueError:
+        await message.answer(
+            "❌ ID пользователя и количество монет должны быть числами!\nПример: <code>/send_coins 123456789 150 Привет!</code>",
+            parse_mode="HTML"
+        )
+        return
+
+    # Если текст сообщения передан, используем его, иначе дефолтный
+    custom_text = command_parts[3] if len(command_parts) > 3 else f"🎁 Персональный подарок от администратора: +{coins_amount} монет!"
+
+    # Проверяем, существует ли питомец/пользователь в базе
+    pet_exists = await PetModel.filter(tg_id=target_tg_id).exists()
+    if not pet_exists:
+        await message.answer(f"❌ Пользователь с ID <code>{target_tg_id}</code> не найден в базе!", parse_mode="HTML")
+        return
+
+    callback_data_str = f"claim_bonus_{coins_amount}"
+
+    keyboard = types.InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                types.InlineKeyboardButton(
+                    text=f"🎁 Забрать {coins_amount} монет!",
+                    callback_data=callback_data_str
+                )
+            ]
+        ]
+    )
+
+    try:
+        await message.bot.send_message(
+            chat_id=target_tg_id,
+            text=custom_text,
+            reply_markup=keyboard,
+            parse_mode="HTML"
+        )
+        await message.answer(f"✅ Награда успешно отправлена пользователю <code>{target_tg_id}</code>!", parse_mode="HTML")
+    except Exception as e:
+        await message.answer(f"❌ Не удалось отправить сообщение пользователю {target_tg_id}: {e}")

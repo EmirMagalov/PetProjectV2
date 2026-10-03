@@ -1,7 +1,7 @@
 <script setup>
 import { currentCostumeItem } from "@/scripts/basket.js";
 import { computed } from "vue";
-import { bodyType } from "@/scripts/useGameStore.js";
+import {bodyType, gameData} from "@/scripts/useGameStore.js";
 
 const costume = computed(() => {
   // 1. Проверяем, надет ли костюм
@@ -16,6 +16,7 @@ const costume = computed(() => {
   // По умолчанию возвращаем обычный вид
   return currentCostumeItem.value.image_normal;
 })
+
 </script>
 
 <template>
