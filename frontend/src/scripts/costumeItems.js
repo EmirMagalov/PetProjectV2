@@ -9,7 +9,7 @@ export const costumeItems = [
         image_normal: `/costumes/normal_orange_tuxedo.webp?v=${APP_VERSION}`,
         image_fat: `/costumes/fat_orange_tuxedo.webp?v=${APP_VERSION}`,
         image_skinny: `/costumes/skinny_orange_tuxedo.webp?v=${APP_VERSION}`,
-        cost: 15000,
+        cost: 10000,
         level:20
     },
     {
@@ -19,7 +19,7 @@ export const costumeItems = [
         image_normal: `/costumes/normal_blue_tuxedo.webp?v=${APP_VERSION}`,
         image_fat: `/costumes/fat_blue_tuxedo.webp?v=${APP_VERSION}`,
         image_skinny: `/costumes/skinny_blue_tuxedo.webp?v=${APP_VERSION}`,
-        cost: 15000,
+        cost: 10000,
         level:20
     },
     {
@@ -29,7 +29,7 @@ export const costumeItems = [
         image_normal: `/costumes/normal_pink_tuxedo.webp?v=${APP_VERSION}`,
         image_fat: `/costumes/fat_pink_tuxedo.webp?v=${APP_VERSION}`,
         image_skinny: `/costumes/skinny_pink_tuxedo.webp?v=${APP_VERSION}`,
-        cost: 15000,
+        cost: 10000,
         level:20
     },
 ]
