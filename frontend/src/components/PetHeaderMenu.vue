@@ -101,7 +101,7 @@ function formatFullNumber(num) {
       <div
           v-if="showStatsModal"
           @touchmove.prevent
-          class="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          class="fixed inset-0 z-300 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           @click.self="showStatsModal = false"
       >
         <div
