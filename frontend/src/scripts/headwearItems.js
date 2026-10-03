@@ -6,7 +6,7 @@ export const headItems = [
         id: 'cowboy_hat',
         name: 'Ковбойская шляпа',
         image: `/headwear/cowboyhat.webp?v=${APP_VERSION}`,
-        cost: 555,
+        cost: 1000,
         level:5
     },
     {
@@ -28,7 +28,7 @@ export const headItems = [
         id: 'mafia_hat',
         name: 'Розовая шляпа',
         image: `/headwear/mafiahat.webp?v=${APP_VERSION}`,
-        cost: 1000,
+        cost: 1666,
         level:15
     },
     {
@@ -42,21 +42,21 @@ export const headItems = [
         id: 'flat_hat',
         name: 'Хулиганка',
         image: `/headwear/flathat.webp?v=${APP_VERSION}`,
-        cost: 720,
+        cost: 950,
         level:20
     },
     {
         id: 'women_hat',
         name: 'Дамская шляпа',
         image: `/headwear/womenhat.webp?v=${APP_VERSION}`,
-        cost: 800,
+        cost: 1800,
         level:25
     },
     {
         id: 'native_hat',
         name: 'Шоляпа в индейском стиле',
         image: `/headwear/nativeamericanhat.webp?v=${APP_VERSION}`,
-        cost: 1200,
+        cost: 2200,
         level:25
     },
 
