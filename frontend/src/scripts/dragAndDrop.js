@@ -34,7 +34,7 @@ let lastBathTime = 0
 const BATH_COOLDOWN = 5000
 
 // Универсальная функция проверки зоны и открытия рта
-export function handleMove(event, itemType, foodId, foodCategory) {
+export function handleMove(event, itemType, foodId = null, Category = null, SubCategory = null) {
     if (itemType === 'food' && foodConsumedByPipe.value) {
         foodDrag.x.value = -9999
         foodDrag.y.value = -9999
@@ -52,8 +52,8 @@ export function handleMove(event, itemType, foodId, foodCategory) {
     ) {
         isHovered.value = true
         if (itemType === 'food') {
-            console.log(foodCategory)
-            if (gameData.cart['pipe'] && foodCategory ==='shaman') {
+
+            if (gameData.cart['pipe'] && Category ==='shaman' && SubCategory==='pipe') {
                 statusSmoke.value = true
                 if (!actionTimer) {
                     actionTimer = setTimeout(() => {
@@ -117,7 +117,7 @@ export function handleMove(event, itemType, foodId, foodCategory) {
 }
 
 // Универсальная функция окончания перетаскивания
-export function handleEnd(itemType, foodId, foodCategory) {
+export function handleEnd(itemType, foodId, Category) {
     if (foodConsumedByPipe.value || foodId === 'pipe') {
         statusSmoke.value = false
         foodConsumedByPipe.value = false
@@ -128,11 +128,14 @@ export function handleEnd(itemType, foodId, foodCategory) {
 
     if (isHovered.value) {
         if (itemType === 'food') {
-            if (foodCategory === 'food') {
+            if (Category === 'food') {
                 feedPet(foodId)
                 nextTutorialStep()
             } else {
-                if (!(foodId === 'lifePotion' && gameData.lives >= 3)) {
+                const isFullLivesPotion = (foodId === 'lifePotion' && gameData.lives >= 3)
+                const isUnneededHealthPotion = (foodId === 'healthPotion' && !gameData.sick)
+
+                if (!isFullLivesPotion && !isUnneededHealthPotion) {
                     otherFeedPet(foodId)
                 }
             }
@@ -175,18 +178,19 @@ export const foodDrag = useDraggable(foodEl, {
         updateEyeLook(event)
 
         const foodId = currentFoodItem.value?.id
-        const foodCategory = currentFoodItem.value?.category
-        handleMove(event, 'food', foodId, foodCategory)
+        const Category = currentFoodItem.value?.category
+        const SubCategory = currentFoodItem.value?.subcategory
+        handleMove(event, 'food', foodId, Category,SubCategory)
     },
     onEnd: () => {
         const foodId = currentFoodItem.value?.id
-        const foodCategory = currentFoodItem.value?.category
+        const Category = currentFoodItem.value?.category
         if (actionTimer) {
             clearTimeout(actionTimer)
             actionTimer = null
         }
         statusSmoke.value = false
-        handleEnd('food', foodId, foodCategory)
+        handleEnd('food', foodId, Category)
 
         resetEyeLook(600)
     }

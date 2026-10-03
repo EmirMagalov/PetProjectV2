@@ -1,8 +1,8 @@
 <script setup>
-import {fruitStreak, gameData, isGameOver, PlayCount} from "@/scripts/useGameStore.js";
+import {gameData} from "@/scripts/useGameStore.js";
 import ProgressBar from "@/components/ProgressBar.vue";
 import {expPercentage} from "@/scripts/level.js";
-import {animKey} from "@/scripts/actions.js";
+
 
 function formatNumber(num) {
   if (num === undefined || num === null) return '0';
@@ -55,7 +55,6 @@ function formatNumber(num) {
           </span>
           </div>
           <div
-              :key="animKey"
               class="flex relative items-center  shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border whitespace-nowrap border-white/10 animate-pop">
             <img src="/gamePlay/click_icon.webp" alt="Монеты" width="20" class="shrink-0">
             <span class="text-sm font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">

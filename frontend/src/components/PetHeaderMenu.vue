@@ -1,9 +1,8 @@
 <script setup>
-import { ref, computed } from "vue";
-import { fruitStreak, gameData, isGameOver, PlayCount } from "@/scripts/useGameStore.js";
+import {ref} from "vue";
+import {gameData, isPopping} from "@/scripts/useGameStore.js";
 import ProgressBar from "@/components/ProgressBar.vue";
-import { expPercentage } from "@/scripts/level.js";
-import { animKey } from "@/scripts/actions.js";
+import {expPercentage} from "@/scripts/level.js";
 
 function formatNumber(num) {
   if (num === undefined || num === null) return '0';
@@ -48,28 +47,33 @@ function formatFullNumber(num) {
 
           <!-- Уровень -->
           <div
-              class="relative overflow-hidden flex items-center justify-center shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border border-white/10">
+              class="relative overflow-hidden flex items-center justify-center shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border border-white/10"
+              :class="isPopping ? 'animate-pop' : ''">
             <div
                 class="absolute left-0 top-0 bottom-0 bg-[#b0d9de]/80 transition-all duration-500 pointer-events-none z-0"
                 :style="{ width: expPercentage + '%' }"
             ></div>
             <span class="text-xs font-semibold text-gray-700 relative z-10">Ур.</span>
-            <span class="text-sm font-bold text-shadow-xs text-shadow-amber-50 text-gray-900 relative z-10">{{ gameData.level }}</span>
+            <span class="text-sm font-bold text-shadow-xs text-shadow-amber-50 text-gray-900 relative z-10">{{
+                gameData.level
+              }}</span>
           </div>
 
           <!-- Монетки -->
           <div
-              class="flex relative justify-center items-center shadow-md bg-white/10 backdrop-blur-md whitespace-nowrap w-15 py-1 rounded-xl border border-white/10 animate-pop">
+              class="flex relative justify-center items-center shadow-md bg-white/10 backdrop-blur-md whitespace-nowrap w-15 py-1 rounded-xl border border-white/10 "
+              :class="isPopping ? 'animate-pop' : ''">
             <img src="/gamePlay/coin.webp" alt="Монеты" width="15" class="shrink-0">
             <span class="text-sm font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">
-              {{ formatNumber(gameData.coins)}}
+              {{ formatNumber(gameData.coins) }}
             </span>
           </div>
 
           <!-- Клики -->
           <div
               :key="animKey"
-              class="flex relative items-center shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border whitespace-nowrap border-white/10 animate-pop">
+              class="flex relative items-center shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border whitespace-nowrap border-white/10 "
+              :class="isPopping ? 'animate-pop' : ''">
             <img src="/gamePlay/click_icon.webp" alt="Клики" width="20" class="shrink-0">
             <span class="text-sm font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">
               {{ formatNumber(gameData.clickCounter) }}
@@ -100,7 +104,8 @@ function formatFullNumber(num) {
           class="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           @click.self="showStatsModal = false"
       >
-        <div class="bg-[#fff6ef] border-2 border-[#f7c9a5] rounded-3xl p-5 w-full max-w-xs shadow-2xl relative flex flex-col gap-3">
+        <div
+            class="bg-[#fff6ef] border-2 border-[#f7c9a5] rounded-3xl p-5 w-full max-w-xs shadow-2xl relative flex flex-col gap-3">
 
           <h3 class="text-lg font-bold text-center text-gray-800">Статистика игрока</h3>
 
@@ -163,9 +168,15 @@ function formatFullNumber(num) {
 
 <style scoped>
 @keyframes popCharacter {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .animate-pop {

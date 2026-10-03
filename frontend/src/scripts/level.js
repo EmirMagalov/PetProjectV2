@@ -1,5 +1,6 @@
 import { gameData } from "@/scripts/useGameStore.js";
 import { computed, ref } from "vue";
+import {triggerExpAnimation} from "@/scripts/actions.js";
 
 export const levelStatus = ref(false);
 
@@ -15,9 +16,9 @@ export const expPercentage = computed(() => {
 });
 
 // Функция добавления опыта (вызывайте её там, где питомец получает экспу)
-export function addExp(amount) {
+export function addExp(amount,x=180,y=130) {
     gameData.exp += amount;
-
+    triggerExpAnimation(amount,x,y)
     // Цикл while защищает от перескоков, если опыта дали сразу на несколько уровней
     while (gameData.exp >= getExpNeeded(gameData.level)) {
         const needed = getExpNeeded(gameData.level);

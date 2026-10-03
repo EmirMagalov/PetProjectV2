@@ -16,7 +16,6 @@ import {addExp} from "@/scripts/level.js";
 import {toggleSleep} from "@/scripts/stats.js";
 import {ref} from "vue";
 
-export const animKey = ref(0)
 export const comboClicks = ref(0)     // Счетчик кликов подряд
 export const comboMultiplier = ref(1) // Текущий множитель (1, 5, 10, 20)
 export const comboAnimKey = ref(0);
@@ -244,8 +243,9 @@ export function updateEyeLook(event) {
     const pupilX = Math.max(-maxOffset, Math.min(maxOffset, (deltaX / centerX) * maxOffset));
     const pupilY = Math.max(-maxOffset, Math.min(maxOffset, (deltaY / centerY) * maxOffset));
 
-    pupilOffset.value = { x: pupilX, y: pupilY };
+    pupilOffset.value = {x: pupilX, y: pupilY};
 }
+
 export function resetEyeLook(delay = 1000) {
     if (lookResetTimer) clearTimeout(lookResetTimer);
 
@@ -330,10 +330,10 @@ export function spawnHeart(x = 160, y = 135) {
 
     // 3. Передаем координаты в addCoin
     if (gameData.clickCounter % 2 === 0) {
-        addCoin(1 * comboMultiplier.value, x, y)
+        addCoin(1, x, y)
     }
-
-    addExp(1)
+    const expAmount = comboMultiplier.value > 2 ? 1 * comboMultiplier.value : 1
+    addExp(expAmount,x,y)
 
     const cost = isBadMood.value ? 0.02 : 0.01
     gameData.energy = Math.max(0, gameData.energy - cost)
@@ -350,7 +350,6 @@ export function spawnHeart(x = 160, y = 135) {
         }
     }
 
-    animKey.value++
 
     if (vibrateTimer) clearTimeout(vibrateTimer)
     isVibrating.value = true
@@ -361,9 +360,9 @@ export function spawnHeart(x = 160, y = 135) {
 
 export function addCoin(coins = 1, x = 160, y = 135) {
     if (coinHideTimer) clearTimeout(coinHideTimer)
-
+    const finalCoins = coins * comboMultiplier.value
     // Передаем фиксированную пачку из 5 визуальных монеток и координаты клика
-    triggerCoinAnimation(1 * comboMultiplier.value, x, y)
+    triggerCoinAnimation(finalCoins, x, y)
 
     isCoinAnimating.value = true
     coinAnimKey.value++
@@ -372,7 +371,7 @@ export function addCoin(coins = 1, x = 160, y = 135) {
         isCoinAnimating.value = false
     }, 500)
 
-    gameData.coins += coins
+    gameData.coins += finalCoins
 
     isAnimating.value = true
     setTimeout(() => {
@@ -393,21 +392,50 @@ export function isLosingLife() {
 }
 
 export const activeCoins = ref([])
+export const activeExp = ref([])
 
 export function triggerCoinAnimation(count = 5, startX = 160, startY = 135) {
+    // 🛡️ Ограничиваем визуальное количество монеток до 10 штук за раз
+    const visualCount = Math.min(count, 10)
     const id = Date.now() + Math.random()
 
-    const coins = Array.from({length: count}, (_, i) => ({
+    const coins = Array.from({ length: visualCount }, (_, i) => ({
         id: `${id}-${i}`,
-        // Каждая монетка из группы спавнится около точки клика с неболшим разбросом
-        x: startX + (count > 1 ? (Math.random() - 0.5) * 40 : 0),
-        y: startY + (count > 1 ? (Math.random() - 0.5) * 20 : 0),
+        x: startX + (visualCount > 1 ? (Math.random() - 0.5) * 40 : 0),
+        y: startY + (visualCount > 1 ? (Math.random() - 0.5) * 20 : 0),
         delay: i * 0.04
     }))
-
-    activeCoins.value.push({id, coins})
+    if (activeCoins.value.length > 15) {
+        // Если на экране висит уже 15 пачек, удаляем самую старую
+        activeCoins.value.shift()
+    }
+    activeCoins.value.push({ id, coins })
 
     setTimeout(() => {
         activeCoins.value = activeCoins.value.filter(c => c.id !== id)
+    }, 1000)
+}
+
+export function triggerExpAnimation(count = 5, startX = 160, startY = 135) {
+    // 🛡️ Ограничиваем визуальное количество опыта до 8 штук за раз
+    const visualCount = Math.min(count, 10)
+    const id = Date.now() + Math.random()
+
+    const offsetY = 0
+    const offsetX = -25
+
+    const exp = Array.from({ length: visualCount }, (_, i) => ({
+        id: `${id}-${i}`,
+        x: (startX + offsetX) + (visualCount > 1 ? (Math.random() - 0.5) * 40 : 0),
+        y: (startY + offsetY) + (visualCount > 1 ? (Math.random() - 0.5) * 20 : 0),
+        delay: i * 0.04
+    }))
+    if (activeExp.value.length > 15) {
+        activeExp.value.shift()
+    }
+    activeExp.value.push({ id, exp })
+
+    setTimeout(() => {
+        activeExp.value = activeExp.value.filter(c => c.id !== id)
     }, 1000)
 }

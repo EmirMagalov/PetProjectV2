@@ -1,10 +1,8 @@
 import {ref, reactive, watch, computed} from 'vue'
-
 export const mouth = ref('/character/happy_mouth.webp')
 export const sleepTimeRemaining = ref("")
 import {initGameData, isLoading, resetPet} from "@/scripts/api.js";
-import {foodList} from "@/scripts/objectItems.js";
-import {levelStatus} from "@/scripts/level.js";
+
 
 export const isShopOpen = ref(false)
 export const lowEnergy = ref(false)
@@ -29,7 +27,7 @@ export const locationUrl = ref()
 export const location = ref()
 export const activeTab = ref('food')
 export const warning = ref(false)
-
+export const isPopping = ref(false)
 
 export const fruitStreak = ref(
     Number(localStorage.getItem('pet_fruitStreak')) || 0

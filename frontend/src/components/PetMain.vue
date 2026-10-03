@@ -21,20 +21,20 @@ import {
   mouth,
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
-  locationUrl, location, dropZoneRef, body, tutorialStep
+  locationUrl, location, dropZoneRef, body, tutorialStep, isPopping
 } from "@/scripts/useGameStore.js";
 import {
-  activeCoins,
-  animKey, coinAnimKey,
+  activeCoins, activeExp,
   comboMultiplier, handleMultiTouch,
-  isCoinAnimating,
   isComboAnimating, isUserLooking, pupilOffset, resetEyeLook,
   sunAnimating, updateEyeLook
 } from "@/scripts/actions.js";
 
-
 let blinkInterval = null
 let lookInterval = null
+let isDragging = false // Флаг удержания пальца/курсора
+
+
 function getHornAsset(level) {
   if (level >= 50) return '/horns/50lvl.webp'
   if (level >= 45) return '/horns/45lvl.webp'
@@ -69,13 +69,22 @@ watch(location, (newLocation) => {
     gameData.sleep = false
   }
 })
+
 // Запускаем рандомный взгляд при монтировании компонента
 
-let isDragging = false // Флаг удержания пальца/курсора
+
+function triggerPop() {
+  isPopping.value = true
+  setTimeout(() => {
+    isPopping.value = false
+  }, 200) // Время совпадает с длительностью animate-pop (0.2s)
+}
 
 function handlePointerDown(event) {
   isDragging = true
+  triggerPop() // Запускаем анимацию подпрыгивания
   handleMultiTouch(event) // Вызывает спавн монетки и первоначальный поворот глаз
+  updateEyeLook(event)
 }
 
 function handlePointerMove(event) {
@@ -240,9 +249,7 @@ onUnmounted(() => {
           <p class="bg-[#fbf3e0]"></p>
 
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
-          <div :key="animKey"
-
-               :class="['absolute flex  justify-center items-center w-45 h-45', animKey > 0 ? 'animate-pop' : '']">
+          <div :class="['absolute flex justify-center items-center w-45 h-45', isPopping ? 'animate-pop' : '']">
 
             <PetHeadwear/>
             <img :src="body" class="absolute w-45" alt="">
@@ -299,17 +306,32 @@ onUnmounted(() => {
                   v-for="coin in group.coins"
                   :key="coin.id"
                   :style="{
-        left: `${coin.x}px`,
-        top: `${coin.y}px`,
-        animationDelay: `${coin.delay}s`
-      }"
+                      left: `${coin.x}px`,
+                      top: `${coin.y}px`,
+                      animationDelay: `${coin.delay}s`
+                    }"
                   src="/gamePlay/coin.webp"
-                  class="absolute w-5 animate-coinFly pointer-events-none"
+                  class="absolute w-5  animate-coinFly pointer-events-none"
                   alt=""
               />
             </template>
           </div>
-
+          <div class="absolute inset-0 pointer-events-none overflow-hidden z-50">
+            <template v-for="group in activeExp" :key="group.id">
+              <img
+                  v-for="exp in group.exp"
+                  :key="exp.id"
+                  :style="{
+                      left: `${exp.x}px`,
+                      top: `${exp.y}px`,
+                      animationDelay: `${exp.delay}s`
+                    }"
+                  src="/gamePlay/exp.webp"
+                  class="absolute w-5 animate-expFly pointer-events-none"
+                  alt=""
+              />
+            </template>
+          </div>
           <Transition name="combo-fade">
             <img
                 v-if="isComboAnimating"
@@ -349,14 +371,14 @@ onUnmounted(() => {
 
         </div>
         <div
-            class="absolute inset-0 z-10 pointer-events-none animate-dark-base"
-            :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
+            class="absolute inset-0 z-10 pointer-events-none"
+            :class="gameData.sleep ? 'animate-dark-in' : 'brightness-100'"
             v-show="(location === 'home' || location === 'food')"
         >
-          <PhotoFrame class="pointer-events-auto" />
+          <PhotoFrame class="pointer-events-auto"/>
         </div>
       </div>
-      <PetSideMenu />
+      <PetSideMenu/>
     </div>
 
     <!-- Меню -->
@@ -386,6 +408,7 @@ onUnmounted(() => {
   /* Фиксирует начальное состояние до запуска анимации */
   filter: brightness(1);
 }
+
 @keyframes animateDarkIn {
   0% {
     filter: brightness(1);
@@ -492,9 +515,14 @@ onUnmounted(() => {
     opacity: 0;
   }
   20% {
-    opacity: 1;
+    opacity: 0.5;
     /* Монетка слегка взлетает вверх относительно точки клика */
     transform: translate(0, -30px) scale(1.2);
+  }
+  25% {
+    opacity: 1;
+    /* Монетка слегка взлетает вверх относительно точки клика */
+    transform: translate(80px, -130px) scale(1.2);
   }
   100% {
     /* Финальный прилёт в угол (счётчик) */
@@ -508,6 +536,37 @@ onUnmounted(() => {
   will-change: transform, opacity;
   pointer-events: none;
 }
+
+
+@keyframes coinExp{
+  0% {
+    transform: translate(0, 0) scale(0.3);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.5;
+    /* Монетка слегка взлетает вверх относительно точки клика */
+    transform: translate(0, -30px) scale(1.2);
+  }
+  25% {
+    opacity:1;
+    /* Монетка слегка взлетает вверх относительно точки клика */
+    transform: translate(30px, -70px) scale(1.2);
+  }
+  100% {
+    /* Финальный прилёт в угол (счётчик) */
+    transform: translate(50px, -150px) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.animate-expFly {
+  animation: coinExp 0.7s cubic-bezier(0.25, 1, 0.5, 1) both;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+
 
 @keyframes popCharacter {
   0% {

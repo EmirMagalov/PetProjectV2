@@ -106,7 +106,7 @@ const getItemBonuses = (item) => {
 <template>
   <div
       v-if="isOpen"
-      class="fixed inset-0 z-150 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 touch-none select-none"
+      class="fixed inset-0 z-300 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 touch-none select-none"
       @touchmove.prevent
   >
     <!-- Само окно магазина -->

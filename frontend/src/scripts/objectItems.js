@@ -1,4 +1,5 @@
-import {APP_VERSION} from "@/scripts/api.js";
+import {APP_VERSION} from "@/scripts/constants.js";
+
 
 export const foodList = [
     {
