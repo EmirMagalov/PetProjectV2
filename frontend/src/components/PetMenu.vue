@@ -249,7 +249,7 @@ const foodWarning = computed(() => {
                }
              ]"
                :class="[
-               showerDrag.isDragging.value ? 'fixed z-150' : 'relative',
+               showerDrag.isDragging.value ? 'fixed z-210' : 'relative',
                statusFoam && !showerDrag.isDragging.value && !gameData.sick ? 'animate-pulse' : ''
              ]"
                class="flex flex-col items-center cursor-move w-[70px] h-[70px]  bg-contain bg-no-repeat bg-center"

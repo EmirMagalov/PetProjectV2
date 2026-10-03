@@ -50,6 +50,7 @@ watch(PlayCount, (newValue) => {
 
 
 export const body = ref("/character/main_body.webp")
+export const bodyType = ref('normal')
 
 export const isGameOver = ref(false)
 
@@ -67,6 +68,7 @@ export const defaultGameData = {
     sleepEndTime: 0,
     feedCount: 9,
     equippedHead: null,
+    equippedCostume: null,
     foodStreak: 0,
     fastfoodStreak: 0,
     sick: false,
@@ -77,6 +79,7 @@ export const defaultGameData = {
     isPooped: false,
     badStatsMinutes: 0,
     unlockedHeads: [],
+    unlockedCostumes: [],
     cart: {}
 }
 

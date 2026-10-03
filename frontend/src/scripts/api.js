@@ -4,7 +4,6 @@ import {ref} from "vue";
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
 
-
 // --- 1. СИСТЕМА ЖЕСТКОЙ БЛОКИРОВКИ ДУБЛИКАТОВ ВКЛАДОК ---
 const TAB_ID = Math.random().toString(36).substring(2)
 let isMaster = true
@@ -15,12 +14,10 @@ const channel = new BroadcastChannel('game_master_channel')
 // Слушаем другие вкладки
 channel.onmessage = (event) => {
     if (event.data.type === 'WHO_IS_MASTER') {
-        // Если кто-то спрашивает, а мы живой мастер — отвечаем, что место занято
         if (isMaster && !isDuplicate) {
             channel.postMessage({ type: 'I_AM_MASTER', id: TAB_ID })
         }
     } else if (event.data.type === 'I_AM_MASTER') {
-        // Если мы получили ответ от другого мастера, а это не мы
         if (event.data.id !== TAB_ID) {
             isDuplicate = true
             isMaster = false
@@ -29,7 +26,6 @@ channel.onmessage = (event) => {
             document.body.innerHTML = `
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #1a1a1a; color: #fff; font-family: sans-serif; text-align: center; padding: 20px;">
                     <h2 style="color: #ff4757;">⚠️ Игра уже открыта в другой вкладке!</h2>
-<!--                    <p>Одновременно играть в нескольких вкладках нельзя. Пожалуйста, закрыть эту вкладку.</p>-->
                 </div>
             `
         }
@@ -59,7 +55,6 @@ setInterval(() => {
 // --- 2. ФЛАГИ СОСТОЯНИЯ ---
 export const isLoading = ref(true)
 let isDataLoaded = false
-let isRefreshing = false
 let isSyncLocked = false // Блокировщик сохранения при фокусе/возвращении
 
 // --- 3. ЗАЩИТА ОТ СТАРЫХ СЕССИЙ БОТА ---
@@ -78,23 +73,21 @@ if (savedSessionKey && savedSessionKey !== currentSessionKey) {
 export async function initGameData() {
     isDataLoaded = false
 
-    // Перехватываем лидерство принудительно при любом вызове initGameData (например, при релоаде)
-    const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
     isLoading.value = true
 
-    // Делаем цикл с попытками на случай холодного старта бэкенда
     const maxRetries = 5;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        // Если эта вкладка потеряла лидерство, отменяем загрузку
-        if (!isCurrentTabActive()) {
-            console.warn("⚠️ Загрузка отменена: вкладка больше не активна.")
+        // Проверяем, что мы главный мастер
+        if (!isMasterTab()) {
+            console.warn("⚠️ Загрузка отменена: вкладка не является ведущей.")
             return
         }
 
         try {
             const minDelay = new Promise(resolve => setTimeout(resolve, 800))
             const [response] = await Promise.all([
-                axios.get(`${API_URL}/${tgId}?_t=${Date.now()}`), // Защита от кэша
+                axios.get(`${API_URL}/${tgId}?_t=${Date.now()}`),
                 minDelay
             ])
             const serverData = response.data
@@ -113,11 +106,12 @@ export async function initGameData() {
             gameData.isFat = serverData.is_fat
             gameData.sick = serverData.sick
             gameData.isPooped = serverData.is_pooped
-            // gameData.addictionLevel = serverData.addiction_level
             gameData.addictionStreak = serverData.addiction_streak
-            gameData.cart = serverData.cart
-            gameData.unlockedHeads = serverData.unlocked_heads
-            gameData.equippedHead = serverData.equipped_head
+            gameData.cart = serverData.cart || {}
+            gameData.unlockedHeads = serverData.unlocked_heads || []
+            gameData.equippedHead = serverData.equipped_head || null
+            gameData.unlockedCostumes = serverData.unlocked_costumes || [] // Исправлено получение
+            gameData.equippedCostume = serverData.equipped_costume || null
             gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
 
             isDataLoaded = true
@@ -140,7 +134,7 @@ export async function initGameData() {
 }
 
 export async function resetPet() {
-    const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
 
     try {
         await axios.post(`${API_URL}/reset`, {tg_id: tgId})
@@ -152,12 +146,11 @@ export async function resetPet() {
 }
 
 export async function syncToBackend() {
-    // 🛑 ЖЕСТКИЙ БЛОКАТОР: если вкладка не лидер, данные не загружены или идет защита — не шлем ничего
     if (!isCurrentTabActive() || !isDataLoaded || isSyncLocked) {
         return
     }
 
-    const tgId =  import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
 
     try {
         await axios.post(`${API_URL}/update`, {
@@ -167,8 +160,6 @@ export async function syncToBackend() {
             exp: gameData.exp,
             coins: gameData.coins,
             cart: gameData.cart,
-            unlocked_heads: gameData.unlockedHeads,
-            equipped_head: gameData.equippedHead,
             lives: gameData.lives,
             food_level: gameData.foodLevel,
             energy: gameData.energy,
@@ -180,7 +171,10 @@ export async function syncToBackend() {
             is_fat: gameData.isFat,
             sick: gameData.sick,
             is_pooped: gameData.isPooped,
-
+            unlocked_heads: gameData.unlockedHeads,
+            equipped_head: gameData.equippedHead,
+            equipped_costume: gameData.equippedCostume,
+            unlocked_costumes: gameData.unlockedCostumes, // ✅ Исправлено с unlockedHeads на unlockedCostumes
             addiction_streak: gameData.addictionStreak,
             last_update: Math.floor(Date.now() / 1000)
         })
@@ -204,8 +198,6 @@ function sendBeaconUpdate() {
         exp: gameData.exp,
         coins: gameData.coins,
         cart: gameData.cart,
-        unlocked_heads: gameData.unlockedHeads,
-        equipped_head: gameData.equippedHead,
         lives: gameData.lives,
         food_level: gameData.foodLevel,
         energy: gameData.energy,
@@ -217,6 +209,10 @@ function sendBeaconUpdate() {
         is_fat: gameData.isFat,
         sick: gameData.sick,
         is_pooped: gameData.isPooped,
+        unlocked_heads: gameData.unlockedHeads,
+        equipped_head: gameData.equippedHead,
+        equipped_costume: gameData.equippedCostume,
+        unlocked_costumes: gameData.unlockedCostumes, // ✅ Исправлено с unlockedHeads на unlockedCostumes
         addiction_streak: gameData.addictionStreak,
         last_update: Math.floor(Date.now() / 1000)
     })
@@ -226,24 +222,18 @@ function sendBeaconUpdate() {
 }
 
 document.addEventListener('visibilitychange', () => {
-    // Игнорируем события только если мы не мастер
     if (!isMasterTab()) return
 
-    // 1. Когда пользователь уходит из игры (сворачивает / перезагружает / закрывает)
     if (document.visibilityState === 'hidden' && isDataLoaded) {
         sendBeaconUpdate()
     }
 
-    // 2. Когда пользователь возвращается в игру (развернул или открыл из бота)
     if (document.visibilityState === 'visible') {
-        // Захватываем статус главного окна
-        isRefreshing = false
-        isSyncLocked = true // Включаем блок автосохранения на время загрузки
+        isSyncLocked = true
 
         initGameData()
             .catch(err => console.error("❌ Ошибка при возврате в игру:", err))
             .finally(() => {
-                // Гарантированно снимаем блокировку через 500мс после завершения запроса
                 setTimeout(() => {
                     isSyncLocked = false
                 }, 500)

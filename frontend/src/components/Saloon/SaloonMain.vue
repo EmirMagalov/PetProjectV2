@@ -12,6 +12,8 @@ import {
   result
 } from "@/scripts/saloonScripts/twentyOneGame.js";
 import SaloonHeaderMenu from "@/components/Saloon/SaloonHeaderMenu.vue";
+import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
+import {activeCoins, activeExp} from "@/scripts/actions.js";
 
 // =====================================================
 // СОСТОЯНИЕ ЗАГРУЗКИ (LOADER)
@@ -129,7 +131,7 @@ onUnmounted(() => {
       </div>
     </Transition>
 
-    <SaloonHeaderMenu/>
+    <PetHeaderMenu/>
 
     <!-- САЛУН -->
     <div class="relative flex justify-center items-center w-full my-auto">
@@ -235,10 +237,89 @@ onUnmounted(() => {
     <div class="mt-auto pb-4 shrink-0">
       <SaloonMenu @animate-draw="animateFlyTo"/>
     </div>
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-50 flex items-center justify-center">
+      <template v-for="group in activeCoins" :key="group.id">
+        <img
+            v-for="coin in group.coins"
+            :key="coin.id"
+            :style="{
+                      animationDelay: `${coin.delay}s`
+                    }"
+            src="/gamePlay/coin.webp"
+            class="absolute w-5  animate-coinFly pointer-events-none"
+            alt=""
+        />
+      </template>
+    </div>
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-50 flex items-center justify-center">
+      <template v-for="group in activeExp" :key="group.id">
+        <img
+            v-for="exp in group.exp"
+            :key="exp.id"
+            :style="{
+                  animationDelay: `${exp.delay}s`
+                }"
+            src="/gamePlay/exp.webp"
+            class="absolute w-6 animate-expFly pointer-events-none"
+            alt=""
+        />
+      </template>
+    </div>
   </div>
 </template>
 
 <style scoped>
+
+@keyframes coinFly {
+  0% {
+    /* Старт: маленький и прозрачный в центре */
+    transform: translate(0, 0) scale(0.3);
+    opacity: 0;
+  }
+  20% {
+    /* Появление: увеличивается и слегка поднимается */
+    transform: translate(100px, -130px) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    /* Финал: улетает вверх к шапке (регулируйте -300px .. -450px под ваш экран) */
+    transform: translate(150px, -380px) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.animate-coinFly {
+  animation: coinFly 0.8s cubic-bezier(0.25, 1, 0.5, 1) both;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+
+@keyframes coinExp {
+  0% {
+    /* Старт: маленький и прозрачный в центре */
+    transform: translate(0, 0) scale(0.3);
+    opacity: 0;
+  }
+  20% {
+    /* Появление: увеличивается и слегка поднимается */
+    transform: translate(100px, -130px) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    /* Финал: улетает вверх к шапке (регулируйте -300px .. -450px под ваш экран) */
+    transform: translate(150px, -380px) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.animate-expFly {
+  animation: coinExp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+
 /* Анимация исчезновения лоадера */
 .fade-leave-active {
   transition: opacity 0.4s ease-in-out;

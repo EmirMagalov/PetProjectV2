@@ -11,7 +11,7 @@ import {syncToBackend} from "@/scripts/api.js";
 
 export const currentIndex = ref(0)
 export const currentBathIndex = ref(0) // Индекс для банных принадлежностей
-
+import {costumeItems} from "@/scripts/costumeItems.js"; // 1. Импортируем костюмы
 // Вычисляемый список ВСЕХ товаров в корзине с подробной информацией
 export const cartItemsList = computed(() => {
     return Object.entries(gameData.cart).map(([foodId, count]) => {
@@ -52,7 +52,10 @@ export const currentHeadItem = computed(() => {
     return headItems.find(item => item.id === gameData.equippedHead)
 })
 
-
+export const currentCostumeItem = computed(() => {
+    if (!gameData.equippedCostume) return null
+    return costumeItems.find(item => item.id === gameData.equippedCostume)
+})
 // Отслеживание изменений корзины с автокоррекцией индексов и синхронизацией
 watch(() => gameData.cart, () => {
     // Безопасно проверяем, чтобы индексы никогда не выходили за границы массивов
@@ -77,6 +80,13 @@ watch(() => gameData.cart, () => {
 
 watch(gameData.unlockedHeads, (newList) => {
     localStorage.setItem('unlockedHeads', JSON.stringify(newList))
+}, {deep: true})
+
+
+watch(() => gameData.unlockedCostumes, (newList) => {
+    if (newList) {
+        localStorage.setItem('unlockedCostumes', JSON.stringify(newList))
+    }
 }, {deep: true})
 
 // Управление корзиной (через копирование объекта для реактивности Vue)
@@ -150,4 +160,14 @@ export function buyHeadwear(headId) {
         gameData.unlockedHeads.push(headId)
     }
     gameData.equippedHead = headId
+}
+
+export function buyCostume(costumeId) {
+    if (!gameData.unlockedCostumes) {
+        gameData.unlockedCostumes = []
+    }
+    if (!gameData.unlockedCostumes.includes(costumeId)) {
+        gameData.unlockedCostumes.push(costumeId)
+    }
+    gameData.equippedCostume = costumeId
 }

@@ -17,7 +17,7 @@ class Pet(models.Model):
     sleep_end_time = fields.FloatField(default=0.0)
 
     feed_count = fields.IntField(default=0)
-    equipped_head = fields.CharField(max_length=255, null=True)
+
 
     last_update = fields.FloatField(default=0.0)
     last_interaction = fields.FloatField(default=0.0)
@@ -32,6 +32,10 @@ class Pet(models.Model):
 
     cart = fields.JSONField(default={})
     unlocked_heads = fields.JSONField(default=list)
+    equipped_head = fields.CharField(max_length=255, null=True)
+
+    unlocked_costumes = fields.JSONField(default=list)
+    equipped_costume = fields.CharField(max_length=255, null=True)
 
     sick=fields.BooleanField(default=False)
     addiction_streak = fields.IntField(default=0)

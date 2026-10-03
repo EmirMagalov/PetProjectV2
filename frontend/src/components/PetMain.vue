@@ -21,7 +21,7 @@ import {
   mouth,
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
-  locationUrl, location, dropZoneRef, body, tutorialStep, isPopping
+  locationUrl, location, dropZoneRef, body, tutorialStep, isPopping, bodyType
 } from "@/scripts/useGameStore.js";
 import {
   activeCoins, activeExp,
@@ -29,6 +29,7 @@ import {
   isComboAnimating, isUserLooking, pupilOffset, resetEyeLook,
   sunAnimating, updateEyeLook
 } from "@/scripts/actions.js";
+import PetCostume from "@/components/PetCostume.vue";
 
 let blinkInterval = null
 let lookInterval = null
@@ -250,15 +251,15 @@ onUnmounted(() => {
 
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
           <div :class="['absolute flex justify-center items-center w-45 h-45', isPopping ? 'animate-pop' : '']">
-
             <PetHeadwear/>
+            <PetCostume/>
             <img :src="body" class="absolute w-45" alt="">
             <img :src="getHornAsset(gameData.level)" class="absolute w-45 " alt="">
             <img v-show="gameData.sick" src="/character/drunk.webp" class="absolute w-45" alt="">
-            <img v-show="gameData.sick && body==='/character/fat_body.webp'" src="/character/sick_fat.webp"
-                 class="absolute w-45" alt="">
-            <img v-show="gameData.sick && body!=='/character/fat_body.webp'" src="/character/sick.webp"
-                 class="absolute w-45" alt="">
+            <img v-show="gameData.sick && bodyType==='fat'" src="/character/sick_fat.webp"
+                 class="absolute w-45 z-10" alt="">
+            <img v-show="gameData.sick && bodyType!=='fat'" src="/character/sick.webp?v=1"
+                 class="absolute w-45  z-10" alt="">
             <div v-if="!blink && !gameData.sleep">
 
               <div v-show="lowEnergy" class="absolute inset-0 flex justify-center items-center z-10">

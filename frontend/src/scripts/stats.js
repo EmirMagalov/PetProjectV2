@@ -1,6 +1,6 @@
 import {computed, watch} from "vue";
 import {
-    body,
+    body, bodyType,
     cloudShow, defaultGameData, feedStatus,
     gameData, isGameOver, isLosingLifeStatus, lastFedItem, lifeStatus,
     lowEnergy,
@@ -140,11 +140,14 @@ watch(
         }
 
         if (foodLevel < 15) {
-            body.value = '/character/skinny_body.webp'
+            body.value = '/character/skinny_body.webp?v=1'
+            bodyType.value = 'skinny'
         } else if (isFat) {
-            body.value = '/character/fat_body.webp'
+            body.value = '/character/fat_body.webp?v=1'
+            bodyType.value = 'fat'
         } else {
-            body.value = '/character/main_body.webp'
+            body.value = '/character/main_body.webp?v=1'
+            bodyType.value = 'normal'
         }
         if (isShowTongue) {
             mouth.value = '/character/isPlayed_mouth.webp'

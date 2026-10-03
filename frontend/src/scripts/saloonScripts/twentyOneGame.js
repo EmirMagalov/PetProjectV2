@@ -1,6 +1,8 @@
 import { computed, ref, watch } from "vue";
 import { gameData } from "@/scripts/useGameStore.js";
 import { syncToBackend } from "@/scripts/api.js";
+import {addExp} from "@/scripts/level.js";
+import {addCoin} from "@/scripts/actions.js";
 
 export const pupilOffset = ref({ x: 0, y: 0 });
 export const isDealing = ref(false);
@@ -28,20 +30,27 @@ watch([playerCards, dealerCards, gameStarted, currentBet], () => {
         gameStarted: gameStarted.value,
         currentBet: currentBet.value,
         bettingPhase: bettingPhase.value,
+        gameFinished: gameFinished.value, // ✅ Сохраняем флаг завершения
+        result: result.value,             // ✅ Сохраняем текст результата
     }));
 }, { deep: true });
 
 // При загрузке скрипта — восстанавливаем
 const savedState = localStorage.getItem('saloon_game_state');
 if (savedState) {
-    const parsed = JSON.parse(savedState);
-    playerCards.value = parsed.playerCards || [];
-    dealerCards.value = parsed.dealerCards || [];
-    gameStarted.value = parsed.gameStarted || false;
-    currentBet.value = parsed.currentBet || null;
-    bettingPhase.value = parsed.bettingPhase || false;
+    try {
+        const parsed = JSON.parse(savedState);
+        playerCards.value = parsed.playerCards || [];
+        dealerCards.value = parsed.dealerCards || [];
+        gameStarted.value = parsed.gameStarted || false;
+        currentBet.value = parsed.currentBet || null;
+        bettingPhase.value = parsed.bettingPhase || false;
+        gameFinished.value = parsed.gameFinished || false; // ✅ Восстанавливаем флаг
+        result.value = parsed.result || "";                // ✅ Восстанавливаем текст
+    } catch (e) {
+        console.error("Ошибка при восстановлении состояния игры:", e);
+    }
 }
-
 
 const characterImages = [
     '/saloonPhotos/characters/Fluffy_body.webp',
@@ -192,18 +201,22 @@ export function hit() {
 export async function finishGame(type) {
     gameFinished.value = true;
 
-    const coinsRef =  gameData;
+
 
     if (type === "bust") {
         result.value = "Перебор! Ты проиграл";
+        addExp(1)
     } else if (type === "lose") {
         result.value = "Дилер выиграл!";
+        addExp(1)
     } else if (type === "win") {
         result.value = "Поздравляю! Ты выиграл!";
-        coinsRef.coins += currentBet.value * 2;
+        addCoin(currentBet.value * 2) ;
+        addExp(10)
     } else if (type === "push") {
         result.value = "Ничья!";
-        coinsRef.coins += currentBet.value;
+        addCoin(currentBet.value);
+        addExp(5)
     }
 
     await syncToBackend();

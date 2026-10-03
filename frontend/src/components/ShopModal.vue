@@ -1,8 +1,9 @@
 <script setup>
 import { foodList } from '@/scripts/objectItems.js'
 import { headItems } from '@/scripts/headwearItems.js'
+import { costumeItems } from '@/scripts/costumeItems.js'
 import { ref, computed } from 'vue'
-import { addToCart, buyHeadwear } from "@/scripts/basket.js"
+import {addToCart, buyCostume, buyHeadwear} from "@/scripts/basket.js"
 import { activeTab, gameData } from "@/scripts/useGameStore.js"
 
 defineProps({
@@ -14,6 +15,9 @@ defineProps({
 
 defineEmits(['close'])
 
+// Переключатель внутри гардероба: 'hats' или 'costumes'
+const wardrobeTab = ref('hats')
+
 // Динамический список товаров в зависимости от выбранной вкладки
 const currentList = computed(() => {
   if (activeTab.value === 'food') {
@@ -23,6 +27,13 @@ const currentList = computed(() => {
   } else if (activeTab.value === 'bath') {
     return foodList.filter(item => item.category === 'bath accessories')
   } else {
+    // Если активен Гардероб
+    if (wardrobeTab.value === 'costumes') {
+      return costumeItems.map(item => ({
+        ...item,
+        image: item.preview || item.image_normal // Подставляем preview для отображения в списке
+      }))
+    }
     return headItems
   }
 })
@@ -37,15 +48,32 @@ function isItemLocked(item) {
     return gameData.level < 5
   }
   if (activeTab.value === 'clothes') {
-    const isUnlocked = gameData.unlockedHeads?.includes(item.id)
+    const isUnlocked = wardrobeTab.value === 'costumes'
+        ? gameData.unlockedCostumes?.includes(item.id)
+        : gameData.unlockedHeads?.includes(item.id)
     return !isUnlocked && Boolean(item.level) && gameData.level < item.level
   }
   return false
 }
 
+// Проверка надета ли одежда/шляпа
+function isEquipped(itemId) {
+  if (wardrobeTab.value === 'costumes') {
+    return gameData.equippedCostume === itemId
+  }
+  return gameData.equippedHead === itemId
+}
+
+// Проверка куплен ли предмет
+function isUnlocked(itemId) {
+  if (wardrobeTab.value === 'costumes') {
+    return gameData.unlockedCostumes?.includes(itemId)
+  }
+  return gameData.unlockedHeads?.includes(itemId)
+}
+
 // Универсальная логика клика по кнопке товара
 function handleItemClick(item) {
-  // Защита от клика по заблокированному товару
   if (isItemLocked(item)) return
 
   if (activeTab.value === 'food' || activeTab.value === 'shaman' || activeTab.value === 'bath') {
@@ -53,20 +81,30 @@ function handleItemClick(item) {
       gameData.coins -= item.cost
       addToCart(item.id)
 
-      // Получаем актуальное количество товара в корзине
       const currentQty = gameData.cart[item.id] || 1
       showNotification(item, currentQty)
     } else {
       alert("Не хватает монет!")
     }
   } else {
-    // Логика для одежды
-    if (gameData.unlockedHeads?.includes(item.id)) {
-      selectHeadwear(item.id)
+    // Логика для Гардероба (Шляпы / Костюмы)
+    if (isUnlocked(item.id)) {
+      if (wardrobeTab.value === 'costumes') {
+        selectCostume(item.id)
+      } else {
+        selectHeadwear(item.id)
+      }
     } else {
       if (gameData.coins >= item.cost) {
         gameData.coins -= item.cost
-        buyHeadwear(item.id)
+
+        if (wardrobeTab.value === 'costumes') {
+          if (!gameData.unlockedCostumes) gameData.unlockedCostumes = []
+          buyCostume(item.id)
+        } else {
+          buyHeadwear(item.id)
+        }
+
         showNotification(item, 1)
       } else {
         alert("Не хватает монет!")
@@ -81,6 +119,15 @@ function selectHeadwear(headId) {
     gameData.equippedHead = null
   } else {
     gameData.equippedHead = headId
+  }
+}
+
+// Функция надевания/снимания костюма
+function selectCostume(costumeId) {
+  if (gameData.equippedCostume === costumeId) {
+    gameData.equippedCostume = null
+  } else {
+    gameData.equippedCostume = costumeId
   }
 }
 
@@ -130,7 +177,7 @@ const getItemBonuses = (item) => {
         </button>
       </div>
 
-      <!-- Переключатель категорий -->
+      <!-- Переключатель основных категорий -->
       <div class="grid grid-cols-4 border-b border-slate-800 bg-slate-900/40 p-2 gap-1.5 shrink-0">
         <button
             @click="activeTab = 'food'"
@@ -164,8 +211,30 @@ const getItemBonuses = (item) => {
             :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate cursor-pointer', activeTab === 'clothes' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
           <div class="flex items-center justify-center gap-1">
-            <img class="w-5 h-5 object-contain" src="/headwear/cowboyhat.webp" alt="">
+            <img class="w-5 h-5 object-contain" src="/other/hanger_icon.webp" alt="">
             <span>Гардероб</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Внутренние подкатегории Гардероба (Шляпы / Костюмы) -->
+      <div v-if="activeTab === 'clothes'" class="flex border-b border-slate-800 bg-slate-950/60 p-1.5 gap-2 shrink-0">
+        <button
+            @click="wardrobeTab = 'hats'"
+            :class="['flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer', wardrobeTab === 'hats' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white']"
+        >
+          <div class="flex items-center justify-center  gap-1">
+            <img src="/headwear/piratehat.webp" class="w-5" alt="">
+            <p>Головные уборы</p>
+          </div>
+        </button>
+        <button
+            @click="wardrobeTab = 'costumes'"
+            :class="['flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer', wardrobeTab === 'costumes' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white']"
+        >
+          <div class="flex items-center justify-center  gap-1">
+            <img src="/costumes/costume_icon.webp" class="w-5" alt="">
+            <p>Костюмы</p>
           </div>
         </button>
       </div>
@@ -178,7 +247,7 @@ const getItemBonuses = (item) => {
             class="relative flex items-center justify-between bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 hover:border-slate-600 transition-all overflow-hidden"
             :class="{'opacity-50 pointer-events-none': isItemLocked(item)}"
         >
-          <!-- Плашка блокировки по уровню (для Шамана и Шляп) -->
+          <!-- Плашка блокировки по уровню -->
           <div
               v-if="isItemLocked(item)"
               class="absolute inset-0 z-20 bg-slate-950/70 flex items-center justify-center rounded-xl"
@@ -208,15 +277,15 @@ const getItemBonuses = (item) => {
               @click="handleItemClick(item)"
               :class="[
                 'px-4 py-2 min-w-23 font-bold rounded-lg text-sm transition-all active:scale-90 flex justify-center items-center gap-1.5 shrink-0 cursor-pointer',
-                activeTab === 'clothes' && gameData.unlockedHeads?.includes(item.id)
-                  ? (gameData.equippedHead === item.id
+                activeTab === 'clothes' && isUnlocked(item.id)
+                  ? (isEquipped(item.id)
                       ? 'bg-slate-700 text-slate-300 cursor-default'
                       : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20')
                   : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20'
               ]"
           >
-            <template v-if="activeTab === 'clothes' && gameData.unlockedHeads?.includes(item.id)">
-              {{ gameData.equippedHead === item.id ? 'Снять' : 'Выбрать' }}
+            <template v-if="activeTab === 'clothes' && isUnlocked(item.id)">
+              {{ isEquipped(item.id) ? 'Снять' : 'Выбрать' }}
             </template>
             <template v-else>
               <span class="w-5"><img src="/gamePlay/coin.webp" alt=""></span> {{ item.cost }}
@@ -243,7 +312,6 @@ const getItemBonuses = (item) => {
       >
         <div class="w-10 h-10 bg-white/20 rounded-lg p-1 flex items-center justify-center shrink-0 relative">
           <img :src="lastBought.image" class="w-full h-full object-contain">
-          <!-- Бейдж количества -->
           <span v-if="lastBoughtQuantity > 1" class="absolute -top-2 -right-2 bg-amber-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow">
             x{{ lastBoughtQuantity }}
           </span>
