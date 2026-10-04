@@ -231,9 +231,7 @@ onUnmounted(() => {
             class="absolute animate-dark-base inset-0 pointer-events-none w-[320px] h-[270px] brightness-100 transition-all duration-500"
             :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
         />
-        <div class="absolute w-18 right-3 -top-2">
-          <img src="/gamePlay/photo_frame.webp?v=2" alt="">
-        </div>
+
 
         <div
             v-if="location==='home'|| location === 'food' "
@@ -398,7 +396,9 @@ onUnmounted(() => {
               v-show="gameData.isPooped && (location==='home' || location==='food')"
               class="pointer-events-auto"
           />
-
+          <div class="absolute w-18 right-3 -top-2">
+            <img src="/gamePlay/photo_frame.webp?v=2" alt="">
+          </div>
 
         </div>
         <div
