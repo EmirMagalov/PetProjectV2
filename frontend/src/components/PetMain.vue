@@ -396,7 +396,7 @@ onUnmounted(() => {
               v-show="gameData.isPooped && (location==='home' || location==='food')"
               class="pointer-events-auto"
           />
-          <div class="absolute w-18 right-3 -top-2">
+          <div v-if="location==='home' || location==='food'" class="absolute w-18 right-3 -top-2">
             <img src="/gamePlay/photo_frame.webp?v=2" alt="">
           </div>
 
