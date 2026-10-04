@@ -146,7 +146,6 @@ function updateClock() {
 let clockInterval = null;
 
 
-
 onMounted(async () => {
   if (window.Telegram?.WebApp) {
     const tg = window.Telegram.WebApp
@@ -158,7 +157,7 @@ onMounted(async () => {
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
   location.value = 'home'
-  preloadImages()
+  await preloadImages()
   startRandomLooking()
   updateClock();
   clockInterval = setInterval(updateClock, 1000);
@@ -228,6 +227,8 @@ onUnmounted(() => {
 
         <img
             :src="locationUrl"
+            fetchpriority="high"
+            decoding="sync"
             class="absolute animate-dark-base inset-0 pointer-events-none w-[320px] h-[270px] brightness-100 transition-all duration-500"
             :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
         />
@@ -242,7 +243,7 @@ onUnmounted(() => {
         </div>
         <div class="relative flex items-center justify-center p-12">
           <!-- 1. Самый дальний мягкий ореол -->
-          <div  v-show="gameData.sleep"  class="absolute top-12 right-10 z-20 flex items-center justify-center">
+          <div v-show="gameData.sleep" class="absolute top-12 right-10 z-20 flex items-center justify-center">
             <!-- 1. Направляющий конусный луч (живой свет) -->
             <div class="absolute top-1 -right-20 w-42 h-56 rotate-[-30deg] blur-lg opacity-70 pointer-events-none">
               <div
@@ -281,7 +282,8 @@ onUnmounted(() => {
           <div :class="['absolute flex justify-center items-center w-45 h-45', isPopping ? 'animate-pop' : '']">
             <PetHeadwear/>
             <PetCostume/>
-            <img :src="body" class="absolute w-45" alt="">
+            <img fetchpriority="high"
+                 decoding="sync" :src="body" class="absolute w-45" alt="">
             <img :src="getHornAsset(gameData.level)" class="absolute w-45 " alt="">
             <img v-show="gameData.sick" src="/character/drunk.webp" class="absolute w-45" alt="">
             <img v-show="gameData.sick && bodyType==='fat'" src="/character/sick_fat.webp"
@@ -569,7 +571,7 @@ onUnmounted(() => {
 }
 
 
-@keyframes coinExp{
+@keyframes coinExp {
   0% {
     transform: translate(0, 0) scale(0.3);
     opacity: 0;
@@ -580,7 +582,7 @@ onUnmounted(() => {
     transform: translate(0, -30px) scale(1.2);
   }
   25% {
-    opacity:1;
+    opacity: 1;
     /* Монетка слегка взлетает вверх относительно точки клика */
     transform: translate(0px, -70px) scale(1.2);
   }
@@ -596,7 +598,6 @@ onUnmounted(() => {
   will-change: transform, opacity;
   pointer-events: none;
 }
-
 
 
 @keyframes popCharacter {
