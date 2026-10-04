@@ -398,9 +398,7 @@ onUnmounted(() => {
               v-show="gameData.isPooped && (location==='home' || location==='food')"
               class="pointer-events-auto"
           />
-          <div v-if="location==='home' || location==='food'" class="absolute w-18 right-3 -top-2">
-            <img src="/gamePlay/photo_frame.webp?v=2" alt="">
-          </div>
+
 
         </div>
         <div
@@ -409,6 +407,9 @@ onUnmounted(() => {
             v-show="(location === 'home' || location === 'food')"
         >
           <Nameplate class="pointer-events-auto"/>
+        </div>
+        <div v-if="location==='home' || location==='food'" class="absolute z-0 w-18 right-3 -top-2">
+          <img src="/gamePlay/photo_frame.webp?v=2" alt="">
         </div>
       </div>
       <PetSideMenu/>
