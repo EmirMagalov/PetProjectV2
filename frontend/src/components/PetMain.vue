@@ -62,7 +62,7 @@ watch(location, (newLocation) => {
     if (statusFoam) {
       statusFoam.value = false;
     }
-    locationUrl.value = '/location/home.webp?v=1'
+    locationUrl.value = '/location/home.webp?v=2'
 
 
   } else if (newLocation === 'bath') {
@@ -236,7 +236,7 @@ onUnmounted(() => {
 
         <div
             v-if="location==='home'|| location === 'food' "
-            class="absolute right-12.5 top-23.5 text-[10px] leading-none text-red-600 font-bold pointer-events-none scale-60 origin-right transition-all duration-500"
+            class="absolute right-12 top-23.5 text-[10px] leading-none text-red-600 font-bold pointer-events-none scale-60 origin-right transition-all duration-500"
             :class="{ 'drop-shadow-[0_0_6px_rgba(239,68,68,0.9)] text-red-500 brightness-125': gameData.sleep }"
         >
           {{ currentTime }}
@@ -277,7 +277,6 @@ onUnmounted(() => {
             <div class="absolute text-[#00BFFF] font-bold text-sm z-2 left-4 -top-3 drop-shadow-md">z</div>
           </div>
           <p class="bg-[#fbf3e0]"></p>
-
           <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
           <div :class="['absolute flex justify-center items-center w-45 h-45', isPopping ? 'animate-pop' : '']">
             <PetHeadwear/>
@@ -408,9 +407,7 @@ onUnmounted(() => {
         >
           <Nameplate class="pointer-events-auto"/>
         </div>
-        <div :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'" v-if="location==='home' || location==='food'" class="absolute z-0 w-18 right-3 -top-2">
-          <img src="/gamePlay/photo_frame.webp?v=2" alt="">
-        </div>
+
       </div>
       <PetSideMenu/>
     </div>

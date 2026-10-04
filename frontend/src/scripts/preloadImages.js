@@ -1,6 +1,6 @@
 const imagesToPreload = [
     '/gamePlay/logo_icons.webp',
-    '/location/home.webp?v=1',
+    '/location/home.webp?v=2',
     '/location/bath.webp',
     '/gamePlay/fridge.webp',
     '/gamePlay/bath_icon.webp',
