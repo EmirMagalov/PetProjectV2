@@ -36,7 +36,9 @@ let sunHideTimer = null
 let vibrateTimer = null
 let coinHideTimer = null
 let lookResetTimer = null;
-
+let lastTouchTime = 0;
+const TOUCH_COOLDOWN = 50; // Минимальный интервал 50 мс (не более 20 кликов в секунду)
+const MAX_TOUCH_FINGERS = 3; // Не более 3 пальцев за один раз
 
 export function otherFeedPet(foodId) {
     const targetId = foodId || cartItemsList.value[currentIndex.value]?.id
@@ -120,6 +122,7 @@ export function feedPet(foodId) {
 
     if (gameData.feedCount >= 10) {
         gameData.stinky = true
+        gameData.feedCount = 0
     }
 
     // Флаг, чтобы отследить, стал ли он толстым именно на этом шаге
@@ -262,6 +265,17 @@ export function handleMultiTouch(event) {
     if (event.cancelable) {
         event.preventDefault();
     }
+    const now = Date.now();
+    if (now - lastTouchTime < TOUCH_COOLDOWN) {
+        return;
+    }
+    lastTouchTime = now;
+    let touchCount = 1;
+    if (event && event.touches && event.touches.length > 0) {
+        touchCount = Math.min(event.touches.length, MAX_TOUCH_FINGERS);
+    }
+
+
 
     let x = 160;
     let y = 135;
@@ -279,7 +293,13 @@ export function handleMultiTouch(event) {
     updateEyeLook(event);
     resetEyeLook(1200);
 
-    spawnHeart(x, y);
+    // 💥 3. Вызываем spawnHeart С УЧЕТОМ количества разрешенных пальцев
+    for (let i = 0; i < touchCount; i++) {
+        // Добавляем небольшое случайное смещение для каждого пальца, чтобы спавн сердечек выглядел естественно
+        const offsetX = x + (i > 0 ? (Math.random() - 0.5) * 30 : 0);
+        const offsetY = y + (i > 0 ? (Math.random() - 0.5) * 30 : 0);
+        spawnHeart(offsetX, offsetY);
+    }
 }
 
 export function spawnHeart(x = 160, y = 135) {
@@ -306,27 +326,27 @@ export function spawnHeart(x = 160, y = 135) {
     comboClicks.value++
     if (comboTimer) clearTimeout(comboTimer)
 
-    if (comboClicks.value >= 100) {
+    if (comboClicks.value >= 150) {
         comboMultiplier.value = 5
-    } else if (comboClicks.value >= 50) {
+    } else if (comboClicks.value >= 100) {
         comboMultiplier.value = 3
-    } else if (comboClicks.value >= 20) {
+    } else if (comboClicks.value >= 50) {
         comboMultiplier.value = 2
     } else {
         comboMultiplier.value = 1
     }
-
+    isComboAnimating.value = true
+    comboAnimKey.value++
     comboTimer = setTimeout(() => {
         comboClicks.value = 0
         comboMultiplier.value = 1
-    }, 1000)
+    }, 500)
 
-    isComboAnimating.value = true
-    comboAnimKey.value++
+
 
     comboHideTimer = setTimeout(() => {
         isComboAnimating.value = false
-    }, 800)
+    }, 300)
 
     // 3. Передаем координаты в addCoin
     if (gameData.clickCounter % 2 === 0) {
@@ -379,11 +399,36 @@ export function addCoin(coins = 1, x = 160, y = 135) {
     }, 5000)
 }
 
-export const Clean = () => {
-    gameData.isPooped = false
-    addCoin(10)
-    addExp(20)
-}
+export const Clean = (event) => {
+    let x = 160;
+    let y = 135;
+
+    if (event) {
+        // Останавливаем всплытие, чтобы не срабатывал handleMultiTouch
+        if (typeof event.stopPropagation === 'function') {
+            event.stopPropagation();
+        }
+
+        // Находим глобальный контейнер игры (как в updateEyeLook)
+        const gameCanvas = document.querySelector('.w-\\[320px\\]') || document.body;
+        const rect = gameCanvas.getBoundingClientRect();
+
+        const touch = (event.touches && event.touches.length > 0)
+            ? event.touches[0]
+            : (event.changedTouches && event.changedTouches.length > 0)
+                ? event.changedTouches[0]
+                : event;
+
+        if (touch && touch.clientX !== undefined) {
+            x = touch.clientX - rect.left;
+            y = touch.clientY - rect.top;
+        }
+    }
+
+    gameData.isPooped = false;
+    addCoin(10, x, y);
+    addExp(20, x, y);
+};
 
 export function isLosingLife() {
     gameData.lives = Math.max(0, gameData.lives - 1)

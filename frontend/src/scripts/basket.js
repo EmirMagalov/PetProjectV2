@@ -78,16 +78,16 @@ watch(() => gameData.cart, () => {
     })()
 }, {deep: true})
 
-watch(gameData.unlockedHeads, (newList) => {
-    localStorage.setItem('unlockedHeads', JSON.stringify(newList))
-}, {deep: true})
-
-
-watch(() => gameData.unlockedCostumes, (newList) => {
-    if (newList) {
-        localStorage.setItem('unlockedCostumes', JSON.stringify(newList))
-    }
-}, {deep: true})
+// watch(gameData.unlockedHeads, (newList) => {
+//     localStorage.setItem('unlockedHeads', JSON.stringify(newList))
+// }, {deep: true})
+//
+//
+// watch(() => gameData.unlockedCostumes, (newList) => {
+//     if (newList) {
+//         localStorage.setItem('unlockedCostumes', JSON.stringify(newList))
+//     }
+// }, {deep: true})
 
 // Управление корзиной (через копирование объекта для реактивности Vue)
 export function addToCart(foodId) {

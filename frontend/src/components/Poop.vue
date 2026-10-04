@@ -12,7 +12,7 @@ const randomBottom = ref(Math.floor(Math.random() * 15))
 </script>
 
 <template>
-  <div @click="Clean()" class="absolute flex justify-center items-center bottom-4 right-13  z-35 w-8"
+  <div @pointerdown.stop="Clean($event)" class="absolute flex justify-center items-center bottom-4 right-13  z-35 w-8"
        >
 
     <!-- Основная картинка -->

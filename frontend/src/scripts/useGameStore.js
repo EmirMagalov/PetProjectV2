@@ -96,7 +96,6 @@ export async function handleRestart() {
     isGameOver.value = false
     isLoading.value = true
     fruitStreak.value = 0
-    localStorage.clear()
     await resetPet()
     await resetLocal()
     // Просто обновляем поля до дефолтных без дублирования портянки кода

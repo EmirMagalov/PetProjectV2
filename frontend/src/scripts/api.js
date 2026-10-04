@@ -231,7 +231,8 @@ document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
         isSyncLocked = true
 
-        initGameData()
+        syncToBackend()
+            .then(() => initGameData())
             .catch(err => console.error("❌ Ошибка при возврате в игру:", err))
             .finally(() => {
                 setTimeout(() => {

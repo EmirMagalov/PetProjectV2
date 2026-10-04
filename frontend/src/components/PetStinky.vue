@@ -4,7 +4,7 @@ import {gameData} from "@/scripts/useGameStore.js";
 </script>
 
 <template>
-  <div v-show="gameData.stinky"  class="absolute inset-0 flex justify-center items-center pointer-events-none z-15">
+  <div v-show="gameData.stinky"  class="absolute brightness-130 inset-0 flex justify-center items-center pointer-events-none z-15">
     <div class="relative w-24 h-24 flex justify-center items-center">
 
       <!-- Облачко тумана 1 (левое) -->

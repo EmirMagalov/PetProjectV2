@@ -1,7 +1,31 @@
 @import "tailwindcss";
+
+@font-face {
+    font-family: 'MyFont';
+    src: url('./fonts/rubik/rubik-bubbles-latin-400-normal.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* 2. Файл для русских букв */
+@font-face {
+    font-family: 'MyFont';
+    src: url('./fonts/rubik/rubik-bubbles-cyrillic-400-normal.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Применяем шрифт к сайту */
+body, button, input, select, textarea {
+    font-family: 'MyFont', sans-serif !important;
+}
+
 img {
     transition: opacity 0.2s ease-in-out;
 }
+
 /* 1. По умолчанию скрываем заглушку для ВСЕХ экранов */
 .rotate-warning {
     display: none;
@@ -24,23 +48,25 @@ img {
     padding: 20px;
     box-sizing: border-box;
 }
-body,html{
+
+body, html {
     overflow: hidden;
     overscroll-behavior: none;
 }
+
 /* Полный запрет выделения текста и элементов на странице */
 body {
-    -webkit-user-select: none;   /* Safari / iOS Safari */
-    -moz-user-select: none;      /* Firefox */
-    -ms-user-select: none;       /* Internet Explorer / Edge */
-    user-select: none;           /* Стандартный синтаксис */
+    -webkit-user-select: none; /* Safari / iOS Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer / Edge */
+    user-select: none; /* Стандартный синтаксис */
     -webkit-touch-callout: none; /* Отключение всплывающего меню на iOS при долгом таппе */
 }
 
 /* Полный запрет контекстных меню, выделения и взаимодействия с фото */
 * {
     -webkit-touch-callout: none !important; /* iOS Safari */
-    -webkit-user-select: none !important;   /* Safari, Chrome */
+    -webkit-user-select: none !important; /* Safari, Chrome */
     -khtml-user-select: none !important;
     -moz-user-select: none !important;
     -ms-user-select: none !important;
@@ -68,7 +94,7 @@ img, .game-image {
 .food-item,
 .shower-item,
 .foam-item {
-    touch-action: none;          /* самое важное */
+    touch-action: none; /* самое важное */
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;

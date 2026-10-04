@@ -13,7 +13,7 @@ import PetSmoke from "@/components/PetSmoke.vue";
 import {initGameData} from "@/scripts/api.js";
 import Poop from "@/components/Poop.vue";
 import {preloadImages} from "@/scripts/preloadImages.js";
-import PhotoFrame from "@/components/PhotoFrame.vue";
+import Nameplate from "@/components/Nameplate.vue";
 import PetSideMenu from "@/components/PetSideMenu.vue";
 import TutorialOverlay from "@/components/TutorialOverlay.vue";
 import {activeStatus} from "@/scripts/stats.js";
@@ -62,7 +62,7 @@ watch(location, (newLocation) => {
     if (statusFoam) {
       statusFoam.value = false;
     }
-    locationUrl.value = '/location/home.webp'
+    locationUrl.value = '/location/home.webp?v=1'
 
 
   } else if (newLocation === 'bath') {
@@ -130,6 +130,23 @@ const handleVisibilityChange = () => {
   }
 }
 
+
+const currentTime = ref('');
+
+function updateClock() {
+  const now = new Date();
+  // Форматирует время под локальный формат (например, 14:05:09)
+  currentTime.value = now.toLocaleTimeString('ru-RU', {
+    hour: '2-digit',
+    minute: '2-digit',
+    // second: '2-digit'
+  });
+}
+
+let clockInterval = null;
+
+
+
 onMounted(async () => {
   if (window.Telegram?.WebApp) {
     const tg = window.Telegram.WebApp
@@ -143,7 +160,8 @@ onMounted(async () => {
   location.value = 'home'
   preloadImages()
   startRandomLooking()
-
+  updateClock();
+  clockInterval = setInterval(updateClock, 1000);
 
 })
 
@@ -151,6 +169,7 @@ onUnmounted(() => {
   clearInterval(lookInterval)
   clearInterval(blinkInterval)
   document.removeEventListener('visibilitychange', handleVisibilityChange)
+  if (clockInterval) clearInterval(clockInterval);
 })
 
 
@@ -176,15 +195,15 @@ onUnmounted(() => {
         <!-- Солнце с плавной анимацией появления/исчезновения и движения -->
         <div
             :class="[
-         'relative w-20 h-20 bg-yellow-300 rounded-full sun-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
-         gameData.sleep ? '-top-20 left-[-50px] opacity-0 scale-50' : 'top-0 left-2 opacity-100 scale-100'
+         'relative  brightness-130 w-15 h-15 bg-yellow-300 rounded-full  sun-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
+         gameData.sleep ? '-top-20 left-[-50px] opacity-0 scale-50' : 'top-0 left-0 opacity-100 scale-100'
 
        ]">
           <Transition name="fade-sun">
             <img
                 v-if="sunAnimating "
                 :src="isBadMood ? '/gamePlay/sun_angry.webp' : '/gamePlay/sun_smile.webp'"
-                class="absolute left-2 w-17  opacity-45 "
+                class="absolute top-1 left-2 w-12  opacity-45 "
                 alt=""
             >
           </Transition>
@@ -193,15 +212,15 @@ onUnmounted(() => {
         <!-- Луна с плавной анимацией появления/исчезновения и движения -->
         <div
             :class="[
-             'absolute w-20 h-20 bg-[#f4f6f0] rounded-full moon-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
-             gameData.sleep ? 'top-0 left-2 opacity-100 scale-100' : '-top-20 left-[-50px] opacity-0 scale-50'
+             'absolute brightness-130 w-15 h-15 bg-[#f4f6f0] rounded-full moon-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
+             gameData.sleep ? 'top-0 left-0 opacity-100 scale-100' : '-top-20 left-[-50px] opacity-0 scale-50'
             ]">
           <!-- Картинка спавнится ТОЛЬКО когда луна на экране и перезапускает CSS-анимацию -->
           <Transition name="fade-sun">
             <img
                 v-if="sunAnimating "
                 :src="isBadMood ? '/gamePlay/sad_moon.webp' : '/gamePlay/happy_moon.webp'"
-                class="absolute left-2 w-17 opacity-45 pointer-events-none "
+                class="absolute left-2 top-1 w-12 opacity-45 pointer-events-none "
                 alt=""
             >
           </Transition>
@@ -212,9 +231,20 @@ onUnmounted(() => {
             class="absolute animate-dark-base inset-0 pointer-events-none w-[320px] h-[270px] brightness-100 transition-all duration-500"
             :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
         />
+        <div class="absolute w-18 right-3 -top-2">
+          <img src="/gamePlay/photo_frame.webp?v=1" alt="">
+        </div>
+
+        <div
+            v-if="location==='home'|| location === 'food' "
+            class="absolute right-12.5 top-23.5 text-[10px] leading-none text-red-600 font-bold pointer-events-none scale-60 origin-right transition-all duration-500"
+            :class="{ 'drop-shadow-[0_0_6px_rgba(239,68,68,0.9)] text-red-500 brightness-125': gameData.sleep }"
+        >
+          {{ currentTime }}
+        </div>
         <div class="relative flex items-center justify-center p-12">
           <!-- 1. Самый дальний мягкий ореол -->
-          <div v-show="gameData.sleep" class="absolute top-4 right-10 z-20 flex items-center justify-center">
+          <div  v-show="gameData.sleep"  class="absolute top-12 right-10 z-20 flex items-center justify-center">
             <!-- 1. Направляющий конусный луч (живой свет) -->
             <div class="absolute -top-6 -right-5 w-52 h-56 rotate-[-30deg] blur-lg opacity-70 pointer-events-none">
               <div
@@ -337,7 +367,7 @@ onUnmounted(() => {
             <img
                 v-if="isComboAnimating"
                 :src="getCombo()"
-                class="absolute text-2xl right-30 top-30 select-none z-50 animate-float-combo pointer-events-none"
+                class="absolute brightness-130 text-2xl right-30 top-30 select-none z-50 animate-float-combo pointer-events-none"
                 :class="{ 'w-14': comboMultiplier >= 1,'w-15': comboMultiplier >= 2,'w-17': comboMultiplier >= 3,'w-19': comboMultiplier >= 5,'z-205': tutorialStep === 3 || tutorialStep === 6 || tutorialStep === 7 }"
                 alt="">
           </Transition>
@@ -363,7 +393,7 @@ onUnmounted(() => {
           <PetSmoke :status-smoke="statusSmoke"/>
           <PetShower :status-shower="statusShower" :class=" tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
 
-          <!-- Включаем клики обратно для Poop и PhotoFrame -->
+          <!-- Включаем клики обратно для Poop и Nameplate -->
           <Poop
               v-show="gameData.isPooped && (location==='home' || location==='food')"
               class="pointer-events-auto"
@@ -376,7 +406,7 @@ onUnmounted(() => {
             :class="gameData.sleep ? 'animate-dark-in' : 'brightness-100'"
             v-show="(location === 'home' || location === 'food')"
         >
-          <PhotoFrame class="pointer-events-auto"/>
+          <Nameplate class="pointer-events-auto"/>
         </div>
       </div>
       <PetSideMenu/>
@@ -523,11 +553,11 @@ onUnmounted(() => {
   25% {
     opacity: 1;
     /* Монетка слегка взлетает вверх относительно точки клика */
-    transform: translate(80px, -130px) scale(1.2);
+    transform: translate(0px, -70px) scale(1.2);
   }
   100% {
     /* Финальный прилёт в угол (счётчик) */
-    transform: translate(120px, -200px) scale(0.3);
+    transform: translate(0px, -250px) scale(0.3);
     opacity: 0;
   }
 }
@@ -552,11 +582,11 @@ onUnmounted(() => {
   25% {
     opacity:1;
     /* Монетка слегка взлетает вверх относительно точки клика */
-    transform: translate(30px, -70px) scale(1.2);
+    transform: translate(0px, -70px) scale(1.2);
   }
   100% {
     /* Финальный прилёт в угол (счётчик) */
-    transform: translate(50px, -150px) scale(0.3);
+    transform: translate(0px, -250px) scale(0.3);
     opacity: 0;
   }
 }

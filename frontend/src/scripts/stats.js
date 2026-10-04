@@ -266,6 +266,6 @@ watch(() => gameData.sleep, () => {
         // Гасим эмоцию через 800мс
         sunTimer = setTimeout(() => {
             sunAnimating.value = false
-        }, 500)
-    }, 700)
+        }, 800)
+    }, 500)
 })

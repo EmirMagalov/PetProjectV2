@@ -4,7 +4,7 @@ import PetMain from "@/components/PetMain.vue";
 import SaloonMain from "@/components/Saloon/SaloonMain.vue";
 import { createApp } from 'vue'
 import App from '../App.vue'
-
+import '../assets/main.css'
 // 1. Принудительный сброс кэша для iOS Safari / Telegram WebApp
 const APP_VERSION = '1.0.2'; // Меняй версию при каждом обновлении
 const currentVersion = localStorage.getItem('app_version');
