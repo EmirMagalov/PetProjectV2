@@ -37,7 +37,7 @@ let vibrateTimer = null
 let coinHideTimer = null
 let lookResetTimer = null;
 let lastTouchTime = 0;
-const TOUCH_COOLDOWN = 80; // Минимальный интервал 50 мс (не более 20 кликов в секунду)
+const TOUCH_COOLDOWN = 50; // Минимальный интервал 50 мс (не более 20 кликов в секунду)
 const MAX_TOUCH_FINGERS = 3; // Не более 3 пальцев за один раз
 
 export function otherFeedPet(foodId) {
