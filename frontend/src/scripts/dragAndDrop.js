@@ -1,6 +1,5 @@
 import {useDraggable} from "@vueuse/core";
 import {computed, ref} from "vue";
-// 1. Добавляем импорты функций слежения глаз
 import {addCoin, feedPet, isLosingLife, otherFeedPet, updateEyeLook, resetEyeLook} from "@/scripts/actions.js";
 import {
     currentDraggedItem,
@@ -27,11 +26,16 @@ export const foamEl = ref()
 export const statusSmoke = ref(false)
 
 export const batheStatus = ref(false)
-// Время последнего успешного действия (в миллисекундах)
 let lastBathTime = 0
-
-// Кулдаун в миллисекундах
 const BATH_COOLDOWN = 5000
+
+// Вспомогательная функция для чистки таймера
+function clearActionTimer() {
+    if (actionTimer) {
+        clearTimeout(actionTimer)
+        actionTimer = null
+    }
+}
 
 // Универсальная функция проверки зоны и открытия рта
 export function handleMove(event, itemType, foodId = null, Category = null, SubCategory = null) {
@@ -44,34 +48,35 @@ export function handleMove(event, itemType, foodId = null, Category = null, SubC
     const dropRect = dropZoneRef.value.getBoundingClientRect()
     const clientX = event.clientX
     const clientY = event.clientY
-    if (
+
+    const isInside = (
         clientX >= dropRect.left &&
         clientX <= dropRect.right &&
         clientY >= dropRect.top &&
         clientY <= dropRect.bottom
-    ) {
+    )
+
+    if (isInside) {
         isHovered.value = true
         if (itemType === 'food') {
-
             if (gameData.cart['pipe'] && Category ==='shaman' && SubCategory==='pipe') {
                 statusSmoke.value = true
                 if (!actionTimer) {
                     actionTimer = setTimeout(() => {
-                        statusSmoke.value = false
-                        otherFeedPet(foodId)
-                        addCoin(2)
-                        addExp(5)
+                        if (isHovered.value && currentDraggedItem.value === 'food') {
+                            statusSmoke.value = false
+                            otherFeedPet(foodId)
+                            addCoin(2)
+                            addExp(5)
 
-                        // Помечаем, что еда уже съедена
-                        foodConsumedByPipe.value = true
-                        foodDrag.x.value = -9999
-                        foodDrag.y.value = -9999
+                            foodConsumedByPipe.value = true
+                            foodDrag.x.value = -9999
+                            foodDrag.y.value = -9999
 
-                        isHovered.value = false
-                        currentDraggedItem.value = null
-
-                        statusSmoke.value = false
-                        actionTimer = null
+                            isHovered.value = false
+                            currentDraggedItem.value = null
+                        }
+                        clearActionTimer()
                     }, 3000)
                 }
             }
@@ -83,22 +88,31 @@ export function handleMove(event, itemType, foodId = null, Category = null, SubC
 
                 if (!actionTimer) {
                     actionTimer = setTimeout(() => {
-                        const now = Date.now()
-                        if(gameData.sick){
-                            isLosingLife()
+                        // Если предмет всё ещё зажат и находится в зоне
+                        if (isHovered.value && currentDraggedItem.value === 'shower') {
+                            const now = Date.now()
+                            if (gameData.sick) {
+                                isLosingLife()
+                            }
+                            if (now - lastBathTime < BATH_COOLDOWN) {
+                                gameData.sick = true
+                            }
+                            lastBathTime = now
+
+                            // Мгновенно убираем пена/душ визуально
+                            statusShower.value = false
+                            statusFoam.value = false
+
+                            showerCount.value += 1
+                            gameData.stinky = false
+                            nextTutorialStep()
+                            addCoin(2)
+                            addExp(25)
+                            gameData.feedCount = 0
+                        } else {
+                            statusShower.value = false
                         }
-                        if (now - lastBathTime < BATH_COOLDOWN) {
-                            gameData.sick = true
-                        }
-                        lastBathTime = now
-                        statusShower.value = false
-                        statusFoam.value = false
-                        showerCount.value += 1
-                        gameData.stinky = false
-                        nextTutorialStep()
-                        addCoin(2)
-                        addExp(25)
-                        gameData.feedCount = 0
+                        clearActionTimer()
                     }, 2000)
                 }
             }
@@ -106,18 +120,18 @@ export function handleMove(event, itemType, foodId = null, Category = null, SubC
             batheStatus.value = true
         }
     } else {
+        // Если вышли за пределы зоны — СРАЗУ отменяем таймер и сбрасываем эффекты
         isHovered.value = false
-        if (actionTimer) {
-            clearTimeout(actionTimer)
-            statusShower.value = false
-            actionTimer = null
-        }
+        statusShower.value = false
         statusSmoke.value = false
+        clearActionTimer()
     }
 }
 
 // Универсальная функция окончания перетаскивания
 export function handleEnd(itemType, foodId, Category) {
+    clearActionTimer()
+
     if (foodConsumedByPipe.value || foodId === 'pipe') {
         statusSmoke.value = false
         foodConsumedByPipe.value = false
@@ -140,7 +154,7 @@ export function handleEnd(itemType, foodId, Category) {
                 }
             }
         } else if (itemType === 'foam') {
-            if(!statusFoam.value){
+            if (!statusFoam.value) {
                 statusFoam.value = true
                 nextTutorialStep()
                 if (foodId) {
@@ -149,6 +163,8 @@ export function handleEnd(itemType, foodId, Category) {
             }
         }
     }
+
+    // Мгновенный сброс всех состояний при отпускании
     batheStatus.value = false
     isHovered.value = false
     statusShower.value = false
@@ -160,11 +176,11 @@ export function handleEnd(itemType, foodId, Category) {
     document.activeElement?.blur()
 }
 
-// Настраиваем useDraggable для каждого предмета
 export const foodDrag = useDraggable(foodEl, {
     disabled: computed(() => Object.keys(gameData.cart).length === 0),
     preventDefault: true,
     onStart: (pos, event) => {
+        clearActionTimer()
         currentDraggedItem.value = 'food'
         foodConsumedByPipe.value = false
         if (foodEl.value) {
@@ -174,24 +190,17 @@ export const foodDrag = useDraggable(foodEl, {
         }
     },
     onMove: (pos, event) => {
-        // Передаем событие движения
         updateEyeLook(event)
 
         const foodId = currentFoodItem.value?.id
         const Category = currentFoodItem.value?.category
         const SubCategory = currentFoodItem.value?.subcategory
-        handleMove(event, 'food', foodId, Category,SubCategory)
+        handleMove(event, 'food', foodId, Category, SubCategory)
     },
     onEnd: () => {
         const foodId = currentFoodItem.value?.id
         const Category = currentFoodItem.value?.category
-        if (actionTimer) {
-            clearTimeout(actionTimer)
-            actionTimer = null
-        }
-        statusSmoke.value = false
         handleEnd('food', foodId, Category)
-
         resetEyeLook(600)
     }
 })
@@ -199,6 +208,7 @@ export const foodDrag = useDraggable(foodEl, {
 export const showerDrag = useDraggable(showerEl, {
     preventDefault: true,
     onStart: (pos, event) => {
+        clearActionTimer()
         currentDraggedItem.value = 'shower'
         if (showerEl.value) {
             const rect = showerEl.value.getBoundingClientRect()
@@ -219,6 +229,7 @@ export const showerDrag = useDraggable(showerEl, {
 export const foamDrag = useDraggable(foamEl, {
     preventDefault: true,
     onStart: (pos, event) => {
+        clearActionTimer()
         currentDraggedItem.value = 'foam'
         if (foamEl.value) {
             const rect = foamEl.value.getBoundingClientRect()
@@ -228,14 +239,12 @@ export const foamDrag = useDraggable(foamEl, {
     },
     onMove: (pos, event) => {
         updateEyeLook(event)
-
         const bathId = currentBathItem.value?.id
         handleMove(event, 'foam', bathId)
     },
     onEnd: () => {
         const bathId = currentBathItem.value?.id
         handleEnd('foam', bathId)
-
         resetEyeLook(600)
     }
 })

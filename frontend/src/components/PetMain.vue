@@ -33,7 +33,7 @@ import PetCostume from "@/components/PetCostume.vue";
 
 let blinkInterval = null
 let lookInterval = null
-let isDragging = false // Флаг удержания пальца/курсора
+let isDragging = false
 
 
 function getHornAsset(level) {
@@ -64,32 +64,27 @@ watch(location, (newLocation) => {
     }
     locationUrl.value = '/location/home.webp?v=2'
 
-
   } else if (newLocation === 'bath') {
     locationUrl.value = '/location/bath.webp'
     gameData.sleep = false
   }
 })
 
-// Запускаем рандомный взгляд при монтировании компонента
-
-
 function triggerPop() {
   isPopping.value = true
   setTimeout(() => {
     isPopping.value = false
-  }, 200) // Время совпадает с длительностью animate-pop (0.2s)
+  }, 200)
 }
 
 function handlePointerDown(event) {
   isDragging = true
-  triggerPop() // Запускаем анимацию подпрыгивания
-  handleMultiTouch(event) // Вызывает спавн монетки и первоначальный поворот глаз
+  triggerPop()
+  handleMultiTouch(event)
   updateEyeLook(event)
 }
 
 function handlePointerMove(event) {
-  // Следим за движением ВСЕГДА, когда палец движется по зоне или зажат
   if (isDragging || event.buttons > 0) {
     updateEyeLook(event)
   }
@@ -130,21 +125,17 @@ const handleVisibilityChange = () => {
   }
 }
 
-
 const currentTime = ref('');
 
 function updateClock() {
   const now = new Date();
-  // Форматирует время под локальный формат (например, 14:05:09)
   currentTime.value = now.toLocaleTimeString('ru-RU', {
     hour: '2-digit',
     minute: '2-digit',
-    // second: '2-digit'
   });
 }
 
 let clockInterval = null;
-
 
 onMounted(async () => {
   if (window.Telegram?.WebApp) {
@@ -170,246 +161,233 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', handleVisibilityChange)
   if (clockInterval) clearInterval(clockInterval);
 })
-
-
 </script>
 
 <template>
   <div
       :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000 relative', gameData.sleep ? 'bg-linear-to-r from-blue-900 via-blue-800 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']">
 
-
     <PetHeaderMenu/>
 
     <!-- Холст -->
-    <div class="relative flex justify-center w-full  ">
-
+    <div class="relative flex justify-center w-full">
 
       <div :class="[
   'relative w-[320px] h-[270px] border-2 border-red-400 overflow-hidden rounded-2xl object-cover transition-colors duration-1000',
   gameData.sleep ? 'bg-[#0F175C]' : 'bg-amber-200',
-
 ]">
 
-        <!-- Солнце с плавной анимацией появления/исчезновения и движения -->
+        <!-- Солнце -->
         <div
             :class="[
-         'relative  brightness-130 w-15 h-15 bg-yellow-300 rounded-full  sun-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
+         'relative brightness-130 w-15 h-15 bg-yellow-300 rounded-full sun-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
          gameData.sleep ? '-top-20 left-[-50px] opacity-0 scale-50' : 'top-0 left-0 opacity-100 scale-100'
-
        ]">
           <Transition name="fade-sun">
             <img
-                v-if="sunAnimating "
+                v-if="sunAnimating"
                 :src="isBadMood ? '/gamePlay/sun_angry.webp' : '/gamePlay/sun_smile.webp'"
-                class="absolute top-1 left-2 w-12  opacity-45 "
+                class="absolute top-1 left-2 w-12 opacity-45"
                 alt=""
             >
           </Transition>
         </div>
 
-        <!-- Луна с плавной анимацией появления/исчезновения и движения -->
+        <!-- Луна -->
         <div
             :class="[
              'absolute brightness-130 w-15 h-15 bg-[#f4f6f0] rounded-full moon-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
              gameData.sleep ? 'top-0 left-0 opacity-100 scale-100' : '-top-20 left-[-50px] opacity-0 scale-50'
             ]">
-          <!-- Картинка спавнится ТОЛЬКО когда луна на экране и перезапускает CSS-анимацию -->
           <Transition name="fade-sun">
             <img
-                v-if="sunAnimating "
+                v-if="sunAnimating"
                 :src="isBadMood ? '/gamePlay/sad_moon.webp' : '/gamePlay/happy_moon.webp'"
-                class="absolute left-2 top-1 w-12 opacity-45 pointer-events-none "
+                class="absolute left-2 top-1 w-12 opacity-45 pointer-events-none"
                 alt=""
             >
           </Transition>
         </div>
 
-        <img
-            :src="locationUrl"
-            fetchpriority="high"
-            decoding="sync"
-            class="absolute animate-dark-base inset-0 pointer-events-none w-[320px] h-[270px] brightness-100 transition-all duration-500"
-            :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
-        />
+        <!-- Фон локации -->
+        <div  class="absolute inset-0 z-5 pointer-events-none transition-all duration-1000 ease-in-out "
+              :class="gameData.sleep ? 'brightness-30' : 'brightness-100'">
+          <img
+              :src="locationUrl"
+              fetchpriority="high"
+              decoding="sync"
+              class="w-[320px] h-[270px] "
+
+          />
+        </div>
 
 
         <div
-            v-if="location==='home'|| location === 'food' "
-            class="absolute right-12 top-23.5 text-[10px] leading-none text-red-600 font-bold pointer-events-none scale-60 origin-right transition-all duration-500"
+            v-if="location==='home'|| location === 'food'"
+            class="absolute right-12 top-23.5 text-[10px] leading-none text-red-600 font-bold pointer-events-none scale-60 origin-right transition-all duration-500 z-10"
             :class="{ 'drop-shadow-[0_0_6px_rgba(239,68,68,0.9)] text-red-500 brightness-125': gameData.sleep }"
         >
           {{ currentTime }}
         </div>
+
         <div class="relative flex items-center justify-center p-12">
-          <!-- 1. Самый дальний мягкий ореол -->
+          <!-- Ореол света ночника -->
           <div v-show="gameData.sleep" class="absolute top-12 right-10 z-20 flex items-center justify-center">
-            <!-- 1. Направляющий конусный луч (живой свет) -->
             <div class="absolute top-12 -right-18 w-52 h-56 blur-lg -rotate-30 opacity-85 pointer-events-none">
               <div
                   class="w-full h-full bg-[conic-gradient(from_150deg_at_90%_0%,rgba(253,224,71,0.6)_0deg,rgba(251,191,36,0.1)_180deg,transparent_180deg)]"></div>
             </div>
-
-            <!-- 2. Мягкое объемное облако света (без резких круглых границ) -->
-            <div class="absolute w-23 h-20 -top-5 blur-xl -right-10 bg-amber-300/30  pointer-events-none "></div>
-
-            <!-- 3. Яркая вспышка-блик (эллипс, а не круг) -->
+            <div class="absolute w-23 h-20 -top-5 blur-xl -right-10 bg-amber-300/30 pointer-events-none"></div>
             <div
                 class="relative z-10 w-5 h-5 top-2 left-3.5 bg-yellow-100 rounded-full rotate-12 blur-[3px] opacity-25 shadow-[0_0_20px_#fde047]"></div>
             <div
-                class="relative z-10 w-4 h-1 top-5 -left-1 bg-yellow-300 brightness-130 rounded-full  blur-[3px] shadow-[0_0_20px_#fde047]"></div>
+                class="relative z-10 w-4 h-1 top-5 -left-1 bg-yellow-300 brightness-130 rounded-full blur-[3px] shadow-[0_0_20px_#fde047]"></div>
           </div>
-
         </div>
 
-        <!-- Зона персонажа -->
+        <!-- Табличка с именем -->
+        <div
+            class="absolute inset-0 z-11 pointer-events-none transition-all duration-1000 ease-in-out"
+            :class="gameData.sleep ? 'brightness-30' : 'brightness-100'"
+            v-show="(location === 'home' || location === 'food')"
+        >
+          <Nameplate class="pointer-events-auto"/>
+        </div>
+
+        <!-- Монетки / Опыт -->
+        <div class="absolute inset-0 pointer-events-none overflow-hidden z-50">
+          <template v-for="group in activeCoins" :key="group.id">
+            <img
+                v-for="coin in group.coins"
+                :key="coin.id"
+                :style="{
+                      left: `${coin.x}px`,
+                      top: `${coin.y}px`,
+                      animationDelay: `${coin.delay}s`
+                    }"
+                src="/gamePlay/coin.webp"
+                class="absolute w-5 animate-coinFly pointer-events-none"
+                alt=""
+            />
+          </template>
+        </div>
+        <div class="absolute inset-0 pointer-events-none overflow-hidden z-50">
+          <template v-for="group in activeExp" :key="group.id">
+            <img
+                v-for="exp in group.exp"
+                :key="exp.id"
+                :style="{
+                      left: `${exp.x}px`,
+                      top: `${exp.y}px`,
+                      animationDelay: `${exp.delay}s`
+                    }"
+                src="/gamePlay/exp.webp"
+                class="absolute w-5 animate-expFly pointer-events-none"
+                alt=""
+            />
+          </template>
+        </div>
+        <Status
+            :class="tutorialStep === 3 ? 'z-205' : ''"
+            v-if="activeStatus.show"
+            :status="true"
+            :text="activeStatus.text"
+            :image="activeStatus.image"
+            :additional="activeStatus.additional"
+            :bg-color="activeStatus.bgColor"
+            class="pointer-events-auto"
+        />
+        <!-- Зона персонажа (исправлены классы transition и синтаксис :class) -->
         <div ref="dropZoneRef"
              @pointerdown="handlePointerDown($event)"
              @pointermove="handlePointerMove($event)"
              @pointerup="handlePointerEnd"
              @pointercancel="handlePointerEnd"
              @pointerleave="handlePointerEnd"
-             class="absolute brightness-100 animate-dark-base inset-0 flex justify-center items-center cursor-pointer touch-none select-none"
-             :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out',tutorialStep === 3 ||tutorialStep === 6 || tutorialStep === 7  ? 'z-205' : ''"
+             class="absolute inset-0 flex justify-center items-center cursor-pointer touch-none select-none transition-all duration-1000 ease-in-out z-10"
+             :class="[
+               gameData.sleep ? 'brightness-30' : 'brightness-100',
+               (tutorialStep === 3 || tutorialStep === 6 || tutorialStep === 7) ? 'z-205' : ''
+             ]"
         >
 
           <div v-show="gameData.sleep"
                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-40">
-            <div class="absolute text-[#00BFFF]  font-extrabold text-xl z-1 drop-shadow-md">Z</div>
+            <div class="absolute text-[#00BFFF] font-extrabold text-xl z-1 drop-shadow-md">Z</div>
             <div class="absolute text-[#00BFFF] font-bold text-sm z-2 left-4 -top-3 drop-shadow-md">z</div>
           </div>
-          <p class="bg-[#fbf3e0]"></p>
-          <!-- Персонаж (тело и рога обернуты с :key для мгновенного отклика анимации pop) -->
+
+          <!-- Персонаж -->
           <div :class="['absolute flex justify-center items-center w-45 h-45', isPopping ? 'animate-pop' : '']">
             <PetHeadwear/>
             <PetCostume/>
-            <img fetchpriority="high"
-                 decoding="sync" :src="body" class="absolute w-45" alt="">
-            <img :src="getHornAsset(gameData.level)" class="absolute w-45 " alt="">
+            <img fetchpriority="high" decoding="sync" :src="body" class="absolute w-45" alt="">
+            <img :src="getHornAsset(gameData.level)" class="absolute w-45" alt="">
             <img v-show="gameData.sick" src="/character/drunk.webp" class="absolute w-45" alt="">
-            <img v-show="gameData.sick && bodyType==='fat'" src="/character/sick_fat.webp"
-                 class="absolute w-45 z-10" alt="">
-            <img v-show="gameData.sick && bodyType!=='fat'" src="/character/sick.webp?v=1"
-                 class="absolute w-45  z-10" alt="">
-            <div v-if="!blink && !gameData.sleep">
+            <img v-show="gameData.sick && bodyType==='fat'" src="/character/sick_fat.webp" class="absolute w-45 z-10" alt="">
+            <img v-show="gameData.sick && bodyType!=='fat'" src="/character/sick.webp?v=1" class="absolute w-45 z-10" alt="">
 
+            <div v-if="!blink && !gameData.sleep">
               <div v-show="lowEnergy" class="absolute inset-0 flex justify-center items-center z-10">
                 <img src="/character/bags_left.webp" class="absolute w-45" alt=""/>
                 <img src="/character/bags_right.webp" class="absolute w-45" alt=""/>
               </div>
 
-              <div class="absolute inset-0 flex justify-center items-center  pointer-events-none">
-
+              <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
                 <img src="/character/eye_left.webp?v=1" class="absolute w-45" alt="">
                 <img src="/character/eye_right.webp" class="absolute w-45" alt="">
               </div>
 
-              <!-- ЗРАЧКИ -->
-              <div class="absolute inset-0 flex justify-center items-center  pointer-events-none">
+              <!-- Зрачки -->
+              <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
                 <div
                     class="absolute inset-0 flex justify-center items-center pupils-look"
-                    :style="{
-                transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)`
-              }"
+                    :style="{ transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)` }"
                 >
                   <img src="/character/eye_pupils_left.webp" class="absolute w-45" alt=""/>
                   <img src="/character/eye_pupils_right.webp" class="absolute w-45" alt=""/>
-
                 </div>
-
-
               </div>
             </div>
+
             <img v-else src="/character/eye_close.webp" class="absolute w-45" alt="">
             <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''" class="absolute w-45" alt="">
           </div>
 
-        </div>
-        <!-- Зона атрибутов -->
-        <div
-            class="animate-dark-base z-205 absolute inset-0 w-full h-full pointer-events-none"
-            :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
-        >
-          <!-- Отрисовываем каждую кликнутую монетку отдельно -->
-
-          <div class="absolute inset-0 pointer-events-none overflow-hidden z-50">
-            <template v-for="group in activeCoins" :key="group.id">
+          <!-- Оверлеи и элементы поверх персонажа -->
+          <div class="absolute inset-0 w-full h-full pointer-events-none">
+            <Transition name="combo-fade">
               <img
-                  v-for="coin in group.coins"
-                  :key="coin.id"
-                  :style="{
-                      left: `${coin.x}px`,
-                      top: `${coin.y}px`,
-                      animationDelay: `${coin.delay}s`
-                    }"
-                  src="/gamePlay/coin.webp"
-                  class="absolute w-5  animate-coinFly pointer-events-none"
-                  alt=""
-              />
-            </template>
+                  v-if="isComboAnimating"
+                  :src="getCombo()"
+                  class="absolute brightness-130 text-2xl right-30 top-30 select-none z-50 animate-float-combo pointer-events-none"
+                  :class="{
+                    'w-14': comboMultiplier >= 1,
+                    'w-15': comboMultiplier >= 2,
+                    'w-17': comboMultiplier >= 3,
+                    'w-19': comboMultiplier >= 5,
+                    'z-205': tutorialStep === 3 || tutorialStep === 6 || tutorialStep === 7
+                  }"
+                  alt="">
+            </Transition>
+
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible z-30">
+              <CloudMessage class="pointer-events-auto"/>
+            </div>
+
+
+
+            <PetStinky :class="tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
+            <PetFoam :status-foam="statusFoam" :class="tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
+            <PetSmoke :status-smoke="statusSmoke"/>
+            <PetShower :status-shower="statusShower" :class="tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
+
+            <Poop
+                v-show="gameData.isPooped && (location==='home' || location==='food')"
+                class="pointer-events-auto"
+            />
           </div>
-          <div class="absolute inset-0 pointer-events-none overflow-hidden z-50">
-            <template v-for="group in activeExp" :key="group.id">
-              <img
-                  v-for="exp in group.exp"
-                  :key="exp.id"
-                  :style="{
-                      left: `${exp.x}px`,
-                      top: `${exp.y}px`,
-                      animationDelay: `${exp.delay}s`
-                    }"
-                  src="/gamePlay/exp.webp"
-                  class="absolute w-5 animate-expFly pointer-events-none"
-                  alt=""
-              />
-            </template>
-          </div>
-          <Transition name="combo-fade">
-            <img
-                v-if="isComboAnimating"
-                :src="getCombo()"
-                class="absolute brightness-130 text-2xl right-30 top-30 select-none z-50 animate-float-combo pointer-events-none"
-                :class="{ 'w-14': comboMultiplier >= 1,'w-15': comboMultiplier >= 2,'w-17': comboMultiplier >= 3,'w-19': comboMultiplier >= 5,'z-205': tutorialStep === 3 || tutorialStep === 6 || tutorialStep === 7 }"
-                alt="">
-          </Transition>
-
-          <div class="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible z-30">
-            <!-- Добавь pointer-events-auto, если CloudMessage кликабелен -->
-            <CloudMessage class="pointer-events-auto"/>
-          </div>
-
-          <Status
-              :class=" tutorialStep === 3 ? 'z-205' : ''"
-              v-if="activeStatus.show "
-              :status="true"
-              :text="activeStatus.text"
-              :image="activeStatus.image"
-              :additional="activeStatus.additional"
-              :bg-color="activeStatus.bgColor"
-              class="pointer-events-auto"
-          />
-
-          <PetStinky :class=" tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
-          <PetFoam :status-foam="statusFoam" :class=" tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
-          <PetSmoke :status-smoke="statusSmoke"/>
-          <PetShower :status-shower="statusShower" :class=" tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
-
-          <!-- Включаем клики обратно для Poop и Nameplate -->
-          <Poop
-              v-show="gameData.isPooped && (location==='home' || location==='food')"
-              class="pointer-events-auto"
-          />
-
-
         </div>
-        <div
-            class="absolute  inset-0 z-10 pointer-events-none"
-            :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
-            v-show="(location === 'home' || location === 'food')"
-        >
-          <Nameplate class="pointer-events-auto"/>
-        </div>
-
       </div>
       <PetSideMenu/>
     </div>
@@ -417,13 +395,11 @@ onUnmounted(() => {
     <!-- Меню -->
     <div class="mt-auto pb-4 shrink-0">
       <PetMenu/>
-
     </div>
     <TutorialOverlay/>
 
   </div>
 </template>
-
 
 <style scoped>
 .fade-sun-enter-active,
@@ -437,110 +413,39 @@ onUnmounted(() => {
   transform: scale(1);
 }
 
-.animate-dark-base {
-  /* Фиксирует начальное состояние до запуска анимации */
-  filter: brightness(1);
-}
-
-@keyframes animateDarkIn {
-  0% {
-    filter: brightness(1);
-  }
-  /* Убраны промежуточные кадры (15%, 45%) — cubic-bezier сделает перепад между 1 и 0.3 идеально плавным */
-  100% {
-    filter: brightness(0.3);
-  }
-}
-
-@keyframes animateDarkOut {
-  0% {
-    filter: brightness(0.3);
-  }
-  100% {
-    filter: brightness(1);
-  }
-}
-
-.animate-dark-in,
-.animate-dark-out {
-  /* Жесткий форс GPU без перерисовок */
-  will-change: filter;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  perspective: 1000px;
-
-  /* Изоляция слоя: предотвращает артефакты размытия по краям */
-  contain: paint;
-  isolation: isolate;
-}
-
-.animate-dark-in {
-  /* Кривая cubic-bezier(0.16, 1, 0.3, 1) даёт ультра-плавный "доводчик" в конце */
-  animation: animateDarkIn 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-dark-out {
-  animation: animateDarkOut 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-
 @keyframes moonFlash {
-  0% {
-    opacity: 0;
-  }
-  15% {
-    opacity: 0.45; /* Быстро проявилась */
-  }
-  45% {
-    opacity: 0.45; /* Висит в полной яркости */
-  }
-
-  100% {
-    opacity: 0; /* Плавно затухает на протяжении 55% времени (0.55 сек) */
-  }
+  0% { opacity: 0; }
+  15% { opacity: 0.45; }
+  45% { opacity: 0.45; }
+  100% { opacity: 0; }
 }
 
 .animate-moonFlash {
-  /* Заменяем ease-in-out на cubic-bezier для шелковистого затухания */
   animation: moonFlash 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
-/* 1. Твоя анимация покачивания (бесконечный цикл, пока висит плашка) */
 @keyframes floatCombo {
-  0% {
-    transform: translate(70px, -70px) scale(1) rotate(15deg);
-  }
-  25% {
-    transform: translate(70px, -70px) scale(1) rotate(-15deg);
-  }
-  50% {
-    transform: translate(70px, -70px) scale(1) rotate(15deg);
-  }
-  75% {
-    transform: translate(70px, -70px) scale(1) rotate(-15deg);
-  }
-  100% {
-    transform: translate(70px, -70px) scale(1) rotate(15deg);
-  }
+  0% { transform: translate(70px, -70px) scale(1) rotate(15deg); }
+  25% { transform: translate(70px, -70px) scale(1) rotate(-15deg); }
+  50% { transform: translate(70px, -70px) scale(1) rotate(15deg); }
+  75% { transform: translate(70px, -70px) scale(1) rotate(-15deg); }
+  100% { transform: translate(70px, -70px) scale(1) rotate(15deg); }
 }
 
 .animate-float-combo {
   animation: floatCombo 0.5s ease-in-out infinite;
 }
 
-/* 2. Плавное появление и плавное растворение во Vue Transition */
 .combo-fade-enter-active,
 .combo-fade-leave-active {
   transition: opacity 1s ease, transform 0.5s ease;
 }
 
-/* Состояние до появления и после исчезновения */
 .combo-fade-enter-from,
 .combo-fade-leave-to {
   opacity: 0;
   transform: scale(0.6) translateY(10px);
 }
-
 
 @keyframes coinFly {
   0% {
@@ -549,16 +454,13 @@ onUnmounted(() => {
   }
   20% {
     opacity: 0.5;
-    /* Монетка слегка взлетает вверх относительно точки клика */
     transform: translate(0, -30px) scale(1.2);
   }
   25% {
     opacity: 1;
-    /* Монетка слегка взлетает вверх относительно точки клика */
     transform: translate(0px, -70px) scale(1.2);
   }
   100% {
-    /* Финальный прилёт в угол (счётчик) */
     transform: translate(0px, -250px) scale(0.3);
     opacity: 0;
   }
@@ -570,7 +472,6 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-
 @keyframes coinExp {
   0% {
     transform: translate(0, 0) scale(0.3);
@@ -578,16 +479,13 @@ onUnmounted(() => {
   }
   20% {
     opacity: 0.5;
-    /* Монетка слегка взлетает вверх относительно точки клика */
     transform: translate(0, -30px) scale(1.2);
   }
   25% {
     opacity: 1;
-    /* Монетка слегка взлетает вверх относительно точки клика */
     transform: translate(0px, -70px) scale(1.2);
   }
   100% {
-    /* Финальный прилёт в угол (счётчик) */
     transform: translate(0px, -250px) scale(0.3);
     opacity: 0;
   }
@@ -599,17 +497,10 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-
 @keyframes popCharacter {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
 .animate-pop {
@@ -617,15 +508,9 @@ onUnmounted(() => {
 }
 
 @keyframes vibrate {
-  0% {
-    transform: translate(1px, 1px);
-  }
-  50% {
-    transform: translate(-0.1px, -0.1px);
-  }
-  100% {
-    transform: translate(-0.1px, 0.1px);
-  }
+  0% { transform: translate(1px, 1px); }
+  50% { transform: translate(-0.1px, -0.1px); }
+  100% { transform: translate(-0.1px, 0.1px); }
 }
 
 .animate-vibrate {
@@ -643,12 +528,8 @@ onUnmounted(() => {
 }
 
 @keyframes sleep-breath {
-  0%, 100% {
-    transform: scale(1) translateY(0);
-  }
-  50% {
-    transform: scale(1.03) translateY(2px);
-  }
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.03) translateY(2px); }
 }
 
 @keyframes float-z {
@@ -656,9 +537,7 @@ onUnmounted(() => {
     opacity: 0;
     transform: translate(0, 0) scale(0.6) rotate(-10deg);
   }
-  30% {
-    opacity: 1;
-  }
+  30% { opacity: 1; }
   100% {
     opacity: 0;
     transform: translate(25px, -35px) scale(1.2) rotate(10deg);
@@ -684,9 +563,7 @@ onUnmounted(() => {
     opacity: 0;
     transform: scale(0.3) translateY(10px);
   }
-  70% {
-    transform: scale(1.05) translateY(-2px);
-  }
+  70% { transform: scale(1.05) translateY(-2px); }
   100% {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -694,12 +571,8 @@ onUnmounted(() => {
 }
 
 @keyframes cloudFloat {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-2px) scale(1.02);
-  }
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.02); }
 }
 
 .animate-thought-cloud {
@@ -707,6 +580,4 @@ onUnmounted(() => {
   cloudFloat 3s ease-in-out 0.4s infinite;
   transform-origin: center bottom;
 }
-
-
 </style>
