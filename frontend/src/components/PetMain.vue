@@ -402,13 +402,13 @@ onUnmounted(() => {
 
         </div>
         <div
-            class="absolute inset-0 z-10 pointer-events-none"
-            :class="gameData.sleep ? 'animate-dark-in' : 'brightness-100'"
+            class="absolute  inset-0 z-10 pointer-events-none"
+            :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
             v-show="(location === 'home' || location === 'food')"
         >
           <Nameplate class="pointer-events-auto"/>
         </div>
-        <div v-if="location==='home' || location==='food'" class="absolute z-0 w-18 right-3 -top-2">
+        <div :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'" v-if="location==='home' || location==='food'" class="absolute z-0 w-18 right-3 -top-2">
           <img src="/gamePlay/photo_frame.webp?v=2" alt="">
         </div>
       </div>
