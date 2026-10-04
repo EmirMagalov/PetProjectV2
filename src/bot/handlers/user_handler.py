@@ -1,9 +1,9 @@
-from aiogram import Router, types
+from aiogram import Router, types,F
 from aiogram.filters import Command
 from common.config import settings
 from aiogram.types import FSInputFile
 from aiogram.utils.media_group import MediaGroupBuilder
-
+from common.config import ADMIN_IDS
 user_router = Router()
 
 PHOTO_CACHE = {
@@ -49,4 +49,37 @@ async def start_handler(message: types.Message):
         reply_markup=keyboard
     )
 
-# ⚠️ Замени на свой Telegram ID, чтобы только ты мог делать рассылку
+
+@user_router.message(F.text.lower().startswith("отзыв"))
+async def feedback_handler(message: types.Message):
+    # Извлекаем сам текст отзыва (убираем слово "Отзыв:")
+    feedback_text = message.text[6:].strip()
+
+    if not feedback_text:
+        await message.answer("⚠️ Вы написали «Отзыв:», но забыли добавить сам текст. Попробуйте еще раз!")
+        return
+
+    # Формируем информацию об отправителе
+    user_info = (
+        f"📩 **Новый отзыв!**\n\n"
+        f"👤 **От:** {message.from_user.full_name} "
+        f"(@{message.from_user.username or 'без_юзернейма'})\n"
+        f"🆔 **ID:** `{message.from_user.id}`\n\n"
+        f"💬 **Текст:**\n{feedback_text}"
+    )
+
+    try:
+        # Отправляем сообщение администратору
+        for admin in ADMIN_IDS:
+            await message.bot.send_message(
+                chat_id=admin,
+                text=user_info,
+                parse_mode="Markdown"
+            )
+
+        # Подтверждаем пользователю отправку
+        await message.answer("✨ Спасибо за отзыв!")
+
+    except Exception as e:
+        await message.answer("❌ Произошла ошибка при отправке отзыва. Попробуйте позже.")
+        print(f"Ошибка отправки отзыва админу: {e}")

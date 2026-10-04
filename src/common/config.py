@@ -1,6 +1,8 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+ADMIN_IDS = [1059422557]
+
 class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str
     DOMAIN:str

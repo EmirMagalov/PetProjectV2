@@ -1,25 +1,26 @@
 import types
 
-from aiogram import Router, F as aiogram_F, types,Bot
+from aiogram import Router, F as aiogram_F, types, Bot
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from backend.models.pet import Pet as PetModel
 from tortoise.expressions import F as db_f
+
+from common.config import ADMIN_IDS
+
 admin_router = Router()
 
-ADMIN_IDS = [1059422557]
 
-
-def keyboard_callback(callback:dict[str,str]):
+def keyboard_callback(callback: dict[str, str]):
     keyboard = InlineKeyboardBuilder()
     for key, value in callback.items():
         keyboard.add(InlineKeyboardButton(text=key, callback_data=value))
     return keyboard.as_markup()
 
 
-async def static_text(page: int, per_page: int = 5,bot=None):
+async def static_text(page: int, per_page: int = 5, bot=None):
     offset = (page - 1) * per_page
     total_count = await PetModel.all().count()
 
@@ -37,10 +38,12 @@ async def static_text(page: int, per_page: int = 5,bot=None):
         coins = pet.coins
         try:
             chat_info = await bot.get_chat(tg_id)
-            user_name = chat_info.first_name or "Неизвестен"
+            user_name = f"@{chat_info.username}" or "Неизвестен"
+            first_name = chat_info.first_name or "Неизвестен"
         except Exception:
-            user_name = f"Неизвестен"
-        statistics += f"Пользователь: {user_name}({tg_id})\nИмя питомца: {name}\nКликов: {click_counter}\nУровень: {level}\nМонет: {coins}\n---------\n"
+            user_name = "Неизвестен"
+            first_name = "Неизвестен"
+        statistics += f"Пользователь: {user_name}({first_name})\nИмя питомца: {name}\nКликов: {click_counter}\nУровень: {level}\nМонет: {coins}\n---------\n"
 
     return f"📊 <b>Всего пользователей:</b> {total_count} (Стр. {page})\n\n{statistics}", total_count
 
@@ -54,7 +57,7 @@ async def statistics_handler(message: types.Message, bot: Bot):
     per_page = 5
 
     # Получаем текст и общее количество записей из функции
-    text, total_count = await static_text(page=page, per_page=per_page,bot=bot)
+    text, total_count = await static_text(page=page, per_page=per_page, bot=bot)
 
     # Формируем кнопки с защитой
     buttons = {}
@@ -68,11 +71,11 @@ async def statistics_handler(message: types.Message, bot: Bot):
 
 
 @admin_router.callback_query(aiogram_F.data.startswith('page_'))
-async def pagination_handler(call: types.CallbackQuery,bot:Bot):
+async def pagination_handler(call: types.CallbackQuery, bot: Bot):
     page = int(call.data.split('_')[1])
     per_page = 5
 
-    text, total_count = await static_text(page=page, per_page=per_page,bot=bot)
+    text, total_count = await static_text(page=page, per_page=per_page, bot=bot)
 
     buttons = {}
 
@@ -93,6 +96,7 @@ async def pagination_handler(call: types.CallbackQuery,bot:Bot):
         parse_mode="HTML",
         reply_markup=keyboard_callback(buttons)
     )
+
 
 @admin_router.message(Command("give_coins"))
 async def give_me_coins_handler(message: types.Message):
@@ -387,7 +391,8 @@ async def send_coins_to_user_handler(message: types.Message):
         return
 
     # Если текст сообщения передан, используем его, иначе дефолтный
-    custom_text = command_parts[3] if len(command_parts) > 3 else f"🎁 Персональный подарок от администратора: +{coins_amount} монет!"
+    custom_text = command_parts[3] if len(
+        command_parts) > 3 else f"🎁 Персональный подарок от администратора: +{coins_amount} монет!"
 
     # Проверяем, существует ли питомец/пользователь в базе
     pet_exists = await PetModel.filter(tg_id=target_tg_id).exists()
@@ -415,6 +420,7 @@ async def send_coins_to_user_handler(message: types.Message):
             reply_markup=keyboard,
             parse_mode="HTML"
         )
-        await message.answer(f"✅ Награда успешно отправлена пользователю <code>{target_tg_id}</code>!", parse_mode="HTML")
+        await message.answer(f"✅ Награда успешно отправлена пользователю <code>{target_tg_id}</code>!",
+                             parse_mode="HTML")
     except Exception as e:
         await message.answer(f"❌ Не удалось отправить сообщение пользователю {target_tg_id}: {e}")
