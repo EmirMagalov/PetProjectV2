@@ -56,7 +56,8 @@ setInterval(() => {
 export const isLoading = ref(true)
 let isDataLoaded = false
 let isSyncLocked = false // Блокировщик сохранения при фокусе/возвращении
-
+export const isApiError = ref(false) // 👈 Флаг ошибки бэкенда
+export const errorMessage = ref('')  // 👈 Текст ошибки
 // --- 3. ЗАЩИТА ОТ СТАРЫХ СЕССИЙ БОТА ---
 const currentSessionKey = window.Telegram?.WebApp?.initData || 'web_debug_mode'
 const savedSessionKey = sessionStorage.getItem('tg_session_signature')
@@ -72,13 +73,13 @@ if (savedSessionKey && savedSessionKey !== currentSessionKey) {
 // --- 4. ЗАГРУЗКА И СИНХРОНИЗАЦИЯ ДАННЫХ ---
 export async function initGameData() {
     isDataLoaded = false
-
-    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    isApiError.value = false // Сбрасываем ошибку перед новой попыткой
     isLoading.value = true
 
+    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
     const maxRetries = 5;
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        // Проверяем, что мы главный мастер
         if (!isMasterTab()) {
             console.warn("⚠️ Загрузка отменена: вкладка не является ведущей.")
             return
@@ -90,7 +91,9 @@ export async function initGameData() {
                 axios.get(`${API_URL}/${tgId}?_t=${Date.now()}`),
                 minDelay
             ])
+
             const serverData = response.data
+            // ... (твой существующий маппинг gameData.name, level, coins и т.д.) ...
             gameData.name = serverData.name && serverData.name.trim() ? serverData.name : 'Имя:'
             gameData.level = serverData.level
             gameData.exp = serverData.exp
@@ -110,22 +113,27 @@ export async function initGameData() {
             gameData.cart = serverData.cart || {}
             gameData.unlockedHeads = serverData.unlocked_heads || []
             gameData.equippedHead = serverData.equipped_head || null
-            gameData.unlockedCostumes = serverData.unlocked_costumes || [] // Исправлено получение
+            gameData.unlockedCostumes = serverData.unlocked_costumes || []
             gameData.equippedCostume = serverData.equipped_costume || null
             gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
 
             isDataLoaded = true
+
+            // Если всё прошло успешно, выключаем экран загрузки
             setTimeout(() => {
                 isLoading.value = false;
-            }, 1000);
+            }, 500);
 
-            return;
+            return; // Выходим из функции при успехе
 
         } catch (e) {
-            console.warn(`⚠️ Попытка ${attempt} из ${maxRetries} не удалась (сервер греется)...`, e)
+            console.warn(`⚠️ Попытка ${attempt} из ${maxRetries} не удалась...`, e)
 
             if (attempt === maxRetries) {
+                // 🛑 Все попытки исчерпаны: фиксируем ошибку и НЕ выключаем isLoading
                 console.error("❌ Не удалось подключиться к бэкенду после всех попыток.")
+                isApiError.value = true
+                errorMessage.value = "Сервер недоступен. Проверьте интернет-соединение."
             } else {
                 await new Promise(resolve => setTimeout(resolve, 2000))
             }

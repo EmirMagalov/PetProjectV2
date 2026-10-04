@@ -28,7 +28,7 @@ watch(isEditing, async (newVal) => {
 <template>
   <div class="absolute w-19 left-4 top-19 ">
     <div class="relative w-18">
-      <img src="/gamePlay/nameplate_icons.webp" alt="" class="w-20 h-auto">
+      <img src="/gamePlay/nameplate_icons.webp?v=1" alt="" class="w-20 h-auto">
 
       <!-- Отображение имени -->
       <div

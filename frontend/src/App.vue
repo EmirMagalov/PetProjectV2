@@ -2,33 +2,68 @@
 import PetMain from "@/components/PetMain.vue";
 import Test from "@/components/Test.vue";
 import { onMounted } from "vue";
-import { initGameData, isLoading } from "@/scripts/api.js";
+// 1. Добавляем импорт isApiError и errorMessage
+import { initGameData, isLoading, isApiError, errorMessage } from "@/scripts/api.js";
 import { preloadImages } from "@/scripts/preloadImages.js";
 
-onMounted(async () => {
-  // Устанавливаем статус загрузки в true
-  isLoading.value = true
+const loadGame = async () => {
+  isLoading.value = true;
+  isApiError.value = false; // Сбрасываем ошибку перед загрузкой
 
   try {
-    // Запускаем загрузку данных и картинок параллельно
+    // Запускаем загрузку данных и предзагрузку картинок параллельно
     await Promise.all([
       initGameData(),
       preloadImages()
-    ])
+    ]);
   } catch (e) {
-    console.error("Ошибка при первоначальной загрузке:", e)
+    console.error("Ошибка при первоначальной загрузке:", e);
   } finally {
-    // Снимаем оверлей только когда всё загружено
-    isLoading.value = false
+    // 2. Снимаем прелоадер ТОЛЬКО если НЕТ ошибки сервера
+    if (!isApiError.value) {
+      isLoading.value = false;
+    }
   }
-})
+};
+
+onMounted(() => {
+  loadGame();
+});
 </script>
 
 <template>
-  <!-- 🛑 ОВЕРЛЕЙ ЗАГРУЗКИ (БЛОКИРУЕТ ИНТЕРФЕЙС, ПОКА ДАННЫЕ И КАРТИНКИ НЕ ПРИШЛИ) -->
   <Transition name="fade">
+    <!-- 🛑 1. ЭКРАН ОШИБКИ (Показывается, если бэкенд не ответил) -->
     <div
-        v-if="isLoading"
+        v-if="isApiError"
+        class="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-gradient-to-br from-zinc-950 via-slate-900 to-black text-white p-6 text-center"
+    >
+      <div class="relative flex items-center justify-center mb-4">
+        <div class="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-3xl animate-pulse">
+          🌐
+        </div>
+      </div>
+
+      <h2 class="text-xl font-extrabold text-red-400 mb-2 uppercase tracking-wide">
+        Ошибка подключения
+      </h2>
+
+      <p class="text-sm text-gray-300 mb-6 max-w-xs leading-relaxed">
+        {{ errorMessage || 'Не удалось получить данные с сервера. Проверьте интернет-соединение.' }}
+      </p>
+
+      <!-- Кнопка перезапуска -->
+      <button
+          @click="loadGame"
+          class="px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 active:scale-95 text-black font-extrabold rounded-2xl shadow-lg transition-all"
+      >
+        Повторить попытку
+      </button>
+    </div>
+
+    <!-- ⏳ 2. ОВЕРЛЕЙ ЗАГРУЗКИ (Показывается пока идет загрузка и нет ошибок) -->
+    <div
+        v-else-if="isLoading"
         class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-amber-950 via-red-950 to-black text-white"
     >
       <div class="relative flex items-center justify-center mb-4">
@@ -37,7 +72,7 @@ onMounted(async () => {
 
         <!-- Анимированный логотип/иконка -->
         <div class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
-          <div class="w-full h-full bg-red-900 rounded-full flex items-center justify-center border">
+          <div class="w-full h-full bg-red-900 rounded-full flex items-center justify-center border border-amber-400/30">
             <img src="/gamePlay/logo_icons.webp" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
           </div>
         </div>
@@ -52,6 +87,7 @@ onMounted(async () => {
       <div class="mt-4 w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></div>
     </div>
 
+    <!-- 🎮 3. ИГРА (Рендерится только при успешной загрузке) -->
     <main v-else>
       <RouterView />
     </main>
