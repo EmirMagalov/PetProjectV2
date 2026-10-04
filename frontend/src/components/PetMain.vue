@@ -245,17 +245,19 @@ onUnmounted(() => {
           <!-- 1. Самый дальний мягкий ореол -->
           <div v-show="gameData.sleep" class="absolute top-12 right-10 z-20 flex items-center justify-center">
             <!-- 1. Направляющий конусный луч (живой свет) -->
-            <div class="absolute top-1 -right-20 w-42 h-56 rotate-[-30deg] blur-lg opacity-70 pointer-events-none">
+            <div class="absolute top-12 -right-18 w-52 h-56 blur-lg -rotate-30 opacity-85 pointer-events-none">
               <div
-                  class="w-full h-full bg-[conic-gradient(from_150deg_at_50%_0%,rgba(253,224,71,0.6)_0deg,rgba(251,191,36,0.1)_180deg,transparent_180deg)]"></div>
+                  class="w-full h-full bg-[conic-gradient(from_150deg_at_90%_0%,rgba(253,224,71,0.6)_0deg,rgba(251,191,36,0.1)_180deg,transparent_180deg)]"></div>
             </div>
 
             <!-- 2. Мягкое объемное облако света (без резких круглых границ) -->
-            <div class="absolute w-36 h-36 bg-amber-300/30 blur-2xl pointer-events-none "></div>
+            <div class="absolute w-23 h-20 -top-5 blur-xl -right-10 bg-amber-300/30  pointer-events-none "></div>
 
             <!-- 3. Яркая вспышка-блик (эллипс, а не круг) -->
             <div
-                class="relative z-10 w-4 h-4 top-2 -left-1 bg-yellow-100 rounded-full rotate-12 blur-[5px] opacity-50 shadow-[0_0_20px_#fde047]"></div>
+                class="relative z-10 w-5 h-5 top-2 left-3.5 bg-yellow-100 rounded-full rotate-12 blur-[3px] opacity-25 shadow-[0_0_20px_#fde047]"></div>
+            <div
+                class="relative z-10 w-4 h-1 top-5 -left-1 bg-yellow-300 brightness-130 rounded-full  blur-[3px] shadow-[0_0_20px_#fde047]"></div>
           </div>
 
         </div>
