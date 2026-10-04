@@ -218,7 +218,7 @@ const foodWarning = computed(() => {
                 class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
                 style="background-image: url('/gamePlay/saloon.webp')"
             ></div>
-            <button class="text-md font-bold text-gray-600 pointer-events-none">Салун(Beta)</button>
+            <button class="text-md font-bold text-gray-600 pointer-events-none">Салун</button>
           </div>
 
         </div>
