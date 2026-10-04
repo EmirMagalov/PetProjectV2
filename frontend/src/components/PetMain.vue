@@ -232,7 +232,7 @@ onUnmounted(() => {
             :class="gameData.sleep ? 'animate-dark-in' : 'animate-dark-out'"
         />
         <div class="absolute w-18 right-3 -top-2">
-          <img src="/gamePlay/photo_frame.webp?v=1" alt="">
+          <img src="/gamePlay/photo_frame.webp?v=2" alt="">
         </div>
 
         <div
