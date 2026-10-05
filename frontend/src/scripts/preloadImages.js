@@ -1,30 +1,37 @@
-import {APP_VERSION} from "@/scripts/constants.js";
+import { APP_VERSION } from "@/scripts/constants.js";
+// Импортируем сгенерированный массив всех картинок из public
+import rawImages from "@/scripts/assetsList.json";
 
-const rawImages = [
-    '/gamePlay/logo_icons.webp',
-    '/location/home.webp',
-    '/location/bath.webp',
-    '/gamePlay/fridge.webp',
-    '/gamePlay/bath_icon.webp',
-    '/gamePlay/sleep_icon.webp',
-    '/gamePlay/sun_icon.webp',
-    '/gamePlay/shower_icon.webp',
-    '/gamePlay/shampoo_icon.webp',
-    '/gamePlay/back_icon.webp',
-    '/gamePlay/market.webp',
-    '/gamePlay/fridge_empty.webp',
+export const imagesToPreload = rawImages.map(path => `${path}?v=${APP_VERSION}`);
 
-]
-export const imagesToPreload = rawImages.map(path => `${path}?v=${APP_VERSION}`)
-export function preloadImages() {
+export function preloadImages(onProgress) {
+    let loadedCount = 0;
+    const total = imagesToPreload.length;
+
+    if (total === 0) {
+        if (onProgress) onProgress(100);
+        return Promise.resolve();
+    }
+
     const promises = imagesToPreload.map((src) => {
         return new Promise((resolve) => {
-            const img = new Image()
-            img.src = src
-            img.onload = () => resolve(src)
-            img.onerror = () => resolve(src) // Ошибка не блокирует всю загрузку
-        })
-    })
+            const img = new Image();
+            img.src = src;
 
-    return Promise.all(promises)
+            const handleLoad = () => {
+                loadedCount++;
+                if (typeof onProgress === "function") {
+                    const percent = Math.round((loadedCount / total) * 100);
+                    onProgress(percent);
+                }
+                resolve(src);
+            };
+
+            img.onload = handleLoad;
+            img.onerror = handleLoad;
+        });
+
+    });
+
+    return Promise.all(promises);
 }
