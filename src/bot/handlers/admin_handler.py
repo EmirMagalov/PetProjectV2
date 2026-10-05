@@ -38,7 +38,7 @@ async def static_text(page: int, per_page: int = 5, bot=None):
         coins = pet.coins
         try:
             chat_info = await bot.get_chat(tg_id)
-            user_name = f"@{chat_info.username}" or "Неизвестен"
+            user_name = f"@{chat_info.username}" if chat_info.username else "Неизвестен"
             first_name = chat_info.first_name or "Неизвестен"
         except Exception:
             user_name = "Неизвестен"

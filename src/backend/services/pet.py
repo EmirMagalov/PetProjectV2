@@ -1,4 +1,6 @@
 import random
+import time
+
 from backend.models.pet import Pet as PetModel
 
 # === Настройки расхода (легко менять) ===
@@ -41,11 +43,13 @@ async def pet_tick_job():
             # Шанс завонять (1/90 в минуту)
             if not pet.stinky and random.random() < (1 / 90):
                 pet.stinky = True
-
+        current_time = int(time.time())
+        last_interaction = int(pet.last_interaction) if pet.last_interaction else 0
+        seconds_since_last_action = current_time - last_interaction
         # 3. Накопление грязи и болезнь (180 минут = 3 часа)
         if pet.is_pooped or pet.stinky:
             pet.poop_bad_minutes += 1
-            if pet.poop_bad_minutes >= 180:
+            if pet.poop_bad_minutes >= 180 and seconds_since_last_action >= 1800:
                 pet.sick = True
         else:
             pet.poop_bad_minutes = 0
