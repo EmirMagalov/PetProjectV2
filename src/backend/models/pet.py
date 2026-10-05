@@ -55,6 +55,15 @@ class Pet(models.Model):
     stinky_bad_minutes = fields.IntField(default=0)
     poop_bad_minutes = fields.IntField(default=0)
 
+    def clean_up_stats(self):
+        """Автоматически сбрасывает счетчики запущенности, если показатели в норме."""
+        # Убрали грязь — сбросили таймер грязи
+        if not self.is_pooped and not self.stinky:
+            self.poop_bad_minutes = 0
+
+        # Есть еда и энергия — сбросили таймер голода
+        if self.food_level > 0 and self.energy > 0:
+            self.bad_stats_minutes = 0
 
     class Meta:
         db_table = "pet"

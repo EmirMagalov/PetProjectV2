@@ -1,10 +1,9 @@
-import time
 import asyncio
-import random
-from common.config import settings
+import time
 from aiogram import types
 from backend.models.pet import Pet as PetModel
 from bot.main import bot
+from common.config import settings
 
 keyboard = types.InlineKeyboardMarkup(
     inline_keyboard=[
@@ -18,9 +17,9 @@ keyboard = types.InlineKeyboardMarkup(
 )
 
 
-async def send_telegram_message(pet_id: int, tg_id: int, text: str) -> bool:
+async def send_telegram_message(tg_id: int, text: str) -> bool:
     """Отправляет уведомление в Telegram, если игрок оффлайн (>35 сек с последнего действия)."""
-    fresh_pet = await PetModel.get_or_none(id=pet_id)
+    fresh_pet = await PetModel.get_or_none(tg_id=tg_id)
     if not fresh_pet:
         return False
 
@@ -52,7 +51,8 @@ async def check_pet_notifications_job():
             if pet.addiction_streak > 0:
                 if pet.addiction_time > 0 and (now - pet.addiction_time) >= 1200:
                     if not getattr(pet, "addiction_notified", False):
-                        if await send_telegram_message(pet.id, pet.tg_id, "🚬 Трубка сама себя не покурит!"):
+                        # Исправлено: 2 аргумента вместо 3
+                        if await send_telegram_message(pet.tg_id, "🚬 Трубка сама себя не покурит!"):
                             pet.addiction_notified = True
                             is_notified_changed = True
             else:
@@ -63,7 +63,7 @@ async def check_pet_notifications_job():
             # --- 2. ПРОВЕРКА НА ГИБЕЛЬ ---
             if pet.lives <= 0:
                 if not pet.game_over_notified:
-                    if await send_telegram_message(pet.id, pet.tg_id, "💀 Питомец погиб из-за плохих условий!"):
+                    if await send_telegram_message(pet.tg_id, "💀 Питомец погиб из-за плохих условий!"):
                         pet.game_over_notified = True
                         pet.low_lives_notified = False
                         pet.critical_life_notified = False
@@ -76,7 +76,7 @@ async def check_pet_notifications_job():
                 # --- 3. ПРЕДУПРЕЖДЕНИЯ О ЖИЗНЯХ ---
                 if pet.lives == 2:
                     if not pet.low_lives_notified:
-                        if await send_telegram_message(pet.id, pet.tg_id, "❤️ У питомца осталось всего жизней: <b>2</b>!"):
+                        if await send_telegram_message(pet.tg_id, "❤️ У питомца осталось всего жизней: <b>2</b>!"):
                             pet.low_lives_notified = True
                             is_notified_changed = True
                 else:
@@ -87,7 +87,7 @@ async def check_pet_notifications_job():
                 if pet.lives == 1:
                     if not pet.critical_life_notified:
                         if await send_telegram_message(
-                            pet.id, pet.tg_id, "🚨 <b>Внимание!</b> У питомца осталась всего <b>1 жизнь</b>! Он на грани гибели!"
+                            pet.tg_id, "🚨 <b>Внимание!</b> У питомца осталась всего <b>1 жизнь</b>! Он на грани гибели!"
                         ):
                             pet.critical_life_notified = True
                             is_notified_changed = True
@@ -99,7 +99,7 @@ async def check_pet_notifications_job():
                 # --- 4. ГОЛОД И ЭНЕРГИЯ ---
                 if pet.food_level < 20:
                     if not pet.hungry_notified:
-                        if await send_telegram_message(pet.id, pet.tg_id, "🍽️ Питомец проголодался!"):
+                        if await send_telegram_message(pet.tg_id, "🍽️ Питомец проголодался!"):
                             pet.hungry_notified = True
                             is_notified_changed = True
                 else:
@@ -109,7 +109,7 @@ async def check_pet_notifications_job():
 
                 if pet.energy < 20:
                     if not pet.energy_notified:
-                        if await send_telegram_message(pet.id, pet.tg_id, "😴 Питомец сильно устал и хочет спать!"):
+                        if await send_telegram_message(pet.tg_id, "😴 Питомец сильно устал и хочет спать!"):
                             pet.energy_notified = True
                             is_notified_changed = True
                 else:
@@ -120,7 +120,7 @@ async def check_pet_notifications_job():
                 # --- 5. ГРЯЗЬ И БОЛЕЗНЬ ---
                 if pet.is_pooped:
                     if not pet.poop_notified:
-                        if await send_telegram_message(pet.id, pet.tg_id, "💩 Питомец тут набедокурил... Надо убрать!"):
+                        if await send_telegram_message(pet.tg_id, "💩 Питомец тут набедокурил... Надо убрать!"):
                             pet.poop_notified = True
                             is_notified_changed = True
                 else:
@@ -130,7 +130,7 @@ async def check_pet_notifications_job():
 
                 if pet.stinky:
                     if not pet.stinky_notified:
-                        if await send_telegram_message(pet.id, pet.tg_id, "🤢 Питомец начал сильно вонять! Пора его помыть!"):
+                        if await send_telegram_message(pet.tg_id, "🤢 Питомец начал сильно вонять! Пора его помыть!"):
                             pet.stinky_notified = True
                             is_notified_changed = True
                 else:
@@ -140,7 +140,7 @@ async def check_pet_notifications_job():
 
                 if pet.sick:
                     if not pet.sick_notified:
-                        if await send_telegram_message(pet.id, pet.tg_id, "🤒 Питомец заболел, нужно его подлечить!"):
+                        if await send_telegram_message(pet.tg_id, "🤒 Питомец заболел, нужно его подлечить!"):
                             pet.sick_notified = True
                             is_notified_changed = True
                 else:
@@ -148,10 +148,9 @@ async def check_pet_notifications_job():
                         pet.sick_notified = False
                         is_notified_changed = True
 
-            # 💡 Сохраняем ТОЛЬКО поля флагов уведомлений, не затрагивая игровой процесс
+            # Сохраняем только реальные поля модели Tortoise
             if is_notified_changed:
                 await pet.save(update_fields=[
-                    "addiction_notified",
                     "game_over_notified",
                     "low_lives_notified",
                     "critical_life_notified",

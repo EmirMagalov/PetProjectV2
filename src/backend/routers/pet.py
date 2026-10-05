@@ -1,6 +1,7 @@
 import time
 from fastapi import APIRouter, HTTPException
 from backend.models.pet import Pet as PetModel
+from bot.workers.pet import check_pet_notifications_job
 
 pet_router = APIRouter(prefix="/api", tags=["api"])
 
@@ -23,8 +24,12 @@ async def get_pet(tg_id: int):
                 "poop_bad_minutes": 0,
                 "cart": {"burger": 1, "shampoo": 1},
                 "last_update": time.time(),
+                "last_interaction": int(time.time()),
             },
         )
+    else:
+        pet.last_interaction = int(time.time())
+        await pet.save(update_fields=["last_interaction"])
     return pet
 
 
@@ -35,20 +40,21 @@ async def update_pet(data: dict):
     if not pet:
         raise HTTPException(status_code=404, detail="Pet not found")
 
-    # Применяем действия игрока (кормление, уборка, лечение)
+    updated_fields = ["last_interaction", "last_update", "bad_stats_minutes", "poop_bad_minutes"]
+
+    # Применяем действия игрока
     for key, value in data.items():
         if hasattr(pet, key) and key != "tg_id":
             setattr(pet, key, value)
+            updated_fields.append(key)
 
-    # Если убрали грязь — сбрасываем счетчик
-    if not pet.is_pooped and not pet.stinky:
-        pet.poop_bad_minutes = 0
+    current_ts = int(time.time())
+    pet.last_interaction = current_ts
+    pet.last_update = current_ts
+    pet.clean_up_stats()
 
-    # Если покормили — сбрасываем счетчик голода
-    if pet.food_level > 0 and pet.energy > 0:
-        pet.bad_stats_minutes = 0
-
-    await pet.save()
+    # Сохраняем ТОЛЬКО переданные и измененные поля
+    await pet.save(update_fields=list(set(updated_fields)))
     return {"status": "success", "pet": pet}
 
 
@@ -77,6 +83,36 @@ async def reset_pet(data: dict):
     pet.poop_bad_minutes = 0
     pet.cart = {"burger": 1}
     pet.last_update = time.time()
+    pet.last_interaction = int(time.time())
 
+    pet.game_over_notified = False
+    pet.low_lives_notified = False
+    pet.critical_life_notified = False
+    pet.hungry_notified = False
+    pet.energy_notified = False
+    pet.poop_notified = False
+    pet.stinky_notified = False
+    pet.sick_notified = False
+    if hasattr(pet, "addiction_notified"):
+        pet.addiction_notified = False
     await pet.save()
     return {"status": "success", "pet": pet}
+
+
+
+@pet_router.post("/test-notification/{tg_id}")
+async def test_notification(tg_id: int):
+    pet = await PetModel.get_or_none(tg_id=tg_id)
+    if not pet:
+        raise HTTPException(status_code=404, detail="Pet not found")
+
+    # Сбрасываем флаги и ставим триггерные значения
+    pet.hungry_notified = False
+    pet.food_level = 5.0
+    pet.last_interaction = int(time.time()) - 100  # Считаем, что оффлайн > 35 сек
+    await pet.save()
+
+    # Принудительно вызываем функцию проверки
+    await check_pet_notifications_job()
+
+    return {"status": "ok", "message": "Проверка запущена, проверьте Telegram"}
