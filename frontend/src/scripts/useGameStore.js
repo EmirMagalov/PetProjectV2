@@ -94,6 +94,7 @@ export const gameData = reactive({
 
 export async function handleRestart() {
     isGameOver.value = false
+    currentStatus.value = null
     isLoading.value = true
     fruitStreak.value = 0
     await resetPet()
@@ -104,7 +105,7 @@ export async function handleRestart() {
 export async function resetLocal() {
     const savedCoins = gameData.coins
     const savedClicks = gameData.clickCounter
-
+    currentStatus.value = null
     // 2. Применяем дефолтные значения ко всем остальным полям
     Object.assign(gameData, defaultGameData, {
         lastUpdate: Date.now()
