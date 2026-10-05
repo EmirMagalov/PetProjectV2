@@ -1,6 +1,7 @@
 <script setup>
 import {cloudShow, energyFull, showHunger, gameData, lowEnergy} from "@/scripts/useGameStore.js";
 import {computed} from "vue";
+import {APP_VERSION} from "@/scripts/constants.js";
 
 const activeItems = computed(() => {
   let items = 0 // <--- ИСПРАВЛЕНИЕ: let вместо const
@@ -19,7 +20,7 @@ const activeItems = computed(() => {
       v-show="cloudShow && !gameData.sleep "
       class="inset-0 flex items-center  animate-thought-cloud justify-center pointer-events-none overflow-visible z-50">
     <!-- Облако -->
-    <img src="/gamePlay/cloud.webp" class="relative opacity-60" width="85%" alt="">
+    <img :src="`/gamePlay/cloud.webp?v=${APP_VERSION}`" class="relative opacity-60" width="85%" alt="">
 <!--    <div-->
 <!--        v-show="gameData.addictionLevel ===1"-->
 <!--         :class="['absolute flex justify-center items-center top-10 left-44 w-10']">-->
@@ -28,13 +29,13 @@ const activeItems = computed(() => {
     <!-- Hunger -->
     <div v-show="showHunger "
          :class="['absolute flex justify-center items-center', activeItems <= 1 ? 'top-12 left-51 w-10' : 'top-13 left-47 w-8']">
-      <img src="/food/burger.webp" alt="">
+      <img :src="`/food/burger.webp?v=${APP_VERSION}`" alt="">
     </div>
 
     <!-- Energy -->
     <div v-show="energyFull || lowEnergy"
          :class="['absolute flex justify-center items-center gap-1', activeItems <= 1 ? 'top-11 left-50 w-12' : 'top-13 left-56 w-8']">
-      <img :src="energyFull?'/gamePlay/energy_full.webp':(lowEnergy?'/gamePlay/energy_low.webp':'')"  alt="">
+      <img :src="energyFull?`/gamePlay/energy_full.webp?v=${APP_VERSION}`:(lowEnergy?'/gamePlay/energy_low.webp':'')"  alt="">
 <!--      <p class="font-bold text-md text-[#47B949]">{{ gameData.energy }}%</p>-->
     </div>
   </div>

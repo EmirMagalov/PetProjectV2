@@ -5,6 +5,7 @@ import { onMounted } from "vue";
 // 1. Добавляем импорт isApiError и errorMessage
 import { initGameData, isLoading, isApiError, errorMessage } from "@/scripts/api.js";
 import { preloadImages } from "@/scripts/preloadImages.js";
+import {APP_VERSION} from "@/scripts/constants.js";
 
 const loadGame = async () => {
   isLoading.value = true;
@@ -73,7 +74,7 @@ onMounted(() => {
         <!-- Анимированный логотип/иконка -->
         <div class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
           <div class="w-full h-full bg-red-900 rounded-full flex items-center justify-center border border-amber-400/30">
-            <img src="/gamePlay/logo_icons.webp" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
+            <img :src="`/gamePlay/logo_icons.webp?v=${APP_VERSION}`" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
           </div>
         </div>
       </div>

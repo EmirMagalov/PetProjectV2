@@ -2,6 +2,7 @@
 import { ref, nextTick, watch } from 'vue'
 import { gameData } from "@/scripts/useGameStore.js";
 import { isEditing, finishEditing } from "@/scripts/actions.js";
+import {APP_VERSION} from "@/scripts/constants.js";
 
 const inputRef = ref(null)
 
@@ -28,7 +29,7 @@ watch(isEditing, async (newVal) => {
 <template>
   <div class="absolute w-19 left-4 top-19 ">
     <div class="relative w-18">
-      <img src="/gamePlay/nameplate_icons.webp?v=1" alt="" class="w-20 h-auto">
+      <img :src="`/gamePlay/nameplate_icons.webp?v=${APP_VERSION}`" alt="" class="w-20 h-auto">
 
       <!-- Отображение имени -->
       <div

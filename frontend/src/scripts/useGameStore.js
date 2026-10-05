@@ -1,9 +1,9 @@
 import {ref, reactive, watch, computed} from 'vue'
+import {initGameData, isLoading, resetPet} from "@/scripts/api.js";
+import {foodList} from "@/scripts/objectItems.js";
+
 export const mouth = ref('/character/happy_mouth.webp')
 export const sleepTimeRemaining = ref("")
-import {initGameData, isLoading, resetPet} from "@/scripts/api.js";
-
-
 export const isShopOpen = ref(false)
 export const lowEnergy = ref(false)
 export const showHunger = ref(false)
@@ -28,7 +28,7 @@ export const location = ref()
 export const activeTab = ref('food')
 export const warning = ref(false)
 export const isPopping = ref(false)
-
+export const levelStatus = ref(false);
 export const fruitStreak = ref(
     Number(localStorage.getItem('pet_fruitStreak')) || 0
 )
@@ -142,3 +142,100 @@ export function nextTutorialStep() {
     }
 }
 
+export const currentStatus = ref(null)
+
+const STATUS_DURATIONS = {
+    feed: 800,
+    lifeGain: 800,
+    losingLife: 800,
+    levelUp: 800,
+    gameOver: 0 // Не сбрасываем
+}
+
+let statusTimer = null
+
+watch(currentStatus, (newStatus) => {
+    if (statusTimer) {
+        clearTimeout(statusTimer)
+        statusTimer = null
+    }
+
+    if (!newStatus) return
+
+    const duration = STATUS_DURATIONS[newStatus.type] ?? 800
+
+    if (duration > 0) {
+        statusTimer = setTimeout(() => {
+            currentStatus.value = null
+            statusTimer = null
+        }, duration)
+    }
+})
+
+export function showStatus(type, payload = null) {
+    currentStatus.value = { type, payload }
+}
+
+export const activeStatus = computed(() => {
+    // Если ничего не происходит и игра не окончена
+    if (!currentStatus.value && !isGameOver.value) {
+        return { show: false }
+    }
+
+    // Приоритет 1: Смерть питомца
+    if (isGameOver.value || currentStatus.value?.type === 'gameOver') {
+        return {
+            show: true,
+            text: "Питомец погиб!",
+            image: "/gamePlay/grave.webp",
+            bgColor: "bg-[#808080]"
+        }
+    }
+
+    const type = currentStatus.value?.type
+    const payload = currentStatus.value?.payload
+
+    // Приоритет 2: Повышение уровня
+    if (type === 'levelUp') {
+        return {
+            show: true,
+            text: "Уровень повышен",
+            additional: gameData.level,
+            image: null
+        }
+    }
+
+    // Приоритет 3: Потеря жизни (-1)
+    if (type === 'losingLife') {
+        return {
+            show: true,
+            text: "- 1 жизнь!",
+            image: "/gamePlay/heart_broken.webp"
+        }
+    }
+
+    // Приоритет 4: Получение жизни (+1)
+    if (type === 'lifeGain') {
+        return {
+            show: true,
+            text: "+ 1 жизнь!",
+            image: "/gamePlay/heart.webp"
+        }
+    }
+
+    // Приоритет 5: Кормежка (ням-ням)
+    if (type === 'feed') {
+        // Ищем еду по переданному fedItemId или по lastFedItem
+        const targetFoodId = payload?.fedItemId || lastFedItem.value
+        const fedItemObj = foodList.find(item => item.id === targetFoodId)
+
+        return {
+            show: true,
+            text: "Ням-ням!",
+            image: "/gamePlay/hunger.webp",
+            additional: `+${fedItemObj?.foodGain || 0}`
+        }
+    }
+
+    return { show: false }
+})

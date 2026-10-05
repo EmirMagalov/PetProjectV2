@@ -1,6 +1,8 @@
-const imagesToPreload = [
+import {APP_VERSION} from "@/scripts/constants.js";
+
+const rawImages = [
     '/gamePlay/logo_icons.webp',
-    '/location/home.webp?v=2',
+    '/location/home.webp',
     '/location/bath.webp',
     '/gamePlay/fridge.webp',
     '/gamePlay/bath_icon.webp',
@@ -13,7 +15,7 @@ const imagesToPreload = [
     '/gamePlay/fridge_empty.webp',
 
 ]
-
+export const imagesToPreload = rawImages.map(path => `${path}?v=${APP_VERSION}`)
 export function preloadImages() {
     const promises = imagesToPreload.map((src) => {
         return new Promise((resolve) => {

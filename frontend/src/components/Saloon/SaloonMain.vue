@@ -1,7 +1,7 @@
 <script setup>
 import SaloonMenu from "@/components/Saloon/SaloonMenu.vue";
 
-import { onMounted, onUnmounted, ref } from "vue";
+import {onMounted, onUnmounted, ref, watch} from "vue";
 import {blink, gameData} from "@/scripts/useGameStore.js";
 import {
   dealerCards,
@@ -14,11 +14,42 @@ import {
 import SaloonHeaderMenu from "@/components/Saloon/SaloonHeaderMenu.vue";
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import {activeCoins, activeExp} from "@/scripts/actions.js";
+import {useRouter} from "vue-router";
+import {APP_VERSION} from "@/scripts/constants.js";
 
 // =====================================================
 // СОСТОЯНИЕ ЗАГРУЗКИ (LOADER)
 // =====================================================
 const isLoading = ref(true);
+const MIN_ENERGY_REQUIRED = 3;
+const MIN_FOOD_REQUIRED = 3;
+
+watch(gameFinished, (isFinished) => {
+  if (isFinished) {
+    const isOutOfEnergy = gameData.energy < MIN_ENERGY_REQUIRED;
+    const isOutOfFood = gameData.foodLevel < MIN_FOOD_REQUIRED; // Проверьте имя свойства (foodLevel или food)
+
+    if (isOutOfEnergy || isOutOfFood) {
+      // Задержка 1.5 сек, чтобы игрок увидел результат партии и анимацию монет
+      setTimeout(() => {
+        if (isOutOfEnergy && isOutOfFood) {
+          alert("У вас закончились и энергия, и сытость! Вы покинули салун.");
+        } else if (isOutOfEnergy) {
+          alert("У вас закончилась энергия! Вы покинули салун.");
+        } else {
+          alert("Персонаж слишком голоден для игры! Вы покинули салун.");
+        }
+
+        // Перенаправление на главную/другую локацию
+        router.push('/');
+      }, 800);
+    }
+  }
+});
+
+const router = useRouter();
+
+
 
 // =====================================================
 // АНИМАЦИЯ FLUFFY
@@ -61,7 +92,7 @@ function animateFlyTo({ targetEl, isDealer = false }) {
   flyer.className =
       "fixed z-[999] w-[42px] h-[58px] rounded-md bg-red-800 border-2 border-amber-300 shadow-2xl pointer-events-none transition-all duration-500 ease-out flex items-center justify-center";
 
-  flyer.innerHTML = `<span class="text-amber-200 text-sm font-bold"><img src="/gamePlay/logo_icons.webp" class="w-7 object-contain" alt="" /></span>`;
+  flyer.innerHTML = `<span class="text-amber-200 text-sm font-bold"><img src="/gamePlay/logo_icons.webp?v=${APP_VERSION}" class="w-7 object-contain" alt="" /></span>`;
 
   flyer.style.left = `${startRect.left}px`;
   flyer.style.top = `${startRect.top}px`;
@@ -116,7 +147,7 @@ onUnmounted(() => {
           <!-- Анимированный логотип/иконка -->
           <div class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
             <div class="w-full h-full bg-red-900 rounded-full flex items-center justify-center border border-amber-300/40">
-              <img src="/gamePlay/logo_icons.webp" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
+              <img :src="`/gamePlay/logo_icons.webp?v=${APP_VERSION}`" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
             </div>
           </div>
         </div>
@@ -137,7 +168,7 @@ onUnmounted(() => {
     <div class="relative flex justify-center items-center w-full my-auto">
       <div class="relative w-[320px] h-[270px] overflow-hidden rounded-3xl border-2 border-red-400/80 shadow-2xl">
         <img
-            src="/location/saloon.webp"
+            :src="`/location/saloon.webp?v=${APP_VERSION}`"
             class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
             alt="Saloon Background"
         />
@@ -150,15 +181,15 @@ onUnmounted(() => {
               alt="Fluffy Body"
               class="absolute"
           />
-          <img src="/saloonPhotos/location/saloon.webp" alt="location saloon" class="object-contain"/>
+          <img :src="`/saloonPhotos/location/saloon.webp?v=${APP_VERSION}`" alt="location saloon" class="object-contain"/>
 
           <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
             <div
                 class="absolute inset-0 flex justify-center items-center transition-transform duration-300 ease-out"
                 :style="{ transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)` }"
             >
-              <img src="/saloonPhotos/characters/pupils_left.webp" class="absolute" alt=""/>
-              <img src="/saloonPhotos/characters/pupils_right.webp" class="absolute" alt=""/>
+              <img :src="`/saloonPhotos/characters/pupils_left.webp?v=${APP_VERSION}`" class="absolute" alt=""/>
+              <img :src="`/saloonPhotos/characters/pupils_right.webp?v=${APP_VERSION}`" class="absolute" alt=""/>
             </div>
           </div>
         </div>
@@ -187,7 +218,7 @@ onUnmounted(() => {
                   class="absolute inset-0 rounded-md bg-red-800 border-2 border-amber-300 shadow-lg overflow-hidden flex items-center justify-center">
                 <div class="absolute inset-[3px] rounded-[4px] border border-amber-200/80"></div>
                 <span class="relative z-10 text-amber-200 text-[16px] font-bold drop-shadow-md">
-                  <img src="/gamePlay/logo_icons.webp" class="w-7 object-contain" alt=""/>
+                  <img :src="`/gamePlay/logo_icons.webp?v=${APP_VERSION}`" class="w-7 object-contain" alt=""/>
                 </span>
               </div>
             </div>
@@ -245,7 +276,7 @@ onUnmounted(() => {
             :style="{
                       animationDelay: `${coin.delay}s`
                     }"
-            src="/gamePlay/coin.webp"
+            :src="`/gamePlay/coin.webp?v=${APP_VERSION}`"
             class="absolute w-5  animate-coinFly pointer-events-none"
             alt=""
         />
@@ -259,7 +290,7 @@ onUnmounted(() => {
             :style="{
                   animationDelay: `${exp.delay}s`
                 }"
-            src="/gamePlay/exp.webp"
+            :src="`/gamePlay/exp.webp?v=${APP_VERSION}`"
             class="absolute w-6 animate-expFly pointer-events-none"
             alt=""
         />

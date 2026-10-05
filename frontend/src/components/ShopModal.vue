@@ -1,10 +1,11 @@
 <script setup>
-import { foodList } from '@/scripts/objectItems.js'
-import { headItems } from '@/scripts/headwearItems.js'
-import { costumeItems } from '@/scripts/costumeItems.js'
-import { ref, computed } from 'vue'
+import {foodList} from '@/scripts/objectItems.js'
+import {headItems} from '@/scripts/headwearItems.js'
+import {costumeItems} from '@/scripts/costumeItems.js'
+import {ref, computed} from 'vue'
 import {addToCart, buyCostume, buyHeadwear} from "@/scripts/basket.js"
-import { activeTab, gameData } from "@/scripts/useGameStore.js"
+import {activeTab, gameData} from "@/scripts/useGameStore.js"
+import {APP_VERSION} from "@/scripts/constants.js";
 
 defineProps({
   isOpen: {
@@ -15,23 +16,28 @@ defineProps({
 
 defineEmits(['close'])
 
-// Переключатель внутри гардероба: 'hats' или 'costumes'
+// Подкатегории для Гардероба: 'hats' или 'costumes'
 const wardrobeTab = ref('hats')
 
-// Динамический список товаров в зависимости от выбранной вкладки
+// Подкатегории для Еды: 'all', 'fastfood', 'fruits', 'sushi'
+const foodTab = ref('all')
+
+// Динамический список товаров в зависимости от выбранной вкладки и подкатегории
 const currentList = computed(() => {
   if (activeTab.value === 'food') {
-    return foodList.filter(item => item.category !== 'shaman' && item.category !== 'bath accessories')
+    const list = foodList.filter(item => item.category === 'food')
+    if (foodTab.value === 'all') return list
+    return list.filter(item => item.subcategory === foodTab.value)
   } else if (activeTab.value === 'shaman') {
     return foodList.filter(item => item.category === 'shaman')
   } else if (activeTab.value === 'bath') {
     return foodList.filter(item => item.category === 'bath accessories')
   } else {
-    // Если активен Гардероб
+    // Активен Гардероб
     if (wardrobeTab.value === 'costumes') {
       return costumeItems.map(item => ({
         ...item,
-        image: item.preview || item.image_normal // Подставляем preview для отображения в списке
+        image: item.preview || item.image_normal
       }))
     }
     return headItems
@@ -42,17 +48,30 @@ const lastBought = ref(null)
 const lastBoughtQuantity = ref(1)
 let notificationTimer = null
 
-// Проверка заблокирован ли товар по уровню
-function isItemLocked(item) {
-  if (activeTab.value === 'shaman') {
-    return gameData.level < 5
+// Функция определения количества товара в инвентаре
+function getItemQuantity(item) {
+  if (activeTab.value === 'food' || activeTab.value === 'shaman' || activeTab.value === 'bath') {
+    return gameData.cart?.[item.id] || 0
   }
+  return 0
+}
+
+// Универсальная проверка блокировки товара по уровню
+function isItemLocked(item) {
+  if (Boolean(item.level) && gameData.level < item.level) {
+    return true
+  }
+
   if (activeTab.value === 'clothes') {
-    const isUnlocked = wardrobeTab.value === 'costumes'
+    const isUnlockedItem = wardrobeTab.value === 'costumes'
         ? gameData.unlockedCostumes?.includes(item.id)
         : gameData.unlockedHeads?.includes(item.id)
-    return !isUnlocked && Boolean(item.level) && gameData.level < item.level
+
+    if (!isUnlockedItem && Boolean(item.level) && gameData.level < item.level) {
+      return true
+    }
   }
+
   return false
 }
 
@@ -87,7 +106,6 @@ function handleItemClick(item) {
       alert("Не хватает монет!")
     }
   } else {
-    // Логика для Гардероба (Шляпы / Костюмы)
     if (isUnlocked(item.id)) {
       if (wardrobeTab.value === 'costumes') {
         selectCostume(item.id)
@@ -113,7 +131,6 @@ function handleItemClick(item) {
   }
 }
 
-// Функция надевания/снимания шапки
 function selectHeadwear(headId) {
   if (gameData.equippedHead === headId) {
     gameData.equippedHead = null
@@ -122,7 +139,6 @@ function selectHeadwear(headId) {
   }
 }
 
-// Функция надевания/снимания костюма
 function selectCostume(costumeId) {
   if (gameData.equippedCostume === costumeId) {
     gameData.equippedCostume = null
@@ -142,10 +158,10 @@ function showNotification(item, quantity = 1) {
 
 const getItemBonuses = (item) => {
   const bonuses = []
-  if (item.foodGain) bonuses.push(`+ ${item.foodGain} сытости`)
-  if (item.energyGain) bonuses.push(`+ ${item.energyGain} энергии`)
-  if (item.life) bonuses.push(`+ ${item.life} жизнь`)
-  if (item.health) bonuses.push(`Востановление здоровья`)
+  if (item.foodGain) bonuses.push({text: `+ ${item.foodGain} сытости`, color: 'text-amber-400'})
+  if (item.energyGain) bonuses.push({text: `+ ${item.energyGain} энергии`, color: 'text-blue-400'})
+  if (item.life) bonuses.push({text: `+ ${item.life} жизнь`, color: 'text-red-400'})
+  if (item.health) bonuses.push({text: `Восстановление здоровья`, color: 'text-emerald-400'})
   return bonuses
 }
 </script>
@@ -153,8 +169,7 @@ const getItemBonuses = (item) => {
 <template>
   <div
       v-if="isOpen"
-      class="fixed inset-0 z-300 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 touch-none select-none"
-      @touchmove.prevent
+      class="fixed inset-0 z-300 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 select-none"
   >
     <!-- Само окно магазина -->
     <div
@@ -164,7 +179,7 @@ const getItemBonuses = (item) => {
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80 shrink-0">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <div class="flex gap-1 items-center">
-            <img src="/gamePlay/shoppingСart_icon.webp" class="w-6 h-6" alt="">
+            <img :src="`/gamePlay/shoppingСart_icon.webp?v=${APP_VERSION}`" class="w-6 h-6" alt="">
             <p class="text-lg">Магазин</p>
           </div>
         </h2>
@@ -178,53 +193,95 @@ const getItemBonuses = (item) => {
       </div>
 
       <!-- Переключатель основных категорий -->
-      <div class="grid grid-cols-4 border-b border-slate-800 bg-slate-900/40 p-2 gap-1.5 shrink-0">
+      <div
+          class="flex overflow-x-auto no-scrollbar border-b border-slate-800 bg-slate-900/40 p-2 gap-2 shrink-0 touch-pan-x">
         <button
             @click="activeTab = 'food'"
-            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate cursor-pointer', activeTab === 'food' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+            :class="['py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer', activeTab === 'food' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
-          <div class="flex items-center justify-center gap-1">
-            <img class="w-5 h-5 object-contain" src="/food/burger.webp" alt="">
-            <span>Еда</span>
+          <div class="flex items-center justify-center gap-1.5">
+            <img class="w-5 h-5 object-contain shrink-0" src="/food/burger.webp" alt="">
+            <span class="whitespace-nowrap">Еда</span>
           </div>
         </button>
+
         <button
             @click="activeTab = 'shaman'"
-            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate cursor-pointer', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+            :class="['py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
-          <div class="flex items-center justify-center gap-1">
-            <img class="w-5 h-5 object-contain" src="/gamePlay/feather_icon.webp" alt="">
-            <span>Шаман</span>
+          <div class="flex items-center justify-center gap-1.5">
+            <img class="w-5 h-5 object-contain shrink-0" src="/gamePlay/feather_icon.webp" alt="">
+            <span class="whitespace-nowrap">Шаман</span>
           </div>
         </button>
+
         <button
             @click="activeTab = 'bath'"
-            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate cursor-pointer', activeTab === 'bath' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+            :class="['py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer', activeTab === 'bath' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
-          <div class="flex items-center justify-center gap-1">
-            <img class="w-5 h-5 object-contain" src="/gamePlay/soap_icon.webp" alt="">
-            <span>Баня</span>
+          <div class="flex items-center justify-center gap-1.5">
+            <img class="w-5 h-5 object-contain shrink-0" src="/gamePlay/soap_icon.webp" alt="">
+            <span class="whitespace-nowrap">Баня</span>
           </div>
         </button>
+
         <button
             @click="activeTab = 'clothes'"
-            :class="['py-2 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all truncate cursor-pointer', activeTab === 'clothes' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
+            :class="['py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer', activeTab === 'clothes' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
-          <div class="flex items-center justify-center gap-1">
-            <img class="w-5 h-5 object-contain" src="/other/hanger_icon.webp" alt="">
-            <span>Гардероб</span>
+          <div class="flex items-center justify-center gap-1.5">
+            <img class="w-5 h-5 object-contain shrink-0" src="/other/hanger_icon.webp" alt="">
+            <span class="whitespace-nowrap">Гардероб</span>
           </div>
         </button>
       </div>
 
-      <!-- Внутренние подкатегории Гардероба (Шляпы / Костюмы) -->
+      <!-- Внутренние подкатегории ЕДЫ -->
+      <div v-if="activeTab === 'food'"
+           class="flex border-b border-slate-800 bg-slate-950/60 p-1.5 gap-2 shrink-0 overflow-x-auto no-scrollbar">
+        <button
+            @click="foodTab = 'all'"
+            :class="['flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap', foodTab === 'all' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white']"
+        >
+          Все
+        </button>
+        <button
+            @click="foodTab = 'fastfood'"
+            :class="['flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap', foodTab === 'fastfood' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white']"
+        >
+          <div class="flex items-center justify-center gap-1.5">
+            <img class="w-5 h-5 object-contain shrink-0" src="/food/burger.webp" alt="">
+            <span class="whitespace-nowrap">Фастфуд</span>
+          </div>
+        </button>
+        <button
+            @click="foodTab = 'fruits'"
+            :class="['flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap', foodTab === 'fruits' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white']"
+        >
+          <div class="flex items-center justify-center gap-1.5">
+            <img class="w-5 h-5 object-contain shrink-0" src="/food/banana.webp" alt="">
+            <span class="whitespace-nowrap">Фрукты</span>
+          </div>
+        </button>
+        <button
+            @click="foodTab = 'sushi'"
+            :class="['flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap', foodTab === 'sushi' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white']"
+        >
+          <div class="flex items-center justify-center gap-1.5">
+            <img class="w-5 h-5 object-contain shrink-0" src="/food/ebi_nigiri.webp" alt="">
+            <span class="whitespace-nowrap">Суши</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Внутренние подкатегории ГАРДЕРОБА -->
       <div v-if="activeTab === 'clothes'" class="flex border-b border-slate-800 bg-slate-950/60 p-1.5 gap-2 shrink-0">
         <button
             @click="wardrobeTab = 'hats'"
             :class="['flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer', wardrobeTab === 'hats' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white']"
         >
-          <div class="flex items-center justify-center  gap-1">
-            <img src="/headwear/piratehat.webp" class="w-5" alt="">
+          <div class="flex items-center justify-center gap-1">
+            <img :src="`/headwear/piratehat.webp?v=${APP_VERSION}`" class="w-5" alt="">
             <p>Головные уборы</p>
           </div>
         </button>
@@ -232,19 +289,19 @@ const getItemBonuses = (item) => {
             @click="wardrobeTab = 'costumes'"
             :class="['flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer', wardrobeTab === 'costumes' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white']"
         >
-          <div class="flex items-center justify-center  gap-1">
-            <img src="/costumes/costume_icon.webp" class="w-5" alt="">
+          <div class="flex items-center justify-center gap-1">
+            <img :src="`/costumes/costume_icon.webp?v=${APP_VERSION}`" class="w-5" alt="">
             <p>Костюмы</p>
           </div>
         </button>
       </div>
 
       <!-- Список товаров -->
-      <div class="p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain touch-auto" @touchmove.stop>
+      <div class="p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain touch-pan-y">
         <div
             v-for="item in currentList"
             :key="item.id"
-            class="relative flex items-center justify-between bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 hover:border-slate-600 transition-all overflow-hidden"
+            class="relative flex items-center justify-between gap-3 bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 hover:border-slate-600 transition-all overflow-hidden"
             :class="{'opacity-50 pointer-events-none': isItemLocked(item)}"
         >
           <!-- Плашка блокировки по уровню -->
@@ -253,30 +310,49 @@ const getItemBonuses = (item) => {
               class="absolute inset-0 z-20 bg-slate-950/70 flex items-center justify-center rounded-xl"
           >
             <span class="text-amber-400 font-bold text-sm tracking-wide px-3 py-1">
-              🔒 Требуется {{ activeTab === 'shaman' ? 5 : item.level }} уровень
+              🔒 Требуется {{ item.level }} уровень
             </span>
           </div>
 
-          <!-- Картинка и описание -->
-          <div class="flex items-center gap-3">
-            <div class="w-15 h-15 shrink-0 bg-white/20 rounded-lg flex items-center justify-center p-1">
-              <img :src="item.image" :alt="item.name" class="w-full h-full object-contain">
+          <!-- Картинка и описание (Разрешен переносы строк, текст виден целиком) -->
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <div class="w-15 h-15 shrink-0 bg-white/20 rounded-lg flex items-center justify-center p-1 relative">
+              <div class="flex">
+                <img :src="item.image" :alt="item.name" class="w-full h-full object-contain">
+                <p v-show="getItemQuantity(item)>0" v-if="activeTab !== 'clothes'"
+                   class="text-[11px] absolute right-1 font-bold text-amber-400 mt-0.5 break-words">
+                  X {{ getItemQuantity(item) }}
+                </p>
+
+              </div>
+
             </div>
-            <div>
-              <h3 class="font-semibold text-sm text-white">{{ item.name }}</h3>
-              <p v-if="activeTab === 'food' || activeTab === 'shaman' || activeTab === 'bath'" class="text-xs text-emerald-400">
-                <template v-for="(bonus, index) in getItemBonuses(item)" :key="index">
-                  {{ bonus }}<br v-if="index < getItemBonuses(item).length - 1">
-                </template>
-              </p>
+
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold text-xs text-white leading-tight break-words">{{ item.name }}</h3>
+
+              <!-- Индикатор количества товара в наличии -->
+
+
+              <!-- Бонусы предмета -->
+              <div v-if="activeTab === 'food' || activeTab === 'shaman' || activeTab === 'bath'"
+                   class="text-xs mt-0.5 leading-tight break-words">
+                <div
+                    v-for="(bonus, index) in getItemBonuses(item)"
+                    :key="index"
+                    :class="bonus.color"
+                >
+                  {{ bonus.text }}
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Динамическая кнопка: Покупка или Выбор -->
+          <!-- Динамическая кнопка (shrink-0 строго держит её ширину и положение) -->
           <button
               @click="handleItemClick(item)"
               :class="[
-                'px-4 py-2 min-w-23 font-bold rounded-lg text-sm transition-all active:scale-90 flex justify-center items-center gap-1.5 shrink-0 cursor-pointer',
+                'px-4 py-2 w-20 font-bold rounded-lg text-xs transition-all active:scale-90 flex justify-center items-center gap-1.5 shrink-0 cursor-pointer self-center',
                 activeTab === 'clothes' && isUnlocked(item.id)
                   ? (isEquipped(item.id)
                       ? 'bg-slate-700 text-slate-300 cursor-default'
@@ -288,7 +364,10 @@ const getItemBonuses = (item) => {
               {{ isEquipped(item.id) ? 'Снять' : 'Выбрать' }}
             </template>
             <template v-else>
-              <span class="w-5"><img src="/gamePlay/coin.webp" alt=""></span> {{ item.cost }}
+              <span class="w-5 h-5 shrink-0 flex items-center justify-center">
+                <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="coin" class="w-full h-full object-contain"/>
+              </span>
+              <span>{{ item.cost }}</span>
             </template>
           </button>
         </div>
@@ -312,7 +391,8 @@ const getItemBonuses = (item) => {
       >
         <div class="w-10 h-10 bg-white/20 rounded-lg p-1 flex items-center justify-center shrink-0 relative">
           <img :src="lastBought.image" class="w-full h-full object-contain">
-          <span v-if="lastBoughtQuantity > 1" class="absolute -top-2 -right-2 bg-amber-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow">
+          <span v-if="lastBoughtQuantity > 1"
+                class="absolute -top-2 -right-2 bg-amber-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow">
             x{{ lastBoughtQuantity }}
           </span>
         </div>

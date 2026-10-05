@@ -1,18 +1,18 @@
-import {computed, watch} from "vue";
+import {watch} from "vue";
 import {
     body, bodyType,
-    cloudShow, defaultGameData, feedStatus,
-    gameData, isGameOver, isLosingLifeStatus, lastFedItem, lifeStatus,
+    cloudShow,
+    gameData, isGameOver,
     lowEnergy,
-    mouth, PlayCount, resetLocal,
-    showHunger, showTongue,
+    mouth, PlayCount,
+    showHunger, showStatus, showTongue,
     sleepTimeRemaining
 } from "@/scripts/useGameStore.js";
-import {addExp, levelStatus} from "@/scripts/level.js";
+import {addExp} from "@/scripts/level.js";
 
-import {addCoin, drunkTimer, sunAnimating} from "@/scripts/actions.js";
-import {batheStatus, isHovered, previousMouth} from "@/scripts/dragAndDrop.js";
-import {foodList} from "@/scripts/objectItems.js";
+import {addCoin, sunAnimating} from "@/scripts/actions.js";
+import {batheStatus, isHovered} from "@/scripts/dragAndDrop.js";
+import {APP_VERSION} from "@/scripts/constants.js";
 
 
 const FOOD_PER_HOUR_HEALTHY = 15;     // ~6.7 часа
@@ -140,25 +140,25 @@ watch(
         }
 
         if (foodLevel < 15) {
-            body.value = '/character/skinny_body.webp?v=1'
+            body.value = `/character/skinny_body.webp?v=${APP_VERSION}`
             bodyType.value = 'skinny'
         } else if (isFat) {
-            body.value = '/character/fat_body.webp?v=1'
+            body.value = `/character/fat_body.webp?v=${APP_VERSION}`
             bodyType.value = 'fat'
         } else {
-            body.value = '/character/main_body.webp?v=1'
+            body.value = `/character/main_body.webp?v=${APP_VERSION}`
             bodyType.value = 'normal'
         }
         if (isShowTongue) {
-            mouth.value = '/character/isPlayed_mouth.webp'
+            mouth.value = `/character/isPlayed_mouth.webp?v=${APP_VERSION}`
         } else if (hovered && !isBathe) {
-            mouth.value = '/character/open_mouth.webp'
+            mouth.value = `/character/open_mouth.webp?v=${APP_VERSION}`
         } else if (hasIssues) {
-            mouth.value = '/character/sad_mouth.webp'
+            mouth.value = `/character/sad_mouth.webp?v=${APP_VERSION}`
         }
         // Приоритет 4: Во всех остальных случаях — счастливый / нормальный
         else {
-            mouth.value = '/character/happy_mouth.webp'
+            mouth.value = `/character/happy_mouth.webp?v=${APP_VERSION}`
         }
 
         // Обновляем остальные флаги для облачков и интерфейса
@@ -180,6 +180,7 @@ watch(() => gameData.lives, async (newLives) => {
     // Если жизни кончились, и мы ЕЩЕ не в процессе сброса/перезагрузки
     if (newLives <= 0 && !isGameOver.value) {
         isGameOver.value = true
+        showStatus('gameOver')
 
 
     }
@@ -194,61 +195,7 @@ watch(() => gameData.sick, (newSick) => {
 })
 
 
-export const activeStatus = computed(() => {
-    // Приоритет 1: Смерть питомца
-    if (isGameOver.value) {
-        return {
-            show: true,
-            text: "Питомец погиб!",
-            image: "/gamePlay/grave.webp",
-            bgColor: "bg-[#808080]"
-        }
-    }
 
-    // Приоритет 2: Повышение уровня
-    if (levelStatus.value) {
-        return {
-            show: true,
-            text: "Уровень повышен",
-            additional: gameData.level,
-            image: null // или дефолтная иконка уровня
-        }
-    }
-
-    // Приоритет 3: Потеря жизни (-1)
-    if (isLosingLifeStatus.value) {
-        return {
-            show: true,
-            text: "- 1 жизнь!",
-            image: "/gamePlay/heart_broken.webp"
-        }
-    }
-
-    // Приоритет 4: Получение жизни (+1)
-    if (lifeStatus.value) {
-        return {
-            show: true,
-            text: "+ 1 жизнь!",
-            image: "/gamePlay/heart.webp"
-        }
-    }
-
-    // Приоритет 5: Кормежка (ням-ням)
-    if (feedStatus.value) {
-        // Находим сам объект еды по ID, который сохранен в lastFedItem
-        const fedItemObj = foodList.find(item => item.id === lastFedItem.value)
-
-        return {
-            show: true,
-            text: "Ням-ням!",
-            image: "/gamePlay/hunger.webp",
-            additional: `+${fedItemObj?.foodGain || 0}`
-        }
-    }
-
-    // Если ничего не происходит
-    return {show: false}
-})
 
 let sunTimer = null
 

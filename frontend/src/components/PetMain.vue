@@ -16,12 +16,12 @@ import {preloadImages} from "@/scripts/preloadImages.js";
 import Nameplate from "@/components/Nameplate.vue";
 import PetSideMenu from "@/components/PetSideMenu.vue";
 import TutorialOverlay from "@/components/TutorialOverlay.vue";
-import {activeStatus} from "@/scripts/stats.js";
+
 import {
   mouth,
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
-  locationUrl, location, dropZoneRef, body, tutorialStep, isPopping, bodyType
+  locationUrl, location, dropZoneRef, body, tutorialStep, isPopping, bodyType, activeStatus
 } from "@/scripts/useGameStore.js";
 import {
   activeCoins, activeExp,
@@ -30,6 +30,7 @@ import {
   sunAnimating, updateEyeLook
 } from "@/scripts/actions.js";
 import PetCostume from "@/components/PetCostume.vue";
+import {APP_VERSION} from "@/scripts/constants.js";
 
 let blinkInterval = null
 let lookInterval = null
@@ -62,7 +63,7 @@ watch(location, (newLocation) => {
     if (statusFoam) {
       statusFoam.value = false;
     }
-    locationUrl.value = '/location/home.webp?v=2'
+    locationUrl.value = `/location/home.webp?v=${APP_VERSION}`
 
   } else if (newLocation === 'bath') {
     locationUrl.value = '/location/bath.webp'
@@ -180,13 +181,13 @@ onUnmounted(() => {
         <!-- Солнце -->
         <div
             :class="[
-         'relative brightness-130 w-15 h-15 bg-yellow-300 rounded-full sun-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
+         'relative brightness-130 w-15 h-15 bg-yellow-300 rounded-full sun-glow pointer-events-none  transition-all duration-1000 ease-in-out',
          gameData.sleep ? '-top-20 left-[-50px] opacity-0 scale-50' : 'top-0 left-0 opacity-100 scale-100'
        ]">
           <Transition name="fade-sun">
             <img
                 v-if="sunAnimating"
-                :src="isBadMood ? '/gamePlay/sun_angry.webp' : '/gamePlay/sun_smile.webp'"
+                :src="isBadMood ? `/gamePlay/sun_angry.webp?v=${APP_VERSION}` : `/gamePlay/sun_smile.webp?v=${APP_VERSION}`"
                 class="absolute top-1 left-2 w-12 opacity-45"
                 alt=""
             >
@@ -196,13 +197,13 @@ onUnmounted(() => {
         <!-- Луна -->
         <div
             :class="[
-             'absolute brightness-130 w-15 h-15 bg-[#f4f6f0] rounded-full moon-glow pointer-events-none z-0 transition-all duration-1000 ease-in-out',
+             'absolute brightness-130 w-15 h-15 bg-[#f4f6f0] rounded-full moon-glow pointer-events-none  transition-all duration-1000 ease-in-out',
              gameData.sleep ? 'top-0 left-0 opacity-100 scale-100' : '-top-20 left-[-50px] opacity-0 scale-50'
             ]">
           <Transition name="fade-sun">
             <img
                 v-if="sunAnimating"
-                :src="isBadMood ? '/gamePlay/sad_moon.webp' : '/gamePlay/happy_moon.webp'"
+                :src="isBadMood ? `/gamePlay/sad_moon.webp?v=${APP_VERSION}` : `/gamePlay/happy_moon.webp?v=${APP_VERSION}`"
                 class="absolute left-2 top-1 w-12 opacity-45 pointer-events-none"
                 alt=""
             >
@@ -210,8 +211,8 @@ onUnmounted(() => {
         </div>
 
         <!-- Фон локации -->
-        <div  class="absolute inset-0 z-5 pointer-events-none transition-all duration-1000 ease-in-out "
-              :class="gameData.sleep ? 'brightness-30' : 'brightness-100'">
+        <div class="absolute inset-0  pointer-events-none transition-all duration-1000 ease-in-out "
+             :class="gameData.sleep ? 'brightness-30' : 'brightness-100'">
           <img
               :src="locationUrl"
               fetchpriority="high"
@@ -224,7 +225,7 @@ onUnmounted(() => {
 
         <div
             v-if="location==='home'|| location === 'food'"
-            class="absolute right-12 top-23.5 text-[10px] leading-none text-red-600 font-bold pointer-events-none scale-60 origin-right transition-all duration-500 z-10"
+            class="absolute right-12 top-23.5 text-[10px] leading-none text-red-600 font-bold pointer-events-none scale-60 origin-right transition-all duration-500"
             :class="{ 'drop-shadow-[0_0_6px_rgba(239,68,68,0.9)] text-red-500 brightness-125': gameData.sleep }"
         >
           {{ currentTime }}
@@ -265,7 +266,7 @@ onUnmounted(() => {
                       top: `${coin.y}px`,
                       animationDelay: `${coin.delay}s`
                     }"
-                src="/gamePlay/coin.webp"
+                :src="`/gamePlay/coin.webp?v=${APP_VERSION}`"
                 class="absolute w-5 animate-coinFly pointer-events-none"
                 alt=""
             />
@@ -281,7 +282,7 @@ onUnmounted(() => {
                       top: `${exp.y}px`,
                       animationDelay: `${exp.delay}s`
                     }"
-                src="/gamePlay/exp.webp"
+                :src="`/gamePlay/exp.webp?v=${APP_VERSION}`"
                 class="absolute w-5 animate-expFly pointer-events-none"
                 alt=""
             />
@@ -304,38 +305,40 @@ onUnmounted(() => {
              @pointerup="handlePointerEnd"
              @pointercancel="handlePointerEnd"
              @pointerleave="handlePointerEnd"
-             class="absolute inset-0 flex justify-center items-center cursor-pointer touch-none select-none transition-all duration-1000 ease-in-out z-10"
+             class="absolute inset-0 flex justify-center items-center cursor-pointer touch-none select-none transition-[filter,transform] duration-1000 ease-in-out"
              :class="[
-               gameData.sleep ? 'brightness-30' : 'brightness-100',
-               (tutorialStep === 3 || tutorialStep === 6 || tutorialStep === 7) ? 'z-205' : ''
+               gameData.sleep ? 'brightness-30' : 'brightness-100',[3, 6, 7].includes(tutorialStep) ? ' z-205 ' : ''
+
              ]"
-        >
+                >
 
           <div v-show="gameData.sleep"
                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-40">
             <div class="absolute text-[#00BFFF] font-extrabold text-xl z-1 drop-shadow-md">Z</div>
-            <div class="absolute text-[#00BFFF] font-bold text-sm z-2 left-4 -top-3 drop-shadow-md">z</div>
+            <div class="absolute  text-[#00BFFF] font-bold text-sm z-2 left-4 -top-3 drop-shadow-md">z</div>
           </div>
 
           <!-- Персонаж -->
-          <div :class="['absolute flex justify-center items-center w-45 h-45', isPopping ? 'animate-pop' : '']">
+          <div :class="['absolute flex justify-center items-center w-45 h-45', isPopping ? 'animate-pop' : '',tutorialStep === 3 ? 'animate-quick-pulse' : '']">
             <PetHeadwear/>
             <PetCostume/>
             <img fetchpriority="high" decoding="sync" :src="body" class="absolute w-45" alt="">
             <img :src="getHornAsset(gameData.level)" class="absolute w-45" alt="">
             <img v-show="gameData.sick" src="/character/drunk.webp" class="absolute w-45" alt="">
-            <img v-show="gameData.sick && bodyType==='fat'" src="/character/sick_fat.webp" class="absolute w-45 z-10" alt="">
-            <img v-show="gameData.sick && bodyType!=='fat'" src="/character/sick.webp?v=1" class="absolute w-45 z-10" alt="">
+            <img v-show="gameData.sick && bodyType==='fat'" src="/character/sick_fat.webp" class="absolute w-45 z-10"
+                 alt="">
+            <img v-show="gameData.sick && bodyType!=='fat'" :src="`/character/sick.webp?v=${APP_VERSION}`" class="absolute w-45 z-10"
+                 alt="">
 
             <div v-if="!blink && !gameData.sleep">
               <div v-show="lowEnergy" class="absolute inset-0 flex justify-center items-center z-10">
-                <img src="/character/bags_left.webp" class="absolute w-45" alt=""/>
-                <img src="/character/bags_right.webp" class="absolute w-45" alt=""/>
+                <img :src="`/character/bags_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
+                <img :src="`/character/bags_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
               </div>
 
               <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
-                <img src="/character/eye_left.webp?v=1" class="absolute w-45" alt="">
-                <img src="/character/eye_right.webp" class="absolute w-45" alt="">
+                <img :src="`/character/eye_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt="">
+                <img :src="`/character/eye_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt="">
               </div>
 
               <!-- Зрачки -->
@@ -344,8 +347,8 @@ onUnmounted(() => {
                     class="absolute inset-0 flex justify-center items-center pupils-look"
                     :style="{ transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)` }"
                 >
-                  <img src="/character/eye_pupils_left.webp" class="absolute w-45" alt=""/>
-                  <img src="/character/eye_pupils_right.webp" class="absolute w-45" alt=""/>
+                  <img :src="`/character/eye_pupils_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
+                  <img :src="`/character/eye_pupils_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
                 </div>
               </div>
             </div>
@@ -376,11 +379,10 @@ onUnmounted(() => {
             </div>
 
 
-
-            <PetStinky :class="tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
-            <PetFoam :status-foam="statusFoam" :class="tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
+            <PetStinky/>
+            <PetFoam :status-foam="statusFoam"/>
             <PetSmoke :status-smoke="statusSmoke"/>
-            <PetShower :status-shower="statusShower" :class="tutorialStep === 6 || tutorialStep === 7 ? 'z-205' : ''"/>
+            <PetShower :status-shower="statusShower"/>
 
             <Poop
                 v-show="gameData.isPooped && (location==='home' || location==='food')"
@@ -396,9 +398,10 @@ onUnmounted(() => {
     <div class="mt-auto pb-4 shrink-0">
       <PetMenu/>
     </div>
-    <TutorialOverlay/>
+
 
   </div>
+  <TutorialOverlay/>
 </template>
 
 <style scoped>
@@ -414,10 +417,18 @@ onUnmounted(() => {
 }
 
 @keyframes moonFlash {
-  0% { opacity: 0; }
-  15% { opacity: 0.45; }
-  45% { opacity: 0.45; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.45;
+  }
+  45% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .animate-moonFlash {
@@ -425,11 +436,21 @@ onUnmounted(() => {
 }
 
 @keyframes floatCombo {
-  0% { transform: translate(70px, -70px) scale(1) rotate(15deg); }
-  25% { transform: translate(70px, -70px) scale(1) rotate(-15deg); }
-  50% { transform: translate(70px, -70px) scale(1) rotate(15deg); }
-  75% { transform: translate(70px, -70px) scale(1) rotate(-15deg); }
-  100% { transform: translate(70px, -70px) scale(1) rotate(15deg); }
+  0% {
+    transform: translate(70px, -70px) scale(1) rotate(15deg);
+  }
+  25% {
+    transform: translate(70px, -70px) scale(1) rotate(-15deg);
+  }
+  50% {
+    transform: translate(70px, -70px) scale(1) rotate(15deg);
+  }
+  75% {
+    transform: translate(70px, -70px) scale(1) rotate(-15deg);
+  }
+  100% {
+    transform: translate(70px, -70px) scale(1) rotate(15deg);
+  }
 }
 
 .animate-float-combo {
@@ -498,9 +519,15 @@ onUnmounted(() => {
 }
 
 @keyframes popCharacter {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .animate-pop {
@@ -508,9 +535,15 @@ onUnmounted(() => {
 }
 
 @keyframes vibrate {
-  0% { transform: translate(1px, 1px); }
-  50% { transform: translate(-0.1px, -0.1px); }
-  100% { transform: translate(-0.1px, 0.1px); }
+  0% {
+    transform: translate(1px, 1px);
+  }
+  50% {
+    transform: translate(-0.1px, -0.1px);
+  }
+  100% {
+    transform: translate(-0.1px, 0.1px);
+  }
 }
 
 .animate-vibrate {
@@ -528,8 +561,12 @@ onUnmounted(() => {
 }
 
 @keyframes sleep-breath {
-  0%, 100% { transform: scale(1) translateY(0); }
-  50% { transform: scale(1.03) translateY(2px); }
+  0%, 100% {
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    transform: scale(1.03) translateY(2px);
+  }
 }
 
 @keyframes float-z {
@@ -537,7 +574,9 @@ onUnmounted(() => {
     opacity: 0;
     transform: translate(0, 0) scale(0.6) rotate(-10deg);
   }
-  30% { opacity: 1; }
+  30% {
+    opacity: 1;
+  }
   100% {
     opacity: 0;
     transform: translate(25px, -35px) scale(1.2) rotate(10deg);
@@ -563,7 +602,9 @@ onUnmounted(() => {
     opacity: 0;
     transform: scale(0.3) translateY(10px);
   }
-  70% { transform: scale(1.05) translateY(-2px); }
+  70% {
+    transform: scale(1.05) translateY(-2px);
+  }
   100% {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -571,8 +612,12 @@ onUnmounted(() => {
 }
 
 @keyframes cloudFloat {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-2px) scale(1.02); }
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.02);
+  }
 }
 
 .animate-thought-cloud {
@@ -580,4 +625,18 @@ onUnmounted(() => {
   cloudFloat 3s ease-in-out 0.4s infinite;
   transform-origin: center bottom;
 }
+
+@keyframes quickPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05); /* Легкий быстрый толчок вверх */
+  }
+}
+
+.animate-quick-pulse {
+  animation: quickPulse 0.6s ease-in-out infinite; /* В 2 раза быстрее стандартного pulse */
+}
+
 </style>

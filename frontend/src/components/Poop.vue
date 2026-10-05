@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import {gameData} from "@/scripts/useGameStore.js";
 import {addCoin, Clean} from "@/scripts/actions.js";
 import {addExp} from "@/scripts/level.js";
+import {APP_VERSION} from "@/scripts/constants.js";
 
 // Генерируем случайные координаты ОДИН РАЗ при создании, чтобы какашка не прыгала
 const randomLeft = ref(Math.floor(Math.random() * 71) + 10)
@@ -16,7 +17,7 @@ const randomBottom = ref(Math.floor(Math.random() * 15))
        >
 
     <!-- Основная картинка -->
-    <img src="/gamePlay/poop.webp" alt="poop" class="w-full h-full object-contain">
+    <img :src="`/gamePlay/poop.webp?v=${APP_VERSION}`" alt="poop" class="w-full h-full object-contain">
 
     <!-- Летающая муха №1 -->
     <span class="absolute top-3 right-5 text-[7px] fly-anim-1">🪰</span>

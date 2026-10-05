@@ -1,11 +1,11 @@
 import {
     cloudShow,
-    energyFull, feedStatus, fruitStreak,
+    energyFull, fruitStreak,
     gameData,
-    isAnimating, isBadMood, isLosingLifeStatus,
+    isAnimating, isBadMood,
     isVibrating,
-    lastFedItem, lifeStatus, nextTutorialStep, PlayCount, sameFoodCount,
-    showHunger, showTongue, tutorialStep,
+    lastFedItem, nextTutorialStep, PlayCount, sameFoodCount,
+    showHunger, showStatus, showTongue, tutorialStep,
 
 }
     from "@/scripts/useGameStore.js";
@@ -69,9 +69,9 @@ export function otherFeedPet(foodId) {
 
 
         if (foodId === "lifePotion") {
-            lifeStatus.value = true
+
             gameData.lives = Math.min(3, gameData.lives + 1)
-            setTimeout(() => lifeStatus.value = false, 800)
+            showStatus('lifeGain')
         }
         if (foodId === "healthPotion") {
             gameData.sick = false
@@ -113,12 +113,16 @@ export function feedPet(foodId) {
     removeFromCart(targetId)
 
     gameData.foodLevel = Math.min(100, gameData.foodLevel + foodItem.foodGain)
+    console.log(foodItem.energyGain)
+    if (foodItem.energyGain){
+        gameData.energy = Math.min(100, gameData.energy + foodItem.energyGain)
+    }
+
     gameData.coins += 1
     gameData.feedCount += 1
     addCoin(1)
     addExp(20)
-    feedStatus.value = true
-    setTimeout(() => feedStatus.value = false, 800)
+    showStatus('feed', { fedItemId: foodId })
 
     if (gameData.feedCount >= 10) {
         gameData.stinky = true
@@ -337,16 +341,16 @@ export function spawnHeart(x = 160, y = 135) {
     }
     isComboAnimating.value = true
     comboAnimKey.value++
+
+
     comboTimer = setTimeout(() => {
         comboClicks.value = 0
         comboMultiplier.value = 1
-    }, 500)
-
-
+    }, 900)
 
     comboHideTimer = setTimeout(() => {
         isComboAnimating.value = false
-    }, 300)
+    }, 800)
 
     // 3. Передаем координаты в addCoin
     if (gameData.clickCounter % 2 === 0) {
@@ -432,8 +436,7 @@ export const Clean = (event) => {
 
 export function isLosingLife() {
     gameData.lives = Math.max(0, gameData.lives - 1)
-    isLosingLifeStatus.value = true
-    setTimeout(() => isLosingLifeStatus.value = false, 800)
+    showStatus('losingLife')
 }
 
 export const activeCoins = ref([])

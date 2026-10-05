@@ -40,7 +40,8 @@ const shouldPulse = computed(() => {
   return list[currentIndex.value].category !== 'shaman';
 });
 import {useRouter} from 'vue-router';
-import {currentBet} from "@/scripts/saloonScripts/twentyOneGame.js";
+import {currentBet, isDealing} from "@/scripts/saloonScripts/twentyOneGame.js";
+import {APP_VERSION} from "@/scripts/constants.js";
 
 
 const router = useRouter();
@@ -53,11 +54,11 @@ function goToSaloon() {
     alert('Нужно минимум 50 монет, чтобы зайти в Салун!');
     return;
   }
-  if (gameData.foodLevel < 20) {
+  if (gameData.foodLevel < 3) {
     alert('Чтобы зайти в Салун нужно быть сытым!');
     return;
   }
-  if (gameData.energy < 20) {
+  if (gameData.energy < 3) {
     alert('Чтобы зайти в Салун нужно быть бодрым!');
     return;
   }
@@ -86,7 +87,8 @@ function resetTutorial() {
 
 const ADMIN_IDS = [
   '1059422557',
-  '2101015196'
+  '2101015196',
+  '743865425'
 
 ]
 
@@ -142,7 +144,7 @@ const foodWarning = computed(() => {
             class="bg-[#fff6ef] absolute p-1 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 justify-center h-14 w-14 overflow-hidden  flex flex-col items-center rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[100px] h-[100px]  bg-contain bg-no-repeat bg-center"
-               style="background-image: url('/gamePlay/market.webp')">
+               :style="{ backgroundImage: `url('/gamePlay/market.webp?v=${APP_VERSION}')` }">
           </div>
           <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
         </div>
@@ -150,22 +152,22 @@ const foodWarning = computed(() => {
         <div
             @click="location = 'food',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95"
-            :class="[showHunger?'animate-pulse':'',tutorialStep === 1 ? 'z-205 pointer-events-auto': 'z-30']"
+            :class="[showHunger?'animate-pulse':'',tutorialStep === 1 ? 'z-205 animate-pulse': 'z-30']"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
 
           <div class="w-[80px] h-[80px] bg-contain bg-no-repeat bg-center cursor-pointer"
-               style="background-image: url('/gamePlay/fridge.webp')">
+               :style="{backgroundImage: `url('/gamePlay/fridge.webp?v=${APP_VERSION}')`}">
           </div>
           <button class="text-md font-bold text-gray-600">Кормить</button>
         </div>
         <div
             @click="location = 'bath',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center flex flex-col h-25   items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
-            :class=" tutorialStep === 5 ? 'z-205' : ''"
+            :class=" tutorialStep === 5 ? 'z-205 animate-pulse' : ''"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
 
           <div class="w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
-               style="background-image: url('/gamePlay/bath_icon.webp')">
+               :style="{backgroundImage: `url('/gamePlay/bath_icon.webp?v=${APP_VERSION}')`}">
           </div>
           <button class="text-md font-bold text-gray-600 pointer-events-none">Мыть</button>
         </div>
@@ -176,7 +178,7 @@ const foodWarning = computed(() => {
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
 
           <div class="w-[60px] h-[60px] bg-contain bg-no-repeat bg-center"
-               :style="{ 'background-image': `url('${gameData.sleep ? '/gamePlay/sun_icon.webp' : '/gamePlay/sleep_icon.webp'}')` }">
+               :style="{ 'background-image': `url('/gamePlay/${gameData.sleep ? 'sun_icon.webp' : 'sleep_icon.webp'}?v=${APP_VERSION}')` }">
           </div>
           <div v-show="gameData.sleep"
                class="absolute bottom-8 text-md text-white text-shadow-md text-shadow-black font-bold  ">
@@ -208,7 +210,7 @@ const foodWarning = computed(() => {
           >
             <div class="flex absolute top-1 right-2">
               <div class="relative w-5">
-                <img src="/gamePlay/coin.webp" class="" alt="">
+                <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" class="" alt="">
                 <p class="absolute text-white text-shadow-lg text-shadow-black top-1 text-xs left-1 font-bold">50</p>
               </div>
 
@@ -216,7 +218,7 @@ const foodWarning = computed(() => {
 
             <div
                 class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
-                style="background-image: url('/gamePlay/saloon.webp')"
+                :style="{backgroundImage: `url('/gamePlay/saloon.webp?v=${APP_VERSION}')`}"
             ></div>
             <button class="text-md font-bold text-gray-600 pointer-events-none">Салун</button>
           </div>
@@ -233,10 +235,13 @@ const foodWarning = computed(() => {
         <!-- ДУШ -->
         <div
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
-            :class=" tutorialStep === 7 ? 'z-205 bg-white' : ''"
+            :class="[
+                tutorialStep === 7 ? 'z-205 bg-white' : '',
+                tutorialStep === 7 && !showerDrag.isDragging.value? 'animate-pulse' : ''
+                ]"
         >
           <div v-show="gameData.sick && statusFoam" class="absolute pointer-events-none w-20 opacity-50 animate-pulse">
-            <img src="/gamePlay/warning_icons.webp" alt="">
+            <img :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt="">
           </div>
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
           <div v-show="!feedStatus"
@@ -245,7 +250,7 @@ const foodWarning = computed(() => {
                showerDrag.isDragging.value ? showerDrag.style.value : {},
                {
                    'touch-action': 'none',
-                   'background-image': 'url(\'/gamePlay/shower_icon.webp\')'
+                   'background-image': `url('/gamePlay/shower_icon.webp?v=${APP_VERSION}')`
                }
              ]"
                :class="[
@@ -255,7 +260,7 @@ const foodWarning = computed(() => {
                class="flex flex-col items-center cursor-move w-[70px] h-[70px]  bg-contain bg-no-repeat bg-center"
           ></div>
           <div v-show="showerDrag.isDragging.value || feedStatus"
-               style="background-image: url('/gamePlay/shower_icon.webp')"
+               :style="{backgroundImage: `url('/gamePlay/shower_icon.webp?v=${APP_VERSION}')`}"
                class="w-[70px] h-[70px] opacity-30 bg-contain">
 
           </div>
@@ -268,7 +273,10 @@ const foodWarning = computed(() => {
         <div
             @click="nextBathItem()"
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 cursor-pointer"
-            :class="tutorialStep === 6 && bathCartList.length > 0? 'z-205 bg-white' : ''"
+            :class="[
+              tutorialStep === 6 && bathCartList.length > 0? 'z-205  bg-white' : '',
+              tutorialStep === 6 && bathCartList.length > 0 && !foamDrag.isDragging.value ? 'animate-pulse ' : ''
+              ]"
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
@@ -277,7 +285,7 @@ const foodWarning = computed(() => {
             <div
                 class="flex flex-col items-center justify-center w-[70px] h-[70px] opacity-30 bg-contain bg-no-repeat bg-center"
                 :class="currentDraggedItem === 'shower' && !statusFoam && showerCount === 0 ? 'animate-pulse' : ''"
-                style="background-image: url('/gamePlay/shampoo_icon.webp')">
+                :style="{backgroundImage: `url('/gamePlay/shampoo_icon.webp?v=${APP_VERSION}')`}">
             </div>
           </template>
 
@@ -289,7 +297,7 @@ const foodWarning = computed(() => {
        foamDrag.isDragging.value ? foamDrag.style.value : {},
        {
            'touch-action': 'none',
-           'background-image': `url('${bathCartList[currentBathIndex]?.image}')`
+           'background-image': `url('${bathCartList[currentBathIndex]?.image}?v=${APP_VERSION}')`
        }
      ]"
                  :class="[
@@ -301,7 +309,7 @@ const foodWarning = computed(() => {
             ></div>
 
             <div v-show="foamDrag.isDragging.value || feedStatus"
-                 :style="{ 'background-image': `url('${bathCartList[currentBathIndex]?.image}')` }"
+                 :style="{ 'background-image': `url('${bathCartList[currentBathIndex]?.image}?v=${APP_VERSION}')` }"
                  class="w-[70px] h-[70px] opacity-30 bg-contain bg-no-repeat bg-center">
 
             </div>
@@ -322,7 +330,7 @@ const foodWarning = computed(() => {
             class="bg-[#fff6ef] justify-center h-25  flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
             style="box-shadow: inset 0 -5px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-20 h-20 bg-contain bg-no-repeat bg-center"
-               style="background-image: url('/gamePlay/back_icon.webp')">
+               :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}">
           </div>
           <button class="text-lg font-bold text-gray-600 pointer-events-none">Назад</button>
         </div>
@@ -331,7 +339,7 @@ const foodWarning = computed(() => {
             class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
-               style="background-image: url('/gamePlay/market.webp')">
+               :style="{backgroundImage: `url('/gamePlay/market.webp?v=${APP_VERSION}')`}">
           </div>
           <button class="text-md font-bold text-gray-600 pointer-events-none">Магазин</button>
         </div>
@@ -345,7 +353,10 @@ const foodWarning = computed(() => {
         <div
             @click="nextItem()"
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
-            :class="tutorialStep === 2 && foodCartList.length > 0 ? 'z-205 pointer-events-auto bg-white' : 'z-30'"
+            :class="[
+              tutorialStep === 2 && foodCartList.length > 0 ? 'z-205 pointer-events-auto bg-white' : 'z-30',
+              tutorialStep === 2 && foodCartList.length > 0 && !foodDrag.isDragging.value ? 'animate-pulse' : ''
+]"
 
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
@@ -356,7 +367,7 @@ const foodWarning = computed(() => {
                 :class="!foodDrag.isDragging.value  && showHunger ? 'animate-pulse' : ''"
                 class="flex flex-col items-center justify-center w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
 
-                style="background-image: url('/gamePlay/fridge_empty.webp')">
+                :style="{backgroundImage: `url('/gamePlay/fridge_empty.webp?v=${APP_VERSION}')`}">
 
             </div>
           </template>
@@ -369,10 +380,11 @@ const foodWarning = computed(() => {
                    (foodDrag.isDragging.value && !foodConsumedByPipe) ? foodDrag.style.value : {},
                    {
                      'touch-action': 'none',
-                     'background-image': `url('${foodCartList[currentIndex]?.image}')`
+                     'background-image': `url('${foodCartList[currentIndex]?.image}?v=${APP_VERSION}')`
                    }
                  ]"
                  :class="[
+
                    (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative ',
                    !foodDrag.isDragging.value &&( foodCartList[currentIndex]?.category === 'food') && showHunger ? 'animate-pulse' : '',
                     !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'healthPotion' && gameData.sick ? 'animate-pulse' : '',
@@ -385,7 +397,7 @@ const foodWarning = computed(() => {
             <div
                 v-show="foodWarning"
                 class="absolute w-20 opacity-50 animate-pulse pointer-events-none">
-              <img src="/gamePlay/warning_icons.webp" alt="">
+              <img :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt="">
             </div>
             <img v-show="(foodDrag.isDragging.value || feedStatus) && !foodConsumedByPipe"
                  :src="foodCartList[currentIndex]?.image"
@@ -410,7 +422,7 @@ const foodWarning = computed(() => {
             class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
-               style="background-image: url('/gamePlay/market.webp')">
+               :style="{backgroundImage: `url('/gamePlay/market.webp?v=${APP_VERSION}')`}">
           </div>
           <button class="text-md font-bold text-gray-600 pointer-events-none">Магазин</button>
         </div>
@@ -418,10 +430,10 @@ const foodWarning = computed(() => {
         <div
             @click="location = 'home',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
-            :class=" tutorialStep === 4 ? 'z-205' : ''"
+            :class=" tutorialStep === 4 ? 'z-205 animate-pulse' : ''"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-20 h-20 bg-contain bg-no-repeat bg-center"
-               style="background-image: url('/gamePlay/back_icon.webp')">
+               :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}">
           </div>
           <button class="text-md font-bold text-gray-600 pointer-events-none">Назад</button>
         </div>

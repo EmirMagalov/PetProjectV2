@@ -2,6 +2,7 @@
 import {gameData} from "@/scripts/useGameStore.js";
 import ProgressBar from "@/components/ProgressBar.vue";
 import {expPercentage} from "@/scripts/level.js";
+import {APP_VERSION} from "@/scripts/constants.js";
 
 
 function formatNumber(num) {
@@ -23,8 +24,8 @@ function formatNumber(num) {
       <div class="flex justify-between gap-2 p-2">
         <div class="flex flex-col gap-1">
 
-          <ProgressBar image="/gamePlay/hunger.webp" name="Сытость" :value="gameData.foodLevel" color="#FFF700"/>
-          <ProgressBar image="/gamePlay/energy.webp" name="Энергия" :value="gameData.energy" color="#44B846"/>
+          <ProgressBar :image="`/gamePlay/hunger.webp?v=${APP_VERSION}`" name="Сытость" :value="gameData.foodLevel" color="#FFF700"/>
+          <ProgressBar :image="`/gamePlay/energy.webp?v=${APP_VERSION}`" name="Энергия" :value="gameData.energy" color="#44B846"/>
 
         </div>
 
@@ -49,14 +50,14 @@ function formatNumber(num) {
           <div
 
               class="flex relative justify-center items-center  shadow-md bg-white/10 backdrop-blur-md whitespace-nowrap  w-15  py-1 rounded-xl border border-white/10 animate-pop">
-            <img src="/gamePlay/coin.webp" alt="Монеты" width="15" class="shrink-0 ">
+            <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="Монеты" width="15" class="shrink-0 ">
             <span class="text-sm font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">
             {{ formatNumber(gameData.coins)}}
           </span>
           </div>
           <div
               class="flex relative items-center  shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border whitespace-nowrap border-white/10 animate-pop">
-            <img src="/gamePlay/click_icon.webp" alt="Монеты" width="20" class="shrink-0">
+            <img :src="`/gamePlay/click_icon.webp?v=${APP_VERSION}`" alt="Монеты" width="20" class="shrink-0">
             <span class="text-sm font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">
           {{ formatNumber(gameData.clickCounter) }}
         </span>
@@ -73,7 +74,7 @@ function formatNumber(num) {
           <img
               v-for="i in 3"
               :key="i"
-              :src="i <= gameData.lives ? '/gamePlay/heart.webp' : '/gamePlay/heart_empty.webp'"
+              :src="i <= gameData.lives ? `/gamePlay/heart.webp?v=${APP_VERSION}` : `/gamePlay/heart_empty.webp?v=${APP_VERSION}`"
               alt="Жизнь"
               width="18"
           >

@@ -4,6 +4,7 @@ import { gameData, isPopping } from "@/scripts/useGameStore.js";
 import ProgressBar from "@/components/ProgressBar.vue";
 import { expPercentage } from "@/scripts/level.js";
 import { comboClicks } from "@/scripts/actions.js";
+import {APP_VERSION} from "@/scripts/constants.js";
 
 // Локальный сглаженный счетчик для плавной анимации спада
 const animatedComboClicks = ref(0);
@@ -88,8 +89,8 @@ const getClipInset = (progress) => {
     >
       <div class="flex justify-between gap-2 p-2">
         <div class="flex flex-col gap-1">
-          <ProgressBar image="/gamePlay/hunger.webp" name="Сытость" :value="gameData.foodLevel" color="#FFF700"/>
-          <ProgressBar image="/gamePlay/energy.webp" name="Энергия" :value="gameData.energy" color="#44B846"/>
+          <ProgressBar :image="`/gamePlay/hunger.webp?v=${APP_VERSION}`" name="Сытость" :value="gameData.foodLevel" color="#FFF700"/>
+          <ProgressBar :image="`/gamePlay/energy.webp?v=${APP_VERSION}`" name="Энергия" :value="gameData.energy" color="#50A2FF"/>
         </div>
 
         <div class="grid grid-cols-2 gap-1 left-0.5">
@@ -114,7 +115,7 @@ const getClipInset = (progress) => {
               class="flex relative h-8 justify-center items-center shadow-md bg-white/10 backdrop-blur-md whitespace-nowrap w-15 py-1 rounded-xl border border-white/10"
               :class="isPopping ? 'animate-pop' : ''"
           >
-            <img src="/gamePlay/coin.webp" alt="Монеты" width="15" class="shrink-0">
+            <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="Монеты" width="15" class="shrink-0">
             <span class="text-xs font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">
               {{ formatNumber(gameData.coins) }}
             </span>
@@ -125,7 +126,7 @@ const getClipInset = (progress) => {
               class="flex relative h-8 items-center shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border whitespace-nowrap border-white/10"
               :class="isPopping ? 'animate-pop' : ''"
           >
-            <img src="/gamePlay/click_icon.webp" alt="Клики" width="20" class="shrink-0">
+            <img :src="`/gamePlay/click_icon.webp?v=${APP_VERSION}`" alt="Клики" width="20" class="shrink-0">
             <span class="text-xs font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">
               {{ formatNumber(gameData.clickCounter) }}
             </span>
@@ -139,7 +140,7 @@ const getClipInset = (progress) => {
           <img
               v-for="i in 3"
               :key="i"
-              :src="i <= gameData.lives ? '/gamePlay/heart.webp' : '/gamePlay/heart_empty.webp'"
+              :src="i <= gameData.lives ? `/gamePlay/heart.webp?v=${APP_VERSION}` : `/gamePlay/heart_empty.webp?v=${APP_VERSION}`"
               alt="Жизнь"
               width="18"
           >
@@ -156,7 +157,7 @@ const getClipInset = (progress) => {
               'scale-115': isClicking && progressX2 > 0 && progressX2 < 100
             }"
         >
-          <img src="/gamePlay/x2_combo_icons.webp" class="absolute inset-0 w-full h-full brightness-45" alt="x2" />
+          <img :src="`/gamePlay/x2_combo_icons.webp?v=${APP_VERSION}`" class="absolute inset-0 w-full h-full brightness-45" alt="x2" />
           <img
               src="/gamePlay/x2_combo_icons.webp"
               class="absolute inset-0 w-full h-full transition-all duration-75 ease-linear"
@@ -174,7 +175,7 @@ const getClipInset = (progress) => {
               'scale-115': isClicking && progressX3 > 0 && progressX3 < 100
             }"
         >
-          <img src="/gamePlay/x3_combo_icons.webp" class="absolute inset-0 w-full h-full brightness-45" alt="x3" />
+          <img :src="`/gamePlay/x3_combo_icons.webp?v=${APP_VERSION}`" class="absolute inset-0 w-full h-full brightness-45" alt="x3" />
           <img
               src="/gamePlay/x3_combo_icons.webp"
               class="absolute inset-0 w-full h-full transition-all duration-75 ease-linear"
@@ -192,7 +193,7 @@ const getClipInset = (progress) => {
               'scale-115': isClicking && progressX5 > 0 && progressX5 < 100
             }"
         >
-          <img src="/gamePlay/x5_combo_icons.webp" class="absolute inset-0 w-full h-full brightness-45" alt="x5" />
+          <img :src="`/gamePlay/x5_combo_icons.webp?v=${APP_VERSION}`" class="absolute inset-0 w-full h-full brightness-45" alt="x5" />
           <img
               src="/gamePlay/x5_combo_icons.webp"
               class="absolute inset-0 w-full h-full transition-all duration-75 ease-linear"
@@ -209,7 +210,7 @@ const getClipInset = (progress) => {
     <Transition name="fade">
       <div
           v-if="showStatsModal"
-          @touchmove.prevent
+
           class="fixed inset-0 z-300 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           @click.self="showStatsModal = false"
       >
@@ -225,7 +226,7 @@ const getClipInset = (progress) => {
 
             <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
               <div class="flex items-center gap-1.5">
-                <img src="/gamePlay/coin.webp" alt="Монеты" width="18">
+                <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="Монеты" width="18">
                 <span class="font-semibold text-gray-600">Монеты:</span>
               </div>
               <span class="font-bold text-amber-600">{{ formatFullNumber(gameData.coins) }}</span>
@@ -233,7 +234,7 @@ const getClipInset = (progress) => {
 
             <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
               <div class="flex items-center gap-1.5">
-                <img src="/gamePlay/click_icon.webp" alt="Клики" width="20">
+                <img :src="`/gamePlay/click_icon.webp?v=${APP_VERSION}`" alt="Клики" width="20">
                 <span class="font-semibold text-gray-600">Всего кликов:</span>
               </div>
               <span class="font-bold text-gray-800">{{ formatFullNumber(gameData.clickCounter) }}</span>
@@ -241,7 +242,7 @@ const getClipInset = (progress) => {
 
             <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
               <div class="flex items-center gap-1.5">
-                <img src="/gamePlay/hunger.webp" alt="Сытость" width="18">
+                <img :src="`/gamePlay/hunger.webp?v=${APP_VERSION}`" alt="Сытость" width="18">
                 <span class="font-semibold text-gray-600">Сытость:</span>
               </div>
               <span class="font-bold text-gray-800">{{ Math.trunc(gameData.foodLevel) }}%</span>
@@ -249,7 +250,7 @@ const getClipInset = (progress) => {
 
             <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
               <div class="flex items-center gap-1.5">
-                <img src="/gamePlay/energy.webp" alt="Энергия" width="18">
+                <img :src="`/gamePlay/energy.webp?v=${APP_VERSION}`" alt="Энергия" width="18">
                 <span class="font-semibold text-gray-600">Энергия:</span>
               </div>
               <span class="font-bold text-gray-800">{{ Math.trunc(gameData.energy) }}%</span>

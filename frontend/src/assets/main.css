@@ -1,4 +1,29 @@
 @import "tailwindcss";
+html, body, #app {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;                 /* блокируем скролл на уровне html/body */
+    overscroll-behavior: none;        /* убирает резину */
+    -webkit-overflow-scrolling: touch;
+    position: fixed;                  /* очень помогает на iOS */
+    inset: 0;
+}
+
+/* Контейнер, в котором реально будет скролл */
+.scroll-container {
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;     /* contain — важно */
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+}
+
+
+
+
+
 
 @font-face {
     font-family: 'MyFont';

@@ -17,6 +17,7 @@ import {
   isDealing, betOptions, selectedBet
 } from "@/scripts/saloonScripts/twentyOneGame.js";
 import {gameData} from "@/scripts/useGameStore.js";
+import {APP_VERSION} from "@/scripts/constants.js";
 
 // Безопасный расчет монет
 const userCoins = computed(() => {
@@ -124,7 +125,8 @@ function handleRestart() {
   <!-- Главный контейнер меню с фиксом для Safari -->
   <div
       class="saloon-container rounded-4xl p-2 mx-5 bg-[#fff6ef] h-65 border-2 border-[#f7c9a5] flex flex-col mt-1 items-center justify-between relative"
-      style="background-image: url('/gamePlay/poker_table.webp'); background-size: cover; "
+      :style="{backgroundImage: `url('/gamePlay/poker_table.webp?v=${APP_VERSION}')`, backgroundSize: `cover`}"
+
   >
     <!-- Кнопка "Назад" -->
     <RouterLink to="/" class="z-30">
@@ -134,7 +136,7 @@ function handleRestart() {
       >
         <div
             class="w-10 h-10 bg-contain bg-no-repeat bg-center"
-            style="background-image: url('/gamePlay/back_icon.webp')"
+            :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"
         ></div>
         <span class="text-xs font-bold text-gray-600 pointer-events-none">Назад</span>
       </div>
