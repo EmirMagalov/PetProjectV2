@@ -134,7 +134,7 @@ export const foodList = [
     },
     {
         id: 'california_roll',
-        name: 'Калифорнийский ролл',
+        name: 'Ролл «Калифорния»',
         image: `/food/california.webp?v=${APP_VERSION}`,
         category: 'food',
         subcategory:'sushi',
