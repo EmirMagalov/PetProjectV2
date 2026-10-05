@@ -1,5 +1,5 @@
+// src/scripts/preloadImages.js
 import { APP_VERSION } from "@/scripts/constants.js";
-// Импортируем сгенерированный массив всех картинок из public
 import rawImages from "@/scripts/assetsList.json";
 
 export const imagesToPreload = rawImages.map(path => `${path}?v=${APP_VERSION}`);
@@ -18,11 +18,19 @@ export function preloadImages(onProgress) {
             const img = new Image();
             img.src = src;
 
-            const handleLoad = () => {
+            const handleLoad = async () => {
+                try {
+                    // 🚀 Заставляем Safari на iOS раскодировать WebP в GPU
+                    if ('decode' in img) {
+                        await img.decode();
+                    }
+                } catch (e) {
+                    // Игнорируем возможные мелкие сбои раскодирования
+                }
+
                 loadedCount++;
                 if (typeof onProgress === "function") {
-                    const percent = Math.round((loadedCount / total) * 100);
-                    onProgress(percent);
+                    onProgress(Math.round((loadedCount / total) * 100));
                 }
                 resolve(src);
             };
@@ -30,7 +38,6 @@ export function preloadImages(onProgress) {
             img.onload = handleLoad;
             img.onerror = handleLoad;
         });
-
     });
 
     return Promise.all(promises);

@@ -4,7 +4,7 @@ import Test from "@/components/Test.vue";
 import { onMounted } from "vue";
 // 1. Добавляем импорт isApiError и errorMessage
 import { initGameData, isLoading, isApiError, errorMessage } from "@/scripts/api.js";
-import { preloadImages } from "@/scripts/preloadImages.js";
+import {imagesToPreload, preloadImages} from "@/scripts/preloadImages.js";
 import {APP_VERSION} from "@/scripts/constants.js";
 
 const loadGame = async () => {
@@ -91,6 +91,9 @@ onMounted(() => {
     <!-- 🎮 3. ИГРА (Рендерится только при успешной загрузке) -->
     <main v-else>
       <RouterView />
+      <div class="pointer-events-none fixed -left-[9999px] -top-[9999px] h-1 w-1 overflow-hidden opacity-0" aria-hidden="true">
+        <img v-for="src in imagesToPreload" :key="src" :src="src" />
+      </div>
     </main>
   </Transition>
 </template>
