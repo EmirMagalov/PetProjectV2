@@ -38,18 +38,13 @@ async def pet_tick_job():
         if pet.last_interaction:
             time_since_interaction = NOW - pet.last_interaction
 
-            # Оффлайн от 1 до 3 часов: шанс пачкания 1 раз в час (а не каждую минуту!)
-            # Проверяем (time_since_interaction % 3600 == 0) или ставим адекватный шанс 1/180 (~раз в 3 часа)
-            if 3600 <= time_since_interaction < 7200:
-                # Шанс 1/180 в минуту сделает так, что питомец испачкается в среднем 1 раз за 3 часа оффлайна
-                if not pet.stinky and random.random() < (1 / 180):
+            if time_since_interaction >= 7200:
+                if not pet.stinky and random.random() < (1 / 90):
                     pet.stinky = True
-
-                if not pet.is_pooped and random.random() < (1 / 180):
+                if not pet.is_pooped and random.random() < (1 / 90):
                     pet.is_pooped = True
 
-            # Оффлайн > 3 часов — гарантированная грязь
-            if time_since_interaction >= 7200:
+            if time_since_interaction >= 10800:
                 pet.stinky = True
                 pet.is_pooped = True
 
