@@ -81,7 +81,7 @@ onMounted(() => {
 
       <!-- Текст загрузки -->
       <span class="text-amber-200 font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
-        Загрузка игры...
+        Загрузка...
       </span>
 
       <!-- Спиннер -->

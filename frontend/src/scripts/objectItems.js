@@ -102,6 +102,28 @@ export const foodList = [
         cost: 25,
         level: 10
     },
+    {
+        id: 'peach',
+        name: 'Персик',
+        image: `/food/peach.webp?v=${APP_VERSION}`,
+        category: 'food',
+        subcategory:'fruits',
+        foodGain: 10,
+        energyGain: 5,
+        cost: 25,
+        level: 10
+    },
+    {
+        id: 'pomegranate',
+        name: 'Персик',
+        image: `/food/pomegranate.webp?v=${APP_VERSION}`,
+        category: 'food',
+        subcategory:'fruits',
+        foodGain: 10,
+        energyGain: 5,
+        cost: 25,
+        level: 10
+    },
 
     {
         id: 'salmon_roll',

@@ -216,12 +216,12 @@ const getClipInset = (progress) => {
       >
         <div class="bg-[#fff6ef] border-2 border-[#f7c9a5] rounded-3xl p-5 w-full max-w-xs shadow-2xl relative flex flex-col gap-3">
 
-          <h3 class="text-lg font-bold text-center text-gray-800">Статистика игрока</h3>
+          <h3 class="text-lg font-bold text-center text-gray-800">Сведения</h3>
 
           <div class="flex flex-col gap-2 text-sm">
             <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
               <span class="font-semibold text-gray-600">Уровень:</span>
-              <span class="font-bold text-gray-800">{{ gameData.level }} ({{ Math.round(expPercentage) }}%)</span>
+              <span class="font-bold text-gray-800">{{ gameData.level }} ({{gameData.exp}}/{{Number(gameData.level) * 100}})</span>
             </div>
 
             <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
