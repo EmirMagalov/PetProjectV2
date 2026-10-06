@@ -23,8 +23,8 @@ async def test():
     pet = await PetModel.get_or_none(tg_id=MY_TG_ID)
     if pet:
         # Искусственно ухудшаем параметры для теста
-        pet.hungry_notified = False
-        pet.food_level = 10.0  # Низкая еда (должен сработать пуш "Питомец проголодался!")
+        # pet.hungry_notified = False
+        # pet.food_level = 10.0  # Низкая еда (должен сработать пуш "Питомец проголодался!")
 
         # Делаем вид, что игрок был оффлайн больше 35 секунд
         pet.last_interaction = int(time.time()) - 100

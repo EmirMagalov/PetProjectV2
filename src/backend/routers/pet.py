@@ -8,7 +8,6 @@ pet_router = APIRouter(prefix="/api", tags=["api"])
 
 @pet_router.get("/{tg_id}")
 async def get_pet(tg_id: int):
-    # Просто отдаем данные из базы — фоновая задача их уже обновила!
     pet = await PetModel.filter(tg_id=tg_id).first()
 
     if not pet:
@@ -36,31 +35,39 @@ async def get_pet(tg_id: int):
 @pet_router.post("/update")
 async def update_pet(data: dict):
     tg_id = data.get("tg_id")
+    if not tg_id:
+        raise HTTPException(status_code=400, detail="tg_id is required")
+
     pet = await PetModel.get_or_none(tg_id=tg_id)
     if not pet:
         raise HTTPException(status_code=404, detail="Pet not found")
 
-    updated_fields = ["last_interaction", "last_update", "bad_stats_minutes", "poop_bad_minutes"]
-
-    # Применяем действия игрока
-    for key, value in data.items():
-        if hasattr(pet, key) and key != "tg_id":
-            setattr(pet, key, value)
-            updated_fields.append(key)
-
     current_ts = int(time.time())
+    updated_fields = {"last_interaction", "last_update", "bad_stats_minutes", "poop_bad_minutes"}
+
+    # Валидные поля модели
+    valid_fields = set(pet._meta.fields_map.keys())
+
+    # Применяем входящие данные
+    for key, value in data.items():
+        if key in valid_fields and key != "tg_id":
+            setattr(pet, key, value)
+            updated_fields.add(key)
+
     pet.last_interaction = current_ts
     pet.last_update = current_ts
     pet.clean_up_stats()
 
-    # Сохраняем ТОЛЬКО переданные и измененные поля
-    await pet.save(update_fields=list(set(updated_fields)))
+    await pet.save(update_fields=list(updated_fields))
     return {"status": "success", "pet": pet}
 
 
 @pet_router.post("/reset")
 async def reset_pet(data: dict):
     tg_id = data.get("tg_id")
+    if not tg_id:
+        raise HTTPException(status_code=400, detail="tg_id is required")
+
     pet = await PetModel.get_or_none(tg_id=tg_id)
     if not pet:
         raise HTTPException(status_code=404, detail="Pet not found")
@@ -95,9 +102,9 @@ async def reset_pet(data: dict):
     pet.sick_notified = False
     if hasattr(pet, "addiction_notified"):
         pet.addiction_notified = False
+
     await pet.save()
     return {"status": "success", "pet": pet}
-
 
 
 @pet_router.post("/test-notification/{tg_id}")
@@ -106,13 +113,11 @@ async def test_notification(tg_id: int):
     if not pet:
         raise HTTPException(status_code=404, detail="Pet not found")
 
-    # Сбрасываем флаги и ставим триггерные значения
     pet.hungry_notified = False
     pet.food_level = 5.0
-    pet.last_interaction = int(time.time()) - 100  # Считаем, что оффлайн > 35 сек
+    pet.last_interaction = int(time.time()) - 100
     await pet.save()
 
-    # Принудительно вызываем функцию проверки
     await check_pet_notifications_job()
 
     return {"status": "ok", "message": "Проверка запущена, проверьте Telegram"}
