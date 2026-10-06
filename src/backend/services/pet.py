@@ -34,15 +34,13 @@ async def pet_tick_job():
             energy_rate = ENERGY_PER_MIN_SICK if pet.sick else ENERGY_PER_MIN_HEALTHY
             pet.energy = max(0.0, pet.energy - energy_rate)
 
-        # --- 3. ГРЯЗЬ И КАКАШКИ ---
-
         # --- ПРОВЕРКА ГРЯЗИ (STINKY) ---
         if not pet.stinky:
-            washed_time = pet.last_washed_time or pet.last_interaction or NOW
+            washed_time = pet.last_washed_time if pet.last_washed_time > 0 else NOW
             time_since_washed = NOW - washed_time
 
             if time_since_washed >= 10800:
-                # Через 4 часа — гарантированная грязь
+                # Через 3 часа — гарантированная грязь
                 pet.stinky = True
             elif time_since_washed >= 7200:
                 # Через 2 часа — шанс испачкаться (1/90)
@@ -51,7 +49,7 @@ async def pet_tick_job():
 
         # --- ПРОВЕРКА КАКАХИ (IS_POOPED) ---
         if not pet.is_pooped:
-            poop_time = pet.last_poop_cleaned_time or pet.last_interaction or NOW
+            poop_time = pet.last_poop_cleaned_time if pet.last_poop_cleaned_time > 0 else NOW
             time_since_poop = NOW - poop_time
 
             if time_since_poop >= 10800:
