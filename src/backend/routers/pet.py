@@ -44,7 +44,18 @@ async def update_pet(data: dict):
 
     current_ts = int(time.time())
     updated_fields = {"last_interaction", "last_update", "bad_stats_minutes", "poop_bad_minutes"}
+    if "stinky" in data:
+        # Если в БД питомец вонял, а с фронтенда пришел False (его помыли)
+        if pet.stinky and data["stinky"] is False:
+            pet.last_washed_time = current_ts
+            updated_fields.add("last_washed_time")
 
+        # --- 2. Фиксируем время уборки какахи ---
+    if "is_pooped" in data:
+        # Если в БД была кучка, а с фронтенда пришел False (ее убрали)
+        if pet.is_pooped and data["is_pooped"] is False:
+            pet.last_poop_cleaned_time = current_ts
+            updated_fields.add("last_poop_cleaned_time")
     # Валидные поля модели
     valid_fields = set(pet._meta.fields_map.keys())
 

@@ -38,6 +38,9 @@ class Pet(models.Model):
     unlocked_costumes = fields.JSONField(default=list)
     equipped_costume = fields.CharField(max_length=255, null=True)
 
+    last_washed_time = fields.BigIntField(default=0)
+    last_poop_cleaned_time = fields.BigIntField(default=0)
+
     sick=fields.BooleanField(default=False)
     addiction_streak = fields.IntField(default=0)
     addiction_time = fields.FloatField(default=0.0)

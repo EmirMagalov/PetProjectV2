@@ -25,7 +25,7 @@ async def pet_tick_job():
 
         # --- 2. ЭНЕРГИЯ ---
         if pet.sleep:
-            # Сон 5 минут (+20 в минуту)
+            # Сон (+20 в минуту)
             pet.energy = min(100.0, pet.energy + 20.0)
             if pet.energy >= 100.0:
                 pet.sleep = False
@@ -34,19 +34,33 @@ async def pet_tick_job():
             energy_rate = ENERGY_PER_MIN_SICK if pet.sick else ENERGY_PER_MIN_HEALTHY
             pet.energy = max(0.0, pet.energy - energy_rate)
 
-        # --- 3. ГРЯЗЬ И КАКАШКИ (работает всегда, даже во сне) ---
-        if pet.last_interaction:
-            time_since_interaction = NOW - pet.last_interaction
+        # --- 3. ГРЯЗЬ И КАКАШКИ ---
 
-            if time_since_interaction >= 7200:
-                if not pet.stinky and random.random() < (1 / 90):
-                    pet.stinky = True
-                if not pet.is_pooped and random.random() < (1 / 90):
-                    pet.is_pooped = True
+        # --- ПРОВЕРКА ГРЯЗИ (STINKY) ---
+        if not pet.stinky:
+            washed_time = pet.last_washed_time or pet.last_interaction or NOW
+            time_since_washed = NOW - washed_time
 
-            if time_since_interaction >= 10800:
+            if time_since_washed >= 10800:
+                # Через 4 часа — гарантированная грязь
                 pet.stinky = True
+            elif time_since_washed >= 7200:
+                # Через 2 часа — шанс испачкаться (1/90)
+                if random.random() < (1 / 90):
+                    pet.stinky = True
+
+        # --- ПРОВЕРКА КАКАХИ (IS_POOPED) ---
+        if not pet.is_pooped:
+            poop_time = pet.last_poop_cleaned_time or pet.last_interaction or NOW
+            time_since_poop = NOW - poop_time
+
+            if time_since_poop >= 10800:
+                # Через 3 часа — гарантированная кучка
                 pet.is_pooped = True
+            elif time_since_poop >= 5400:
+                # Через 1.5 часа — шанс накакать (1/90)
+                if random.random() < (1 / 90):
+                    pet.is_pooped = True
 
         # --- 4. НАКОПЛЕНИЕ ГРЯЗИ И БОЛЕЗНЬ (через 60 минут грязи) ---
         if (pet.is_pooped or pet.stinky) and not pet.sick:
@@ -82,5 +96,7 @@ async def pet_tick_job():
             "sleep_end_time",
             "bad_stats_minutes",
             "poop_bad_minutes",
+            "last_washed_time",
+            "last_poop_cleaned_time",
         ],
     )
