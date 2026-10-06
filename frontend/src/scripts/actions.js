@@ -39,6 +39,7 @@ let lookResetTimer = null;
 let lastTouchTime = 0;
 const TOUCH_COOLDOWN = 50; // Минимальный интервал 50 мс (не более 20 кликов в секунду)
 const MAX_TOUCH_FINGERS = 3; // Не более 3 пальцев за один раз
+let zeroStatsClicks = 0;
 
 export function otherFeedPet(foodId) {
     const targetId = foodId || cartItemsList.value[currentIndex.value]?.id
@@ -114,7 +115,7 @@ export function feedPet(foodId) {
 
     gameData.foodLevel = Math.min(100, gameData.foodLevel + foodItem.foodGain)
     console.log(foodItem.energyGain)
-    if (foodItem.energyGain){
+    if (foodItem.energyGain) {
         gameData.energy = Math.min(100, gameData.energy + foodItem.energyGain)
     }
 
@@ -122,7 +123,7 @@ export function feedPet(foodId) {
     gameData.feedCount += 1
     addCoin(1)
     addExp(20)
-    showStatus('feed', { fedItemId: foodId })
+    showStatus('feed', {fedItemId: foodId})
 
     if (gameData.feedCount >= 10) {
         gameData.stinky = true
@@ -280,7 +281,6 @@ export function handleMultiTouch(event) {
     }
 
 
-
     let x = 160;
     let y = 135;
 
@@ -310,6 +310,8 @@ export function spawnHeart(x = 160, y = 135) {
     if (tutorialStep.value === 3) {
         if (gameData.clickCounter > 10) nextTutorialStep()
     }
+
+
     if (tutorialStep.value === 6 || tutorialStep.value === 7) {
         return
     }
@@ -323,10 +325,34 @@ export function spawnHeart(x = 160, y = 135) {
             sunAnimating.value = false
         }, 800)
     }
+
     gameData.sleep = false
-
     gameData.clickCounter++
+    if (vibrateTimer) clearTimeout(vibrateTimer)
+    isVibrating.value = true
+    vibrateTimer = setTimeout(() => {
+        isVibrating.value = false
+    }, 150)
 
+    const isFoodZero = gameData.foodLevel <= 0
+    const isEnergyZero = gameData.energy <= 0
+    if (isFoodZero || isEnergyZero) {
+        zeroStatsClicks++
+
+        // Если ВСЕ 2 показателя на нуле — лимит 50, иначе (если только 1) — лимит 100
+        const clickLimit = (isFoodZero && isEnergyZero) ? 50 : 100
+
+        // При достижении нужного лилита списываем жизнь
+        if (zeroStatsClicks >= clickLimit) {
+            isLosingLife()
+            zeroStatsClicks = 0 // Сбрасываем счетчик для следующей жизни
+        }
+
+        return // Прерываем выполнение (монеты, опыт и комбо не начисляются)
+    } else {
+        // Если оба показателя выше 0 — обнуляем штрафной счетчик
+        zeroStatsClicks = 0
+    }
     comboClicks.value++
     if (comboTimer) clearTimeout(comboTimer)
 
@@ -357,7 +383,7 @@ export function spawnHeart(x = 160, y = 135) {
         addCoin(1, x, y)
     }
     const expAmount = comboMultiplier.value > 2 ? 1 * comboMultiplier.value : 1
-    addExp(expAmount,x,y)
+    addExp(expAmount, x, y)
 
     const cost = isBadMood.value ? 0.02 : 0.01
     gameData.energy = Math.max(0, gameData.energy - cost)
@@ -373,13 +399,6 @@ export function spawnHeart(x = 160, y = 135) {
             addCoin(10, x, y)
         }
     }
-
-
-    if (vibrateTimer) clearTimeout(vibrateTimer)
-    isVibrating.value = true
-    vibrateTimer = setTimeout(() => {
-        isVibrating.value = false
-    }, 150)
 }
 
 export function addCoin(coins = 1, x = 160, y = 135) {
@@ -447,7 +466,7 @@ export function triggerCoinAnimation(count = 5, startX = 160, startY = 135) {
     const visualCount = Math.min(count, 10)
     const id = Date.now() + Math.random()
 
-    const coins = Array.from({ length: visualCount }, (_, i) => ({
+    const coins = Array.from({length: visualCount}, (_, i) => ({
         id: `${id}-${i}`,
         x: startX + (visualCount > 1 ? (Math.random() - 0.5) * 40 : 0),
         y: startY + (visualCount > 1 ? (Math.random() - 0.5) * 20 : 0),
@@ -457,7 +476,7 @@ export function triggerCoinAnimation(count = 5, startX = 160, startY = 135) {
         // Если на экране висит уже 15 пачек, удаляем самую старую
         activeCoins.value.shift()
     }
-    activeCoins.value.push({ id, coins })
+    activeCoins.value.push({id, coins})
 
     setTimeout(() => {
         activeCoins.value = activeCoins.value.filter(c => c.id !== id)
@@ -472,7 +491,7 @@ export function triggerExpAnimation(count = 5, startX = 160, startY = 135) {
     const offsetY = 0
     const offsetX = -25
 
-    const exp = Array.from({ length: visualCount }, (_, i) => ({
+    const exp = Array.from({length: visualCount}, (_, i) => ({
         id: `${id}-${i}`,
         x: (startX + offsetX) + (visualCount > 1 ? (Math.random() - 0.5) * 40 : 0),
         y: (startY + offsetY) + (visualCount > 1 ? (Math.random() - 0.5) * 20 : 0),
@@ -481,7 +500,7 @@ export function triggerExpAnimation(count = 5, startX = 160, startY = 135) {
     if (activeExp.value.length > 15) {
         activeExp.value.shift()
     }
-    activeExp.value.push({ id, exp })
+    activeExp.value.push({id, exp})
 
     setTimeout(() => {
         activeExp.value = activeExp.value.filter(c => c.id !== id)
