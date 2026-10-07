@@ -150,7 +150,7 @@ export const foodList = [
         image: `/food/ebi_nigiri.webp?v=${APP_VERSION}`,
         category: 'food',
         subcategory:'sushi',
-        foodGain: 12,
+        foodGain: 15,
         cost: 80,
         level: 10
     },
@@ -160,7 +160,7 @@ export const foodList = [
         image: `/food/california.webp?v=${APP_VERSION}`,
         category: 'food',
         subcategory:'sushi',
-        foodGain: 12,
+        foodGain: 15,
         cost: 80,
         level: 10
     },

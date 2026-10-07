@@ -50,7 +50,6 @@ export function otherFeedPet(foodId) {
     if (foodItem && gameData.cart[targetId] > 0) {
         // 👇 Используем общую функцию списания
         removeFromCart(targetId)
-        console.log(gameData.addictionStreak)
         if (foodId === "pipe") {
             // gameData.isDrunk = true
             gameData.addictionStreak = Math.min(3, gameData.addictionStreak + 1)
@@ -90,15 +89,12 @@ export function otherFeedPet(foodId) {
 export function feedPet(foodId) {
     const targetId = foodId || cartItemsList.value[currentIndex.value]?.id
     const foodItem = foodList.find(item => item.id === targetId)
-
     if (!foodItem || gameData.cart[targetId] <= 0) return
-
     // 1. Считаем, сколько раз это блюдо встречалось в последних приемах пищи
     const sameFoodCountInHistory = recentFedItems.value.filter(id => id === targetId).length
-
     const randomLimit = Math.floor(Math.random() * 2) + 2 // Например, от 2 до 3 раз
     const isSickAndFruit = gameData.sick && foodItem?.subcategory === 'fruits'
-
+    let becameFatNow = false
     // Если блюдо уже часто встречалось в недавней истории и питомец достаточно сыт
     if (!isSickAndFruit && sameFoodCountInHistory >= randomLimit && gameData.foodLevel >= 50) {
         showTongue.value = true
@@ -106,6 +102,34 @@ export function feedPet(foodId) {
             showTongue.value = false
         }, 800)
         return false
+    }
+    // 1. Проверка по шкале сытости (100%)
+    if (gameData.foodLevel >= 95) {
+        if (foodItem.subcategory === 'fruits') {
+            if(!gameData.sick && !gameData.isFat ){
+                showTongue.value = true
+                setTimeout(() => {
+                    showTongue.value = false
+                }, 800)
+                return
+            }
+            if (gameData.isFat) {
+                PlayCount.value= 0
+                gameData.fatCount = Math.min(100, gameData.fatCount + 30)
+            }
+        } else {
+            // Обычная еда
+            if (!gameData.isFat) {
+                // Если НЕ был толстым — становимся толстым
+                gameData.fatCount = 30
+                PlayCount.value = 0
+                gameData.isFat = true
+                becameFatNow = true
+            } else {
+                // Если УЖЕ был толстым и ест обычную еду — забираем жизнь
+                isLosingLife()
+            }
+        }
     }
 
     // 2. Если питомец согласился съесть — добавляем ID в историю и ограничиваем размер (например, помним последние 5 блюд)
@@ -116,8 +140,9 @@ export function feedPet(foodId) {
 
     // 3. Основная логика кормления
     removeFromCart(targetId)
-
+    const oldFoodLevel = gameData.foodLevel
     gameData.foodLevel = Math.min(100, gameData.foodLevel + foodItem.foodGain)
+    const actualGain = gameData.foodLevel - oldFoodLevel
     if (foodItem.energyGain) {
         gameData.energy = Math.min(100, gameData.energy + foodItem.energyGain)
     }
@@ -126,7 +151,7 @@ export function feedPet(foodId) {
     gameData.feedCount += 1
     addCoin(1)
     addExp(20)
-    showStatus('feed', {fedItemId: foodId})
+    showStatus('feed', { fedItemId: foodId, actualGain })
 
     if (gameData.feedCount >= 10) {
         gameData.stinky = true
@@ -134,24 +159,8 @@ export function feedPet(foodId) {
     }
 
     // Флаг, чтобы отследить, стал ли он толстым именно на этом шаге
-    let becameFatNow = false
 
-    // 1. Проверка по шкале сытости (100%)
-    if (gameData.foodLevel >= 100) {
-        if (!gameData.isFat) {
-            gameData.fatCount = 30
-            PlayCount.value = 0
-            gameData.isFat = true
-            becameFatNow = true
-        } else {
-            if (foodItem.subcategory !== 'fruits') {
-                isLosingLife()
-            } else if (foodItem.subcategory === 'fruits') {
-                gameData.fatCount = Math.min(100, gameData.fatCount += 30)
-            }
 
-        }
-    }
 
     // 2. Проверяем обычный стрик еды
     if (gameData.foodStreak >= 2 && !gameData.isFat) {

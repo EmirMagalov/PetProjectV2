@@ -434,7 +434,7 @@ onUnmounted(() => {
 
 .body-fade {
   /* Менять время плавно здесь: например 1000ms, 3000ms, 5000ms */
-  transition: opacity 300ms ease-in-out !important;
+  transition: opacity 150ms ease-in-out !important;
   will-change: opacity;
 }
 

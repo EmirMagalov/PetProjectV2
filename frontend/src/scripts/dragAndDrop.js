@@ -4,7 +4,7 @@ import {addCoin, feedPet, isLosingLife, otherFeedPet, updateEyeLook, resetEyeLoo
 import {
     currentDraggedItem,
     dropZoneRef,
-    gameData, nextTutorialStep,
+    gameData, nextTutorialStep, showTongue,
     statusFoam,
     statusShower
 } from "@/scripts/useGameStore.js";
@@ -151,6 +151,11 @@ export function handleEnd(itemType, foodId, Category) {
 
                 if (!isFullLivesPotion && !isUnneededHealthPotion) {
                     otherFeedPet(foodId)
+                }else {
+                    showTongue.value = true
+                    setTimeout(() => {
+                        showTongue.value = false
+                    }, 800)
                 }
             }
         } else if (itemType === 'foam') {

@@ -234,15 +234,17 @@ export const activeStatus = computed(() => {
 
     // Приоритет 5: Кормежка (ням-ням)
     if (type === 'feed') {
-        // Ищем еду по переданному fedItemId или по lastFedItem
         const targetFoodId = payload?.fedItemId || lastFedItem.value
         const fedItemObj = foodList.find(item => item.id === targetFoodId)
+
+        // Используем переданный actualGain или фоллбэк на foodGain
+        const actualGain = Math.ceil(payload?.actualGain ?? fedItemObj?.foodGain ?? 0)
 
         return {
             show: true,
             text: "Ням-ням!",
             image: "/gamePlay/hunger.webp",
-            additional: `+${fedItemObj?.foodGain || 0}`,
+            additional: `+${actualGain}`,
             bgColor: 'bg-[#FFFF66]/40'
         }
     }
