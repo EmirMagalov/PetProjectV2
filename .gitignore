@@ -44,6 +44,8 @@ coverage.xml
 .pytest_cache/
 cover/
 sources/
+migrations/
+src/migrations/
 # Translations
 *.mo
 *.pot
