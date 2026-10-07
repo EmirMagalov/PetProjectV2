@@ -241,7 +241,7 @@ export const activeStatus = computed(() => {
             text: "Ням-ням!",
             image: "/gamePlay/hunger.webp",
             additional: `+${fedItemObj?.foodGain || 0}`,
-            bgColor: 'bg-[#FFFF00]/40'
+            bgColor: 'bg-[#FFFF66]/40'
         }
     }
 
