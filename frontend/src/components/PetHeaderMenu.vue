@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from "vue";
-import { gameData, isPopping } from "@/scripts/useGameStore.js";
+import {gameData, isCoinPopping, isExpPopping, isPopping} from "@/scripts/useGameStore.js";
 import ProgressBar from "@/components/ProgressBar.vue";
 import { expPercentage } from "@/scripts/level.js";
 import { comboClicks } from "@/scripts/actions.js";
@@ -98,7 +98,7 @@ const getClipInset = (progress) => {
           <!-- Уровень -->
           <div
               class="relative h-8 overflow-hidden flex items-center justify-center shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border border-white/10"
-              :class="isPopping ? 'animate-pop' : ''"
+              :class="isExpPopping? 'animate-pop' : ''"
           >
             <div
                 class="absolute left-0 top-0 bottom-0 bg-[#b0d9de]/80 transition-all duration-500 pointer-events-none z-0"
@@ -113,7 +113,7 @@ const getClipInset = (progress) => {
           <!-- Монетки -->
           <div
               class="flex relative h-8 justify-center items-center shadow-md bg-white/10 backdrop-blur-md whitespace-nowrap w-15 py-1 rounded-xl border border-white/10"
-              :class="isPopping ? 'animate-pop' : ''"
+              :class="isCoinPopping ? 'animate-pop' : ''"
           >
             <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="Монеты" width="15" class="shrink-0">
             <span class="text-xs font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">
@@ -134,7 +134,7 @@ const getClipInset = (progress) => {
           <!-- Смерти -->
           <div
               class="flex relative h-8 justify-center items-center shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border whitespace-nowrap border-white/10"
-              :class="isPopping ? 'animate-pop' : ''"
+
           >
             <img :src="`/gamePlay/scull_icon.webp?v=${APP_VERSION}`" alt="Клики" width="20" class="shrink-0">
             <span class="text-xs font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">

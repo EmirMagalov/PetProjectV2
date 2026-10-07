@@ -28,6 +28,8 @@ export const location = ref()
 export const activeTab = ref('food')
 export const warning = ref(false)
 export const isPopping = ref(false)
+export const isCoinPopping = ref(false)
+export const isExpPopping = ref(false)
 export const levelStatus = ref(false);
 export const fruitStreak = ref(
     Number(localStorage.getItem('pet_fruitStreak')) || 0

@@ -2,7 +2,7 @@ import {
     cloudShow,
     energyFull, fruitStreak,
     gameData,
-    isAnimating, isBadMood,
+    isAnimating, isBadMood, isCoinPopping,
     isVibrating,
     lastFedItem, nextTutorialStep, PlayCount, sameFoodCount,
     showHunger, showStatus, showTongue, tutorialStep,
@@ -357,24 +357,26 @@ export function spawnHeart(x = 160, y = 135) {
     }
 
 
-    const isFoodZero = gameData.foodLevel <= 0
-    const isEnergyZero = gameData.energy <= 0
-    if (isFoodZero || isEnergyZero) {
-        zeroStatsClicks++
+    const isBothStatsZero = gameData.foodLevel <= 0 && gameData.energy <= 0;
+    const coinInterval = isBothStatsZero ? 5 : 2
+    if (gameData.clickCounter % coinInterval === 0) {
+        addCoin(1, x, y)
+    }
+    if (isBothStatsZero) {
+        zeroStatsClicks++;
 
-        // Если ВСЕ 2 показателя на нуле — лимит 50, иначе (если только 1) — лимит 100
-        const clickLimit = (isFoodZero && isEnergyZero) ? 50 : 100
+        const clickLimit = 300; // Лимит кликов, когда оба показателя на 0
 
-        // При достижении нужного лилита списываем жизнь
+        // При достижении 50 кликов списываем жизнь
         if (zeroStatsClicks >= clickLimit) {
-            isLosingLife()
-            zeroStatsClicks = 0 // Сбрасываем счетчик для следующей жизни
+            isLosingLife();
+            zeroStatsClicks = 0; // Сбрасываем счётчик для следующей жизни
         }
 
-        return // Прерываем выполнение (монеты, опыт и комбо не начисляются)
+        return; // Прерываем выполнение (монеты, опыт и комбо не начисляются)
     } else {
-        // Если оба показателя выше 0 — обнуляем штрафной счетчик
-        zeroStatsClicks = 0
+        // Если хотя бы один показатель выше 0 — штрафной счётчик обнуляется
+        zeroStatsClicks = 0;
     }
     comboClicks.value++
     if (comboTimer) clearTimeout(comboTimer)
@@ -402,9 +404,7 @@ export function spawnHeart(x = 160, y = 135) {
     }, 800)
 
     // 3. Передаем координаты в addCoin
-    if (gameData.clickCounter % 2 === 0) {
-        addCoin(1, x, y)
-    }
+
     const expAmount = comboMultiplier.value > 2 ? 1 * comboMultiplier.value : 1
     addExp(expAmount, x, y)
 
@@ -420,7 +420,11 @@ export function addCoin(coins = 1, x = 160, y = 135) {
     const finalCoins = coins * comboMultiplier.value
     // Передаем фиксированную пачку из 5 визуальных монеток и координаты клика
     triggerCoinAnimation(finalCoins, x, y)
+    isCoinPopping.value = true
+    setTimeout(() => {
+        isCoinPopping.value = false
 
+    }, 200)
     isCoinAnimating.value = true
     coinAnimKey.value++
 

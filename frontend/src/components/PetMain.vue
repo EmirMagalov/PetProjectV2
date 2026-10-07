@@ -21,7 +21,7 @@ import {
   mouth,
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
-  locationUrl, location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus
+  locationUrl, location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus, isCoinPopping
 } from "@/scripts/useGameStore.js";
 import {
   activeCoins, activeExp,
@@ -73,8 +73,10 @@ watch(location, (newLocation) => {
 
 function triggerPop() {
   isPopping.value = true
+
   setTimeout(() => {
     isPopping.value = false
+
   }, 200)
 }
 
