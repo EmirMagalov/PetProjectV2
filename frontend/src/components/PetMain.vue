@@ -21,7 +21,7 @@ import {
   mouth,
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
-  locationUrl, location, dropZoneRef, body, tutorialStep, isPopping, bodyType, activeStatus
+  locationUrl, location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus
 } from "@/scripts/useGameStore.js";
 import {
   activeCoins, activeExp,
@@ -322,7 +322,31 @@ onUnmounted(() => {
           <div :class="['absolute flex justify-center items-center w-45 h-45', isPopping ? 'animate-pop' : '',tutorialStep === 3 ? 'animate-quick-pulse' : '']">
             <PetHeadwear/>
             <PetCostume/>
-            <img fetchpriority="high" decoding="sync" :src="body" class="absolute w-45" alt="">
+            <div class="absolute w-45 h-45 pointer-events-none">
+              <!-- Худое тело -->
+              <img
+                  :src="`/character/skinny_body.webp?v=${APP_VERSION}`"
+                  alt="skinny body"
+                  class="absolute inset-0 w-full h-full object-contain body-fade"
+                  :class="bodyType === 'skinny' ? 'opacity-100' : 'opacity-0'"
+              />
+
+              <!-- Нормальное тело -->
+              <img
+                  :src="`/character/main_body.webp?v=${APP_VERSION}`"
+                  alt="normal body"
+                  class="absolute inset-0 w-full h-full object-contain body-fade"
+                  :class="bodyType === 'normal' ? 'opacity-100' : 'opacity-0'"
+              />
+
+              <!-- Толстое тело -->
+              <img
+                  :src="`/character/fat_body.webp?v=${APP_VERSION}`"
+                  alt="fat body"
+                  class="absolute inset-0 w-full h-full object-contain body-fade"
+                  :class="bodyType === 'fat' ? 'opacity-100' : 'opacity-0'"
+              />
+            </div>
             <img :src="getHornAsset(gameData.level)" class="absolute w-45" alt="">
             <img v-show="gameData.sick" src="/character/drunk.webp" class="absolute w-45" alt="">
             <img v-show="gameData.sick && bodyType==='fat'" src="/character/sick_fat.webp" class="absolute w-45 z-10"
@@ -405,6 +429,14 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+
+.body-fade {
+  /* Менять время плавно здесь: например 1000ms, 3000ms, 5000ms */
+  transition: opacity 300ms ease-in-out !important;
+  will-change: opacity;
+}
+
+
 .fade-sun-enter-active,
 .fade-sun-leave-active {
   transition: opacity 1s ease;

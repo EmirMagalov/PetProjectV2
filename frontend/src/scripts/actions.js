@@ -137,16 +137,17 @@ export function feedPet(foodId) {
     let becameFatNow = false
 
     // 1. Проверка по шкале сытости (100%)
-    if (gameData.foodLevel >= 100 ) {
+    if (gameData.foodLevel >= 100) {
         if (!gameData.isFat) {
             gameData.fatCount = 30
+            PlayCount.value = 0
             gameData.isFat = true
             becameFatNow = true
         } else {
-            if(foodItem.subcategory !== 'fruits'){
+            if (foodItem.subcategory !== 'fruits') {
                 isLosingLife()
-            }else if(foodItem.subcategory === 'fruits'){
-                gameData.fatCount = Math.min(100,gameData.fatCount += 30)
+            } else if (foodItem.subcategory === 'fruits') {
+                gameData.fatCount = Math.min(100, gameData.fatCount += 30)
             }
 
         }
@@ -343,6 +344,19 @@ export function spawnHeart(x = 160, y = 135) {
         isVibrating.value = false
     }, 150)
 
+
+    if (gameData.isFat) {
+        PlayCount.value++
+        if ((gameData.fatCount - PlayCount.value) <= 0) {
+            gameData.isFat = false
+            PlayCount.value = 0
+            gameData.fastfoodStreak = 0
+            addExp(10)
+            addCoin(10, x, y)
+        }
+    }
+
+
     const isFoodZero = gameData.foodLevel <= 0
     const isEnergyZero = gameData.energy <= 0
     if (isFoodZero || isEnergyZero) {
@@ -398,16 +412,7 @@ export function spawnHeart(x = 160, y = 135) {
     gameData.energy = Math.max(0, gameData.energy - cost)
     gameData.foodLevel = Math.max(0, gameData.foodLevel - cost)
 
-    if (gameData.isFat) {
-        PlayCount.value++
-        if ( (gameData.fatCount - PlayCount.value) <= 0) {
-            gameData.isFat = false
-            PlayCount.value = 0
-            gameData.fastfoodStreak = 0
-            addExp(10)
-            addCoin(10, x, y)
-        }
-    }
+
 }
 
 export function addCoin(coins = 1, x = 160, y = 135) {
@@ -461,6 +466,7 @@ export const Clean = (event) => {
     addCoin(10, x, y);
     addExp(20, x, y);
 };
+
 export function isLosingLife() {
     gameData.lives = Math.max(0, gameData.lives - 1)
     showStatus('losingLife')

@@ -103,7 +103,7 @@ const foodWarning = computed(() => {
   const list = foodCartList.value
   const idx = currentIndex.value
 
-  return (gameData.isFat && list[idx]?.subcategory !== 'fruits') ||
+  return (gameData.isFat && list[idx]?.subcategory !== 'fruits' && gameData.isFat && list[idx]?.subcategory !=='potion') ||
       (gameData.sick && list[idx]?.subcategory === 'pipe')
 })
 

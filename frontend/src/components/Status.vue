@@ -6,7 +6,7 @@ const props = defineProps({
   additional: String,
   bgColor: {
     type: String,
-    default: 'bg-green-500/50'
+    default: 'bg-green-500/40'
   }
 })
 </script>

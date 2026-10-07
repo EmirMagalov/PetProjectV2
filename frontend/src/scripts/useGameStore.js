@@ -49,7 +49,7 @@ watch(PlayCount, (newValue) => {
 })
 
 
-export const body = ref("/character/main_body.webp")
+// export const body = ref("/character/main_body.webp")
 export const bodyType = ref('normal')
 
 export const isGameOver = ref(false)
@@ -215,7 +215,8 @@ export const activeStatus = computed(() => {
         return {
             show: true,
             text: "- 1 жизнь!",
-            image: "/gamePlay/heart_broken.webp"
+            image: "/gamePlay/heart_broken.webp",
+            bgColor: "bg-[#CC0000]/40"
         }
     }
 
@@ -224,7 +225,8 @@ export const activeStatus = computed(() => {
         return {
             show: true,
             text: "+ 1 жизнь!",
-            image: "/gamePlay/heart.webp"
+            image: "/gamePlay/heart.webp",
+            bgColor: "bg-[#FF0000]/40"
         }
     }
 
@@ -238,7 +240,8 @@ export const activeStatus = computed(() => {
             show: true,
             text: "Ням-ням!",
             image: "/gamePlay/hunger.webp",
-            additional: `+${fedItemObj?.foodGain || 0}`
+            additional: `+${fedItemObj?.foodGain || 0}`,
+            bgColor: 'bg-[#FFFF00]/40'
         }
     }
 

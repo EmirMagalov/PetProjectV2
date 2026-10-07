@@ -1,6 +1,6 @@
 import {watch} from "vue";
 import {
-    body, bodyType,
+    bodyType,
     cloudShow,
     gameData, isGameOver,
     lowEnergy,
@@ -136,17 +136,14 @@ watch(
         if (foodLevel <= 85) {
             gameData.foodStreak = 0
             gameData.isFat = false
-            PlayCount.value = 0
+            // PlayCount.value = 0
         }
 
         if (foodLevel < 15) {
-            body.value = `/character/skinny_body.webp?v=${APP_VERSION}`
             bodyType.value = 'skinny'
         } else if (isFat) {
-            body.value = `/character/fat_body.webp?v=${APP_VERSION}`
             bodyType.value = 'fat'
         } else {
-            body.value = `/character/main_body.webp?v=${APP_VERSION}`
             bodyType.value = 'normal'
         }
         if (isShowTongue) {
