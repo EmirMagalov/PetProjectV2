@@ -66,7 +66,7 @@ watch(location, (newLocation) => {
     locationUrl.value = `/location/home.webp?v=${APP_VERSION}`
 
   } else if (newLocation === 'bath') {
-    locationUrl.value = '/location/bath.webp'
+    locationUrl.value = `/location/bath.webp?v=${APP_VERSION}`
     gameData.sleep = false
   }
 })
