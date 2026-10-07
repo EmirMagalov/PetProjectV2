@@ -7,8 +7,8 @@ from backend.models.pet import Pet as PetModel
 FOOD_PER_MIN_HEALTHY = 0.25
 FOOD_PER_MIN_SICK = 0.416
 
-ENERGY_PER_MIN_HEALTHY = 0.25
-ENERGY_PER_MIN_SICK = 0.416
+ENERGY_PER_MIN_HEALTHY = 0.16
+ENERGY_PER_MIN_SICK = 0.25
 
 
 async def pet_tick_job():
@@ -74,6 +74,8 @@ async def pet_tick_job():
             pet.bad_stats_minutes += 1
             if pet.bad_stats_minutes >= 480:
                 pet.lives = max(0, pet.lives - 1)
+                if pet.lives == 0:
+                    pet.deaths_count += 1
                 pet.bad_stats_minutes = 0
         else:
             pet.bad_stats_minutes = 0
@@ -90,6 +92,7 @@ async def pet_tick_job():
             "stinky",
             "sick",
             "lives",
+            "deaths_count",
             "sleep",
             "sleep_end_time",
             "bad_stats_minutes",

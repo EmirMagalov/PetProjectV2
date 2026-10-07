@@ -42,7 +42,7 @@ register_tortoise(
     app,
     db_url=settings.DATABASE_URL,
     modules={"models": ["backend.models.pet"]}, # Указываем весь пакет models, чтобы подтянулись все файлы внутри (включая pet.py)
-    generate_schemas=True,
+    generate_schemas=False,
     add_exception_handlers=True,
 )
 
@@ -52,7 +52,7 @@ TORTOISE_ORM = {
     },
     "apps": {
         "models": {
-            "models": ["backend.models.pet"], # Должно совпадать с тем, что выше
+            "models": ["backend.models.pet","aerich.models"], # Должно совпадать с тем, что выше
             "default_connection": "default",
             "migrations": "backend.migrations", # Лучше назвать папку осмысленно, например, backend.migrations вместо myapp.migrations
         },

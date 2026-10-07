@@ -11,7 +11,6 @@ import {
   pupilOffset, randomCharacterImage,
   result
 } from "@/scripts/saloonScripts/twentyOneGame.js";
-import SaloonHeaderMenu from "@/components/Saloon/SaloonHeaderMenu.vue";
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import {activeCoins, activeExp} from "@/scripts/actions.js";
 import {useRouter} from "vue-router";

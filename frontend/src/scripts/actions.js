@@ -40,6 +40,7 @@ let lastTouchTime = 0;
 const TOUCH_COOLDOWN = 50; // Минимальный интервал 50 мс (не более 20 кликов в секунду)
 const MAX_TOUCH_FINGERS = 3; // Не более 3 пальцев за один раз
 let zeroStatsClicks = 0;
+const recentFedItems = ref([])
 
 export function otherFeedPet(foodId) {
     const targetId = foodId || cartItemsList.value[currentIndex.value]?.id
@@ -92,17 +93,14 @@ export function feedPet(foodId) {
 
     if (!foodItem || gameData.cart[targetId] <= 0) return
 
-    // 1. Проверяем, ел ли он это же блюдо до этого
-    if (lastFedItem.value === targetId) {
-        sameFoodCount.value++
-    } else {
-        lastFedItem.value = targetId
-        sameFoodCount.value = 1
-    }
-    const randomLimit = Math.floor(Math.random() * 3) + 3
+    // 1. Считаем, сколько раз это блюдо встречалось в последних приемах пищи
+    const sameFoodCountInHistory = recentFedItems.value.filter(id => id === targetId).length
+
+    const randomLimit = Math.floor(Math.random() * 2) + 2 // Например, от 2 до 3 раз
     const isSickAndFruit = gameData.sick && foodItem?.subcategory === 'fruits'
 
-    if (!isSickAndFruit && sameFoodCount.value >= randomLimit && gameData.foodLevel >= 50) {
+    // Если блюдо уже часто встречалось в недавней истории и питомец достаточно сыт
+    if (!isSickAndFruit && sameFoodCountInHistory >= randomLimit && gameData.foodLevel >= 50) {
         showTongue.value = true
         setTimeout(() => {
             showTongue.value = false
@@ -110,11 +108,16 @@ export function feedPet(foodId) {
         return false
     }
 
+    // 2. Если питомец согласился съесть — добавляем ID в историю и ограничиваем размер (например, помним последние 5 блюд)
+    recentFedItems.value.push(targetId)
+    if (recentFedItems.value.length > 5) {
+        recentFedItems.value.shift() // Удаляем самое старое блюдо
+    }
+
     // 3. Основная логика кормления
     removeFromCart(targetId)
 
     gameData.foodLevel = Math.min(100, gameData.foodLevel + foodItem.foodGain)
-    console.log(foodItem.energyGain)
     if (foodItem.energyGain) {
         gameData.energy = Math.min(100, gameData.energy + foodItem.energyGain)
     }
@@ -134,12 +137,18 @@ export function feedPet(foodId) {
     let becameFatNow = false
 
     // 1. Проверка по шкале сытости (100%)
-    if (gameData.foodLevel >= 100 && foodItem.subcategory === 'fastfood') {
+    if (gameData.foodLevel >= 100 ) {
         if (!gameData.isFat) {
+            gameData.fatCount = 30
             gameData.isFat = true
             becameFatNow = true
         } else {
-            isLosingLife()
+            if(foodItem.subcategory !== 'fruits'){
+                isLosingLife()
+            }else if(foodItem.subcategory === 'fruits'){
+                gameData.fatCount = Math.min(100,gameData.fatCount += 30)
+            }
+
         }
     }
 
@@ -391,7 +400,7 @@ export function spawnHeart(x = 160, y = 135) {
 
     if (gameData.isFat) {
         PlayCount.value++
-        if (PlayCount.value >= 30) {
+        if ( (gameData.fatCount - PlayCount.value) <= 0) {
             gameData.isFat = false
             PlayCount.value = 0
             gameData.fastfoodStreak = 0
@@ -427,12 +436,10 @@ export const Clean = (event) => {
     let y = 135;
 
     if (event) {
-        // Останавливаем всплытие, чтобы не срабатывал handleMultiTouch
         if (typeof event.stopPropagation === 'function') {
             event.stopPropagation();
         }
 
-        // Находим глобальный контейнер игры (как в updateEyeLook)
         const gameCanvas = document.querySelector('.w-\\[320px\\]') || document.body;
         const rect = gameCanvas.getBoundingClientRect();
 
@@ -448,11 +455,12 @@ export const Clean = (event) => {
         }
     }
 
-    gameData.isPooped = false;
+    // ❌ УБРАЛИ: gameData.isPooped = false;
+    // Теперь Clean только начисляет награду и спавнит монеты в точке клика
+
     addCoin(10, x, y);
     addExp(20, x, y);
 };
-
 export function isLosingLife() {
     gameData.lives = Math.max(0, gameData.lives - 1)
     showStatus('losingLife')

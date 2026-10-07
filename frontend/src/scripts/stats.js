@@ -15,17 +15,17 @@ import {batheStatus, isHovered} from "@/scripts/dragAndDrop.js";
 import {APP_VERSION} from "@/scripts/constants.js";
 
 
-const FOOD_PER_HOUR_HEALTHY = 15;     // ~6.7 часа
-const FOOD_PER_HOUR_SICK = 25;     // ~4 часа
+const FOOD_PER_HOUR_HEALTHY = 0.25;     // ~6.7 часа
+const FOOD_PER_HOUR_SICK = 0.416;     // ~4 часа
 
-const ENERGY_PER_HOUR_HEALTHY = 15;
-const ENERGY_PER_HOUR_SICK = 25;
+const ENERGY_PER_HOUR_HEALTHY = 0.16;
+const ENERGY_PER_HOUR_SICK = 0.25;
 // ===================================================
 
 setInterval(() => {
     // Переводим часовой расход в минутный (потому что интервал = 1 минута)
-    const foodPerMinute = (gameData.sick ? FOOD_PER_HOUR_SICK : FOOD_PER_HOUR_HEALTHY) / 60;
-    const energyPerMinute = (gameData.sick ? ENERGY_PER_HOUR_SICK : ENERGY_PER_HOUR_HEALTHY) / 60;
+    const foodPerMinute = (gameData.sick ? FOOD_PER_HOUR_SICK : FOOD_PER_HOUR_HEALTHY) ;
+    const energyPerMinute = (gameData.sick ? ENERGY_PER_HOUR_SICK : ENERGY_PER_HOUR_HEALTHY) ;
     // 1. Уменьшаем еду
     if (gameData.foodLevel > 0) {
         gameData.foodLevel = Math.max(0, gameData.foodLevel - foodPerMinute);
@@ -180,6 +180,7 @@ watch(() => gameData.lives, async (newLives) => {
     // Если жизни кончились, и мы ЕЩЕ не в процессе сброса/перезагрузки
     if (newLives <= 0 && !isGameOver.value) {
         isGameOver.value = true
+        gameData.deathsCount+=1
         showStatus('gameOver')
 
 

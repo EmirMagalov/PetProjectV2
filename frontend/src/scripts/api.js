@@ -99,6 +99,8 @@ export async function initGameData() {
             gameData.exp = serverData.exp
             gameData.coins = serverData.coins
             gameData.lives = serverData.lives
+            gameData.deathsCount = serverData.deaths_count
+            gameData.fatCount = serverData.fat_count
             gameData.foodLevel = serverData.food_level
             gameData.energy = serverData.energy
             gameData.stinky = serverData.stinky
@@ -153,53 +155,11 @@ export async function resetPet() {
     }
 }
 
-export async function syncToBackend() {
-    if (!isCurrentTabActive() || !isDataLoaded || isSyncLocked) {
-        return
-    }
 
+function getPayload() {
     const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
 
-    try {
-        await axios.post(`${API_URL}/update`, {
-            tg_id: tgId,
-            name: gameData.name,
-            level: gameData.level,
-            exp: gameData.exp,
-            coins: gameData.coins,
-            cart: gameData.cart,
-            lives: gameData.lives,
-            food_level: gameData.foodLevel,
-            energy: gameData.energy,
-            stinky: gameData.stinky,
-            sleep: gameData.sleep,
-            click_counter: gameData.clickCounter,
-            sleep_end_time: gameData.sleepEndTime,
-            fastfood_streak: gameData.fastfoodStreak,
-            is_fat: gameData.isFat,
-            sick: gameData.sick,
-            is_pooped: gameData.isPooped,
-            unlocked_heads: gameData.unlockedHeads,
-            equipped_head: gameData.equippedHead,
-            equipped_costume: gameData.equippedCostume,
-            unlocked_costumes: gameData.unlockedCostumes, // ✅ Исправлено с unlockedHeads на unlockedCostumes
-            addiction_streak: gameData.addictionStreak,
-            last_update: Math.floor(Date.now() / 1000)
-        })
-    } catch (e) {
-        console.error("❌ Ошибка сохранения:", e)
-    }
-}
-
-// Запускаем автосохранение каждые 15 секунд
-setInterval(syncToBackend, 15000)
-
-// --- 5. ОБРАБОТЧИК ЖИЗНЕННОГО ЦИКЛА ---
-function sendBeaconUpdate() {
-    if (!isMasterTab() || !isDataLoaded) return
-
-    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
-    const payload = JSON.stringify({
+    return {
         tg_id: tgId,
         name: gameData.name,
         level: gameData.level,
@@ -207,6 +167,8 @@ function sendBeaconUpdate() {
         coins: gameData.coins,
         cart: gameData.cart,
         lives: gameData.lives,
+        deaths_count: gameData.deathsCount,
+        fat_count: gameData.fatCount,
         food_level: gameData.foodLevel,
         energy: gameData.energy,
         stinky: gameData.stinky,
@@ -220,10 +182,37 @@ function sendBeaconUpdate() {
         unlocked_heads: gameData.unlockedHeads,
         equipped_head: gameData.equippedHead,
         equipped_costume: gameData.equippedCostume,
-        unlocked_costumes: gameData.unlockedCostumes, // ✅ Исправлено с unlockedHeads на unlockedCostumes
+        unlocked_costumes: gameData.unlockedCostumes,
         addiction_streak: gameData.addictionStreak,
         last_update: Math.floor(Date.now() / 1000)
-    })
+    }
+}
+
+
+
+export async function syncToBackend() {
+    if (!isCurrentTabActive() || !isDataLoaded || isSyncLocked) {
+        return
+    }
+
+
+
+    try {
+        await axios.post(`${API_URL}/update`, getPayload())
+    } catch (e) {
+        console.error("❌ Ошибка сохранения:", e)
+    }
+}
+
+// Запускаем автосохранение каждые 15 секунд
+setInterval(syncToBackend, 15000)
+
+// --- 5. ОБРАБОТЧИК ЖИЗНЕННОГО ЦИКЛА ---
+function sendBeaconUpdate() {
+    if (!isMasterTab() || !isDataLoaded) return
+
+
+    const payload = JSON.stringify(getPayload())
 
     const blob = new Blob([payload], { type: 'application/json' })
     navigator.sendBeacon(`${API_URL}/update`, blob)

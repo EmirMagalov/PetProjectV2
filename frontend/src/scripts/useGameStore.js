@@ -60,9 +60,11 @@ export const defaultGameData = {
     exp: 0,
     coins: 50,
     lives: 3,
+    deathsCount:0,
     foodLevel: 50,
     energy: 50,
     clickCounter: 0,
+    fatCount: 0,
     stinky: false,
     sleep: false,
     sleepEndTime: 0,
@@ -105,6 +107,7 @@ export async function handleRestart() {
 export async function resetLocal() {
     const savedCoins = gameData.coins
     const savedClicks = gameData.clickCounter
+    const savedDeathsCount = gameData.deathsCount
     currentStatus.value = null
     // 2. Применяем дефолтные значения ко всем остальным полям
     Object.assign(gameData, defaultGameData, {
@@ -114,6 +117,7 @@ export async function resetLocal() {
     // 3. Возвращаем сохраненные значения обратно
     gameData.coins = savedCoins
     gameData.clickCounter = savedClicks
+    gameData.deathsCount = savedDeathsCount
 }
 
 

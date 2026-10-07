@@ -10,7 +10,7 @@ import {fruitStreak, gameData, isGameOver, PlayCount} from "@/scripts/useGameSto
     <div v-show="gameData.isFat" class="relative transition-transform duration-50 animate-pulse">
       <img class="absolute left-5 top-4  w-7 z-10" src="/gamePlay/click_icon.webp" alt="">
       <img class="relative w-10" src="/gamePlay/fat_icon.webp" alt="">
-      <p class="absolute left-10 text-shadow-xs text-shadow-amber-50  top-6 font-bold text-[15px] z-20">{{ 30 - PlayCount }}</p>
+      <p class="absolute left-10 text-shadow-xs text-shadow-amber-50  top-6 font-bold text-[15px] z-20">{{ gameData.fatCount - PlayCount }}</p>
     </div>
 
     <!-- Вторая иконка (Sick) -->
