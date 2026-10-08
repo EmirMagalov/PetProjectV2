@@ -25,27 +25,27 @@ async def start_handler(message: types.Message):
         ]
     )
 
-    media_group = MediaGroupBuilder(
-        caption="Привет! 👋 Добро пожаловать в нашу уютную игру!\n\nЗдесь ты сможешь заботиться о своем питомце... 🐾"
-    )
-
+    # media_group = MediaGroupBuilder(
+    #     caption="Привет! 👋 Добро пожаловать в нашу уютную игру!\n\nЗдесь ты сможешь заботиться о своем питомце... 🐾"
+    # )
+    text = "Добро пожаловать в нашу уютную игру!\n\nЗдесь ты сможешь заботиться о своем питомце... 🐾"
     # Если file_id еще не сохранен — загружаем с диска, иначе берем из кэша
-    p1 = PHOTO_CACHE["photo1"] or FSInputFile("bot/photo/instructions1.jpg")
-    p2 = PHOTO_CACHE["photo2"] or FSInputFile("bot/photo/instructions2.jpg")
+    # p1 = PHOTO_CACHE["photo1"] or FSInputFile("bot/photo/instructions1.jpg")
+    # p2 = PHOTO_CACHE["photo2"] or FSInputFile("bot/photo/instructions2.jpg")
 
-    media_group.add_photo(media=p1)
-    media_group.add_photo(media=p2)
+    # media_group.add_photo(media=p1)
+    # media_group.add_photo(media=p2)
 
     # Отправляем альбом и забираем ответ от Telegram, чтобы сохранить file_id
-    sent_messages = await message.answer_media_group(media=media_group.build())
+    # sent_messages = await message.answer_media_group(media=media_group.build())
 
     # Если мы отправляли файлы с диска, Telegram пришлет нам объекты с уже готовыми file_id
-    if not PHOTO_CACHE["photo1"] and sent_messages:
-        PHOTO_CACHE["photo1"] = sent_messages[0].photo[-1].file_id
-        PHOTO_CACHE["photo2"] = sent_messages[1].photo[-1].file_id
+    # if not PHOTO_CACHE["photo1"] and sent_messages:
+    #     PHOTO_CACHE["photo1"] = sent_messages[0].photo[-1].file_id
+    #     PHOTO_CACHE["photo2"] = sent_messages[1].photo[-1].file_id
 
     await message.answer(
-        "Нажимай кнопку ниже, чтобы запустить приложение и начать приключение! 👇",
+        f"{text}\n\nНажимай кнопку ниже, чтобы запустить приложение и начать приключение! 👇",
         reply_markup=keyboard
     )
 
