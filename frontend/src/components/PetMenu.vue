@@ -107,7 +107,17 @@ const foodWarning = computed(() => {
       (gameData.sick && list[idx]?.subcategory === 'pipe')
 })
 
+// Вычисляем картинку активной еды с версией
+const currentFoodImage = computed(() => {
+  const item = foodCartList.value?.[currentIndex.value]
+  return item?.image ? `${item.image}?v=${APP_VERSION}` : ''
+})
 
+// Вычисляем картинку активного средства для купания с версией
+const currentBathImage = computed(() => {
+  const item = bathCartList.value?.[currentBathIndex.value]
+  return item?.image ? `${item.image}?v=${APP_VERSION}` : ''
+})
 </script>
 
 <template>
@@ -297,7 +307,7 @@ const foodWarning = computed(() => {
        foamDrag.isDragging.value ? foamDrag.style.value : {},
        {
            'touch-action': 'none',
-           'background-image': `url('${bathCartList[currentBathIndex]?.image}?v=${APP_VERSION}')`
+           'background-image': currentBathImage ? `url('${currentBathImage}')` : 'none'
        }
      ]"
                  :class="[
@@ -380,7 +390,7 @@ const foodWarning = computed(() => {
                    (foodDrag.isDragging.value && !foodConsumedByPipe) ? foodDrag.style.value : {},
                    {
                      'touch-action': 'none',
-                     'background-image': `url('${foodCartList[currentIndex]?.image}?v=${APP_VERSION}')`
+                     'background-image': currentFoodImage ? `url('${currentFoodImage}')` : 'none'
                    }
                  ]"
                  :class="[

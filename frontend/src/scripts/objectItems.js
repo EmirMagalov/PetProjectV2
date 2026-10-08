@@ -115,7 +115,7 @@ export const foodList = [
     },
     {
         id: 'pomegranate',
-        name: 'Персик',
+        name: 'Гранат',
         image: `/food/pomegranate.webp?v=${APP_VERSION}`,
         category: 'food',
         subcategory:'fruits',

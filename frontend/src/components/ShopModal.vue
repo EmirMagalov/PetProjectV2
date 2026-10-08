@@ -95,9 +95,12 @@ function isUnlocked(itemId) {
 function handleItemClick(item) {
   if (isItemLocked(item)) return
 
+  // Получаем динамическую цену предметов
+  const itemCost = getItemCost(item)
+
   if (activeTab.value === 'food' || activeTab.value === 'shaman' || activeTab.value === 'bath') {
-    if (gameData.coins >= item.cost) {
-      gameData.coins -= item.cost
+    if (gameData.coins >= itemCost) {
+      gameData.coins -= itemCost // 👈 Списываем с учетом уровня
       addToCart(item.id)
 
       const currentQty = gameData.cart[item.id] || 1
@@ -113,8 +116,8 @@ function handleItemClick(item) {
         selectHeadwear(item.id)
       }
     } else {
-      if (gameData.coins >= item.cost) {
-        gameData.coins -= item.cost
+      if (gameData.coins >= itemCost) {
+        gameData.coins -= itemCost // 👈 Списываем с учетом уровня
 
         if (wardrobeTab.value === 'costumes') {
           if (!gameData.unlockedCostumes) gameData.unlockedCostumes = []
@@ -158,12 +161,29 @@ function showNotification(item, quantity = 1) {
 
 const getItemBonuses = (item) => {
   const bonuses = []
+
   if (item.foodGain) bonuses.push({text: `+ ${item.foodGain} сытости`, color: 'text-amber-400'})
   if (item.energyGain) bonuses.push({text: `+ ${item.energyGain} энергии`, color: 'text-blue-400'})
   if (item.life) bonuses.push({text: `+ ${item.life} жизнь`, color: 'text-red-400'})
   if (item.health) bonuses.push({text: `Восстановление здоровья`, color: 'text-emerald-400'})
+  if (item.subcategory === 'fruits') bonuses.push({text: `+ здоровье`, color: 'text-green-400'})
   return bonuses
 }
+
+function getItemCost(item) {
+  if (!item) return 0
+  const baseCost = item.baseCost ?? item.cost ?? 0
+
+  // Повышаем цену на (level * 2) ТОЛЬКО для товаров категории 'food'
+  if (item.category === 'food') {
+    const currentLevel = gameData.level || 1
+    return baseCost + (currentLevel * 2)
+  }
+
+  // Для всех остальных предметов (shaman, bath accessories, clothes) возвращаем исходную цену
+  return baseCost
+}
+
 </script>
 
 <template>
@@ -352,22 +372,23 @@ const getItemBonuses = (item) => {
           <button
               @click="handleItemClick(item)"
               :class="[
-                'px-4 py-2 w-20 font-bold rounded-lg text-xs transition-all active:scale-90 flex justify-center items-center gap-1.5 shrink-0 cursor-pointer self-center',
-                activeTab === 'clothes' && isUnlocked(item.id)
-                  ? (isEquipped(item.id)
-                      ? 'bg-slate-700 text-slate-300 cursor-default'
-                      : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20')
-                  : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20'
-              ]"
+      'px-4 py-2 w-20 font-bold rounded-lg text-xs transition-all active:scale-90 flex justify-center items-center gap-1.5 shrink-0 cursor-pointer self-center',
+      activeTab === 'clothes' && isUnlocked(item.id)
+        ? (isEquipped(item.id)
+            ? 'bg-slate-700 text-slate-300 cursor-default'
+            : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20')
+        : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20'
+    ]"
           >
             <template v-if="activeTab === 'clothes' && isUnlocked(item.id)">
               {{ isEquipped(item.id) ? 'Снять' : 'Выбрать' }}
             </template>
             <template v-else>
-              <span class="w-5 h-5 shrink-0 flex items-center justify-center">
-                <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="coin" class="w-full h-full object-contain"/>
-              </span>
-              <span>{{ item.cost }}</span>
+    <span class="w-5 h-5 shrink-0 flex items-center justify-center">
+      <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="coin" class="w-full h-full object-contain"/>
+    </span>
+              <!-- ⬇️ Выводим динамическую цену -->
+              <span>{{ getItemCost(item) }}</span>
             </template>
           </button>
         </div>

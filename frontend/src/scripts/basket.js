@@ -11,7 +11,8 @@ import {syncToBackend} from "@/scripts/api.js";
 
 export const currentIndex = ref(0)
 export const currentBathIndex = ref(0) // Индекс для банных принадлежностей
-import {costumeItems} from "@/scripts/costumeItems.js"; // 1. Импортируем костюмы
+import {costumeItems} from "@/scripts/costumeItems.js";
+import {APP_VERSION} from "@/scripts/constants.js"; // 1. Импортируем костюмы
 // Вычисляемый список ВСЕХ товаров в корзине с подробной информацией
 export const cartItemsList = computed(() => {
     return Object.entries(gameData.cart).map(([foodId, count]) => {
@@ -171,3 +172,12 @@ export function buyCostume(costumeId) {
     }
     gameData.equippedCostume = costumeId
 }
+
+watch(foodCartList, (newList) => {
+    newList.forEach(item => {
+        if (item?.image) {
+            const img = new Image()
+            img.src = `${item.image}?v=${APP_VERSION}`
+        }
+    })
+}, { immediate: true })

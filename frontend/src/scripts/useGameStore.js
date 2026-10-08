@@ -17,20 +17,16 @@ export const hearts = ref(false)
 export const showTongue = ref(false)
 export const dropZoneRef = ref()
 export const feedStatus = ref(false)
-export const lifeStatus = ref(false)
-export const isLosingLifeStatus = ref(false)
 export const statusFoam = ref(false)
 export const statusShower = ref(false)
 export const currentDraggedItem = ref(null)
 export const blink = ref(false)
-export const locationUrl = ref()
 export const location = ref()
 export const activeTab = ref('food')
 export const warning = ref(false)
 export const isPopping = ref(false)
 export const isCoinPopping = ref(false)
 export const isExpPopping = ref(false)
-export const levelStatus = ref(false);
 export const fruitStreak = ref(
     Number(localStorage.getItem('pet_fruitStreak')) || 0
 )
@@ -237,14 +233,24 @@ export const activeStatus = computed(() => {
         const targetFoodId = payload?.fedItemId || lastFedItem.value
         const fedItemObj = foodList.find(item => item.id === targetFoodId)
 
-        // Используем переданный actualGain или фоллбэк на foodGain
-        const actualGain = Math.ceil(payload?.actualGain ?? fedItemObj?.foodGain ?? 0)
+        // Прирост сытости
+        const rawGain = payload?.actualGain ?? fedItemObj?.foodGain ?? 0
+        const actualGain = Math.ceil(rawGain)
+
+        // Прирост энергии (если есть)
+        const rawEnergyGain = payload?.actualEnergyGain ?? fedItemObj?.energyGain ?? 0
+        const actualEnergyGain = Math.ceil(rawEnergyGain)
 
         return {
             show: true,
             text: "Ням-ням!",
             image: "/gamePlay/hunger.webp",
-            additional: `+${actualGain}`,
+            additional: actualGain > 0 ? `+${actualGain}` : 'MAX!',
+
+            // Новые поля для энергии:
+            energyImage: actualEnergyGain > 0 ? "/gamePlay/energy.webp" : null,
+            energyAdditional: actualEnergyGain > 0 ? `+${actualEnergyGain}` : null,
+
             bgColor: 'bg-[#FFFF66]/40'
         }
     }

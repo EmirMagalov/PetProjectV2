@@ -12,7 +12,6 @@ import {statusSmoke} from "@/scripts/dragAndDrop.js";
 import PetSmoke from "@/components/PetSmoke.vue";
 import {initGameData} from "@/scripts/api.js";
 import Poop from "@/components/Poop.vue";
-import {preloadImages} from "@/scripts/preloadImages.js";
 import Nameplate from "@/components/Nameplate.vue";
 import PetSideMenu from "@/components/PetSideMenu.vue";
 import TutorialOverlay from "@/components/TutorialOverlay.vue";
@@ -21,7 +20,7 @@ import {
   mouth,
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
-  locationUrl, location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus, isCoinPopping
+  location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus
 } from "@/scripts/useGameStore.js";
 import {
   activeCoins, activeExp,
@@ -38,24 +37,24 @@ let isDragging = false
 
 
 function getHornAsset(level) {
-  if (level >= 50) return '/horns/50lvl.webp'
-  if (level >= 45) return '/horns/45lvl.webp'
-  if (level >= 40) return '/horns/40lvl.webp'
-  if (level >= 35) return '/horns/35lvl.webp'
-  if (level >= 30) return '/horns/30lvl.webp'
-  if (level >= 25) return '/horns/25lvl.webp'
-  if (level >= 20) return '/horns/20lvl.webp'
-  if (level >= 15) return '/horns/15lvl.webp'
-  if (level >= 10) return '/horns/10lvl.webp'
-  if (level >= 5) return '/horns/5lvl.webp'
-  return '/horns/1lvl.webp'
+  if (level >= 50) return `/horns/50lvl.webp?v=${APP_VERSION}`
+  if (level >= 45) return `/horns/45lvl.webp?v=${APP_VERSION}`
+  if (level >= 40) return `/horns/40lvl.webp?v=${APP_VERSION}`
+  if (level >= 35) return `/horns/35lvl.webp?v=${APP_VERSION}`
+  if (level >= 30) return `/horns/30lvl.webp?v=${APP_VERSION}`
+  if (level >= 25) return `/horns/25lvl.webp?v=${APP_VERSION}`
+  if (level >= 20) return `/horns/20lvl.webp?v=${APP_VERSION}`
+  if (level >= 15) return `/horns/15lvl.webp?v=${APP_VERSION}`
+  if (level >= 10) return `/horns/10lvl.webp?v=${APP_VERSION}`
+  if (level >= 5) return `/horns/5lvl.webp?v=${APP_VERSION}`
+  return `/horns/1lvl.webp?v=${APP_VERSION}`
 }
 
 function getCombo() {
-  if (comboMultiplier.value >= 5) return '/gamePlay/x5_combo_icons.webp'
-  if (comboMultiplier.value >= 3) return '/gamePlay/x3_combo_icons.webp'
-  if (comboMultiplier.value >= 2) return '/gamePlay/x2_combo_icons.webp'
-  return '/gamePlay/x1_combo_icons.webp'
+  if (comboMultiplier.value >= 5) return `/gamePlay/x5_combo_icons.webp?v=${APP_VERSION}`
+  if (comboMultiplier.value >= 3) return `/gamePlay/x3_combo_icons.webp?v=${APP_VERSION}`
+  if (comboMultiplier.value >= 2) return `/gamePlay/x2_combo_icons.webp?v=${APP_VERSION}`
+  return `/gamePlay/x1_combo_icons.webp?v=${APP_VERSION}`
 }
 
 watch(location, (newLocation) => {
@@ -63,10 +62,10 @@ watch(location, (newLocation) => {
     if (statusFoam) {
       statusFoam.value = false;
     }
-    locationUrl.value = `/location/home.webp?v=${APP_VERSION}`
+    // locationUrl.value = `/location/home.webp?v=${APP_VERSION}`
 
   } else if (newLocation === 'bath') {
-    locationUrl.value = `/location/bath.webp?v=${APP_VERSION}`
+    // locationUrl.value = `/location/bath.webp?v=${APP_VERSION}`
     gameData.sleep = false
   }
 })
@@ -151,7 +150,7 @@ onMounted(async () => {
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
   location.value = 'home'
-  await preloadImages()
+
   startRandomLooking()
   updateClock();
   clockInterval = setInterval(updateClock, 1000);
@@ -216,7 +215,16 @@ onUnmounted(() => {
         <div class="absolute inset-0  pointer-events-none transition-all duration-1000 ease-in-out "
              :class="gameData.sleep ? 'brightness-30' : 'brightness-100'">
           <img
-              :src="locationUrl"
+              v-show="location==='home' || location === 'food'"
+              src="/location/home.webp"
+              fetchpriority="high"
+              decoding="sync"
+              class="w-[320px] h-[270px] "
+
+          />
+          <img
+              v-show="location==='bath'"
+              src="/location/bath.webp"
               fetchpriority="high"
               decoding="sync"
               class="w-[320px] h-[270px] "
@@ -297,6 +305,8 @@ onUnmounted(() => {
             :text="activeStatus.text"
             :image="activeStatus.image"
             :additional="activeStatus.additional"
+            :energyAdditional="activeStatus.energyAdditional"
+            :energy-image="activeStatus.energyImage"
             :bg-color="activeStatus.bgColor"
             class="pointer-events-auto"
         />

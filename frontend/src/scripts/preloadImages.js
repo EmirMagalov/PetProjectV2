@@ -1,15 +1,21 @@
-// src/scripts/preloadImages.js
 import { APP_VERSION } from "@/scripts/constants.js";
 import rawImages from "@/scripts/assetsList.json";
 
-export const imagesToPreload = rawImages.map(path => `${path}?v=${APP_VERSION}`);
+export const imagesToPreload = rawImages.map(path => {
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${cleanPath}?v=${APP_VERSION}`;
+});
 
 export function preloadImages(onProgress) {
     let loadedCount = 0;
     const total = imagesToPreload.length;
 
+    console.group("🖼️ [Preload] started");
+    console.log(`Total images in the list: ${total}`);
+
     if (total === 0) {
         if (onProgress) onProgress(100);
+        console.groupEnd();
         return Promise.resolve();
     }
 
@@ -18,27 +24,36 @@ export function preloadImages(onProgress) {
             const img = new Image();
             img.src = src;
 
-            const handleLoad = async () => {
-                try {
-                    // 🚀 Заставляем Safari на iOS раскодировать WebP в GPU
-                    if ('decode' in img) {
-                        await img.decode();
-                    }
-                } catch (e) {
-                    // Игнорируем возможные мелкие сбои раскодирования
+            const handleFinish = (status) => {
+                loadedCount++;
+                const progress = Math.round((loadedCount / total) * 100);
+
+                if (status === 'error') {
+                    console.error(`❌ [Preload Fail]${src}`);
+                } else {
+                    console.log(`✅ [Preload OK] (${loadedCount}/${total} - ${progress}%)`);
                 }
 
-                loadedCount++;
                 if (typeof onProgress === "function") {
-                    onProgress(Math.round((loadedCount / total) * 100));
+                    onProgress(progress);
                 }
                 resolve(src);
             };
 
-            img.onload = handleLoad;
-            img.onerror = handleLoad;
+            if ('decode' in img) {
+                img.decode()
+                    .then(() => handleFinish('ok'))
+                    .catch(() => handleFinish('error'));
+            } else {
+                img.onload = () => handleFinish('ok');
+                img.onerror = () => handleFinish('error');
+            }
         });
     });
 
-    return Promise.all(promises);
+    return Promise.all(promises).then((results) => {
+        console.log("[Preload] successfully loaded");
+        console.groupEnd();
+        return results;
+    });
 }

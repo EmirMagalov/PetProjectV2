@@ -141,17 +141,20 @@ export function feedPet(foodId) {
     // 3. Основная логика кормления
     removeFromCart(targetId)
     const oldFoodLevel = gameData.foodLevel
+    const oldEnergy = gameData.energy
     gameData.foodLevel = Math.min(100, gameData.foodLevel + foodItem.foodGain)
     const actualGain = gameData.foodLevel - oldFoodLevel
+    let actualEnergyGain = 0
     if (foodItem.energyGain) {
         gameData.energy = Math.min(100, gameData.energy + foodItem.energyGain)
+        actualEnergyGain = gameData.energy - oldEnergy
     }
 
     gameData.coins += 1
     gameData.feedCount += 1
     addCoin(1)
     addExp(20)
-    showStatus('feed', { fedItemId: foodId, actualGain })
+    showStatus('feed', { fedItemId: foodId, actualGain,actualEnergyGain })
 
     if (gameData.feedCount >= 10) {
         gameData.stinky = true
