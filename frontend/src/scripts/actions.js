@@ -57,7 +57,7 @@ export function otherFeedPet(foodId) {
             if (gameData.addictionStreak >= 2) {
                 gameData.sick = true
             }
-            if (gameData.addictionStreak >= 3) {
+            if (gameData.addictionStreak >= 3 || gameData.sick) {
                 isLosingLife()
             }
 
