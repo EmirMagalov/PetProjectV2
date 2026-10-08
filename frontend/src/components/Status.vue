@@ -16,15 +16,15 @@ const props = defineProps({
 <template>
   <div
       v-show="props.status"
-      class="absolute text-yellow-300 top-0 text-shadow-sm text-shadow-black w-full h-full rounded-2xl flex flex-col items-center justify-center font-bold text-2xl z-50 pointer-events-none"
+      class="absolute whitespace-pre-line text-yellow-300 top-0 text-shadow-sm text-shadow-black w-full h-full rounded-2xl flex flex-col items-center justify-center font-bold text-2xl z-50 pointer-events-none"
       :class="[bgColor]"
   >
     <p>{{ props.text }}</p>
 
     <div class="flex flex-col items-center justify-center gap-1 mt-1">
       <!-- Блок Сытости -->
-      <div v-if="props.image" class="flex items-center gap-1">
-        <img :src="props.image" class="w-8 h-8 object-contain" alt="">
+      <div  class="flex items-center gap-1">
+        <img v-if="props.image" :src="props.image" class="w-8 h-8 object-contain" alt="">
         <p>{{ props.additional }}</p>
       </div>
 

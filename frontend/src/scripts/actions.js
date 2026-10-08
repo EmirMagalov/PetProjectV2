@@ -50,6 +50,8 @@ export function otherFeedPet(foodId) {
     if (foodItem && gameData.cart[targetId] > 0) {
         // 👇 Используем общую функцию списания
         removeFromCart(targetId)
+        addCoin(1)
+        addExp(20)
         if (foodId === "pipe") {
             // gameData.isDrunk = true
             gameData.addictionStreak = Math.min(3, gameData.addictionStreak + 1)
@@ -78,8 +80,7 @@ export function otherFeedPet(foodId) {
             gameData.sick = false
             fruitStreak.value = 0
         }
-        addCoin(1)
-        addExp(20)
+
 
 
     }

@@ -83,3 +83,5 @@ async def feedback_handler(message: types.Message):
     except Exception as e:
         await message.answer("❌ Произошла ошибка при отправке отзыва. Попробуйте позже.")
         print(f"Ошибка отправки отзыва админу: {e}")
+
+

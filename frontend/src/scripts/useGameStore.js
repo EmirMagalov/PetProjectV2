@@ -58,7 +58,7 @@ export const defaultGameData = {
     exp: 0,
     coins: 50,
     lives: 3,
-    deathsCount:0,
+    deathsCount: 0,
     foodLevel: 50,
     energy: 50,
     clickCounter: 0,
@@ -90,8 +90,6 @@ export const gameData = reactive({
 })
 
 
-
-
 export async function handleRestart() {
     isGameOver.value = false
     currentStatus.value = null
@@ -102,6 +100,7 @@ export async function handleRestart() {
     // Просто обновляем поля до дефолтных без дублирования портянки кода
     await initGameData()
 }
+
 export async function resetLocal() {
     const savedCoins = gameData.coins
     const savedClicks = gameData.clickCounter
@@ -131,7 +130,6 @@ document.addEventListener('contextmenu', e => {
 });
 
 
-
 // Шаг онбординга: 0 — выключен, 1 — кормежка, 2 — мытье, 3 — сон и т.д.
 export const tutorialStep = ref(localStorage.getItem('tutorial_completed') ? 0 : 1)
 
@@ -154,35 +152,66 @@ const STATUS_DURATIONS = {
     levelUp: 800,
     gameOver: 0 // Не сбрасываем
 }
+const STATUS_PRIORITIES = {
+    feed: 1,
+    lifeGain: 2,
+    losingLife: 3,
+    levelUp: 4,
+    gameOver: 5
+}
+const statusQueue = ref([])
+let isProcessingQueue = false
 
-let statusTimer = null
 
-watch(currentStatus, (newStatus) => {
-    if (statusTimer) {
-        clearTimeout(statusTimer)
-        statusTimer = null
-    }
-
-    if (!newStatus) return
-
-    const duration = STATUS_DURATIONS[newStatus.type] ?? 800
-
-    if (duration > 0) {
-        statusTimer = setTimeout(() => {
-            currentStatus.value = null
-            statusTimer = null
-        }, duration)
-    }
-})
 
 export function showStatus(type, payload = null) {
-    currentStatus.value = { type, payload }
+    if (type === 'gameOver') {
+        statusQueue.value = [] // Очищаем очередь при смерти
+        currentStatus.value = {type, payload}
+        return
+    }
+
+    // Добавляем новое событие в очередь
+    statusQueue.value.push({
+        type,
+        payload,
+        priority: STATUS_PRIORITIES[type] || 0
+    })
+
+    // Сортируем очередь от большего приоритета к меньшему (levelUp встанет раньше feed)
+    statusQueue.value.sort((a, b) => b.priority - a.priority)
+
+    // Запускаем обработку очереди
+    processStatusQueue()
+}
+
+function processStatusQueue() {
+    // Если уже показывается статус или очередь пуста — ничего не делаем
+    if (isProcessingQueue || statusQueue.value.length === 0) return
+
+    isProcessingQueue = true
+
+    // Достаем самый важный статус из очереди
+    const nextStatus = statusQueue.value.shift()
+    currentStatus.value = nextStatus
+
+    const duration = STATUS_DURATIONS[nextStatus.type] ?? 800
+
+    if (duration > 0) {
+        setTimeout(() => {
+            currentStatus.value = null
+            isProcessingQueue = false
+
+            // Запускаем следующее событие из очереди (если есть)
+            processStatusQueue()
+        }, duration)
+    }
 }
 
 export const activeStatus = computed(() => {
     // Если ничего не происходит и игра не окончена
     if (!currentStatus.value && !isGameOver.value) {
-        return { show: false }
+        return {show: false}
     }
 
     // Приоритет 1: Смерть питомца
@@ -255,5 +284,5 @@ export const activeStatus = computed(() => {
         }
     }
 
-    return { show: false }
+    return {show: false}
 })
