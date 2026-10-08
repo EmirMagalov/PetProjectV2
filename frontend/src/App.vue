@@ -4,11 +4,10 @@ import { initGameData, isLoading, isApiError, errorMessage } from "@/scripts/api
 import { imagesToPreload, preloadImages } from "@/scripts/preloadImages.js";
 import { APP_VERSION } from "@/scripts/constants.js";
 
-// Фоны, без которых НЕЛЬЗЯ убирать лоадер
 const homeBgUrl = `/location/home.webp?v=${APP_VERSION}`;
 const bathBgUrl = `/location/bath.webp?v=${APP_VERSION}`;
 
-// Функция, которая НАМЕРТВО держит лоадер, пока картинки не сдекодируются в GPU
+// Функция с корректным порядком подписки и раскодирования
 const waitForBackgroundsToRender = () => {
   const urls = [homeBgUrl, bathBgUrl];
 
@@ -16,10 +15,8 @@ const waitForBackgroundsToRender = () => {
       urls.map((src) => {
         return new Promise((resolve) => {
           const img = new Image();
-          img.src = src;
 
-          const done = () => {
-            // Если браузер поддерживает decode() — ждем полного графического рендеринга
+          const decodeAndResolve = () => {
             if ('decode' in img) {
               img.decode().then(resolve).catch(resolve);
             } else {
@@ -27,11 +24,16 @@ const waitForBackgroundsToRender = () => {
             }
           };
 
+          // 1. Сначала подписываемся на события
+          img.onload = decodeAndResolve;
+          img.onerror = resolve; // Не ломаем приложение при ошибке сети
+
+          // 2. И только потом задаем src для запуска скачивания
+          img.src = src;
+
+          // 3. Если картинка мгновенно подгрузилась из дискового кэша
           if (img.complete) {
-            done();
-          } else {
-            img.onload = done;
-            img.onerror = resolve; // Пропускаем в случае ошибки, чтобы игра не зависла навсегда
+            decodeAndResolve();
           }
         });
       })
@@ -43,23 +45,25 @@ const loadGame = async () => {
   isApiError.value = false;
 
   try {
-    // 1. Параллельно инициализируем данные и предзагружаем список файлов
     await Promise.all([
       initGameData(),
       preloadImages()
     ]);
 
-    // 2. СТРОГИЙ БЛОК: Не убираем лоадер, пока фон гарантированно не раскодируется
+    // Дожидаемся полного скачивания и раскодирования в GPU
     await waitForBackgroundsToRender();
 
   } catch (e) {
     console.error("Ошибка при первоначальной загрузке:", e);
   } finally {
     if (!isApiError.value) {
-      // Искусственная микро-пауза (50мс), чтобы Vue успел смонтировать элементы в DOM
-      setTimeout(() => {
-        isLoading.value = false;
-      }, 50);
+      // Двойной requestAnimationFrame заставляет браузер сначала
+      // ВСТАВИТЬ И ОТРИСОВАТЬ фон компонента, а затем убрать лоадер
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          isLoading.value = false;
+        });
+      });
     }
   }
 };
