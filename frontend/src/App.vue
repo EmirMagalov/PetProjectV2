@@ -1,32 +1,37 @@
 <script setup>
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { initGameData, isLoading, isApiError, errorMessage } from "@/scripts/api.js";
 import { imagesToPreload, preloadImages } from "@/scripts/preloadImages.js";
 import { APP_VERSION } from "@/scripts/constants.js";
 
-// Список абсолютно критических изображений, без которых нельзя открывать игру
-const criticalAssets = [
-  `/location/home.webp?v=${APP_VERSION}`,
-  `/location/bath.webp?v=${APP_VERSION}`,
-  `/character/main_body.webp?v=${APP_VERSION}`,
+// Фоны, без которых НЕЛЬЗЯ убирать лоадер
+const homeBgUrl = `/location/home.webp?v=${APP_VERSION}`;
+const bathBgUrl = `/location/bath.webp?v=${APP_VERSION}`;
 
-];
+// Функция, которая НАМЕРТВО держит лоадер, пока картинки не сдекодируются в GPU
+const waitForBackgroundsToRender = () => {
+  const urls = [homeBgUrl, bathBgUrl];
 
-// Функция принудительного декодирования критических ресурсов в GPU
-const preloadCritical = () => {
   return Promise.all(
-      criticalAssets.map((src) => {
+      urls.map((src) => {
         return new Promise((resolve) => {
           const img = new Image();
           img.src = src;
 
-          const handleFinish = () => resolve(src);
+          const done = () => {
+            // Если браузер поддерживает decode() — ждем полного графического рендеринга
+            if ('decode' in img) {
+              img.decode().then(resolve).catch(resolve);
+            } else {
+              resolve();
+            }
+          };
 
-          if ('decode' in img) {
-            img.decode().then(handleFinish).catch(handleFinish);
+          if (img.complete) {
+            done();
           } else {
-            img.onload = handleFinish;
-            img.onerror = handleFinish;
+            img.onload = done;
+            img.onerror = resolve; // Пропускаем в случае ошибки, чтобы игра не зависла навсегда
           }
         });
       })
@@ -38,17 +43,23 @@ const loadGame = async () => {
   isApiError.value = false;
 
   try {
-    // Ждем полной загрузки API, всех ассетов из списка и РАСКОДИРОВАНИЯ критических фонов
+    // 1. Параллельно инициализируем данные и предзагружаем список файлов
     await Promise.all([
       initGameData(),
-      preloadImages(),
-      preloadCritical()
+      preloadImages()
     ]);
+
+    // 2. СТРОГИЙ БЛОК: Не убираем лоадер, пока фон гарантированно не раскодируется
+    await waitForBackgroundsToRender();
+
   } catch (e) {
     console.error("Ошибка при первоначальной загрузке:", e);
   } finally {
     if (!isApiError.value) {
-      isLoading.value = false;
+      // Искусственная микро-пауза (50мс), чтобы Vue успел смонтировать элементы в DOM
+      setTimeout(() => {
+        isLoading.value = false;
+      }, 50);
     }
   }
 };
@@ -87,7 +98,7 @@ onMounted(() => {
       </button>
     </div>
 
-    <!-- ⏳ 2. ОВЕРЛЕЙ ЗАГРУЗКИ -->
+    <!-- ⏳ 2. ОВЕРЛЕЙ ЗАГРУЗКИ (Закрывается только после полной отрисовки фона) -->
     <div
         v-else-if="isLoading"
         class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-amber-950 via-red-950 to-black text-white"
@@ -112,17 +123,6 @@ onMounted(() => {
     <!-- 🎮 3. ИГРА -->
     <main v-else>
       <RouterView />
-
-      <!-- 🚀 Для жесткого удержания текстур в видеопамяти добавляем loading="eager" и decoding="sync" -->
-      <div class="pointer-events-none fixed -left-[9999px] -top-[9999px] h-1 w-1 overflow-hidden opacity-0" aria-hidden="true">
-        <img
-            v-for="src in imagesToPreload"
-            :key="src"
-            :src="src"
-            loading="eager"
-            decoding="sync"
-        />
-      </div>
     </main>
   </Transition>
 </template>
