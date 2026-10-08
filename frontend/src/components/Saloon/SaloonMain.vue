@@ -137,7 +137,7 @@ onUnmounted(() => {
     <Transition name="fade">
       <div
           v-if="isLoading"
-          class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-amber-950 via-red-950 to-black text-white"
+          class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#ABD7DD] via-[#ABD7DD] to-blue-300 text-[#D18900]"
       >
         <div class="relative flex items-center justify-center mb-4">
           <!-- Пульсирующее свечение -->
@@ -145,14 +145,14 @@ onUnmounted(() => {
 
           <!-- Анимированный логотип/иконка -->
           <div class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
-            <div class="w-full h-full bg-red-900 rounded-full flex items-center justify-center border border-amber-300/40">
+            <div class="w-full h-full bg-[#FADCCC]  rounded-full flex items-center justify-center border border-amber-300/40">
               <img :src="`/gamePlay/logo_icons.webp?v=${APP_VERSION}`" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
             </div>
           </div>
         </div>
 
         <!-- Текст загрузки -->
-        <span class="text-amber-200 font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
+        <span class="text-[#D18900] font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
           Входим в Салун...
         </span>
 
