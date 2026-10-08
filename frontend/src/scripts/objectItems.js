@@ -98,7 +98,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fruits',
         foodGain: 10,
-        energyGain: 5,
+        energyGain: 1,
         cost: 25,
         level: 10
     },
@@ -109,7 +109,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fruits',
         foodGain: 10,
-        energyGain: 5,
+        energyGain: 1,
         cost: 25,
         level: 10
     },
@@ -120,7 +120,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fruits',
         foodGain: 10,
-        energyGain: 5,
+        energyGain: 1,
         cost: 25,
         level: 10
     },
