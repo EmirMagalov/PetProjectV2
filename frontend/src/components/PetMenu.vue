@@ -88,7 +88,8 @@ function resetTutorial() {
 const ADMIN_IDS = [
   '1059422557',
   '2101015196',
-  '743865425'
+  '743865425',
+  '7287871980'
 
 ]
 
@@ -103,7 +104,7 @@ const foodWarning = computed(() => {
   const list = foodCartList.value
   const idx = currentIndex.value
 
-  return (gameData.isFat && list[idx]?.subcategory !== 'fruits' && gameData.isFat && list[idx]?.subcategory !=='potion') ||
+  return (gameData.isFat && list[idx]?.subcategory !== 'fruits' && gameData.isFat && list[idx]?.subcategory !== 'potion') ||
       (gameData.sick && list[idx]?.subcategory === 'pipe')
 })
 
