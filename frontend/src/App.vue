@@ -6,10 +6,10 @@ import { APP_VERSION } from "@/scripts/constants.js";
 
 // Список абсолютно критических изображений, без которых нельзя открывать игру
 const criticalAssets = [
-  '/location/home.webp',
-  '/location/bath.webp',
+  `/location/home.webp?v=${APP_VERSION}`,
+  `/location/bath.webp?v=${APP_VERSION}`,
   `/character/main_body.webp?v=${APP_VERSION}`,
-  
+
 ];
 
 // Функция принудительного декодирования критических ресурсов в GPU
