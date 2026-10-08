@@ -1,69 +1,28 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import PetMain from "@/components/PetMain.vue";
+import Test from "@/components/Test.vue";
+import { onMounted } from "vue";
+// 1. Добавляем импорт isApiError и errorMessage
 import { initGameData, isLoading, isApiError, errorMessage } from "@/scripts/api.js";
-import { imagesToPreload, preloadImages } from "@/scripts/preloadImages.js";
-import { APP_VERSION } from "@/scripts/constants.js";
-
-const homeBgUrl = `/location/home.webp?v=${APP_VERSION}`;
-const bathBgUrl = `/location/bath.webp?v=${APP_VERSION}`;
-
-// Функция с корректным порядком подписки и раскодирования
-const waitForBackgroundsToRender = () => {
-  const urls = [homeBgUrl, bathBgUrl];
-
-  return Promise.all(
-      urls.map((src) => {
-        return new Promise((resolve) => {
-          const img = new Image();
-
-          const decodeAndResolve = () => {
-            if ('decode' in img) {
-              img.decode().then(resolve).catch(resolve);
-            } else {
-              resolve();
-            }
-          };
-
-          // 1. Сначала подписываемся на события
-          img.onload = decodeAndResolve;
-          img.onerror = resolve; // Не ломаем приложение при ошибке сети
-
-          // 2. И только потом задаем src для запуска скачивания
-          img.src = src;
-
-          // 3. Если картинка мгновенно подгрузилась из дискового кэша
-          if (img.complete) {
-            decodeAndResolve();
-          }
-        });
-      })
-  );
-};
+import {imagesToPreload, preloadImages} from "@/scripts/preloadImages.js";
+import {APP_VERSION} from "@/scripts/constants.js";
 
 const loadGame = async () => {
   isLoading.value = true;
-  isApiError.value = false;
+  isApiError.value = false; // Сбрасываем ошибку перед загрузкой
 
   try {
+    // Запускаем загрузку данных и предзагрузку картинок параллельно
     await Promise.all([
       initGameData(),
       preloadImages()
     ]);
-
-    // Дожидаемся полного скачивания и раскодирования в GPU
-    await waitForBackgroundsToRender();
-
   } catch (e) {
     console.error("Ошибка при первоначальной загрузке:", e);
   } finally {
+    // 2. Снимаем прелоадер ТОЛЬКО если НЕТ ошибки сервера
     if (!isApiError.value) {
-      // Двойной requestAnimationFrame заставляет браузер сначала
-      // ВСТАВИТЬ И ОТРИСОВАТЬ фон компонента, а затем убрать лоадер
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          isLoading.value = false;
-        });
-      });
+      isLoading.value = false;
     }
   }
 };
@@ -75,7 +34,7 @@ onMounted(() => {
 
 <template>
   <Transition name="fade">
-    <!-- 🛑 1. ЭКРАН ОШИБКИ -->
+    <!-- 🛑 1. ЭКРАН ОШИБКИ (Показывается, если бэкенд не ответил) -->
     <div
         v-if="isApiError"
         class="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-gradient-to-br from-zinc-950 via-slate-900 to-black text-white p-6 text-center"
@@ -94,6 +53,7 @@ onMounted(() => {
         {{ errorMessage || 'Не удалось получить данные с сервера. Проверьте интернет-соединение.' }}
       </p>
 
+      <!-- Кнопка перезапуска -->
       <button
           @click="loadGame"
           class="px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 active:scale-95 text-black font-extrabold rounded-2xl shadow-lg transition-all"
@@ -102,14 +62,16 @@ onMounted(() => {
       </button>
     </div>
 
-    <!-- ⏳ 2. ОВЕРЛЕЙ ЗАГРУЗКИ (Закрывается только после полной отрисовки фона) -->
+    <!-- ⏳ 2. ОВЕРЛЕЙ ЗАГРУЗКИ (Показывается пока идет загрузка и нет ошибок) -->
     <div
         v-else-if="isLoading"
         class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-amber-950 via-red-950 to-black text-white"
     >
       <div class="relative flex items-center justify-center mb-4">
+        <!-- Пульсирующее свечение -->
         <div class="absolute w-24 h-24 rounded-full bg-amber-500/20 animate-ping"></div>
 
+        <!-- Анимированный логотип/иконка -->
         <div class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
           <div class="w-full h-full bg-red-900 rounded-full flex items-center justify-center border border-amber-400/30">
             <img :src="`/gamePlay/logo_icons.webp?v=${APP_VERSION}`" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
@@ -117,16 +79,21 @@ onMounted(() => {
         </div>
       </div>
 
+      <!-- Текст загрузки -->
       <span class="text-amber-200 font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
         Загрузка...
       </span>
 
+      <!-- Спиннер -->
       <div class="mt-4 w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></div>
     </div>
 
-    <!-- 🎮 3. ИГРА -->
+    <!-- 🎮 3. ИГРА (Рендерится только при успешной загрузке) -->
     <main v-else>
       <RouterView />
+      <div class="pointer-events-none fixed -left-[9999px] -top-[9999px] h-1 w-1 overflow-hidden opacity-0" aria-hidden="true">
+        <img v-for="src in imagesToPreload" :key="src" :src="src" />
+      </div>
     </main>
   </Transition>
 </template>
