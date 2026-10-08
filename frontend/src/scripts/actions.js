@@ -156,7 +156,7 @@ export function feedPet(foodId) {
     addExp(20)
     showStatus('feed', { fedItemId: foodId, actualGain,actualEnergyGain })
 
-    if (gameData.feedCount >= 10) {
+    if (gameData.feedCount >= Math.floor(Math.random() * (15-10 + 1)) + 10) {
         gameData.stinky = true
         gameData.feedCount = 0
     }
