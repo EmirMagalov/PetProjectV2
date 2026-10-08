@@ -45,7 +45,7 @@ function Skip() {
           <button @click="Skip" class="text-amber-500 hover:text-amber-600 font-bold cursor-pointer pointer-events-auto">
             Пропустить обучение
           </button>
-          <span >Кликай по питомцу чтобы заработать еще монет!</span>
+          <span >Кликай по питомцу чтобы заработать еще монет и опыта!</span>
 
         </div>
       </div>

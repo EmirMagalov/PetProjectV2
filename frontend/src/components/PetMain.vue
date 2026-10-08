@@ -266,7 +266,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Монетки / Опыт -->
-        <div class="absolute inset-0 pointer-events-none overflow-hidden z-50">
+        <div class="absolute inset-0 pointer-events-none overflow-hidden"  :class="tutorialStep === 3 ? 'z-205' : ' z-50'">
           <template v-for="group in activeCoins" :key="group.id">
             <img
                 v-for="coin in group.coins"
@@ -282,7 +282,7 @@ onUnmounted(() => {
             />
           </template>
         </div>
-        <div class="absolute inset-0 pointer-events-none overflow-hidden z-50">
+        <div class="absolute inset-0 pointer-events-none overflow-hidden" :class="tutorialStep === 3 ? 'z-205' : ' z-50'">
           <template v-for="group in activeExp" :key="group.id">
             <img
                 v-for="exp in group.exp"
