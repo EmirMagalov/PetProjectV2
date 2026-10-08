@@ -216,7 +216,7 @@ onUnmounted(() => {
              :class="gameData.sleep ? 'brightness-30' : 'brightness-100'">
           <img
               v-show="location==='home' || location === 'food'"
-              src="/location/home.webp"
+              :src="`/location/home.webp?v=${APP_VERSION}`"
               fetchpriority="high"
               decoding="sync"
               class="w-[320px] h-[270px] "
@@ -224,7 +224,7 @@ onUnmounted(() => {
           />
           <img
               v-show="location==='bath'"
-              src="/location/bath.webp"
+              :src="`/location/bath.webp?v=${APP_VERSION}`"
               fetchpriority="high"
               decoding="sync"
               class="w-[320px] h-[270px] "
