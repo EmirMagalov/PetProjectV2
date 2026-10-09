@@ -22,7 +22,7 @@ export const fortuneRewards = [
     {id: 4, name: '5000', type: 'coins', icon: `/gamePlay/coin.webp?v=${APP_VERSION}`},
     {id: 5, name: '', type: 'potion', icon: `/other/health_potion.webp?v=${APP_VERSION}`},
     {id: 6, name: '', type: 'food', icon: `/food/burger.webp?v=${APP_VERSION}`},
-    {id: 7, name: '', type: 'nothing', icon: ''}, // Пустой сектор "Ничего" без иконки и текста
+    {id: 7, name: '', type: 'nothing', icon: '/gamePlay/poop.webp'}, // Пустой сектор "Ничего" без иконки и текста
 ]
 
 export const nextSpinTime = ref(Number(localStorage.getItem('pet_nextSpinAt')) || 0)
