@@ -39,7 +39,7 @@ watch(canSpin, (newValue) => {
       </button>
 
       <h2 class="title">Колесо Фортуны</h2>
-      <p class="subtitle">Крути каждый день и получай бонусы!</p>
+      <p class="subtitle">Крути каждый день и получай призы!</p>
 
       <!-- Стрелка-указатель -->
       <div class="pointer-wrapper">
@@ -62,9 +62,9 @@ watch(canSpin, (newValue) => {
               class="sector"
               :style="getSectorStyle(index)"
           >
-            <div class="sector-content">
+            <div class="sector-content relative" v-if="reward.icon">
               <img :src="reward.icon" :alt="reward.name"/>
-              <span>{{ reward.name }}</span>
+              <span class="absolute bottom-0">{{ reward.name }}</span>
             </div>
           </div>
         </div>
@@ -92,7 +92,15 @@ watch(canSpin, (newValue) => {
   </div>
       </button>
       <p v-show="!canSpin">Бесплатно через: {{ formattedCooldown }}</p>
+      <div class=" py-2  flex items-center gap-1 justify-end ">
+        <span class="text-slate-400 text-sm">Баланс:</span>
+        <span class="text-amber-400 font-bold text-xs flex items-center gap-1 tabular-nums">
+          <img class="w-5" src="/gamePlay/coin.webp" alt=""> {{ gameData.coins }}
+        </span>
+      </div>
+
     </div>
+
   </div>
 </template>
 
@@ -112,7 +120,7 @@ watch(canSpin, (newValue) => {
   background: linear-gradient(135deg, #2b1055, #7597de);
   border: 4px solid #ffd700;
   border-radius: 24px;
-  padding: 24px 16px;
+  padding: 14px 16px;
   width: 320px;
   text-align: center;
   color: white;
@@ -205,8 +213,8 @@ watch(canSpin, (newValue) => {
 }
 
 .sector-content img {
-  width: 26px;
-  height: 26px;
+  width: 40px;
+  height: 40px;
   margin-bottom: 2px;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
 }

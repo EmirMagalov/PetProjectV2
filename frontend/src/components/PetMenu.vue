@@ -160,15 +160,19 @@ const currentBathImage = computed(() => {
           </div>
           <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
         </div>
+
+
         <div
             @click="isFortuneOpen = true"
-            class="bg-[#fff6ef] absolute p-1 top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 justify-center h-11 w-11 overflow-hidden  flex flex-col items-center rounded-4xl border-2 border-purple-500 transition-transform duration-50 cursor-pointer"
+            class="bg-[#fff6ef] absolute p-1 top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 justify-center h-11 w-11 overflow-hidden  flex flex-col items-center rounded-4xl border-2 border-purple-400 transition-transform duration-50 cursor-pointer"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[100px] h-[100px]  bg-contain bg-no-repeat bg-center"
                :style="{ backgroundImage: `url('/gamePlay/fortune_icons.webp?v=${APP_VERSION}')` }">
           </div>
           <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
         </div>
+
+
         <div
             @click="location = 'food',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95"
@@ -412,7 +416,7 @@ const currentBathImage = computed(() => {
 
 
                  ]"
-                 class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
+                 class="flex flex-col items-center cursor-move w-[80px] h-[80px]  bg-contain bg-no-repeat bg-center"
             ></div>
             <div
                 v-show="foodWarning"

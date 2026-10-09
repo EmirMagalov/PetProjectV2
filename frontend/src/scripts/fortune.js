@@ -1,8 +1,8 @@
 import {ref, computed} from 'vue'
 import axios from 'axios'
-import { gameData } from "@/scripts/useGameStore.js"
-import { API_URL, tgId } from "@/scripts/api.js"
-import { APP_VERSION } from "@/scripts/imageVersion.js"
+import {gameData} from "@/scripts/useGameStore.js"
+import {API_URL, tgId} from "@/scripts/api.js"
+import {APP_VERSION} from "@/scripts/imageVersion.js"
 
 export const isFortuneOpen = ref(false)
 export const isSpinning = ref(false)
@@ -15,19 +15,21 @@ setInterval(() => {
 }, 1000)
 
 export const fortuneRewards = [
-    { id: 0, name: '50 Монет', icon: `/gamePlay/coin.webp?v=${APP_VERSION}` },
-    { id: 1, name: '100 Монет', icon: `/gamePlay/coin.webp?v=${APP_VERSION}` },
-    { id: 2, name: '500 Монет', icon: `/gamePlay/coin.webp?v=${APP_VERSION}` },
-    { id: 3, name: '1500 Монет', icon: `/gamePlay/coin.webp?v=${APP_VERSION}` },
-    { id: 4, name: 'Зелье здоровья', icon: `/other/health_potion.webp?v=${APP_VERSION}` },
-    { id: 5, name: 'Бургер', icon: `/food/burger.webp?v=${APP_VERSION}` },
+    {id: 0, name: '50', type: 'coins', icon: `/gamePlay/coin.webp?v=${APP_VERSION}`},
+    {id: 1, name: '100', type: 'coins', icon: `/gamePlay/coin.webp?v=${APP_VERSION}`},
+    {id: 2, name: '500', type: 'coins', icon: `/gamePlay/coin.webp?v=${APP_VERSION}`},
+    {id: 3, name: '1500', type: 'coins', icon: `/gamePlay/coin.webp?v=${APP_VERSION}`},
+    {id: 4, name: '5000', type: 'coins', icon: `/gamePlay/coin.webp?v=${APP_VERSION}`},
+    {id: 5, name: '', type: 'potion', icon: `/other/health_potion.webp?v=${APP_VERSION}`},
+    {id: 6, name: '', type: 'food', icon: `/food/burger.webp?v=${APP_VERSION}`},
+    {id: 7, name: '', type: 'nothing', icon: ''}, // Пустой сектор "Ничего" без иконки и текста
 ]
 
 export const nextSpinTime = ref(Number(localStorage.getItem('pet_nextSpinAt')) || 0)
 
 export const canSpin = computed(() => now.value >= nextSpinTime.value)
 
-// ИСПРАВЛЕННЫЙ РАСЧЕТ ТАЙМЕРА (каждую секунду реагирует на изменение now.value)
+// РАСЧЕТ ТАЙМЕРА (каждую секунду реагирует на изменение now.value)
 export const formattedCooldown = computed(() => {
     const diff = Math.max(0, Math.floor((nextSpinTime.value - now.value) / 1000))
     const hours = String(Math.floor(diff / 3600)).padStart(2, '0')
@@ -38,7 +40,7 @@ export const formattedCooldown = computed(() => {
 
 const totalSectors = fortuneRewards.length
 const sectorAngle = 360 / totalSectors
-const sectorColors = ['#8e44ad', '#2980b9', '#16a085', '#d35400', '#c0392b', '#27ae60']
+const sectorColors = ['#8e44ad', '#2980b9', '#FF007F', '#16a085', '#d35400', '#c0392b', '#27ae60', '#7f8c8d']
 
 export function getSectorStyle(index) {
     const halfAngleRad = (sectorAngle / 2) * (Math.PI / 180)
@@ -61,7 +63,10 @@ export async function spinWheel() {
     }
 
     isSpinning.value = true
-
+    const isPaidSpin = !canSpin.value
+    if (isPaidSpin) {
+        gameData.coins -= SPIN_PRICE
+    }
     try {
         const response = await axios.post(`${API_URL}/pet/spin-fortune/${tgId}`)
 
@@ -71,7 +76,7 @@ export async function spinWheel() {
             return
         }
 
-        const { reward, next_spin_at, coins_left } = response.data
+        const {reward, next_spin_at, coins_left} = response.data
 
         const winIndex = fortuneRewards.findIndex(r => r.id === reward.id)
         const targetIndex = winIndex !== -1 ? winIndex : 0
@@ -113,7 +118,11 @@ export async function spinWheel() {
                 gameData.cart[itemId] += amount
             }
 
-            alert(`🎉 Вы выиграли: ${reward.name}!`)
+            if (reward.type === 'nothing') {
+                alert(`😢 К сожалению, в этот раз ничего не выпало...`)
+            } else {
+                alert(`🎉 Приз: ${reward.name}!`)
+            }
         }, 3500)
 
     } catch (error) {
@@ -121,4 +130,3 @@ export async function spinWheel() {
         isSpinning.value = false
     }
 }
-

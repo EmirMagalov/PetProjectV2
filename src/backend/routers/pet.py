@@ -166,11 +166,13 @@ async def spin_fortune(tg_id: int):
     # Массив наград с настроенными весами (шансами в %)
     rewards = [
         {"id": 0, "type": "coins", "amount": 50, "name": "50 Монет", "weight": 35},
-        {"id": 1, "type": "coins", "amount": 100, "name": "100 Монет", "weight": 30},
-        {"id": 2, "type": "coins", "amount": 500, "name": "500 Монет", "weight": 20},
+        {"id": 1, "type": "coins", "amount": 100, "name": "100 Монет", "weight": 25},
+        {"id": 2, "type": "coins", "amount": 500, "name": "500 Монет", "weight": 10},
         {"id": 3, "type": "coins", "amount": 1500, "name": "1500 Монет", "weight": 5},  # Редкий джекпот 5%
-        {"id": 4, "type": "potion", "amount": 1, "item_id": "healthPotion", "name": "Зелье здоровья", "weight": 15},
-        {"id": 5, "type": "food", "amount": 1, "item_id": "burger", "name": "Бургер", "weight": 15},
+        {"id": 4, "type": "coins", "amount": 5000, "name": "1500 Монет", "weight": 1},  # Редкий джекпот 1%
+        {"id": 5, "type": "potion", "amount": 1, "item_id": "healthPotion", "name": "Зелье здоровья", "weight": 7},
+        {"id": 6, "type": "food", "amount": 1, "item_id": "burger", "name": "Бургер", "weight": 15},
+        {"id": 7, "type": "nothing", "amount": 0, "name": "Ничего", "weight": 10},
     ]
 
     # Выбор одной награды с учетом весов
@@ -183,6 +185,9 @@ async def spin_fortune(tg_id: int):
     # Начисление выигрыша
     if reward["type"] == "coins":
         pet.coins += reward["amount"]
+    elif reward["type"] == "nothing":
+        # Ничего не начисляем
+        pass
     elif "item_id" in reward:
         item_id = reward["item_id"]
         amount = reward.get("amount", 1)
