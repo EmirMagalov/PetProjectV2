@@ -1,4 +1,4 @@
-import { APP_VERSION } from "@/scripts/constants.js";
+import { APP_VERSION } from "@/scripts/imageVersion.js";
 import rawImages from "@/scripts/assetsList.json";
 
 export const imagesToPreload = rawImages.map(path => {

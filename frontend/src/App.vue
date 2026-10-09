@@ -5,7 +5,7 @@ import { onMounted } from "vue";
 // 1. Добавляем импорт isApiError и errorMessage
 import { initGameData, isLoading, isApiError, errorMessage } from "@/scripts/api.js";
 import {imagesToPreload, preloadImages} from "@/scripts/preloadImages.js";
-import {APP_VERSION} from "@/scripts/constants.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 const loadGame = async () => {
   isLoading.value = true;

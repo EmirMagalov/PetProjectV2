@@ -1,4 +1,4 @@
-import {APP_VERSION} from "@/scripts/constants.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 
 export const foodList = [

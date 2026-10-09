@@ -14,7 +14,7 @@ import {
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import {activeCoins, activeExp} from "@/scripts/actions.js";
 import {useRouter} from "vue-router";
-import {APP_VERSION} from "@/scripts/constants.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 // =====================================================
 // СОСТОЯНИЕ ЗАГРУЗКИ (LOADER)

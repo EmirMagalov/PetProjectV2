@@ -1,7 +1,7 @@
 <script setup>
 import {cloudShow, energyFull, showHunger, gameData, lowEnergy} from "@/scripts/useGameStore.js";
 import {computed} from "vue";
-import {APP_VERSION} from "@/scripts/constants.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 const activeItems = computed(() => {
   let items = 0 // <--- ИСПРАВЛЕНИЕ: let вместо const

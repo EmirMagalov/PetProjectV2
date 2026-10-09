@@ -2,7 +2,7 @@
 import { ref, nextTick, watch } from 'vue'
 import { gameData } from "@/scripts/useGameStore.js";
 import { isEditing, finishEditing } from "@/scripts/actions.js";
-import {APP_VERSION} from "@/scripts/constants.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 const inputRef = ref(null)
 

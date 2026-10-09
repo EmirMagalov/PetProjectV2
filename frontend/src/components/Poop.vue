@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { gameData } from "@/scripts/useGameStore.js"
 import { Clean } from "@/scripts/actions.js"
-import { APP_VERSION } from "@/scripts/constants.js"
+import { APP_VERSION } from "@/scripts/imageVersion.js"
 
 const LOCAL_STORAGE_KEY = 'pet_poops_positions'
 

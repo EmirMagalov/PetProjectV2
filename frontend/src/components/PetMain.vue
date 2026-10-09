@@ -29,7 +29,7 @@ import {
   sunAnimating, updateEyeLook
 } from "@/scripts/actions.js";
 import PetCostume from "@/components/PetCostume.vue";
-import {APP_VERSION} from "@/scripts/constants.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 import FortuneWheel from "@/components/FortuneWheel.vue";
 
 let blinkInterval = null

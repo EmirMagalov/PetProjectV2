@@ -5,7 +5,7 @@ import {costumeItems} from '@/scripts/costumeItems.js'
 import {ref, computed} from 'vue'
 import {addToCart, buyCostume, buyHeadwear} from "@/scripts/basket.js"
 import {activeTab, gameData} from "@/scripts/useGameStore.js"
-import {APP_VERSION} from "@/scripts/constants.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 defineProps({
   isOpen: {
@@ -344,7 +344,7 @@ function getItemCost(item) {
               <div class="flex">
                 <img :src="item.image" :alt="item.name" class="w-full h-full object-contain">
                 <p v-show="getItemQuantity(item)>0" v-if="activeTab !== 'clothes'"
-                   class="text-[11px] absolute right-1 font-bold text-amber-400 mt-0.5 break-words">
+                   class="text-[11px] absolute left-1 top-0 font-bold text-amber-400 mt-0.5 break-words">
                   X {{ getItemQuantity(item) }}
                 </p>
 

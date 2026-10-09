@@ -17,7 +17,7 @@ import {
   isDealing, betOptions, selectedBet
 } from "@/scripts/saloonScripts/twentyOneGame.js";
 import {gameData} from "@/scripts/useGameStore.js";
-import {APP_VERSION} from "@/scripts/constants.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 // Безопасный расчет монет
 const userCoins = computed(() => {

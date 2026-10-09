@@ -2,7 +2,7 @@ import {ref, computed} from 'vue'
 import axios from 'axios'
 import { gameData } from "@/scripts/useGameStore.js"
 import { API_URL, tgId } from "@/scripts/api.js"
-import { APP_VERSION } from "@/scripts/constants.js"
+import { APP_VERSION } from "@/scripts/imageVersion.js"
 
 export const isFortuneOpen = ref(false)
 export const isSpinning = ref(false)

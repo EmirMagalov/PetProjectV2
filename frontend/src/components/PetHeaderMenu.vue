@@ -4,7 +4,7 @@ import {gameData, isCoinPopping, isExpPopping, isPopping} from "@/scripts/useGam
 import ProgressBar from "@/components/ProgressBar.vue";
 import { expPercentage } from "@/scripts/level.js";
 import { comboClicks } from "@/scripts/actions.js";
-import {APP_VERSION} from "@/scripts/constants.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 // Локальный сглаженный счетчик для плавной анимации спада
 const animatedComboClicks = ref(0);

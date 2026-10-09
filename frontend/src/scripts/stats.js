@@ -12,7 +12,7 @@ import {addExp} from "@/scripts/level.js";
 
 import {addCoin, sunAnimating} from "@/scripts/actions.js";
 import {batheStatus, isHovered} from "@/scripts/dragAndDrop.js";
-import {APP_VERSION} from "@/scripts/constants.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 
 const FOOD_PER_HOUR_HEALTHY = 0.25;     // ~6.7 часа

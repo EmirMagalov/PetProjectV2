@@ -41,7 +41,7 @@ const shouldPulse = computed(() => {
 });
 import {useRouter} from 'vue-router';
 import {currentBet, isDealing} from "@/scripts/saloonScripts/twentyOneGame.js";
-import {APP_VERSION} from "@/scripts/constants.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {isFortuneOpen} from "@/scripts/fortune.js";
 
 
@@ -368,24 +368,27 @@ const currentBathImage = computed(() => {
       <!-- FOOD -->
 
 
-      <div v-show="location==='food'" class="grid grid-cols-2 gap-8 relative gap-y-1.5 w-65 place-self-center">
+      <div v-show="location==='food'" class="grid grid-cols-2 gap-8 relative  gap-y-1.5 w-65 place-self-center " >
 
         <div
             @click="nextItem()"
-            class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
+            class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 overflow-hidden"
             :class="[
               tutorialStep === 2 && foodCartList.length > 0 ? 'z-205 pointer-events-auto bg-white' : 'z-30',
               tutorialStep === 2 && foodCartList.length > 0 && !foodDrag.isDragging.value ? 'animate-pulse' : ''
-            ]"
+]"
+
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
-          <!-- 1. Если холодильник пуст -->
+          <!-- 1. Если холодильник пуст: используем foodCartList вместо cartItemsList -->
           <template v-if="foodCartList.length === 0">
             <div
-                :class="!foodDrag.isDragging.value && showHunger ? 'animate-pulse' : ''"
+                :class="!foodDrag.isDragging.value  && showHunger ? 'animate-pulse' : ''"
                 class="flex flex-col items-center justify-center w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
+
                 :style="{backgroundImage: `url('/gamePlay/fridge_empty.webp?v=${APP_VERSION}')`}">
+
             </div>
           </template>
 
@@ -401,39 +404,41 @@ const currentBathImage = computed(() => {
                    }
                  ]"
                  :class="[
-                   (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative',
-                   !foodDrag.isDragging.value && (foodCartList[currentIndex]?.category === 'food') && showHunger ? 'animate-pulse' : '',
-                   !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'healthPotion' && gameData.sick ? 'animate-pulse' : '',
-                   !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'pipe' && lowEnergy.value ? 'animate-pulse' : '',
+
+                   (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative ',
+                   !foodDrag.isDragging.value &&( foodCartList[currentIndex]?.category === 'food') && showHunger ? 'animate-pulse' : '',
+                    !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'healthPotion' && gameData.sick ? 'animate-pulse' : '',
+                    !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'pipe' && lowEnergy.value ? 'animate-pulse' : '',
+
+
                  ]"
                  class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
             ></div>
-
             <div
                 v-show="foodWarning"
                 class="absolute w-20 opacity-50 animate-pulse pointer-events-none">
               <img :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt="">
             </div>
-
             <img v-show="(foodDrag.isDragging.value || feedStatus) && !foodConsumedByPipe"
                  :src="foodCartList[currentIndex]?.image"
                  class="opacity-30 relative"
                  width="80"
                  alt="">
           </template>
-
-          <!-- Текст названия теперь аккуратно в самом низу карточки -->
-          <p class="text-xs absolute bottom-1 font-bold text-gray-600 pointer-events-none whitespace-nowrap">
+          <p class="absolute top-0 left-2 text-amber-500">x{{gameData.cart[foodCartList[currentIndex]?.id] }}</p>
+          <!-- Текст названия / статуса с использованием foodCartList -->
+          <p class="text-[10px] absolute bottom-0 font-bold text-gray-600 pointer-events-none whitespace-nowrap">
             {{
               foodCartList.length > 0 && foodCartList[currentIndex]
-                  ? `${foodCartList[currentIndex].name} x${gameData.cart[foodCartList[currentIndex]?.id]}`
+                  ? `${foodCartList[currentIndex].name}`
                   : 'Холодильник пуст'
             }}
           </p>
+
         </div>
 
         <div
-            @click="isShopOpen = true; activeTab='food'"
+            @click="isShopOpen = true;activeTab='food'"
             class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
@@ -443,9 +448,9 @@ const currentBathImage = computed(() => {
         </div>
 
         <div
-            @click="location = 'home'; nextTutorialStep()"
+            @click="location = 'home',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
-            :class="tutorialStep === 4 ? 'z-205 animate-pulse' : ''"
+            :class=" tutorialStep === 4 ? 'z-205 animate-pulse' : ''"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-20 h-20 bg-contain bg-no-repeat bg-center"
                :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}">
