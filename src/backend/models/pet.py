@@ -84,6 +84,9 @@ class Pet(models.Model):
     critical_life_notified = fields.BooleanField(default=False)  # Уведомление о критической жизни
     game_over_notified = fields.BooleanField(default=False)  # Уведомление о смерти
 
+    # Поля для Колеса Фортуны
+    last_fortune_spin = fields.IntField(default=0)  # Timestamp последнего кручения
+    fortune_notified = fields.BooleanField(default=False)  # Отправлено ли уже уведомление
     # ==========================================
     # МЕТОДЫ МОДЕЛИ
     # ==========================================

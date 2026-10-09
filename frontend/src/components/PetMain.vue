@@ -30,6 +30,7 @@ import {
 } from "@/scripts/actions.js";
 import PetCostume from "@/components/PetCostume.vue";
 import {APP_VERSION} from "@/scripts/constants.js";
+import FortuneWheel from "@/components/FortuneWheel.vue";
 
 let blinkInterval = null
 let lookInterval = null
@@ -146,7 +147,7 @@ onMounted(async () => {
       tg.disableVerticalSwipes()
     }
   }
-
+  localStorage.removeItem('pet_nextSpinAt')
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
   location.value = 'home'
@@ -163,6 +164,9 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', handleVisibilityChange)
   if (clockInterval) clearInterval(clockInterval);
 })
+
+
+
 </script>
 
 <template>
@@ -438,6 +442,7 @@ onUnmounted(() => {
 
   </div>
   <TutorialOverlay/>
+  <FortuneWheel/>
 </template>
 
 <style scoped>

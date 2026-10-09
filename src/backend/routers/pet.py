@@ -1,3 +1,4 @@
+import random
 import time
 from fastapi import APIRouter, HTTPException
 from backend.models.pet import Pet as PetModel
@@ -132,3 +133,74 @@ async def test_notification(tg_id: int):
     await check_pet_notifications_job()
 
     return {"status": "ok", "message": "Проверка запущена, проверьте Telegram"}
+
+
+@pet_router.post("/pet/spin-fortune/{tg_id}")
+async def spin_fortune(tg_id: int):
+    NOW = int(time.time())
+    COOLDOWN = 86400  # 24 часа в секундах
+    SPIN_PRICE = 100  # Стоимость платного спина
+
+    pet = await PetModel.get_or_none(tg_id=tg_id)
+    if not pet:
+        raise HTTPException(status_code=404, detail="Pet not found")
+
+    is_free_spin = (NOW - pet.last_fortune_spin) >= COOLDOWN
+
+    # Если бесплатный спин НЕ доступен — проверяем баланс монет
+    if not is_free_spin:
+        if pet.coins < SPIN_PRICE:
+            remaining_seconds = COOLDOWN - (NOW - pet.last_fortune_spin)
+            return {
+                "success": False,
+                "message": f"Недостаточно монет! Платный спин стоит {SPIN_PRICE} монет.",
+                "retry_in": remaining_seconds
+            }
+        # Списываем монеты за платный спин
+        pet.coins -= SPIN_PRICE
+    else:
+        # Если спин бесплатный — обновляем таймер бесплатного спина
+        pet.last_fortune_spin = NOW
+        pet.fortune_notified = False
+
+    # Массив наград с настроенными весами (шансами в %)
+    rewards = [
+        {"id": 0, "type": "coins", "amount": 50, "name": "50 Монет", "weight": 35},
+        {"id": 1, "type": "coins", "amount": 100, "name": "100 Монет", "weight": 30},
+        {"id": 2, "type": "coins", "amount": 500, "name": "500 Монет", "weight": 20},
+        {"id": 3, "type": "coins", "amount": 1500, "name": "1500 Монет", "weight": 5},  # Редкий джекпот 5%
+        {"id": 4, "type": "potion", "amount": 1, "item_id": "healthPotion", "name": "Зелье здоровья", "weight": 15},
+        {"id": 5, "type": "food", "amount": 1, "item_id": "burger", "name": "Бургер", "weight": 15},
+    ]
+
+    # Выбор одной награды с учетом весов
+    weights = [int(r["weight"]) for r in rewards]
+    selected_reward = random.choices(rewards, weights=weights, k=1)[0]
+
+    # Создаем чистую копию словаря награды (без служебного поля weight для ответа)
+    reward = {k: v for k, v in selected_reward.items() if k != "weight"}
+
+    # Начисление выигрыша
+    if reward["type"] == "coins":
+        pet.coins += reward["amount"]
+    elif "item_id" in reward:
+        item_id = reward["item_id"]
+        amount = reward.get("amount", 1)
+
+        current_cart = dict(pet.cart) if pet.cart else {}
+        current_cart[item_id] = current_cart.get(item_id, 0) + amount
+        pet.cart = current_cart
+
+    # Сохраняем обновлённые данные
+    await pet.save(update_fields=["last_fortune_spin", "fortune_notified", "coins", "cart"])
+
+    # Время следующего бесплатного спина
+    next_spin_at = pet.last_fortune_spin + COOLDOWN
+
+    return {
+        "success": True,
+        "reward": reward,
+        "is_free": is_free_spin,
+        "coins_left": pet.coins,
+        "next_spin_at": next_spin_at
+    }

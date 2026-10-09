@@ -2,6 +2,9 @@ import random
 import time
 
 from backend.models.pet import Pet as PetModel
+# 24 часа в секундах
+FORTUNE_COOLDOWN = 86400
+
 
 # === Настройки расхода (в минуту) ===
 FOOD_PER_MIN_HEALTHY = 0.25

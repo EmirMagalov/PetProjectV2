@@ -152,7 +152,23 @@ async def process_pet_notifications(pet: PetModel, now: float):
             if pet.sick_notified:
                 pet.sick_notified = False
                 is_notified_changed = True
+        last_spin = getattr(pet, "last_fortune_spin", 0)
+        time_since_spin = now - last_spin
 
+        if time_since_spin >= 86400:
+            if not getattr(pet, "fortune_notified", False):
+                if await send_telegram_message(
+                        pet.tg_id,
+                        "🎰 <b>Бесплатный спин готов!</b> Заходи и крути Колесо Фортуны!",
+                        last_act
+                ):
+                    pet.fortune_notified = True
+                    is_notified_changed = True
+        else:
+            # Если игрок уже прокрутил колесо (last_spin обновился), сбрасываем флаг
+            if getattr(pet, "fortune_notified", False):
+                pet.fortune_notified = False
+                is_notified_changed = True
     # Сохраняем измененные состояния
     if is_notified_changed:
         update_fields = [
@@ -164,6 +180,7 @@ async def process_pet_notifications(pet: PetModel, now: float):
             "poop_notified",
             "stinky_notified",
             "sick_notified",
+            "fortune_notified",
         ]
         if hasattr(pet, "addiction_notified"):
             update_fields.append("addiction_notified")

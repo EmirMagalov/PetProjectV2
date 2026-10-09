@@ -176,11 +176,15 @@ function getItemCost(item) {
 
   // Повышаем цену на (level * 2) ТОЛЬКО для товаров категории 'food'
   if (item.category === 'food') {
-    const currentLevel = gameData.level || 1
-    return baseCost + (currentLevel * 2)
+    const rawLevel = gameData.level || 1
+
+    // Ограничиваем уровень максимумом в 50
+    const effectiveLevel = Math.min(rawLevel, 50)
+
+    return baseCost + (effectiveLevel)
   }
 
-  // Для всех остальных предметов (shaman, bath accessories, clothes) возвращаем исходную цену
+  // Для всех остальных предметов возвращаем исходную цену
   return baseCost
 }
 

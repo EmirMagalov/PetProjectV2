@@ -71,7 +71,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fruits',
         foodGain: 5,
-        cost: 25
+        cost: 20
     },
     {
         id: 'kiwi',
@@ -80,7 +80,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fruits',
         foodGain: 5,
-        cost: 25
+        cost: 20
     },
     {
         id: 'grape',
@@ -89,7 +89,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fruits',
         foodGain: 5,
-        cost: 25
+        cost: 20
     },
     {
         id: 'pineapple',
@@ -99,7 +99,7 @@ export const foodList = [
         subcategory:'fruits',
         foodGain: 10,
         energyGain: 1,
-        cost: 25,
+        cost: 23,
         level: 10
     },
     {
@@ -110,7 +110,7 @@ export const foodList = [
         subcategory:'fruits',
         foodGain: 10,
         energyGain: 1,
-        cost: 25,
+        cost: 23,
         level: 10
     },
     {
@@ -121,7 +121,7 @@ export const foodList = [
         subcategory:'fruits',
         foodGain: 10,
         energyGain: 1,
-        cost: 25,
+        cost: 23,
         level: 10
     },
 
@@ -193,7 +193,7 @@ export const foodList = [
         category: 'shaman',
         subcategory:'potion',
         health:1,
-        cost: 300,
+        cost: 800,
 
     },
     {

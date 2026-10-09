@@ -3,7 +3,7 @@ import {gameData} from './useGameStore.js'
 import {ref} from "vue";
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
-
+export const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
 // --- 1. СИСТЕМА ЖЕСТКОЙ БЛОКИРОВКИ ДУБЛИКАТОВ ВКЛАДОК ---
 const TAB_ID = Math.random().toString(36).substring(2)
 let isMaster = true
@@ -76,7 +76,7 @@ export async function initGameData() {
     isApiError.value = false // Сбрасываем ошибку перед новой попыткой
     isLoading.value = true
 
-    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+
     const maxRetries = 5;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -144,7 +144,7 @@ export async function initGameData() {
 }
 
 export async function resetPet() {
-    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    // const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
 
     try {
         await axios.post(`${API_URL}/reset`, {tg_id: tgId})
@@ -157,7 +157,7 @@ export async function resetPet() {
 
 
 function getPayload() {
-    const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    // const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
 
     return {
         tg_id: tgId,
