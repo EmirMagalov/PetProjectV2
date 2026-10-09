@@ -31,7 +31,12 @@ watch(canSpin, (newValue) => {
 <template>
   <div class="fortune-overlay" v-if="isFortuneOpen">
     <div class="fortune-card">
-      <button class="close-icon" @click="isFortuneOpen = false">✖</button>
+      <button
+          class="absolute top-2 right-3 text-3xl text-red-600 font-bold hover:text-red-800 transition-colors"
+          @click="isFortuneOpen = false"
+      >
+        X
+      </button>
 
       <h2 class="title">Колесо Фортуны</h2>
       <p class="subtitle">Крути каждый день и получай бонусы!</p>

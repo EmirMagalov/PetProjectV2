@@ -147,7 +147,7 @@ onMounted(async () => {
       tg.disableVerticalSwipes()
     }
   }
-  localStorage.removeItem('pet_nextSpinAt')
+  // localStorage.removeItem('pet_nextSpinAt')
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
   location.value = 'home'
