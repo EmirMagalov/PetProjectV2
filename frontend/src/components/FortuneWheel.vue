@@ -88,7 +88,7 @@ watch(canSpin, (newValue) => {
    </div>
         <div class="flex gap-1 justify-center items-center" v-else>
           <img src="/gamePlay/coin.webp" class="w-5 h-5" alt="">
-          <p>Мало монет</p>
+          <p>100 монет</p>
   </div>
       </button>
       <p v-show="!canSpin">Бесплатно через: {{ formattedCooldown }}</p>
