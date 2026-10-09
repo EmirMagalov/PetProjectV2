@@ -169,7 +169,7 @@ async def spin_fortune(tg_id: int):
         {"id": 1, "type": "coins", "amount": 100, "name": "100 Монет", "weight": 25},
         {"id": 2, "type": "coins", "amount": 500, "name": "500 Монет", "weight": 10},
         {"id": 3, "type": "coins", "amount": 1500, "name": "1500 Монет", "weight": 5},  # Редкий джекпот 5%
-        {"id": 4, "type": "coins", "amount": 5000, "name": "1500 Монет", "weight": 1},  # Редкий джекпот 1%
+        {"id": 4, "type": "coins", "amount": 5000, "name": "5000 Монет", "weight": 1},  # Редкий джекпот 1%
         {"id": 5, "type": "potion", "amount": 1, "item_id": "healthPotion", "name": "Зелье здоровья", "weight": 7},
         {"id": 6, "type": "food", "amount": 1, "item_id": "burger", "name": "Бургер", "weight": 15},
         {"id": 7, "type": "nothing", "amount": 0, "name": "Ничего", "weight": 10},
