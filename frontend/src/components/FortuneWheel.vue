@@ -10,6 +10,22 @@ import {
   wheelRotation
 } from "@/scripts/fortune.js";
 import {gameData} from "@/scripts/useGameStore.js";
+import {onMounted, watch} from "vue";
+
+
+onMounted(() => {
+  if (canSpin.value) {
+    isFortuneOpen.value = true
+  }
+})
+
+// Если таймер закончился, пока пользователь был в игре — тоже открываем
+watch(canSpin, (newValue) => {
+  if (newValue) {
+    isFortuneOpen.value = true
+  }
+})
+
 </script>
 
 <template>

@@ -1,4 +1,4 @@
-import {ref, computed, onMounted, watch} from 'vue'
+import {ref, computed} from 'vue'
 import axios from 'axios'
 import { gameData } from "@/scripts/useGameStore.js"
 import { API_URL, tgId } from "@/scripts/api.js"
@@ -122,15 +122,3 @@ export async function spinWheel() {
     }
 }
 
-onMounted(() => {
-    if (canSpin.value) {
-        isFortuneOpen.value = true
-    }
-})
-
-// Если таймер закончился, пока пользователь был в игре — тоже открываем
-watch(canSpin, (newValue) => {
-    if (newValue) {
-        isFortuneOpen.value = true
-    }
-})
