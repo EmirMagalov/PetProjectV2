@@ -49,7 +49,6 @@ import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 .animate-cloud-appear-left {
   animation: appearFromLeft 1.5s ease-out forwards;
-  animation-delay: 0.3s;
   will-change: transform, opacity;
 }
 
