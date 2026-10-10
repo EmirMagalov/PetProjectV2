@@ -429,7 +429,9 @@ const currentBathImage = computed(() => {
                  width="80"
                  alt="">
           </template>
-          <p class="absolute top-0 left-2 text-amber-500">x{{gameData.cart[foodCartList[currentIndex]?.id] }}</p>
+          <p v-show="Object.keys(gameData.cart).length > 0" class="absolute top-0 left-2 text-amber-500">
+            x{{ gameData.cart[foodCartList[currentIndex]?.id] || 0 }}
+          </p>
           <!-- Текст названия / статуса с использованием foodCartList -->
           <p class="text-[10px] absolute bottom-0 font-bold text-gray-600 pointer-events-none whitespace-nowrap">
             {{
