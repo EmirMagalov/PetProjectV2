@@ -31,6 +31,10 @@ import {
 import PetCostume from "@/components/PetCostume.vue";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 import FortuneWheel from "@/components/FortuneWheel.vue";
+import SunAndMoon from "@/components/Decorations/SunAndMoon.vue";
+import Clouds from "@/components/Decorations/Clouds.vue";
+import CoinsAndXP from "@/components/Decorations/CoinsAndXP.vue";
+import Rain from "@/components/Decorations/Rain.vue";
 
 let blinkInterval = null
 let lookInterval = null
@@ -179,45 +183,18 @@ onUnmounted(() => {
     <div class="relative flex justify-center w-full">
 
       <div :class="[
-  'relative w-[320px] h-[270px] border-2 border-red-400 overflow-hidden rounded-2xl object-cover transition-colors duration-1000',
-  gameData.sleep ? 'bg-[#0F175C]' : 'bg-amber-200',
+  'relative w-[320px] h-[270px] border-2 border-red-400 overflow-hidden rounded-2xl object-cover duration-1000',
+   gameData.sleep ? 'bg-[#0F175C]' : isBadMood?'bg-gray-400':'bg-blue-50',
 ]">
 
-        <!-- Солнце -->
-        <div
-            :class="[
-         'relative brightness-130 w-15 h-15 bg-yellow-300 rounded-full sun-glow pointer-events-none  transition-all duration-1000 ease-in-out',
-         gameData.sleep ? '-top-20 left-[-50px] opacity-0 scale-50' : 'top-0 left-0 opacity-100 scale-100'
-       ]">
-          <Transition name="fade-sun">
-            <img
-                v-if="sunAnimating"
-                :src="isBadMood ? `/gamePlay/sun_angry.webp?v=${APP_VERSION}` : `/gamePlay/sun_smile.webp?v=${APP_VERSION}`"
-                class="absolute top-1 left-2 w-12 opacity-45"
-                alt=""
-            >
-          </Transition>
-        </div>
 
-        <!-- Луна -->
-        <div
-            :class="[
-             'absolute brightness-130 w-15 h-15 bg-[#f4f6f0] rounded-full moon-glow pointer-events-none  transition-all duration-1000 ease-in-out',
-             gameData.sleep ? 'top-0 left-0 opacity-100 scale-100' : '-top-20 left-[-50px] opacity-0 scale-50'
-            ]">
-          <Transition name="fade-sun">
-            <img
-                v-if="sunAnimating"
-                :src="isBadMood ? `/gamePlay/sad_moon.webp?v=${APP_VERSION}` : `/gamePlay/happy_moon.webp?v=${APP_VERSION}`"
-                class="absolute left-2 top-1 w-12 opacity-45 pointer-events-none"
-                alt=""
-            >
-          </Transition>
-        </div>
-
+        <SunAndMoon/>
+        <Clouds/>
+        <rain/>
         <!-- Фон локации -->
         <div class="absolute inset-0  pointer-events-none transition-all duration-1000 ease-in-out "
              :class="gameData.sleep ? 'brightness-30' : 'brightness-100'">
+
           <img
               v-show="location==='home' || location === 'food'"
               :src="`/location/home.webp?v=${APP_VERSION}`"
@@ -260,48 +237,17 @@ onUnmounted(() => {
           </div>
         </div>
 
+
+
         <!-- Табличка с именем -->
-        <div
-            class="absolute inset-0 z-11 pointer-events-none transition-all duration-1000 ease-in-out"
-            :class="gameData.sleep ? 'brightness-30' : 'brightness-100'"
-            v-show="(location === 'home' || location === 'food')"
-        >
-          <Nameplate class="pointer-events-auto"/>
-        </div>
+
+          <Nameplate />
+
+
+          <CloudMessage />
 
         <!-- Монетки / Опыт -->
-        <div class="absolute inset-0 pointer-events-none overflow-hidden"  :class="tutorialStep === 3 ? 'z-205' : ' z-50'">
-          <template v-for="group in activeCoins" :key="group.id">
-            <img
-                v-for="coin in group.coins"
-                :key="coin.id"
-                :style="{
-                      left: `${coin.x}px`,
-                      top: `${coin.y}px`,
-                      animationDelay: `${coin.delay}s`
-                    }"
-                :src="`/gamePlay/coin.webp?v=${APP_VERSION}`"
-                class="absolute w-5 animate-coinFly pointer-events-none"
-                alt=""
-            />
-          </template>
-        </div>
-        <div class="absolute inset-0 pointer-events-none overflow-hidden" :class="tutorialStep === 3 ? 'z-205' : ' z-50'">
-          <template v-for="group in activeExp" :key="group.id">
-            <img
-                v-for="exp in group.exp"
-                :key="exp.id"
-                :style="{
-                      left: `${exp.x}px`,
-                      top: `${exp.y}px`,
-                      animationDelay: `${exp.delay}s`
-                    }"
-                :src="`/gamePlay/exp.webp?v=${APP_VERSION}`"
-                class="absolute w-5 animate-expFly pointer-events-none"
-                alt=""
-            />
-          </template>
-        </div>
+        <coins-and-x-p/>
         <Status
             :class="tutorialStep === 3 ? 'z-205' : ''"
             v-if="activeStatus.show"
@@ -414,10 +360,6 @@ onUnmounted(() => {
                   alt="">
             </Transition>
 
-            <div class="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible z-30">
-              <CloudMessage class="pointer-events-auto"/>
-            </div>
-
 
             <PetStinky/>
             <PetFoam :status-foam="statusFoam"/>
@@ -447,12 +389,14 @@ onUnmounted(() => {
 
 <style scoped>
 
+
+
+
 .body-fade {
   /* Менять время плавно здесь: например 1000ms, 3000ms, 5000ms */
   transition: opacity 150ms ease-in-out !important;
   will-change: opacity;
 }
-
 
 .fade-sun-enter-active,
 .fade-sun-leave-active {
@@ -517,55 +461,7 @@ onUnmounted(() => {
   transform: scale(0.6) translateY(10px);
 }
 
-@keyframes coinFly {
-  0% {
-    transform: translate(0, 0) scale(0.5);
-    opacity: 0;
-  }
-  20% {
-    opacity: 0.5;
-    transform: translate(0, -30px) scale(1.2);
-  }
-  25% {
-    opacity: 1;
-    transform: translate(0px, -70px) scale(1.2);
-  }
-  100% {
-    transform: translate(0px, -250px) scale(0.3);
-    opacity: 0;
-  }
-}
 
-.animate-coinFly {
-  animation: coinFly 0.7s cubic-bezier(0.25, 1, 0.5, 1) both;
-  will-change: transform, opacity;
-  pointer-events: none;
-}
-
-@keyframes coinExp {
-  0% {
-    transform: translate(0, 0) scale(0.3);
-    opacity: 0;
-  }
-  20% {
-    opacity: 0.5;
-    transform: translate(0, -30px) scale(1.2);
-  }
-  25% {
-    opacity: 1;
-    transform: translate(0px, -70px) scale(1.2);
-  }
-  100% {
-    transform: translate(0px, -250px) scale(0.3);
-    opacity: 0;
-  }
-}
-
-.animate-expFly {
-  animation: coinExp 0.7s cubic-bezier(0.25, 1, 0.5, 1) both;
-  will-change: transform, opacity;
-  pointer-events: none;
-}
 
 @keyframes popCharacter {
   0% {
@@ -604,10 +500,7 @@ onUnmounted(() => {
   transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.moon-glow {
-  box-shadow: 0 0 20px 8px rgba(240, 244, 248, 0.5),
-  0 0 40px 15px rgba(203, 213, 225, 0.2);
-}
+
 
 @keyframes sleep-breath {
   0%, 100% {

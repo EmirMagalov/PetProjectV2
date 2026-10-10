@@ -16,11 +16,12 @@ const activeItems = computed(() => {
 </script>
 
 <template>
+  <div class="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible z-30">
   <div
       v-show="cloudShow && !gameData.sleep "
-      class="inset-0 flex items-center  animate-thought-cloud justify-center pointer-events-none overflow-visible z-50">
+      class="inset-0 flex items-center  animate-thought-cloud justify-center pointer-events-none overflow-visible z-50 pointer-events-auto">
     <!-- Облако -->
-    <img :src="`/gamePlay/cloud.webp?v=${APP_VERSION}`" class="relative opacity-60" width="85%" alt="">
+    <img :src="`/gamePlay/cloud_message.webp?v=${APP_VERSION}`" class="relative opacity-60" width="85%" alt="">
 <!--    <div-->
 <!--        v-show="gameData.addictionLevel ===1"-->
 <!--         :class="['absolute flex justify-center items-center top-10 left-44 w-10']">-->
@@ -38,6 +39,7 @@ const activeItems = computed(() => {
       <img :src="energyFull?`/gamePlay/energy_full.webp?v=${APP_VERSION}`:(lowEnergy?'/gamePlay/energy_low.webp':'')"  alt="">
 <!--      <p class="font-bold text-md text-[#47B949]">{{ gameData.energy }}%</p>-->
     </div>
+  </div>
   </div>
 </template>
 

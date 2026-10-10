@@ -1,6 +1,6 @@
 import {gameData, isExpPopping, showStatus} from "@/scripts/useGameStore.js";
 import { computed } from "vue";
-import {triggerExpAnimation} from "@/scripts/actions.js";
+import {addCoin, triggerExpAnimation} from "@/scripts/actions.js";
 
 
 // Динамический расчет требуемого опыта для любого уровня
@@ -31,6 +31,6 @@ export function addExp(amount,x=180,y=130) {
 
         showStatus('levelUp')
 
-        gameData.coins += 50;    // Бонусные монетки при повышении уровня
+        addCoin(50 + gameData.level)    // Бонусные монетки при повышении уровня
     }
 }

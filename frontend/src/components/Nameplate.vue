@@ -3,7 +3,7 @@ import { ref, nextTick, watch } from 'vue'
 import { gameData } from "@/scripts/useGameStore.js";
 import { isEditing, finishEditing } from "@/scripts/actions.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
-
+import {location} from "@/scripts/useGameStore.js";
 const inputRef = ref(null)
 
 function startEditing() {
@@ -27,7 +27,12 @@ watch(isEditing, async (newVal) => {
 </script>
 
 <template>
-  <div class="absolute w-19 left-4 top-19 ">
+  <div
+      class="absolute inset-0 z-11 pointer-events-none transition-all duration-1000 ease-in-out"
+      :class="gameData.sleep ? 'brightness-30' : 'brightness-100'"
+      v-show="(location === 'home' || location === 'food')"
+  >
+  <div class="absolute w-19 left-4 top-19 pointer-events-auto">
     <div class="relative w-18">
       <img :src="`/gamePlay/nameplate_icons.webp?v=${APP_VERSION}`" alt="" class="w-20 h-auto">
 
@@ -54,5 +59,6 @@ watch(isEditing, async (newVal) => {
         />
       </div>
     </div>
+  </div>
   </div>
 </template>

@@ -2,7 +2,7 @@ import {watch} from "vue";
 import {
     bodyType,
     cloudShow,
-    gameData, isGameOver,
+    gameData, isBadMood, isGameOver,
     lowEnergy,
     mouth, PlayCount,
     showHunger, showStatus, showTongue,
@@ -121,22 +121,19 @@ watch(
         batheStatus,
         showTongue,
         () => gameData.foodLevel,
-
         () => gameData.isFat,
-
+        () => gameData.energy, // <--- Добавили энергию!
+        () => gameData.sick     // <--- Добавили болезнь!
     ],
-    ([hovered, isBathe, isShowTongue, foodLevel, isFat]) => {
-        const isLowEnergy = gameData.energy < 20
-        const isHungry = gameData.foodLevel < 20
-        const isSick = gameData.sick
+    ([hovered, isBathe, isShowTongue, foodLevel, isFat, energy, sick]) => {
+        const isLowEnergy = energy < 20
+        const isHungry = foodLevel < 20
+        const isSick = sick
         const hasIssues = isLowEnergy || isHungry || isSick
-
-        // Приоритет 1: Если предмет перетаскивают над зоной — ВСЕГДА открытый рот
 
         if (foodLevel <= 85) {
             gameData.foodStreak = 0
             gameData.isFat = false
-            // PlayCount.value = 0
         }
 
         if (foodLevel < 15) {
@@ -146,22 +143,24 @@ watch(
         } else {
             bodyType.value = 'normal'
         }
+
         if (isShowTongue) {
             mouth.value = `/character/isPlayed_mouth.webp?v=${APP_VERSION}`
         } else if (hovered && !isBathe) {
             mouth.value = `/character/open_mouth.webp?v=${APP_VERSION}`
         } else if (hasIssues) {
             mouth.value = `/character/sad_mouth.webp?v=${APP_VERSION}`
-        }
-        // Приоритет 4: Во всех остальных случаях — счастливый / нормальный
-        else {
+        } else {
             mouth.value = `/character/happy_mouth.webp?v=${APP_VERSION}`
         }
 
-        // Обновляем остальные флаги для облачков и интерфейса
+        // Обновляем флаги
         lowEnergy.value = isLowEnergy
         showHunger.value = isHungry
         cloudShow.value = isLowEnergy || isHungry
+
+        // Обновляем состояние плохого настроения!
+        isBadMood.value = hasIssues
     },
     {immediate: true}
 )
