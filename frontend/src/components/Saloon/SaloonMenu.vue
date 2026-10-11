@@ -131,14 +131,14 @@ function handleRestart() {
     <!-- Кнопка "Назад" -->
     <RouterLink to="/" class="z-30">
       <div
-          class="bg-[#fff6ef] absolute left-2 top-2 h-15 w-15 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer z-30"
+          class="bg-[#fff6ef] absolute -left-6 top-1/2 -translate-y-1/2 h-15 w-10 flex flex-col items-center justify-center p-0.5 rounded-l-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer z-30"
           style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
       >
         <div
             class="w-10 h-10 bg-contain bg-no-repeat bg-center"
             :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"
         ></div>
-        <span class="text-xs font-bold text-gray-600 pointer-events-none">Назад</span>
+        <span class="text-xs font-bold text-gray-600 pointer-events-none"></span>
       </div>
     </RouterLink>
 

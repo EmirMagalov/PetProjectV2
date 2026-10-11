@@ -5,6 +5,7 @@ import SaloonMain from "@/components/Saloon/SaloonMain.vue";
 import { createApp } from 'vue'
 import App from '../App.vue'
 import '../assets/main.css'
+import LaboratoryMain from "@/components/Laboratory/LaboratoryMain.vue";
 // 1. Принудительный сброс кэша для iOS Safari / Telegram WebApp
 const APP_VERSION = '1.0.2'; // Меняй версию при каждом обновлении
 const currentVersion = localStorage.getItem('app_version');
@@ -54,6 +55,7 @@ clearCacheAndReload();
 const routes = [
     { path: '/', component: PetMain },
     { path: '/saloon', component: SaloonMain },
+    { path: '/laboratory', component: LaboratoryMain },
 ];
 
 export const router = createRouter({

@@ -1,11 +1,16 @@
 <script setup>
-import {foodList} from '@/scripts/objectItems.js'
-import {headItems} from '@/scripts/headwearItems.js'
-import {costumeItems} from '@/scripts/costumeItems.js'
-import {ref, computed} from 'vue'
-import {addToCart, buyCostume, buyHeadwear} from "@/scripts/basket.js"
+
 import {activeTab, gameData} from "@/scripts/useGameStore.js"
 import {APP_VERSION} from "@/scripts/imageVersion.js";
+import {
+  currentList,
+  foodTab, getItemBonuses, getItemCost,
+  getItemQuantity,
+  handleItemClick,
+  isEquipped,
+  isItemLocked, isUnlocked, lastBought, lastBoughtQuantity,
+  wardrobeTab
+} from "@/scripts/shop.js";
 
 defineProps({
   isOpen: {
@@ -17,176 +22,7 @@ defineProps({
 defineEmits(['close'])
 
 // Подкатегории для Гардероба: 'hats' или 'costumes'
-const wardrobeTab = ref('hats')
 
-// Подкатегории для Еды: 'all', 'fastfood', 'fruits', 'sushi'
-const foodTab = ref('all')
-
-// Динамический список товаров в зависимости от выбранной вкладки и подкатегории
-const currentList = computed(() => {
-  if (activeTab.value === 'food') {
-    const list = foodList.filter(item => item.category === 'food')
-    if (foodTab.value === 'all') return list
-    return list.filter(item => item.subcategory === foodTab.value)
-  } else if (activeTab.value === 'shaman') {
-    return foodList.filter(item => item.category === 'shaman')
-  } else if (activeTab.value === 'bath') {
-    return foodList.filter(item => item.category === 'bath accessories')
-  } else {
-    // Активен Гардероб
-    if (wardrobeTab.value === 'costumes') {
-      return costumeItems.map(item => ({
-        ...item,
-        image: item.preview || item.image_normal
-      }))
-    }
-    return headItems
-  }
-})
-
-const lastBought = ref(null)
-const lastBoughtQuantity = ref(1)
-let notificationTimer = null
-
-// Функция определения количества товара в инвентаре
-function getItemQuantity(item) {
-  if (activeTab.value === 'food' || activeTab.value === 'shaman' || activeTab.value === 'bath') {
-    return gameData.cart?.[item.id] || 0
-  }
-  return 0
-}
-
-// Универсальная проверка блокировки товара по уровню
-function isItemLocked(item) {
-  if (Boolean(item.level) && gameData.level < item.level) {
-    return true
-  }
-
-  if (activeTab.value === 'clothes') {
-    const isUnlockedItem = wardrobeTab.value === 'costumes'
-        ? gameData.unlockedCostumes?.includes(item.id)
-        : gameData.unlockedHeads?.includes(item.id)
-
-    if (!isUnlockedItem && Boolean(item.level) && gameData.level < item.level) {
-      return true
-    }
-  }
-
-  return false
-}
-
-// Проверка надета ли одежда/шляпа
-function isEquipped(itemId) {
-  if (wardrobeTab.value === 'costumes') {
-    return gameData.equippedCostume === itemId
-  }
-  return gameData.equippedHead === itemId
-}
-
-// Проверка куплен ли предмет
-function isUnlocked(itemId) {
-  if (wardrobeTab.value === 'costumes') {
-    return gameData.unlockedCostumes?.includes(itemId)
-  }
-  return gameData.unlockedHeads?.includes(itemId)
-}
-
-// Универсальная логика клика по кнопке товара
-function handleItemClick(item) {
-  if (isItemLocked(item)) return
-
-  // Получаем динамическую цену предметов
-  const itemCost = getItemCost(item)
-
-  if (activeTab.value === 'food' || activeTab.value === 'shaman' || activeTab.value === 'bath') {
-    if (gameData.coins >= itemCost) {
-      gameData.coins -= itemCost // 👈 Списываем с учетом уровня
-      addToCart(item.id)
-
-      const currentQty = gameData.cart[item.id] || 1
-      showNotification(item, currentQty)
-    } else {
-      alert("Не хватает монет!")
-    }
-  } else {
-    if (isUnlocked(item.id)) {
-      if (wardrobeTab.value === 'costumes') {
-        selectCostume(item.id)
-      } else {
-        selectHeadwear(item.id)
-      }
-    } else {
-      if (gameData.coins >= itemCost) {
-        gameData.coins -= itemCost // 👈 Списываем с учетом уровня
-
-        if (wardrobeTab.value === 'costumes') {
-          if (!gameData.unlockedCostumes) gameData.unlockedCostumes = []
-          buyCostume(item.id)
-        } else {
-          buyHeadwear(item.id)
-        }
-
-        showNotification(item, 1)
-      } else {
-        alert("Не хватает монет!")
-      }
-    }
-  }
-}
-
-function selectHeadwear(headId) {
-  if (gameData.equippedHead === headId) {
-    gameData.equippedHead = null
-  } else {
-    gameData.equippedHead = headId
-  }
-}
-
-function selectCostume(costumeId) {
-  if (gameData.equippedCostume === costumeId) {
-    gameData.equippedCostume = null
-  } else {
-    gameData.equippedCostume = costumeId
-  }
-}
-
-function showNotification(item, quantity = 1) {
-  lastBought.value = item
-  lastBoughtQuantity.value = quantity
-  if (notificationTimer) clearTimeout(notificationTimer)
-  notificationTimer = setTimeout(() => {
-    lastBought.value = null
-  }, 2500)
-}
-
-const getItemBonuses = (item) => {
-  const bonuses = []
-
-  if (item.foodGain) bonuses.push({text: `+ ${item.foodGain} сытости`, color: 'text-amber-400'})
-  if (item.energyGain) bonuses.push({text: `+ ${item.energyGain} энергии`, color: 'text-blue-400'})
-  if (item.life) bonuses.push({text: `+ ${item.life} жизнь`, color: 'text-red-400'})
-  if (item.health) bonuses.push({text: `Восстановление здоровья`, color: 'text-emerald-400'})
-  if (item.subcategory === 'fruits') bonuses.push({text: `+ здоровье`, color: 'text-green-400'})
-  return bonuses
-}
-
-function getItemCost(item) {
-  if (!item) return 0
-  const baseCost = item.baseCost ?? item.cost ?? 0
-
-  // Повышаем цену на (level * 2) ТОЛЬКО для товаров категории 'food'
-  if (item.category === 'food') {
-    const rawLevel = gameData.level || 1
-
-    // Ограничиваем уровень максимумом в 50
-    const effectiveLevel = Math.min(rawLevel, 50)
-
-    return baseCost + (effectiveLevel)
-  }
-
-  // Для всех остальных предметов возвращаем исходную цену
-  return baseCost
-}
 
 </script>
 
@@ -230,7 +66,7 @@ function getItemCost(item) {
         </button>
 
         <button
-            @click="activeTab = 'shaman'"
+            @click="activeTab = 'laboratory'"
             :class="['py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
           <div class="flex items-center justify-center gap-1.5">
@@ -359,7 +195,7 @@ function getItemCost(item) {
 
 
               <!-- Бонусы предмета -->
-              <div v-if="activeTab === 'food' || activeTab === 'shaman' || activeTab === 'bath'"
+              <div v-if="activeTab === 'food' || activeTab === 'laboratory' || activeTab === 'bath'"
                    class="text-xs mt-0.5 leading-tight break-words">
                 <div
                     v-for="(bonus, index) in getItemBonuses(item)"

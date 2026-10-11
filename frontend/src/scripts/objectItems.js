@@ -9,7 +9,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fastfood',
         foodGain: 15, // сколько добавляет сытости
-        cost: 22       // сколько стоит монет
+        price: 22       // сколько стоит монет
     },
     {
         id: 'pizza',
@@ -18,7 +18,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fastfood',
         foodGain: 15, // сколько добавляет сытости
-        cost: 32       // сколько стоит монет
+        price: 32       // сколько стоит монет
     },
     {
         id: 'hotdog',
@@ -27,7 +27,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fastfood',
         foodGain: 10,
-        cost: 29
+        price: 29
     },
     {
         id: 'burger',
@@ -37,7 +37,7 @@ export const foodList = [
         subcategory:'fastfood',
         foodGain: 25,
         energyGain:3,
-        cost: 39,
+        price: 39,
         level:10
     },
     {
@@ -48,7 +48,7 @@ export const foodList = [
         subcategory:'fastfood',
         foodGain: 25,
         energyGain:3,
-        cost: 29,
+        price: 29,
         level:10
     },
     {
@@ -59,7 +59,7 @@ export const foodList = [
         subcategory:'fastfood',
         energyGain:3,
         foodGain: 25,
-        cost: 29,
+        price: 29,
         level:10
     },
 
@@ -71,7 +71,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fruits',
         foodGain: 5,
-        cost: 20
+        price: 20
     },
     {
         id: 'kiwi',
@@ -80,7 +80,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fruits',
         foodGain: 5,
-        cost: 20
+        price: 20
     },
     {
         id: 'grape',
@@ -89,7 +89,7 @@ export const foodList = [
         category: 'food',
         subcategory:'fruits',
         foodGain: 5,
-        cost: 20
+        price: 20
     },
     {
         id: 'pineapple',
@@ -99,7 +99,7 @@ export const foodList = [
         subcategory:'fruits',
         foodGain: 10,
         energyGain: 1,
-        cost: 23,
+        price: 23,
         level: 10
     },
     {
@@ -110,7 +110,7 @@ export const foodList = [
         subcategory:'fruits',
         foodGain: 10,
         energyGain: 1,
-        cost: 23,
+        price: 23,
         level: 10
     },
     {
@@ -121,7 +121,7 @@ export const foodList = [
         subcategory:'fruits',
         foodGain: 10,
         energyGain: 1,
-        cost: 23,
+        price: 23,
         level: 10
     },
 
@@ -132,7 +132,7 @@ export const foodList = [
         category: 'food',
         subcategory:'sushi',
         foodGain: 12,
-        cost: 60
+        price: 60
     },
     {
         id: 'sake_nigir',
@@ -141,7 +141,7 @@ export const foodList = [
         category: 'food',
         subcategory:'sushi',
         foodGain: 15,
-        cost: 80,
+        price: 80,
         level: 10
     },
     {
@@ -151,7 +151,7 @@ export const foodList = [
         category: 'food',
         subcategory:'sushi',
         foodGain: 15,
-        cost: 80,
+        price: 80,
         level: 10
     },
     {
@@ -161,39 +161,38 @@ export const foodList = [
         category: 'food',
         subcategory:'sushi',
         foodGain: 15,
-        cost: 80,
+        price: 80,
         level: 10
     },
 
     {
-        id: 'pipe',
-        name: 'Трубка Шамана',
-        image: `/other/pipe.webp?v=${APP_VERSION}`,
-        category: 'shaman',
-        subcategory:'pipe',
+        id: 'energy_serum',
+        name: 'Сыворотка энергии',
+        image: `Laboratory/serums/energy_serum.webp?v=${APP_VERSION}`,
+        category: 'laboratory',
+        subcategory:'serum',
         energyGain: 80,
-        cost: 350,
+        price: 350,
 
     },
     {
-        id: 'lifePotion',
-        name: 'Зелье жизни',
-        image: `/other/life_potion.webp?v=${APP_VERSION}`,
-        category: 'shaman',
-        subcategory:'potion',
+        id: 'life_serum',
+        name: 'Сыворотка жизни',
+        image: `Laboratory/serums/life_serum.webp?v=${APP_VERSION}`,
+        category: 'laboratory',
+        subcategory:'serum',
         life:1,
-        cost: 1000,
+        price: 1000,
 
     },
 
     {
-        id: 'healthPotion',
-        name: 'Зелье здоровья',
-        image: `/other/health_potion.webp?v=${APP_VERSION}`,
-        category: 'shaman',
-        subcategory:'potion',
+        id: 'health_serum',
+        name: 'Сыворотка здоровья',
+        image: `Laboratory/serums/health_serum.webp?v=${APP_VERSION}`,
+        category: 'laboratory',
         health:1,
-        cost: 800,
+        price: 800,
 
     },
     {
@@ -202,7 +201,7 @@ export const foodList = [
         image: `/gamePlay/shampoo_icon.webp?v=${APP_VERSION}`,
         category: 'bath accessories',
         subcategory:'shampoo',
-        cost: 70,
+        price: 70,
 
     },
     {
@@ -211,7 +210,7 @@ export const foodList = [
         image: `/gamePlay/soap_icon.webp?v=${APP_VERSION}`,
         category: 'bath accessories',
         subcategory:'soap',
-        cost: 70,
+        price: 70,
 
     },
 ]

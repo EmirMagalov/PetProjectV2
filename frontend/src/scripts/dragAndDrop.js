@@ -3,7 +3,7 @@ import {computed, ref} from "vue";
 import {addCoin, feedPet, isLosingLife, otherFeedPet, updateEyeLook, resetEyeLook} from "@/scripts/actions.js";
 import {
     currentDraggedItem,
-    dropZoneRef,
+    dropZoneRef, energyFull,
     gameData, nextTutorialStep, showTongue,
     statusFoam,
     statusShower
@@ -59,7 +59,7 @@ export function handleMove(event, itemType, foodId = null, Category = null, SubC
     if (isInside) {
         isHovered.value = true
         if (itemType === 'food') {
-            if (gameData.cart['pipe'] && Category ==='shaman' && SubCategory==='pipe') {
+            if (gameData.cart['pipe'] && Category ==='laboratory' && SubCategory==='pipe') {
                 statusSmoke.value = true
                 if (!actionTimer) {
                     actionTimer = setTimeout(() => {
@@ -146,10 +146,11 @@ export function handleEnd(itemType, foodId, Category) {
                 feedPet(foodId)
                 nextTutorialStep()
             } else {
-                const isFullLivesPotion = (foodId === 'lifePotion' && gameData.lives >= 3)
-                const isUnneededHealthPotion = (foodId === 'healthPotion' && !gameData.sick)
+                const isFullLives = (foodId === 'life_serum' && gameData.lives >= 3)
+                const isUnneededHealth = (foodId === 'health_serum' && !gameData.sick)
+                const isUnneededEnergy = (foodId === 'health_serum' && energyFull.value)
 
-                if (!isFullLivesPotion && !isUnneededHealthPotion) {
+                if (!isFullLives && !isUnneededHealth && !isUnneededEnergy) {
                     otherFeedPet(foodId)
                 }else {
                     showTongue.value = true

@@ -52,33 +52,37 @@ export function otherFeedPet(foodId) {
         removeFromCart(targetId)
         addCoin(1)
         addExp(20)
-        if (foodId === "pipe") {
-            // gameData.isDrunk = true
-            gameData.addictionStreak = Math.min(3, gameData.addictionStreak + 1)
-            gameData.lastAddictionTime = Math.floor(Date.now() / 1000)
-            if (gameData.addictionStreak >= 2) {
-                gameData.sick = true
-            }
-            if (gameData.addictionStreak >= 3 || gameData.sick) {
-                isLosingLife()
-            }
+        // if (foodId === "pipe") {
+        //     // gameData.isDrunk = true
+        //     gameData.addictionStreak = Math.min(3, gameData.addictionStreak + 1)
+        //     gameData.lastAddictionTime = Math.floor(Date.now() / 1000)
+        //     if (gameData.addictionStreak >= 2) {
+        //         gameData.sick = true
+        //     }
+        //     if (gameData.addictionStreak >= 3 || gameData.sick) {
+        //         isLosingLife()
+        //     }
+        //
+        //     if (drunkTimer) {
+        //         clearTimeout(drunkTimer)
+        //     }
+        //
+        //     gameData.energy = Math.min(100, gameData.energy + 80)
+        // }
 
-            if (drunkTimer) {
-                clearTimeout(drunkTimer)
-            }
 
-            gameData.energy = Math.min(100, gameData.energy + 80)
-        }
-
-
-        if (foodId === "lifePotion") {
+        if (foodId === "life_serum") {
 
             gameData.lives = Math.min(3, gameData.lives + 1)
             showStatus('lifeGain')
         }
-        if (foodId === "healthPotion") {
+        if (foodId === "health_serum") {
             gameData.sick = false
             fruitStreak.value = 0
+        }
+
+        if (foodId === "energy_serum") {
+            gameData.energy = Math.min(100, gameData.energy + 80)
         }
 
 

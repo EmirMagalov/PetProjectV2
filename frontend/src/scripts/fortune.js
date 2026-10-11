@@ -108,7 +108,7 @@ export async function spinWheel() {
                 gameData.coins = coins_left
             }
 
-            if (reward.type === 'potion' || reward.type === 'item' || reward.type === 'food') {
+            if (reward.type === 'serum' || reward.type === 'item' || reward.type === 'food') {
                 const itemId = reward.itemId || reward.item_id || 'healthPotion'
                 const amount = reward.amount || 1
 

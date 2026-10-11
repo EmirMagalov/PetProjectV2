@@ -2,7 +2,7 @@
 import SaloonMenu from "@/components/Saloon/SaloonMenu.vue";
 
 import {onMounted, onUnmounted, ref, watch} from "vue";
-import {blink, gameData} from "@/scripts/useGameStore.js";
+import {blink, gameData, isBadMood} from "@/scripts/useGameStore.js";
 import {
   dealerCards,
   dealerScore, deckRef,
@@ -32,11 +32,11 @@ watch(gameFinished, (isFinished) => {
       // Задержка 1.5 сек, чтобы игрок увидел результат партии и анимацию монет
       setTimeout(() => {
         if (isOutOfEnergy && isOutOfFood) {
-          alert("У вас закончились и энергия, и сытость! Вы покинули салун.");
+          alert("У вас закончились и энергия, и сытость! Вы покинули Jackpot.");
         } else if (isOutOfEnergy) {
-          alert("У вас закончилась энергия! Вы покинули салун.");
+          alert("У вас закончилась энергия! Вы покинули Jackpot.");
         } else {
-          alert("Персонаж слишком голоден для игры! Вы покинули салун.");
+          alert("Персонаж слишком голоден для игры! Вы покинули Jackpot.");
         }
 
         // Перенаправление на главную/другую локацию
@@ -153,7 +153,7 @@ onUnmounted(() => {
 
         <!-- Текст загрузки -->
         <span class="text-[#D18900] font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
-          Входим в Салун...
+          Входим в Jackpot...
         </span>
 
         <!-- Спиннер -->
@@ -164,13 +164,13 @@ onUnmounted(() => {
     <PetHeaderMenu/>
 
     <!-- САЛУН -->
-    <div class="relative flex justify-center items-center w-full my-auto">
-      <div class="relative w-[320px] h-[270px] overflow-hidden rounded-3xl border-2 border-red-400/80 shadow-2xl">
-        <img
-            :src="`/location/saloon.webp?v=${APP_VERSION}`"
-            class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
-            alt="Saloon Background"
-        />
+    <div class="relative flex justify-center items-center w-full my-auto" >
+      <div class="relative w-[320px] h-[270px] overflow-hidden rounded-3xl border-2 border-red-400/80 shadow-2xl" :class="gameData.sleep ? 'bg-[#0F175C]':'bg-[#98E5FE]'">
+<!--        <img-->
+<!--            :src="`/location/saloon.webp?v=${APP_VERSION}`"-->
+<!--            class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"-->
+<!--            alt="Saloon Background"-->
+<!--        />-->
 
         <!-- FLUFFY (ПЕРСОНАЖ) -->
         <div class="absolute inset-0 z-20 flex justify-center items-center cursor-pointer pointer-events-none">
@@ -180,7 +180,7 @@ onUnmounted(() => {
               alt="Fluffy Body"
               class="absolute"
           />
-          <img :src="`/saloonPhotos/location/saloon.webp?v=${APP_VERSION}`" alt="location saloon" class="object-contain"/>
+          <img :src="`/saloonPhotos/location/casino.webp?v=${APP_VERSION}`" alt="location saloon" class="object-contain"/>
 
           <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
             <div

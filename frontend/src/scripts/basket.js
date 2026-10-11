@@ -8,36 +8,43 @@ import {foodList} from "@/scripts/objectItems.js";
 import {headItems} from "@/scripts/headwearItems.js";
 
 import {syncToBackend} from "@/scripts/api.js";
+import {costumeItems} from "@/scripts/costumeItems.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
+import {ingredientList} from "@/scripts/laboratoryScripts/ingredientItems.js"; // 1. Импортируем костюмы
 
 export const currentIndex = ref(0)
 export const currentBathIndex = ref(0) // Индекс для банных принадлежностей
-import {costumeItems} from "@/scripts/costumeItems.js";
-import {APP_VERSION} from "@/scripts/imageVersion.js"; // 1. Импортируем костюмы
+export const currentSerumIndex = ref(0)
+
 // Вычисляемый список ВСЕХ товаров в корзине с подробной информацией
 export const cartItemsList = computed(() => {
-    return Object.entries(gameData.cart).map(([foodId, count]) => {
-        const foodInfo = foodList.find(item => item.id === foodId)
+    return Object.entries(gameData.cart).map(([itemId, count]) => {
+        const itemInfo = foodList.find(i => i.id === itemId) || ingredientList.find(i => i.id === itemId);
         return {
-            id: foodId,
+            id: itemId,
             count: count,
-            name: foodInfo?.name || 'Неизвестно',
-            category: foodInfo?.category || 'Неизвестно',
-            subcategory: foodInfo?.subcategory || 'Неизвестно',
-            image: foodInfo?.image || '',
-            foodGain: foodInfo?.foodGain || 0,
-            cost: foodInfo?.cost || 0
+            name: itemInfo?.name || 'Неизвестно',
+            category: itemInfo?.category || 'Неизвестно',
+            subcategory: itemInfo?.subcategory || 'Неизвестно',
+            image: itemInfo?.image || '',
+            foodGain: itemInfo?.foodGain || 0,
+            price: itemInfo?.price || 0
         }
     })
 })
 
 // Отдельный список только для еды и шамана (исключаем баню)
 export const foodCartList = computed(() => {
-    return cartItemsList.value.filter(item => item.category !== 'bath accessories')
+    return cartItemsList.value.filter(item => item.category !== 'bath accessories' &&  item.category !== 'ingredients')
 })
 
 // Отдельный список только для банных принадлежностей
 export const bathCartList = computed(() => {
     return cartItemsList.value.filter(item => item.category === 'bath accessories')
+})
+
+export const ingredientCartList = computed(() => {
+    return cartItemsList.value.filter(item => item.category === 'ingredients' || ingredientList.some(s => s.id === item.id))
 })
 
 export const currentFoodItem = computed(() => {
@@ -57,6 +64,13 @@ export const currentCostumeItem = computed(() => {
     if (!gameData.equippedCostume) return null
     return costumeItems.find(item => item.id === gameData.equippedCostume)
 })
+
+
+export const laboratoryIngredientsList = computed(() => {
+    return ingredientCartList.value
+})
+
+console.log(laboratoryIngredientsList.value)
 // Отслеживание изменений корзины с автокоррекцией индексов и синхронизацией
 watch(() => gameData.cart, () => {
     // Безопасно проверяем, чтобы индексы никогда не выходили за границы массивов

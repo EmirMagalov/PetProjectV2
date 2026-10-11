@@ -37,7 +37,7 @@ const shouldPulse = computed(() => {
   if (list.length === 0 || !list[currentIndex.value]) {
     return false;
   }
-  return list[currentIndex.value].category !== 'shaman';
+  return list[currentIndex.value].category !== 'laboratory';
 });
 import {useRouter} from 'vue-router';
 import {currentBet, isDealing} from "@/scripts/saloonScripts/twentyOneGame.js";
@@ -52,15 +52,15 @@ function goToSaloon() {
   const coins = Number(gameData?.value?.coins ?? gameData?.coins) || 0;
 
   if (coins < 50 && !currentBet.value) {
-    alert('Нужно минимум 50 монет, чтобы зайти в Салун!');
+    alert('Нужно минимум 50 монет, чтобы зайти в Jackpot!');
     return;
   }
   if (gameData.foodLevel < 3) {
-    alert('Чтобы зайти в Салун нужно быть сытым!');
+    alert('Чтобы зайти в Jackpot нужно быть сытым!');
     return;
   }
   if (gameData.energy < 3) {
-    alert('Чтобы зайти в Салун нужно быть бодрым!');
+    alert('Чтобы зайти в Jackpot нужно быть бодрым!');
     return;
   }
 
@@ -105,7 +105,7 @@ const foodWarning = computed(() => {
   const list = foodCartList.value
   const idx = currentIndex.value
 
-  return (gameData.isFat && list[idx]?.subcategory !== 'fruits' && gameData.isFat && list[idx]?.subcategory !== 'potion') ||
+  return (gameData.isFat && list[idx]?.subcategory !== 'fruits' && gameData.isFat && list[idx]?.subcategory !== 'serum') ||
       (gameData.sick && list[idx]?.subcategory === 'pipe')
 })
 
@@ -172,7 +172,16 @@ const currentBathImage = computed(() => {
           <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
         </div>
 
-
+        <!-- Кнопка Салуна -->
+        <div
+            @click="goToSaloon()"
+            class="bg-[#fff6ef] absolute p-1 -bottom-10 left-1/2 -translate-x-1/2 -translate-y-1/2 justify-center h-11 w-11 overflow-hidden  flex flex-col items-center rounded-4xl border-2 border-red-600 transition-transform duration-50 cursor-pointer"
+            style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+          <div class="w-[100px] h-[100px]  bg-contain bg-no-repeat bg-center"
+               :style="{ backgroundImage: `url('/gamePlay/jackpot_icon.webp?v=${APP_VERSION}')` }">
+          </div>
+          <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
+        </div>
         <div
             @click="location = 'food',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95"
@@ -227,24 +236,20 @@ const currentBathImage = computed(() => {
 
           <!-- Кнопка Салуна -->
           <div
-              @click="goToSaloon"
+              @click="router.push('/laboratory');"
               class="bg-[#fff6ef] relative justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
               :class="{'opacity-50 pointer-events-none': gameData.level < 5}"
               style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
           >
             <div class="flex absolute top-1 right-2">
-              <div class="relative w-5">
-                <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" class="" alt="">
-                <p class="absolute text-white text-shadow-lg text-shadow-black top-1 text-xs left-1 font-bold">50</p>
-              </div>
 
             </div>
 
             <div
                 class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
-                :style="{backgroundImage: `url('/gamePlay/saloon.webp?v=${APP_VERSION}')`}"
+                :style="{backgroundImage: `url('/gamePlay/laboratory_icon.webp?v=${APP_VERSION}')`}"
             ></div>
-            <button class="text-md font-bold text-gray-600 pointer-events-none">Салун</button>
+            <button class="text-xs font-bold text-gray-600 pointer-events-none">Лаборатория</button>
           </div>
 
         </div>
