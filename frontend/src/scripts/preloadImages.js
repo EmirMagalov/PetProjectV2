@@ -26,9 +26,9 @@ export function preloadImages(onProgress) {
                 loadedCount++;
                 const progress = Math.round((loadedCount / total) * 100);
 
-                if (status === 'error') {
-                    console.error(`❌ [Preload Fail]${src}`);
-                }
+                // if (status === 'error') {
+                //     console.error(`❌ [Preload Fail]${src}`);
+                // }
 
                 if (typeof onProgress === "function") {
                     onProgress(progress);
