@@ -10,8 +10,6 @@ export function preloadImages(onProgress) {
     let loadedCount = 0;
     const total = imagesToPreload.length;
 
-    console.group("🖼️ [Preload] started");
-    console.log(`Total images in the list: ${total}`);
 
     if (total === 0) {
         if (onProgress) onProgress(100);
@@ -30,8 +28,6 @@ export function preloadImages(onProgress) {
 
                 if (status === 'error') {
                     console.error(`❌ [Preload Fail]${src}`);
-                } else {
-                    console.log(`✅ [Preload OK] (${loadedCount}/${total} - ${progress}%)`);
                 }
 
                 if (typeof onProgress === "function") {
@@ -52,7 +48,6 @@ export function preloadImages(onProgress) {
     });
 
     return Promise.all(promises).then((results) => {
-        console.log("[Preload] successfully loaded");
         console.groupEnd();
         return results;
     });

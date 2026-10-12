@@ -166,11 +166,6 @@ watch(
 )
 
 
-// watch(() => gameData.isDrunk, (newVal) => {
-//     console.log(`⚡ Энергия изменилась: с ${oldVal} до ${newVal}`);
-//     console.trace(); // Покажет полный стек вызовов: какая именно функция изменила энергию!
-// })
-
 
 watch(() => gameData.lives, async (newLives) => {
     // Если жизни кончились, и мы ЕЩЕ не в процессе сброса/перезагрузки

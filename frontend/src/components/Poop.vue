@@ -22,7 +22,7 @@ function initPoops() {
         return
       }
     } catch (e) {
-      console.error("Ошибка чтения какашек из localStorage", e)
+      console.error(e)
     }
   }
 

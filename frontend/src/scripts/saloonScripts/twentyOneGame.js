@@ -51,7 +51,7 @@ if (savedState) {
         gameFinished.value = parsed.gameFinished || false;
         result.value = parsed.result || "";
     } catch (e) {
-        console.error("Ошибка при восстановлении состояния игры:", e);
+        console.error(e);
     }
 }
 
