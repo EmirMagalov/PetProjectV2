@@ -3,7 +3,7 @@ import {gameData} from './useGameStore.js'
 import {ref} from "vue";
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
-export const tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+export let tgId = import.meta.env.VITE_USER_ID || null
 // --- 1. СИСТЕМА ЖЕСТКОЙ БЛОКИРОВКИ ДУБЛИКАТОВ ВКЛАДОК ---
 const TAB_ID = Math.random().toString(36).substring(2)
 let isMaster = true
@@ -72,6 +72,25 @@ if (savedSessionKey && savedSessionKey !== currentSessionKey) {
 
 // --- 4. ЗАГРУЗКА И СИНХРОНИЗАЦИЯ ДАННЫХ ---
 export async function initGameData() {
+
+    if (!tgId) {
+        tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    }
+
+    if (!tgId) {
+        console.warn("⚠️ Не удалось определить tgId пользователя. Ждем Telegram WebApp...")
+        // Даем короткую паузу на случай холодного старта Telegram
+        await new Promise(resolve => setTimeout(resolve, 300))
+        tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    }
+
+    if (!tgId) {
+        console.error("❌ tgId так и не был найден!")
+        isApiError.value = true
+        errorMessage.value = "Не удалось определить пользователя Telegram."
+        isLoading.value = false
+        return
+    }
     isDataLoaded = false
     isApiError.value = false // Сбрасываем ошибку перед новой попыткой
     isLoading.value = true
