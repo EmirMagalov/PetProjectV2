@@ -9,7 +9,7 @@ import {
   isSpinning, spinWheel,
   wheelRotation
 } from "@/scripts/fortune.js";
-import {gameData} from "@/scripts/useGameStore.js";
+import {gameData, isTutorialCompleted} from "@/scripts/useGameStore.js";
 import {onMounted, watch} from "vue";
 
 
@@ -29,7 +29,7 @@ watch(canSpin, (newValue) => {
 </script>
 
 <template>
-  <div class="fortune-overlay" v-if="isFortuneOpen">
+  <div class="fortune-overlay" v-if="isFortuneOpen && isTutorialCompleted">
     <div class="fortune-card">
       <button
           class="absolute top-2 right-3 text-3xl text-red-600 font-bold hover:text-red-800 transition-colors"

@@ -33,6 +33,11 @@ export const fruitStreak = ref(
     Number(localStorage.getItem('pet_fruitStreak')) || 0
 )
 
+
+export const isTutorialCompleted = computed(() => {
+    return localStorage.getItem('tutorial_completed') === 'true';
+});
+
 // Автоматически сохраняем при любом изменении
 watch(fruitStreak, (newValue) => {
     localStorage.setItem('pet_fruitStreak', newValue)
