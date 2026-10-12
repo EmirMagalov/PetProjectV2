@@ -14,7 +14,7 @@ import {
   placeBet,
   determineWinner,
   currentBet,
-  isDealing, betOptions, selectedBet
+  isDealing, betOptions, selectedBet, playerScoreText
 } from "@/scripts/saloonScripts/twentyOneGame.js";
 import {gameData} from "@/scripts/useGameStore.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
@@ -153,7 +153,7 @@ function handleRestart() {
     <div v-if="gameStarted" class="flex flex-col items-center gap-1 my-auto z-20 w-full">
       <div v-show="playerScore > 0" class="inline-flex items-center justify-center">
         <span class="bg-black/80 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-          Ты: {{ playerScore }}
+          Ты: {{ playerScoreText }}
         </span>
       </div>
 

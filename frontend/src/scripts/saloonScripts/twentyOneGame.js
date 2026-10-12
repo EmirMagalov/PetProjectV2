@@ -141,6 +141,22 @@ function calculateScore(cards) {
     return score;
 }
 
+
+export const playerScoreText = computed(() => {
+    const cards = playerCards.value;
+    let aces = 0;
+    for (const card of cards) {
+        if (card.name === "ace") aces++;
+    }
+
+    // Если ровно 2 туза и 2 карты — возвращаем текст вместо 21
+    if (aces === 2 && cards.length === 2) {
+        return "Золотое очко";
+    }
+
+    return playerScore.value;
+});
+
 export const playerScore = computed(() => calculateScore(playerCards.value));
 export const dealerScore = computed(() => calculateScore(dealerCards.value));
 
