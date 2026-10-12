@@ -209,25 +209,31 @@ defineEmits(['close'])
           </div>
 
           <!-- Динамическая кнопка (shrink-0 строго держит её ширину и положение) -->
+          <!-- Динамическая кнопка -->
           <button
               @click="handleItemClick(item)"
+              :disabled="(activeTab !== 'clothes' && getItemQuantity(item) >= 10)"
               :class="[
       'px-4 py-2 w-20 font-bold rounded-lg text-xs transition-all active:scale-90 flex justify-center items-center gap-1.5 shrink-0 cursor-pointer self-center',
       activeTab === 'clothes' && isUnlocked(item.id)
         ? (isEquipped(item.id)
             ? 'bg-slate-700 text-slate-300 cursor-default'
             : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20')
-        : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20'
+        : (activeTab !== 'clothes' && getItemQuantity(item) >= 10)
+            ? 'bg-slate-700 text-slate-500 cursor-not-allowed shadow-none'
+            : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20'
     ]"
           >
             <template v-if="activeTab === 'clothes' && isUnlocked(item.id)">
               {{ isEquipped(item.id) ? 'Снять' : 'Выбрать' }}
             </template>
+            <template v-else-if="activeTab !== 'clothes' && getItemQuantity(item) >= 10">
+              <span>Макс</span>
+            </template>
             <template v-else>
-    <span class="w-5 h-5 shrink-0 flex items-center justify-center">
-      <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="coin" class="w-full h-full object-contain"/>
-    </span>
-              <!-- ⬇️ Выводим динамическую цену -->
+              <span class="w-5 h-5 shrink-0 flex items-center justify-center">
+                <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="coin" class="w-full h-full object-contain"/>
+              </span>
               <span>{{ getItemCost(item) }}</span>
             </template>
           </button>

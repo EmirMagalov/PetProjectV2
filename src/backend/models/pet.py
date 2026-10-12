@@ -87,6 +87,7 @@ class Pet(models.Model):
     # Поля для Колеса Фортуны
     last_fortune_spin = fields.IntField(default=0)  # Timestamp последнего кручения
     fortune_notified = fields.BooleanField(default=False)  # Отправлено ли уже уведомление
+    paid_spin_count = fields.IntField(default=0)
     # ==========================================
     # МЕТОДЫ МОДЕЛИ
     # ==========================================

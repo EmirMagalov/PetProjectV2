@@ -9,17 +9,48 @@ export const isSpinning = ref(false)
 export const wheelRotation = ref(0)
 export const now = ref(Date.now())
 
-// Количество платных прокруток подряд (сохраняем в localStorage, чтобы не сбрасывалось при перезагрузке)
 export const paidSpinsCount = ref(Number(localStorage.getItem('pet_paidSpinsCount')) || 0)
+export const nextSpinTime = ref(Number(localStorage.getItem('pet_nextSpinAt')) || 0)
 
-// ТАЙМЕР: запускаем его прямо при загрузке модуля
+export const currentSpinPrice = ref(
+    (Number(localStorage.getItem('pet_nextSpinAt')) || 0) > Date.now()
+        ? Math.min(1000, 100 + (Number(localStorage.getItem('pet_paidSpinsCount')) || 0) * 100)
+        : 0
+)
+
+export function syncFortuneTime(serverLastFortuneSpin, serverPaidCount, serverNextPrice) {
+    const COOLDOWN_MS = 86400 * 1000
+
+    if (serverLastFortuneSpin !== undefined && serverLastFortuneSpin > 0) {
+        nextSpinTime.value = (serverLastFortuneSpin * 1000) + COOLDOWN_MS
+        localStorage.setItem('pet_nextSpinAt', nextSpinTime.value)
+    } else if (serverLastFortuneSpin === 0) {
+        nextSpinTime.value = 0
+        localStorage.setItem('pet_nextSpinAt', 0)
+    }
+
+    if (serverPaidCount !== undefined) {
+        paidSpinsCount.value = serverPaidCount
+        localStorage.setItem('pet_paidSpinsCount', serverPaidCount)
+    }
+
+    if (serverNextPrice !== undefined) {
+        currentSpinPrice.value = serverNextPrice
+    } else if (now.value >= nextSpinTime.value) {
+        currentSpinPrice.value = 0
+    } else {
+        currentSpinPrice.value = Math.min(1000, 100 + (paidSpinsCount.value * 100))
+    }
+}
+
 setInterval(() => {
     now.value = Date.now()
-
-    // Если таймер бесплатного спина истек — сбрасываем счетчик платных прокруток
-    if (now.value >= nextSpinTime.value && paidSpinsCount.value > 0) {
-        paidSpinsCount.value = 0
-        localStorage.setItem('pet_paidSpinsCount', 0)
+    if (now.value >= nextSpinTime.value) {
+        if (paidSpinsCount.value > 0) {
+            paidSpinsCount.value = 0
+            localStorage.setItem('pet_paidSpinsCount', 0)
+        }
+        currentSpinPrice.value = 0
     }
 }, 1000)
 
@@ -34,18 +65,8 @@ export const fortuneRewards = [
     {id: 7, name: '', type: 'nothing', icon: '/gamePlay/poop.webp'},
 ]
 
-export const nextSpinTime = ref(Number(localStorage.getItem('pet_nextSpinAt')) || 0)
-
 export const canSpin = computed(() => now.value >= nextSpinTime.value)
 
-// Динамическая цена прокрутки: 100 за первую платную, 200 за вторую и т.д. Если доступен бесплатный — цена 0.
-// Динамическая цена прокрутки: увеличивается на 100, но не превышает 2000
-export const currentSpinPrice = computed(() => {
-    if (canSpin.value) return 0
-    return Math.min(1000, 100 + (paidSpinsCount.value * 100))
-})
-
-// РАСЧЕТ ТАЙМЕРА
 export const formattedCooldown = computed(() => {
     const diff = Math.max(0, Math.floor((nextSpinTime.value - now.value) / 1000))
     const hours = String(Math.floor(diff / 3600)).padStart(2, '0')
@@ -71,20 +92,21 @@ export function getSectorStyle(index) {
 }
 
 export async function spinWheel() {
-    const SPIN_PRICE = currentSpinPrice.value
+    const SPIN_PRICE = canSpin.value ? 0 : currentSpinPrice.value
 
-    if (gameData.coins < SPIN_PRICE || isSpinning.value) {
+    if (!canSpin.value && gameData.coins < SPIN_PRICE) {
         alert(`Недостаточно монет! Нужно ${SPIN_PRICE} монет.`)
         return
     }
 
+    if (isSpinning.value) return
+
     isSpinning.value = true
     const isPaidSpin = !canSpin.value
 
+    // Сразу списываем стоимость платного спина для отклика интерфейса
     if (isPaidSpin) {
         gameData.coins -= SPIN_PRICE
-        paidSpinsCount.value++
-        localStorage.setItem('pet_paidSpinsCount', paidSpinsCount.value)
     }
 
     try {
@@ -93,18 +115,15 @@ export async function spinWheel() {
         if (!response.data.success) {
             alert(response.data.message)
             isSpinning.value = false
-            // Возвращаем монеты при ошибке бэкенда
             if (isPaidSpin) {
-                gameData.coins += SPIN_PRICE
-                paidSpinsCount.value--
-                localStorage.setItem('pet_paidSpinsCount', paidSpinsCount.value)
+                gameData.coins += SPIN_PRICE // Возвращаем монеты при ошибке
             }
             return
         }
 
-        const {reward, next_spin_at, coins_left} = response.data
+        const responseData = response.data
 
-        const winIndex = fortuneRewards.findIndex(r => r.id === reward.id)
+        const winIndex = fortuneRewards.findIndex(r => r.id === responseData.reward.id)
         const targetIndex = winIndex !== -1 ? winIndex : 0
 
         const targetCenterAngle = 360 - (targetIndex * sectorAngle)
@@ -119,25 +138,35 @@ export async function spinWheel() {
             rotationDiff += 360
         }
 
-        const totalRotation = wheelRotation.value + 1440 + rotationDiff
-        wheelRotation.value = totalRotation
+        wheelRotation.value += 1440 + rotationDiff
 
+        // 🟢 ВСЕ НАГРАДЫ И ОБНОВЛЕНИЯ ПРИМЕНЯЕМ СТРОГО ПОСЛЕ ОКОНЧАНИЯ АНИМАЦИИ (3.5 сек)
         setTimeout(() => {
             isSpinning.value = false
 
-            nextSpinTime.value = next_spin_at * 1000
-            localStorage.setItem('pet_nextSpinAt', nextSpinTime.value)
+            const { reward, next_spin_at, coins_left, paid_spins_count: serverPaidCount, next_spin_price: serverNextPrice } = responseData
 
-            // Если выпал бесплатный бонус (сервер обновил таймер), сбрасываем счетчик платных
-            if (response.data.is_free) {
-                paidSpinsCount.value = 0
-                localStorage.setItem('pet_paidSpinsCount', 0)
-            }
-
+            // 1. Применяем итоговый баланс монет от сервера (сюда уже входит выигрыш)
             if (coins_left !== undefined) {
                 gameData.coins = coins_left
             }
 
+            // 2. Обновляем таймер и состояние спинов
+            if (next_spin_at) {
+                nextSpinTime.value = next_spin_at * 1000
+                localStorage.setItem('pet_nextSpinAt', nextSpinTime.value)
+            }
+
+            if (serverPaidCount !== undefined) {
+                paidSpinsCount.value = serverPaidCount
+                localStorage.setItem('pet_paidSpinsCount', serverPaidCount)
+            }
+
+            if (serverNextPrice !== undefined) {
+                currentSpinPrice.value = serverNextPrice
+            }
+
+            // 3. Добавляем выигранный предмет в инвентарь (если это не монеты и не пусто)
             if (reward.type === 'serum' || reward.type === 'item' || reward.type === 'food') {
                 const itemId = reward.itemId || reward.item_id || 'health_serum'
                 const amount = reward.amount || 1
@@ -148,6 +177,7 @@ export async function spinWheel() {
                 gameData.cart[itemId] += amount
             }
 
+            // 4. Показываем уведомление о выигрыше
             if (reward.type === 'nothing') {
                 alert(`😢 К сожалению, в этот раз ничего не выпало...`)
             } else {
@@ -160,8 +190,6 @@ export async function spinWheel() {
         isSpinning.value = false
         if (isPaidSpin) {
             gameData.coins += SPIN_PRICE
-            paidSpinsCount.value--
-            localStorage.setItem('pet_paidSpinsCount', paidSpinsCount.value)
         }
     }
 }

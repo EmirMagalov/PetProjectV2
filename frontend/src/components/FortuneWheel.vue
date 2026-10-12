@@ -75,21 +75,19 @@ watch(canSpin, (newValue) => {
       <!-- Кнопка вращения / Таймер -->
       <button
           class="spin-button"
-          :disabled="(!canSpin && gameData.coins < 100) || isSpinning"
+          :disabled="(!canSpin && gameData.coins < currentSpinPrice) || isSpinning"
           @click="spinWheel"
       >
         <span v-if="isSpinning">Крутим...</span>
         <span v-else-if="canSpin">Бесплатный спин!</span>
-        <div class="flex gap-1 justify-center items-center" v-else-if="gameData.coins >= 100">
-
-            <img src="/gamePlay/coin.webp" class="w-5 h-5" alt="">
-            <p>Покрутить за {{currentSpinPrice}} монет</p>
-
-   </div>
+        <div class="flex gap-1 justify-center items-center" v-else-if="gameData.coins >= currentSpinPrice">
+          <img src="/gamePlay/coin.webp" class="w-5 h-5" alt="">
+          <p>Покрутить за {{ currentSpinPrice }} монет</p>
+        </div>
         <div class="flex gap-1 justify-center items-center" v-else>
           <img src="/gamePlay/coin.webp" class="w-5 h-5" alt="">
-          <p>100 монет</p>
-  </div>
+          <p>{{ currentSpinPrice }} монет</p>
+        </div>
       </button>
       <p v-show="!canSpin">Бесплатно через: {{ formattedCooldown }}</p>
       <div class=" py-2  flex items-center gap-1 justify-end ">

@@ -32,7 +32,7 @@ app = FastAPI(lifespan=lifespan)
 scheduler = AsyncIOScheduler()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # В продакшене лучше указать конкретный домен, но для разработки "*" идеально
+    allow_origins=[settings.FRONTEND_URL],  # В продакшене лучше указать конкретный домен, но для разработки "*" идеально
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

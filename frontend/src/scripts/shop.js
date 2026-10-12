@@ -81,6 +81,10 @@ export function isUnlocked(itemId) {
 
 // Универсальная логика клика по кнопке товара
 export function handleItemClick(item) {
+    if (activeTab.value !== 'clothes' && getItemQuantity(item) >= 10) {
+        alert("Максимальное количество этого товара — 10 штук!");
+        return;
+    }
     if (isItemLocked(item)) return
 
     // Получаем динамическую цену предметов

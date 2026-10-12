@@ -4,14 +4,11 @@ import { laboratoryIngredientsList } from "@/scripts/basket.js";
 import { ingredientList } from "@/scripts/laboratoryScripts/ingredientItems.js";
 import { getItemCost, handleItemClick, lastBought, lastBoughtQuantity } from "@/scripts/shop.js";
 import { APP_VERSION } from "@/scripts/imageVersion.js";
-import {getAvailableIngredientCount} from "../../scripts/laboratoryScripts/dragAndDrop.js";
+import { getAvailableIngredientCount, getTotalIngredientCount } from "../../scripts/laboratoryScripts/dragAndDrop.js";
 
-// Функция возвращает данные купленного предмета (включая его количество в инвентаре)
 const getPurchasedItem = (ingredientId) => {
   return laboratoryIngredientsList.value.find(item => item.id === ingredientId);
 };
-
-
 </script>
 
 <template>
@@ -28,7 +25,7 @@ const getPurchasedItem = (ingredientId) => {
         <span class="text-xs font-bold text-gray-600 pointer-events-none"></span>
       </div>
     </RouterLink>
-    <!-- Общая сетка по 2 элемента в ряд для ВСЕХ ингредиентов -->
+
     <div class="grid grid-cols-2 gap-2 w-70">
       <div
           v-for="item in ingredientList"
@@ -38,18 +35,15 @@ const getPurchasedItem = (ingredientId) => {
         <p class="absolute inset-0 flex text-blue-800/75 items-center  justify-center text-center text-[11px] pointer-events-none">
           {{ item.name }}
         </p>
-        <!-- Верхняя часть: если предмет куплен, показываем интерактивный drag-and-drop элемент -->
+
         <div v-if="getPurchasedItem(item.id)" class="w-full flex flex-col items-center relative">
           <IngredientItem :item="getPurchasedItem(item.id)" />
 
-          <!-- Бейдж с количеством (например, x2, x3) -->
           <span class="absolute -top-1 -right-1 bg-amber-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.2 rounded-full shadow">
             x{{ getAvailableIngredientCount(item.id) }}
           </span>
-
         </div>
 
-        <!-- Если еще не куплен — показываем просто затемненную картинку -->
         <div v-else class="w-full flex flex-col items-center">
           <img
               :src="item.image"
@@ -58,21 +52,30 @@ const getPurchasedItem = (ingredientId) => {
           />
         </div>
 
-        <!-- Нижняя часть: Кнопка покупки всегда на месте -->
+        <!-- Кнопка покупки проверяет общую сумму (инвентарь + стол) -->
         <button
             @click="handleItemClick(item)"
-            class="py-1.5 w-full font-bold rounded-lg text-xs transition-all bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md active:scale-95 flex justify-center items-center gap-1.5 cursor-pointer mt-auto"
+            :disabled="getTotalIngredientCount(item.id) >= 10"
+            :class="[
+              'py-1.5 w-full font-bold rounded-lg text-xs transition-all shadow-md flex justify-center items-center gap-1.5 mt-auto',
+              getTotalIngredientCount(item.id) >= 10
+                ? 'bg-slate-400 text-slate-700 cursor-not-allowed shadow-none'
+                : 'bg-amber-500 hover:bg-amber-400 text-slate-950 active:scale-95 cursor-pointer'
+            ]"
         >
-          <span class="w-4 h-4 shrink-0 flex items-center justify-center">
-            <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="coin" class="w-full h-full object-contain"/>
-          </span>
-          <span>{{ getItemCost(item) }}</span>
+          <template v-if="getTotalIngredientCount(item.id) >= 10">
+            <span>Макс</span>
+          </template>
+          <template v-else>
+            <span class="w-4 h-4 shrink-0 flex items-center justify-center">
+              <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="coin" class="w-full h-full object-contain"/>
+            </span>
+            <span>{{ getItemCost(item) }}</span>
+          </template>
         </button>
       </div>
-
     </div>
 
-    <!-- Тост об успешной покупке -->
     <transition name="toast">
       <div
           v-if="lastBought"
@@ -93,6 +96,5 @@ const getPurchasedItem = (ingredientId) => {
         </div>
       </div>
     </transition>
-
   </div>
 </template>

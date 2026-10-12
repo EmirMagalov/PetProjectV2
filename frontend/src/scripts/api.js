@@ -1,6 +1,7 @@
 import axios from 'axios'
 import {gameData} from './useGameStore.js'
 import {ref} from "vue";
+import {syncFortuneTime} from "@/scripts/fortune.js";
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
 export let tgId = import.meta.env.VITE_USER_ID || null
@@ -112,6 +113,9 @@ export async function initGameData() {
             ])
 
             const serverData = response.data
+            if (serverData.last_fortune_spin !== undefined) {
+                syncFortuneTime(serverData.last_fortune_spin, serverData.paid_spin_count);
+            }
             // ... (твой существующий маппинг gameData.name, level, coins и т.д.) ...
             gameData.name = serverData.name && serverData.name.trim() ? serverData.name : 'Имя:'
             gameData.level = serverData.level

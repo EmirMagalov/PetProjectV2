@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str
     DOMAIN:str
     DATABASE_URL: str
+    FRONTEND_URL:str
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
         env_file_encoding='utf-8',

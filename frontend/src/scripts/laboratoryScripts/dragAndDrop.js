@@ -164,3 +164,10 @@ export function getAvailableIngredientCount(ingredientId) {
     // Возвращаем то, что осталось доступным для переноса
     return Math.max(0, purchasedCount - onTableCount);
 }
+
+
+// Во вспомогательной функции в dragAndDrop_2.js:
+export function getTotalIngredientCount(ingredientId) {
+    // Лимит 10 штук должен считаться по общему купленному количеству в корзине!
+    return gameData.cart && gameData.cart[ingredientId] ? Number(gameData.cart[ingredientId]) : 0;
+}

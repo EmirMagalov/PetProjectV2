@@ -25,6 +25,9 @@ async def get_pet(tg_id: int):
                 "cart": {"burger": 1, "shampoo": 1},
                 "last_update": time.time(),
                 "last_interaction": int(time.time()),
+                "last_fortune_spin": 0,
+                "paid_spin_count": 0,
+
             },
         )
     else:
@@ -136,15 +139,9 @@ async def test_notification(tg_id: int):
 
 
 @pet_router.post("/pet/spin-fortune/{tg_id}")
-async def spin_fortune(tg_id: int, data: dict = None):
+async def spin_fortune(tg_id: int):
     NOW = int(time.time())
-    COOLDOWN = 86400  # 24 часа в секундах
-
-    # Получаем количество уже сделанных платных прокруток подряд от фронтенда (по умолчанию 0)
-    paid_spins_count = data.get("paid_spins_count", 0) if data else 0
-
-    # Динамическая цена: первая 100, вторая 200, третья 300 и т.д.
-    current_spin_price = min(1000, 100 + (paid_spins_count * 100))
+    COOLDOWN = 86400  # 24 часа
 
     pet = await PetModel.get_or_none(tg_id=tg_id)
     if not pet:
@@ -152,10 +149,10 @@ async def spin_fortune(tg_id: int, data: dict = None):
 
     is_free_spin = (NOW - pet.last_fortune_spin) >= COOLDOWN
 
-    updated_fields = ["coins", "cart"]
-
-    # Если бесплатный спин НЕ доступен — проверяем баланс монет
-    if not is_free_spin:
+    if is_free_spin:
+        pet.paid_spin_count = 0
+    else:
+        current_spin_price = min(1000, 100 + (pet.paid_spin_count * 100))
         if pet.coins < current_spin_price:
             remaining_seconds = COOLDOWN - (NOW - pet.last_fortune_spin)
             return {
@@ -163,17 +160,16 @@ async def spin_fortune(tg_id: int, data: dict = None):
                 "message": f"Недостаточно монет! Платный спин стоит {current_spin_price} монет.",
                 "retry_in": remaining_seconds
             }
-        # Списываем динамическую стоимость за платный спин
         pet.coins -= current_spin_price
-        # ВНИМАНИЕ: Для платного спина мы НЕ обновляем pet.last_fortune_spin,
-        # чтобы таймер до бесплатного бонуса продолжал идти!
-    else:
-        # Если спин бесплатный — обновляем таймер бесплатного спина
+        pet.paid_spin_count += 1
+
+    updated_fields = ["coins", "cart", "paid_spin_count"]
+
+    if is_free_spin:
         pet.last_fortune_spin = NOW
         pet.fortune_notified = False
         updated_fields.extend(["last_fortune_spin", "fortune_notified"])
 
-    # Массив наград с настроенными весами (шансами в %)
     rewards = [
         {"id": 0, "type": "coins", "amount": 50, "name": "50 Монет", "weight": 35},
         {"id": 1, "type": "coins", "amount": 100, "name": "100 Монет", "weight": 25},
@@ -181,7 +177,7 @@ async def spin_fortune(tg_id: int, data: dict = None):
         {"id": 3, "type": "coins", "amount": 1500, "name": "1500 Монет", "weight": 5},
         {"id": 4, "type": "coins", "amount": 5000, "name": "5000 Монет", "weight": 1},
         {"id": 5, "type": "serum", "amount": 1, "item_id": "health_serum", "name": "Сыворотка здоровья", "weight": 5},
-        {"id": 6, "type": "food", "amount": 1, "item_id": "burger", "name": "Бургер", "weight": 15},
+        {"id": 6, "type": "food", "amount": 1, "item_id": "burger", "name": "Бургер", "weight": 10},
         {"id": 7, "type": "nothing", "amount": 0, "name": "Ничего", "weight": 10},
     ]
 
@@ -189,7 +185,6 @@ async def spin_fortune(tg_id: int, data: dict = None):
     selected_reward = random.choices(rewards, weights=weights, k=1)[0]
     reward = {k: v for k, v in selected_reward.items() if k != "weight"}
 
-    # Начисление выигрыша
     if reward["type"] == "coins":
         pet.coins += reward["amount"]
     elif reward["type"] == "nothing":
@@ -197,20 +192,22 @@ async def spin_fortune(tg_id: int, data: dict = None):
     elif "item_id" in reward:
         item_id = reward["item_id"]
         amount = reward.get("amount", 1)
-
         current_cart = dict(pet.cart) if pet.cart else {}
         current_cart[item_id] = current_cart.get(item_id, 0) + amount
         pet.cart = current_cart
 
-    # Сохраняем обновлённые данные
     await pet.save(update_fields=updated_fields)
 
     next_spin_at = pet.last_fortune_spin + COOLDOWN
+    # Считаем точную цену следующего спина прямо на сервере
+    next_spin_price = min(1000, 100 + (pet.paid_spin_count * 100))
 
     return {
         "success": True,
         "reward": reward,
         "is_free": is_free_spin,
         "coins_left": pet.coins,
-        "next_spin_at": next_spin_at
+        "next_spin_at": next_spin_at,
+        "paid_spin_count": pet.paid_spin_count,
+        "next_spin_price": next_spin_price  # 👈 Сервер сам говорит фронту цену
     }
