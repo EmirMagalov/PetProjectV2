@@ -266,4 +266,5 @@ window.addEventListener('pagehide', () => {
 // Говорим Telegram WebApp, что приложение готово
 if (window.Telegram?.WebApp) {
     window.Telegram.WebApp.ready()
+    window.Telegram.WebApp.expand?.()
 }
