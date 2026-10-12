@@ -231,7 +231,7 @@ export async function finishGame(type) {
     } else if (type === "win") {
         result.value = "Поздравляю! Ты выиграл!";
         addCoin(currentBet.value * 2) ;
-        addExp(10)
+        addExp(20)
     } else if (type === "push") {
         result.value = "Ничья!";
         addCoin(currentBet.value);

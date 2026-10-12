@@ -99,10 +99,9 @@ export function feedPet(foodId) {
     // 1. Считаем, сколько раз это блюдо встречалось в последних приемах пищи
     const sameFoodCountInHistory = recentFedItems.value.filter(id => id === targetId).length
     const randomLimit = Math.floor(Math.random() * 2) + 2 // Например, от 2 до 3 раз
-    const isSickAndFruit = gameData.sick && foodItem?.subcategory === 'fruits'
     let becameFatNow = false
     // Если блюдо уже часто встречалось в недавней истории и питомец достаточно сыт
-    if (!isSickAndFruit && sameFoodCountInHistory >= randomLimit && gameData.foodLevel >= 50) {
+    if (sameFoodCountInHistory >= randomLimit && gameData.foodLevel >= 50) {
         showTongue.value = true
         setTimeout(() => {
             showTongue.value = false
@@ -112,13 +111,14 @@ export function feedPet(foodId) {
     // 1. Проверка по шкале сытости (100%)
     if (gameData.foodLevel >= 95) {
         if (foodItem.subcategory === 'fruits') {
-            if(!gameData.sick && !gameData.isFat ){
+            if(!gameData.isFat || gameData.fatCount >=100){
                 showTongue.value = true
                 setTimeout(() => {
                     showTongue.value = false
                 }, 800)
                 return
             }
+
             if (gameData.isFat) {
                 PlayCount.value= 0
                 gameData.fatCount = Math.min(100, gameData.fatCount + 30)

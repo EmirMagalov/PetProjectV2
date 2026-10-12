@@ -132,7 +132,7 @@ export function handleMove(event,itemType ,Item) {
 // Универсальная функция окончания перетаскивания
 export function handleEnd(itemType, Item) {
     clearActionTimer()
-
+    statusShower.value = false
     if (foodConsumedByPipe.value || Item.category=== 'pipe') {
         statusSmoke.value = false
         foodConsumedByPipe.value = false
