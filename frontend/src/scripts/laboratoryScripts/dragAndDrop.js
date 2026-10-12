@@ -151,3 +151,16 @@ export function craftSerum(targetRecipe) {
 export function closeCraftModal() {
     craftedSerumModal.value = null;
 }
+
+
+export function getAvailableIngredientCount(ingredientId) {
+    const purchasedItem = laboratoryIngredientsList.value.find(i => i.id === ingredientId);
+    const purchasedCount = purchasedItem ? purchasedItem.count : 0;
+
+    // Сколько штук этого же ингредиента сейчас лежит на столе
+    const tableItem = activeIngredient.value.find(i => i.id === ingredientId);
+    const onTableCount = tableItem ? tableItem.count : 0;
+
+    // Возвращаем то, что осталось доступным для переноса
+    return Math.max(0, purchasedCount - onTableCount);
+}

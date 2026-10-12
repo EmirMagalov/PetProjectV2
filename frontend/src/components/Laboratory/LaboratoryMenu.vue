@@ -4,11 +4,14 @@ import { laboratoryIngredientsList } from "@/scripts/basket.js";
 import { ingredientList } from "@/scripts/laboratoryScripts/ingredientItems.js";
 import { getItemCost, handleItemClick, lastBought, lastBoughtQuantity } from "@/scripts/shop.js";
 import { APP_VERSION } from "@/scripts/imageVersion.js";
+import {getAvailableIngredientCount} from "../../scripts/laboratoryScripts/dragAndDrop.js";
 
 // Функция возвращает данные купленного предмета (включая его количество в инвентаре)
 const getPurchasedItem = (ingredientId) => {
   return laboratoryIngredientsList.value.find(item => item.id === ingredientId);
 };
+
+
 </script>
 
 <template>
@@ -41,7 +44,7 @@ const getPurchasedItem = (ingredientId) => {
 
           <!-- Бейдж с количеством (например, x2, x3) -->
           <span class="absolute -top-1 -right-1 bg-amber-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.2 rounded-full shadow">
-            x{{ getPurchasedItem(item.id).count }}
+            x{{ getAvailableIngredientCount(item.id) }}
           </span>
 
         </div>

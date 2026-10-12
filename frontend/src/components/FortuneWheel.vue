@@ -1,7 +1,7 @@
 <script setup>
 
 import {
-  canSpin,
+  canSpin, currentSpinPrice,
   formattedCooldown,
   fortuneRewards,
   getSectorStyle,
@@ -83,7 +83,7 @@ watch(canSpin, (newValue) => {
         <div class="flex gap-1 justify-center items-center" v-else-if="gameData.coins >= 100">
 
             <img src="/gamePlay/coin.webp" class="w-5 h-5" alt="">
-            <p>Покрутить за 100 монет</p>
+            <p>Покрутить за {{currentSpinPrice}} монет</p>
 
    </div>
         <div class="flex gap-1 justify-center items-center" v-else>

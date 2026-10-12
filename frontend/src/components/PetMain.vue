@@ -20,7 +20,7 @@ import {
   mouth,
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
-  location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus
+  location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus, colorFoam
 } from "@/scripts/useGameStore.js";
 import {
   activeCoins, activeExp,
@@ -362,7 +362,7 @@ onUnmounted(() => {
 
 
             <PetStinky/>
-            <PetFoam :status-foam="statusFoam"/>
+            <PetFoam :status-foam="statusFoam" :bg-color="colorFoam"/>
             <PetSmoke :status-smoke="statusSmoke"/>
             <PetShower :status-shower="statusShower"/>
 

@@ -54,7 +54,7 @@ defineEmits(['close'])
 
       <!-- Переключатель основных категорий -->
       <div
-          class="flex overflow-x-auto no-scrollbar border-b border-slate-800 bg-slate-900/40 p-2 gap-2 shrink-0 touch-pan-x">
+          class="flex overflow-x-auto justify-center no-scrollbar border-b border-slate-800 bg-slate-900/40 p-2 gap-2 shrink-0 touch-pan-x">
         <button
             @click="activeTab = 'food'"
             :class="['py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer', activeTab === 'food' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
@@ -65,22 +65,22 @@ defineEmits(['close'])
           </div>
         </button>
 
-        <button
-            @click="activeTab = 'laboratory'"
-            :class="['py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
-        >
-          <div class="flex items-center justify-center gap-1.5">
-            <img class="w-5 h-5 object-contain shrink-0" src="/gamePlay/feather_icon.webp" alt="">
-            <span class="whitespace-nowrap">Шаман</span>
-          </div>
-        </button>
+<!--        <button-->
+<!--            @click="activeTab = 'laboratory'"-->
+<!--            :class="['py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer', activeTab === 'shaman' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"-->
+<!--        >-->
+<!--          <div class="flex items-center justify-center gap-1.5">-->
+<!--            <img class="w-5 h-5 object-contain shrink-0" src="/gamePlay/feather_icon.webp" alt="">-->
+<!--            <span class="whitespace-nowrap">Шаман</span>-->
+<!--          </div>-->
+<!--        </button>-->
 
         <button
             @click="activeTab = 'bath'"
             :class="['py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer', activeTab === 'bath' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white']"
         >
           <div class="flex items-center justify-center gap-1.5">
-            <img class="w-5 h-5 object-contain shrink-0" src="/gamePlay/soap_icon.webp" alt="">
+            <img class="w-5 h-5 object-contain shrink-0" src="/Bath/shampoo_icon.webp" alt="">
             <span class="whitespace-nowrap">Баня</span>
           </div>
         </button>
@@ -176,9 +176,9 @@ defineEmits(['close'])
 
           <!-- Картинка и описание (Разрешен переносы строк, текст виден целиком) -->
           <div class="flex items-center gap-3 flex-1 min-w-0">
-            <div class="w-15 h-15 shrink-0 bg-white/20 rounded-lg flex items-center justify-center p-1 relative">
+            <div class="w-15 h-15 shrink-0 bg-white/20 rounded-lg flex items-center justify-center  p-1 relative">
               <div class="flex">
-                <img :src="item.image" :alt="item.name" class="w-full h-full object-contain">
+                <img :src="item.image" :alt="item.name" class="w-full h-full  object-contain">
                 <p v-show="getItemQuantity(item)>0" v-if="activeTab !== 'clothes'"
                    class="text-[11px] absolute left-1 top-0 font-bold text-amber-400 mt-0.5 break-words">
                   X {{ getItemQuantity(item) }}
@@ -188,7 +188,7 @@ defineEmits(['close'])
 
             </div>
 
-            <div class="flex-1 min-w-0">
+            <div class="">
               <h3 class="font-semibold text-xs text-white leading-tight break-words">{{ item.name }}</h3>
 
               <!-- Индикатор количества товара в наличии -->

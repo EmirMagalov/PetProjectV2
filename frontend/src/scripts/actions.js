@@ -82,7 +82,8 @@ export function otherFeedPet(foodId) {
         }
 
         if (foodId === "energy_serum") {
-            gameData.energy = Math.min(100, gameData.energy + 80)
+
+            gameData.energy = Math.min(100, gameData.energy + 100)
         }
 
 
@@ -177,16 +178,16 @@ export function feedPet(foodId) {
     }
 
     // 3. Логика фруктов (лечение)
-    if (foodItem.subcategory === 'fruits') {
-        if (gameData.sick) {
-            fruitStreak.value++
-            if (fruitStreak.value >= 10) {
-                gameData.sick = false
-                fruitStreak.value = 0
-                addCoin(20)
-            }
-        }
-    }
+    // if (foodItem.subcategory === 'fruits') {
+    //     if (gameData.sick) {
+    //         fruitStreak.value++
+    //         if (fruitStreak.value >= 10) {
+    //             gameData.sick = false
+    //             fruitStreak.value = 0
+    //             addCoin(20)
+    //         }
+    //     }
+    // }
 
     // 4. Проверка кулдауна (если стал толстым прямо сейчас)
     if (becameFatNow) {

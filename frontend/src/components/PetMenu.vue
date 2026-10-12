@@ -161,26 +161,39 @@ const currentBathImage = computed(() => {
           <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
         </div>
 
-
-        <div
-            @click="isFortuneOpen = true"
-            class="bg-[#fff6ef] absolute p-1 top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 justify-center h-11 w-11 overflow-hidden  flex flex-col items-center rounded-4xl border-2 border-purple-400 transition-transform duration-50 cursor-pointer"
-            style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-          <div class="w-[100px] h-[100px]  bg-contain bg-no-repeat bg-center"
-               :style="{ backgroundImage: `url('/gamePlay/fortune_icons.webp?v=${APP_VERSION}')` }">
+        <div class="absolute gap-2 flex  -top-10 left-1/2 -translate-x-1/2">
+          <div
+              @click="isFortuneOpen = true"
+              class="bg-[#fff6ef]  overflow-hidden   rounded-4xl border-2 border-purple-400 transition-transform duration-50 cursor-pointer"
+              style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+            <div class=" h-10 w-10  bg-contain bg-no-repeat bg-center"
+                 :style="{ backgroundImage: `url('/gamePlay/fortune_icons.webp?v=${APP_VERSION}')` }">
+            </div>
+            <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
           </div>
-          <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
+
+          <!-- Кнопка Салуна -->
+          <div class="relative  rounded-4xl overflow-hidden">
+
+            <!-- Блокирующий оверлей (как в магазине) -->
+            <div
+                v-if="gameData.level < 5"
+                class="absolute inset-0 z-20 bg-slate-950/50  flex flex-col items-center justify-center text-center"
+            >
+        <span class="text-amber-400 font-bold text-[5px] tracking-wide leading-tight">
+          🔒 5 уровень
+        </span>
+            </div>
+          <div
+              @click="goToSaloon()"
+              class="bg-[#fff6ef] overflow-hidden rounded-4xl border-2 border-red-600 transition-transform duration-50 cursor-pointer"
+              style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+            <div class="h-10 w-10 bg-contain bg-no-repeat bg-center"
+                 :style="{ backgroundImage: `url('/gamePlay/jackpot_icon.webp?v=${APP_VERSION}')` }">
+            </div>
+            <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
+          </div>
         </div>
-
-        <!-- Кнопка Салуна -->
-        <div
-            @click="goToSaloon()"
-            class="bg-[#fff6ef] absolute p-1 -bottom-10 left-1/2 -translate-x-1/2 -translate-y-1/2 justify-center h-11 w-11 overflow-hidden  flex flex-col items-center rounded-4xl border-2 border-red-600 transition-transform duration-50 cursor-pointer"
-            style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-          <div class="w-[100px] h-[100px]  bg-contain bg-no-repeat bg-center"
-               :style="{ backgroundImage: `url('/gamePlay/jackpot_icon.webp?v=${APP_VERSION}')` }">
-          </div>
-          <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
         </div>
         <div
             @click="location = 'food',nextTutorialStep()"
@@ -222,23 +235,13 @@ const currentBathImage = computed(() => {
           </button>
 
         </div>
-        <div class="relative rounded-4xl overflow-hidden">
 
-          <!-- Блокирующий оверлей (как в магазине) -->
-          <div
-              v-if="gameData.level < 5"
-              class="absolute inset-0 z-20 bg-slate-950/70 flex flex-col items-center justify-center p-1 text-center"
-          >
-        <span class="text-amber-400 font-bold text-xs tracking-wide leading-tight">
-          🔒 Нужен<br>5 уровень
-        </span>
-          </div>
 
-          <!-- Кнопка Салуна -->
+          <!-- Кнопка Лаборатория -->
           <div
               @click="router.push('/laboratory');"
               class="bg-[#fff6ef] relative justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
-              :class="{'opacity-50 pointer-events-none': gameData.level < 5}"
+
               style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
           >
             <div class="flex absolute top-1 right-2">
@@ -252,7 +255,7 @@ const currentBathImage = computed(() => {
             <button class="text-xs font-bold text-gray-600 pointer-events-none">Лаборатория</button>
           </div>
 
-        </div>
+
 
       </div>
 
@@ -294,7 +297,7 @@ const currentBathImage = computed(() => {
 
           </div>
 
-          <button class="text-xs font-bold text-gray-600">Душ</button>
+          <button class="absolute text-xs font-bold bottom-0 text-gray-600">Душ</button>
 
         </div>
 
@@ -314,7 +317,7 @@ const currentBathImage = computed(() => {
             <div
                 class="flex flex-col items-center justify-center w-[70px] h-[70px] opacity-30 bg-contain bg-no-repeat bg-center"
                 :class="currentDraggedItem === 'shower' && !statusFoam && showerCount === 0 ? 'animate-pulse' : ''"
-                :style="{backgroundImage: `url('/gamePlay/shampoo_icon.webp?v=${APP_VERSION}')`}">
+                :style="{backgroundImage: `url('/Bath/shampoo_icon.webp?v=${APP_VERSION}')`}">
             </div>
           </template>
 
@@ -343,12 +346,14 @@ const currentBathImage = computed(() => {
 
             </div>
           </template>
-
+          <p v-show="Object.keys(gameData.cart).length > 0" class="absolute top-0 left-2 text-amber-500">
+            x{{ gameData.cart[bathCartList[currentBathIndex]?.id] || 0 }}
+          </p>
           <!-- Текст названия / статуса -->
-          <p class="text-xs absolute bottom-2 font-bold text-gray-600 pointer-events-none whitespace-nowrap">
+          <p class="absolute bottom-0 font-bold text-center text-gray-600 pointer-events-none break-words" :class="bathCartList[currentBathIndex].name.length<15?'text-[10px]':'text-[7px]'" >
             {{
               bathCartList.length > 0 && bathCartList[currentBathIndex]
-                  ? `${bathCartList[currentBathIndex].name} x${bathCartList[currentBathIndex].count}`
+                  ? `${bathCartList[currentBathIndex].name} `
                   : 'Полка пустая'
             }}
           </p>
@@ -438,7 +443,7 @@ const currentBathImage = computed(() => {
             x{{ gameData.cart[foodCartList[currentIndex]?.id] || 0 }}
           </p>
           <!-- Текст названия / статуса с использованием foodCartList -->
-          <p class="text-[10px] absolute bottom-0 font-bold text-gray-600 pointer-events-none whitespace-nowrap">
+          <p class="absolute bottom-0 font-bold text-gray-600 pointer-events-none " :class="foodCartList[currentIndex].name.length < 15?'text-[10px]':'text-[7px]'">
             {{
               foodCartList.length > 0 && foodCartList[currentIndex]
                   ? `${foodCartList[currentIndex].name}`

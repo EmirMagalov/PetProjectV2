@@ -15,9 +15,9 @@ import {fruitStreak, gameData, isGameOver, PlayCount} from "@/scripts/useGameSto
 
     <!-- Вторая иконка (Sick) -->
     <div v-show="gameData.sick" class="relative animate-pulse ">
-      <img class="absolute left-6 top-4 font-bold  w-6 z-10" src="/gamePlay/fruit_basket_icons.webp" alt="">
+      <img class="absolute left-6 top-4 font-bold  w-6 z-10" src="/Laboratory/serums/health_serum.webp" alt="">
       <img class="relative w-10" src="/gamePlay/sick_icon.webp" alt="">
-      <p class="absolute left-10 text-shadow-xs text-shadow-amber-50  top-6 font-bold text-[15px] z-20">{{ 10 - fruitStreak }}</p>
+<!--      <p class="absolute left-10 text-shadow-xs text-shadow-amber-50  top-6 font-bold text-[15px] z-20">{{ 10 - fruitStreak }}</p>-->
     </div>
 
   </div>

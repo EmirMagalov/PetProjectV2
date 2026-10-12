@@ -2,6 +2,7 @@ import {useDraggable} from "@vueuse/core";
 import {computed, ref} from "vue";
 import {addCoin, feedPet, isLosingLife, otherFeedPet, updateEyeLook, resetEyeLook} from "@/scripts/actions.js";
 import {
+    colorFoam,
     currentDraggedItem,
     dropZoneRef, energyFull,
     gameData, nextTutorialStep, showTongue,
@@ -38,7 +39,7 @@ function clearActionTimer() {
 }
 
 // Универсальная функция проверки зоны и открытия рта
-export function handleMove(event, itemType, foodId = null, Category = null, SubCategory = null) {
+export function handleMove(event,itemType ,Item) {
     if (itemType === 'food' && foodConsumedByPipe.value) {
         foodDrag.x.value = -9999
         foodDrag.y.value = -9999
@@ -59,13 +60,13 @@ export function handleMove(event, itemType, foodId = null, Category = null, SubC
     if (isInside) {
         isHovered.value = true
         if (itemType === 'food') {
-            if (gameData.cart['pipe'] && Category ==='laboratory' && SubCategory==='pipe') {
+            if (gameData.cart['pipe'] && Item.category ==='laboratory' && Item.subcategory==='pipe') {
                 statusSmoke.value = true
                 if (!actionTimer) {
                     actionTimer = setTimeout(() => {
                         if (isHovered.value && currentDraggedItem.value === 'food') {
                             statusSmoke.value = false
-                            otherFeedPet(foodId)
+                            otherFeedPet(Item.id)
                             addCoin(2)
                             addExp(5)
 
@@ -116,7 +117,7 @@ export function handleMove(event, itemType, foodId = null, Category = null, SubC
                     }, 2000)
                 }
             }
-        } else if (itemType === 'foam') {
+        } else if (Item.id === 'foam') {
             batheStatus.value = true
         }
     } else {
@@ -129,10 +130,10 @@ export function handleMove(event, itemType, foodId = null, Category = null, SubC
 }
 
 // Универсальная функция окончания перетаскивания
-export function handleEnd(itemType, foodId, Category) {
+export function handleEnd(itemType, Item) {
     clearActionTimer()
 
-    if (foodConsumedByPipe.value || foodId === 'pipe') {
+    if (foodConsumedByPipe.value || Item.category=== 'pipe') {
         statusSmoke.value = false
         foodConsumedByPipe.value = false
         isHovered.value = false
@@ -142,16 +143,16 @@ export function handleEnd(itemType, foodId, Category) {
 
     if (isHovered.value) {
         if (itemType === 'food') {
-            if (Category === 'food') {
-                feedPet(foodId)
+            if (Item.category === 'food') {
+                feedPet(Item.id)
                 nextTutorialStep()
             } else {
-                const isFullLives = (foodId === 'life_serum' && gameData.lives >= 3)
-                const isUnneededHealth = (foodId === 'health_serum' && !gameData.sick)
-                const isUnneededEnergy = (foodId === 'health_serum' && energyFull.value)
+                const isFullLives = (Item.id === 'life_serum' && gameData.lives >= 3)
+                const isUnneededHealth = (Item.id === 'health_serum' && !gameData.sick)
+                const isUnneededEnergy = (Item.id === 'energy_serum' && gameData.energy >=80)
 
                 if (!isFullLives && !isUnneededHealth && !isUnneededEnergy) {
-                    otherFeedPet(foodId)
+                    otherFeedPet(Item.id)
                 }else {
                     showTongue.value = true
                     setTimeout(() => {
@@ -162,9 +163,10 @@ export function handleEnd(itemType, foodId, Category) {
         } else if (itemType === 'foam') {
             if (!statusFoam.value) {
                 statusFoam.value = true
+                colorFoam.value = Item.color
                 nextTutorialStep()
-                if (foodId) {
-                    removeFromCart(foodId)
+                if (Item.id) {
+                    removeFromCart(Item.id)
                 }
             }
         }
@@ -198,15 +200,12 @@ export const foodDrag = useDraggable(foodEl, {
     onMove: (pos, event) => {
         updateEyeLook(event)
 
-        const foodId = currentFoodItem.value?.id
-        const Category = currentFoodItem.value?.category
-        const SubCategory = currentFoodItem.value?.subcategory
-        handleMove(event, 'food', foodId, Category, SubCategory)
+        const foodItem= currentFoodItem.value
+        handleMove(event, 'food', foodItem)
     },
     onEnd: () => {
-        const foodId = currentFoodItem.value?.id
-        const Category = currentFoodItem.value?.category
-        handleEnd('food', foodId, Category)
+        const foodItem= currentFoodItem.value
+        handleEnd('food', foodItem)
         resetEyeLook(600)
     }
 })
@@ -245,12 +244,12 @@ export const foamDrag = useDraggable(foamEl, {
     },
     onMove: (pos, event) => {
         updateEyeLook(event)
-        const bathId = currentBathItem.value?.id
-        handleMove(event, 'foam', bathId)
+        const bathItem = currentBathItem.value
+        handleMove(event, 'foam', bathItem)
     },
     onEnd: () => {
-        const bathId = currentBathItem.value?.id
-        handleEnd('foam', bathId)
+        const bathItem = currentBathItem.value
+        handleEnd('foam', bathItem)
         resetEyeLook(600)
     }
 })

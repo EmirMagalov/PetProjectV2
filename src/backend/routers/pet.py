@@ -136,10 +136,15 @@ async def test_notification(tg_id: int):
 
 
 @pet_router.post("/pet/spin-fortune/{tg_id}")
-async def spin_fortune(tg_id: int):
+async def spin_fortune(tg_id: int, data: dict = None):
     NOW = int(time.time())
     COOLDOWN = 86400  # 24 часа в секундах
-    SPIN_PRICE = 100  # Стоимость платного спина
+
+    # Получаем количество уже сделанных платных прокруток подряд от фронтенда (по умолчанию 0)
+    paid_spins_count = data.get("paid_spins_count", 0) if data else 0
+
+    # Динамическая цена: первая 100, вторая 200, третья 300 и т.д.
+    current_spin_price = min(1000, 100 + (paid_spins_count * 100))
 
     pet = await PetModel.get_or_none(tg_id=tg_id)
     if not pet:
@@ -147,46 +152,47 @@ async def spin_fortune(tg_id: int):
 
     is_free_spin = (NOW - pet.last_fortune_spin) >= COOLDOWN
 
+    updated_fields = ["coins", "cart"]
+
     # Если бесплатный спин НЕ доступен — проверяем баланс монет
     if not is_free_spin:
-        if pet.coins < SPIN_PRICE:
+        if pet.coins < current_spin_price:
             remaining_seconds = COOLDOWN - (NOW - pet.last_fortune_spin)
             return {
                 "success": False,
-                "message": f"Недостаточно монет! Платный спин стоит {SPIN_PRICE} монет.",
+                "message": f"Недостаточно монет! Платный спин стоит {current_spin_price} монет.",
                 "retry_in": remaining_seconds
             }
-        # Списываем монеты за платный спин
-        pet.coins -= SPIN_PRICE
+        # Списываем динамическую стоимость за платный спин
+        pet.coins -= current_spin_price
+        # ВНИМАНИЕ: Для платного спина мы НЕ обновляем pet.last_fortune_spin,
+        # чтобы таймер до бесплатного бонуса продолжал идти!
     else:
         # Если спин бесплатный — обновляем таймер бесплатного спина
         pet.last_fortune_spin = NOW
         pet.fortune_notified = False
+        updated_fields.extend(["last_fortune_spin", "fortune_notified"])
 
     # Массив наград с настроенными весами (шансами в %)
     rewards = [
         {"id": 0, "type": "coins", "amount": 50, "name": "50 Монет", "weight": 35},
         {"id": 1, "type": "coins", "amount": 100, "name": "100 Монет", "weight": 25},
         {"id": 2, "type": "coins", "amount": 500, "name": "500 Монет", "weight": 10},
-        {"id": 3, "type": "coins", "amount": 1500, "name": "1500 Монет", "weight": 5},  # Редкий джекпот 5%
-        {"id": 4, "type": "coins", "amount": 5000, "name": "5000 Монет", "weight": 1},  # Редкий джекпот 1%
-        {"id": 5, "type": "potion", "amount": 1, "item_id": "healthPotion", "name": "Зелье здоровья", "weight": 7},
+        {"id": 3, "type": "coins", "amount": 1500, "name": "1500 Монет", "weight": 5},
+        {"id": 4, "type": "coins", "amount": 5000, "name": "5000 Монет", "weight": 1},
+        {"id": 5, "type": "serum", "amount": 1, "item_id": "health_serum", "name": "Сыворотка здоровья", "weight": 5},
         {"id": 6, "type": "food", "amount": 1, "item_id": "burger", "name": "Бургер", "weight": 15},
         {"id": 7, "type": "nothing", "amount": 0, "name": "Ничего", "weight": 10},
     ]
 
-    # Выбор одной награды с учетом весов
     weights = [int(r["weight"]) for r in rewards]
     selected_reward = random.choices(rewards, weights=weights, k=1)[0]
-
-    # Создаем чистую копию словаря награды (без служебного поля weight для ответа)
     reward = {k: v for k, v in selected_reward.items() if k != "weight"}
 
     # Начисление выигрыша
     if reward["type"] == "coins":
         pet.coins += reward["amount"]
     elif reward["type"] == "nothing":
-        # Ничего не начисляем
         pass
     elif "item_id" in reward:
         item_id = reward["item_id"]
@@ -197,9 +203,8 @@ async def spin_fortune(tg_id: int):
         pet.cart = current_cart
 
     # Сохраняем обновлённые данные
-    await pet.save(update_fields=["last_fortune_spin", "fortune_notified", "coins", "cart"])
+    await pet.save(update_fields=updated_fields)
 
-    # Время следующего бесплатного спина
     next_spin_at = pet.last_fortune_spin + COOLDOWN
 
     return {

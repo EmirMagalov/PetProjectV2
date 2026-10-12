@@ -23,6 +23,7 @@ export const cartItemsList = computed(() => {
         return {
             id: itemId,
             count: count,
+            color: itemInfo?.color || null,
             name: itemInfo?.name || 'Неизвестно',
             category: itemInfo?.category || 'Неизвестно',
             subcategory: itemInfo?.subcategory || 'Неизвестно',

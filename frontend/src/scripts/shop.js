@@ -154,7 +154,7 @@ export const getItemBonuses = (item) => {
     if (item.energyGain) bonuses.push({text: `+ ${item.energyGain} энергии`, color: 'text-blue-400'})
     if (item.life) bonuses.push({text: `+ ${item.life} жизнь`, color: 'text-red-400'})
     if (item.health) bonuses.push({text: `Восстановление здоровья`, color: 'text-emerald-400'})
-    if (item.subcategory === 'fruits') bonuses.push({text: `+ здоровье`, color: 'text-green-400'})
+    // if (item.subcategory === 'fruits') bonuses.push({text: `+ здоровье`, color: 'text-green-400'})
     return bonuses
 }
 

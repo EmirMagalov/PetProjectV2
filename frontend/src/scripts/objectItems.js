@@ -7,7 +7,7 @@ export const foodList = [
         name: 'Картошка фри',
         image: `/food/fri.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'fastfood',
+        subcategory: 'fastfood',
         foodGain: 15, // сколько добавляет сытости
         price: 22       // сколько стоит монет
     },
@@ -16,7 +16,7 @@ export const foodList = [
         name: 'Пицца',
         image: `/food/pizza.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'fastfood',
+        subcategory: 'fastfood',
         foodGain: 15, // сколько добавляет сытости
         price: 32       // сколько стоит монет
     },
@@ -25,7 +25,7 @@ export const foodList = [
         name: 'Хотдог',
         image: `/food/hotdog.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'fastfood',
+        subcategory: 'fastfood',
         foodGain: 10,
         price: 29
     },
@@ -34,33 +34,33 @@ export const foodList = [
         name: 'Бургер',
         image: `/food/burger.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'fastfood',
+        subcategory: 'fastfood',
         foodGain: 25,
-        energyGain:3,
+        energyGain: 3,
         price: 39,
-        level:10
+        level: 10
     },
     {
         id: 'tako',
         name: 'Тако',
         image: `/food/tako.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'fastfood',
+        subcategory: 'fastfood',
         foodGain: 25,
-        energyGain:3,
+        energyGain: 3,
         price: 29,
-        level:10
+        level: 10
     },
     {
         id: 'lasagna',
         name: 'Лазанья',
         image: `/food/lasagna.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'fastfood',
-        energyGain:3,
+        subcategory: 'fastfood',
+        energyGain: 3,
         foodGain: 25,
         price: 29,
-        level:10
+        level: 10
     },
 
 
@@ -69,7 +69,8 @@ export const foodList = [
         name: 'Банан',
         image: `/food/banana.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'fruits',
+        subcategory: 'fruits',
+        energyGain: 1,
         foodGain: 5,
         price: 20
     },
@@ -78,7 +79,8 @@ export const foodList = [
         name: 'Киви',
         image: `/food/kiwi.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'fruits',
+        subcategory: 'fruits',
+        energyGain: 1,
         foodGain: 5,
         price: 20
     },
@@ -87,7 +89,8 @@ export const foodList = [
         name: 'Виноград',
         image: `/food/grape.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'fruits',
+        subcategory: 'fruits',
+        energyGain: 1,
         foodGain: 5,
         price: 20
     },
@@ -96,9 +99,9 @@ export const foodList = [
         name: 'Ананас',
         image: `/food/pineapple.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'fruits',
+        subcategory: 'fruits',
         foodGain: 10,
-        energyGain: 1,
+        energyGain: 5,
         price: 23,
         level: 10
     },
@@ -107,9 +110,9 @@ export const foodList = [
         name: 'Персик',
         image: `/food/peach.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'fruits',
+        subcategory: 'fruits',
         foodGain: 10,
-        energyGain: 1,
+        energyGain: 5,
         price: 23,
         level: 10
     },
@@ -118,9 +121,9 @@ export const foodList = [
         name: 'Гранат',
         image: `/food/pomegranate.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'fruits',
+        subcategory: 'fruits',
         foodGain: 10,
-        energyGain: 1,
+        energyGain: 5,
         price: 23,
         level: 10
     },
@@ -130,7 +133,7 @@ export const foodList = [
         name: 'Ролл из лосося',
         image: `/food/salmon_roll.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'sushi',
+        subcategory: 'sushi',
         foodGain: 12,
         price: 60
     },
@@ -139,7 +142,7 @@ export const foodList = [
         name: 'Нигири с лососем',
         image: `/food/sake_nigir.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'sushi',
+        subcategory: 'sushi',
         foodGain: 15,
         price: 80,
         level: 10
@@ -149,7 +152,7 @@ export const foodList = [
         name: 'Нигири с креветкой',
         image: `/food/ebi_nigiri.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'sushi',
+        subcategory: 'sushi',
         foodGain: 15,
         price: 80,
         level: 10
@@ -159,7 +162,7 @@ export const foodList = [
         name: 'Ролл «Калифорния»',
         image: `/food/california.webp?v=${APP_VERSION}`,
         category: 'food',
-        subcategory:'sushi',
+        subcategory: 'sushi',
         foodGain: 15,
         price: 80,
         level: 10
@@ -170,9 +173,9 @@ export const foodList = [
         name: 'Сыворотка энергии',
         image: `Laboratory/serums/energy_serum.webp?v=${APP_VERSION}`,
         category: 'laboratory',
-        subcategory:'serum',
+        subcategory: 'serum',
         energyGain: 80,
-        price: 350,
+        price: 750,
 
     },
     {
@@ -180,8 +183,8 @@ export const foodList = [
         name: 'Сыворотка жизни',
         image: `Laboratory/serums/life_serum.webp?v=${APP_VERSION}`,
         category: 'laboratory',
-        subcategory:'serum',
-        life:1,
+        subcategory: 'serum',
+        life: 1,
         price: 1000,
 
     },
@@ -191,26 +194,51 @@ export const foodList = [
         name: 'Сыворотка здоровья',
         image: `Laboratory/serums/health_serum.webp?v=${APP_VERSION}`,
         category: 'laboratory',
-        health:1,
+        health: 1,
         price: 800,
 
     },
     {
         id: 'shampoo',
         name: 'Шампунь',
-        image: `/gamePlay/shampoo_icon.webp?v=${APP_VERSION}`,
+        image: `/Bath/shampoo_icon.webp?v=${APP_VERSION}`,
         category: 'bath accessories',
-        subcategory:'shampoo',
+        subcategory: 'shampoo',
+        color: 'bg-white/70',
         price: 70,
 
     },
     {
-        id: 'soap',
-        name: 'Мыло',
-        image: `/gamePlay/soap_icon.webp?v=${APP_VERSION}`,
+        id: 'shampoo_green',
+        name: 'Шампунь (Зеленый)',
+        image: `/Bath/shampoo_green_icon.webp?v=${APP_VERSION}`,
         category: 'bath accessories',
-        subcategory:'soap',
-        price: 70,
+        subcategory: 'shampoo',
+        color: 'bg-[#34bc39]/50',
+        price: 80,
+        level: 10
+
+    },
+    {
+        id: 'shampoo_blue',
+        name: 'Шампунь (Синий)',
+        image: `/Bath/shampoo_blue_icon.webp?v=${APP_VERSION}`,
+        category: 'bath accessories',
+        subcategory: 'shampoo',
+        color: 'bg-[#3552b8]/50',
+        price: 80,
+        level: 10
+
+    },
+    {
+        id: 'shampoo_violet_green',
+        name: 'Шампунь (Фиолетовый)',
+        image: `/Bath/shampoo_violet_icon.webp?v=${APP_VERSION}`,
+        category: 'bath accessories',
+        subcategory: 'shampoo',
+        color: 'bg-[#a05fba]/50',
+        price: 80,
+        level: 10
 
     },
 ]
