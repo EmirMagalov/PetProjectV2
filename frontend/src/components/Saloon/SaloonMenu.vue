@@ -154,7 +154,7 @@ function handleRestart() {
       <div v-show="playerScore > 0" class="inline-flex items-center justify-center">
        <span
            class="px-3 py-1 rounded-full text-xs font-bold shadow-sm transition-all"
-           :class="typeof playerScoreText === 'string' ? 'bg-amber-950 text-amber-300 border border-amber-400 animate-pulse' : 'bg-black/80 text-white'"
+           :class="typeof playerScoreText === 'string' ? 'bg-amber-950 text-amber-300 border border-amber-400' : 'bg-black/80 text-white'"
        >
   {{ playerScoreText }}
 </span>
