@@ -350,7 +350,7 @@ const currentBathImage = computed(() => {
             x{{ gameData.cart[bathCartList[currentBathIndex]?.id] || 0 }}
           </p>
           <!-- Текст названия / статуса -->
-          <p class="absolute bottom-0 font-bold text-center text-gray-600 pointer-events-none break-words" :class="bathCartList[currentBathIndex].name.length<15?'text-[10px]':'text-[7px]'" >
+          <p class="absolute bottom-0 font-bold text-center text-gray-600 pointer-events-none break-words" :class="bathCartList[currentBathIndex]?.name.length<15?'text-[10px]':'text-[7px]'" >
             {{
               bathCartList.length > 0 && bathCartList[currentBathIndex]
                   ? `${bathCartList[currentBathIndex].name} `
@@ -421,7 +421,7 @@ const currentBathImage = computed(() => {
 
                    (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative ',
                    !foodDrag.isDragging.value &&( foodCartList[currentIndex]?.category === 'food') && showHunger ? 'animate-pulse' : '',
-                    !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'healthPotion' && gameData.sick ? 'animate-pulse' : '',
+                    !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'health_serum' && gameData.sick ? 'animate-pulse' : '',
                     !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'pipe' && lowEnergy.value ? 'animate-pulse' : '',
 
 
@@ -443,7 +443,7 @@ const currentBathImage = computed(() => {
             x{{ gameData.cart[foodCartList[currentIndex]?.id] || 0 }}
           </p>
           <!-- Текст названия / статуса с использованием foodCartList -->
-          <p class="absolute bottom-0 font-bold text-gray-600 pointer-events-none " :class="foodCartList[currentIndex].name.length < 15?'text-[10px]':'text-[7px]'">
+          <p class="absolute bottom-0 font-bold text-gray-600 pointer-events-none " :class="foodCartList[currentIndex]?.name.length < 15?'text-[10px]':'text-[7px]'">
             {{
               foodCartList.length > 0 && foodCartList[currentIndex]
                   ? `${foodCartList[currentIndex].name}`

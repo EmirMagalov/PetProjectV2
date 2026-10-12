@@ -139,7 +139,7 @@ export async function spinWheel() {
             }
 
             if (reward.type === 'serum' || reward.type === 'item' || reward.type === 'food') {
-                const itemId = reward.itemId || reward.item_id || 'healthPotion'
+                const itemId = reward.itemId || reward.item_id || 'health_serum'
                 const amount = reward.amount || 1
 
                 if (!gameData.cart[itemId]) {
