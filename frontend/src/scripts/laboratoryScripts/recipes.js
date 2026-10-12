@@ -18,7 +18,7 @@ export const serumRecipes = [
         name: 'Сыворотка здоровья',
         image: `/Laboratory/serums/health_serum.webp?v=${APP_VERSION}`,
         requirements: {
-            health_spores: 2,
+            health_spores: 1,
             stimulating_crystalloid: 1
         }
     },
