@@ -204,7 +204,7 @@ export const foodList = [
         image: `/Bath/shampoo_icon.webp?v=${APP_VERSION}`,
         category: 'bath accessories',
         subcategory: 'shampoo',
-        color: 'bg-white/70',
+        color: 'bg-white/50',
         price: 70,
 
     },
