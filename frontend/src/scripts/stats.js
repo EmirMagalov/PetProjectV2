@@ -143,7 +143,7 @@ watch(
         } else {
             bodyType.value = 'normal'
         }
-
+        console.log(isBathe)
         if (isShowTongue) {
             mouth.value = `/character/isPlayed_mouth.webp?v=${APP_VERSION}`
         } else if (hovered && !isBathe) {

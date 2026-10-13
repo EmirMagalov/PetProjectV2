@@ -117,8 +117,9 @@ export function handleMove(event,itemType ,Item) {
                     }, 2000)
                 }
             }
-        } else if (Item.id === 'foam') {
+        } else if (itemType === 'foam') {
             batheStatus.value = true
+            console.log(batheStatus.value)
         }
     } else {
         // Если вышли за пределы зоны — СРАЗУ отменяем таймер и сбрасываем эффекты
