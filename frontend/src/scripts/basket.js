@@ -8,7 +8,7 @@ import {foodList} from "@/scripts/objectItems.js";
 import {headItems} from "@/scripts/headwearItems.js";
 
 import {syncToBackend} from "@/scripts/api.js";
-import {costumeItems} from "@/scripts/costumeItems.js";
+import {clothesItems} from "@/scripts/clothesItems.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {ingredientList} from "@/scripts/laboratoryScripts/ingredientItems.js"; // 1. Импортируем костюмы
 
@@ -61,9 +61,9 @@ export const currentHeadItem = computed(() => {
     return headItems.find(item => item.id === gameData.equippedHead)
 })
 
-export const currentCostumeItem = computed(() => {
-    if (!gameData.equippedCostume) return null
-    return costumeItems.find(item => item.id === gameData.equippedCostume)
+export const currentClothesItem = computed(() => {
+    if (!gameData.equippedClothes) return null
+    return clothesItems.find(item => item.id === gameData.equippedClothes)
 })
 
 
@@ -177,14 +177,14 @@ export function buyHeadwear(headId) {
     gameData.equippedHead = headId
 }
 
-export function buyCostume(costumeId) {
-    if (!gameData.unlockedCostumes) {
-        gameData.unlockedCostumes = []
+export function buyClothes(clothesId) {
+    if (!gameData.unlockedClothes) {
+        gameData.unlockedClothes = []
     }
-    if (!gameData.unlockedCostumes.includes(costumeId)) {
-        gameData.unlockedCostumes.push(costumeId)
+    if (!gameData.unlockedClothes.includes(clothesId)) {
+        gameData.unlockedClothes.push(clothesId)
     }
-    gameData.equippedCostume = costumeId
+    gameData.equippedClothes = clothesId
 }
 
 watch(foodCartList, (newList) => {

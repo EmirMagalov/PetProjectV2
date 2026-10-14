@@ -21,7 +21,7 @@ defineProps({
 
 defineEmits(['close'])
 
-// Подкатегории для Гардероба: 'hats' или 'costumes'
+// Подкатегории для Гардероба: 'hats' или 'clothes'
 
 
 </script>
@@ -146,12 +146,12 @@ defineEmits(['close'])
           </div>
         </button>
         <button
-            @click="wardrobeTab = 'costumes'"
-            :class="['flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer', wardrobeTab === 'costumes' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white']"
+            @click="wardrobeTab = 'clothes'"
+            :class="['flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer', wardrobeTab === 'clothes' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white']"
         >
           <div class="flex items-center justify-center gap-1">
-            <img :src="`/costumes/costume_icon.webp?v=${APP_VERSION}`" class="w-5" alt="">
-            <p>Костюмы</p>
+            <img :src="`/clothes/costumes/costume_icon.webp?v=${APP_VERSION}`" class="w-5" alt="">
+            <p>Одежда</p>
           </div>
         </button>
       </div>

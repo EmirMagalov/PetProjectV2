@@ -69,8 +69,8 @@ class Pet(models.Model):
     unlocked_heads = fields.JSONField(default=list)  # Разблокированные шапки/головы
     equipped_head = fields.CharField(max_length=255, null=True)  # Надетая шапка
 
-    unlocked_costumes = fields.JSONField(default=list)  # Разблокированные костюмы
-    equipped_costume = fields.CharField(max_length=255, null=True)  # Надетый костюм
+    unlocked_clothes = fields.JSONField(default=list)  # Разблокированные костюмы
+    equipped_clothes = fields.CharField(max_length=255, null=True)  # Надетый костюм
 
     # ==========================================
     # 8. ФЛАГИ УВЕДОМЛЕНИЙ (ЗАЩИТА ОТ СПАМА)

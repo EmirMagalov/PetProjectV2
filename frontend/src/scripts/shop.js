@@ -1,9 +1,9 @@
 import {computed, ref} from "vue";
 import {activeTab, gameData} from "@/scripts/useGameStore.js";
 import {foodList} from "@/scripts/objectItems.js";
-import {costumeItems} from "@/scripts/costumeItems.js";
+import {clothesItems} from "@/scripts/clothesItems.js";
 import {headItems} from "@/scripts/headwearItems.js";
-import {addToCart, buyCostume, buyHeadwear} from "@/scripts/basket.js";
+import {addToCart, buyClothes, buyHeadwear} from "@/scripts/basket.js";
 
 export const wardrobeTab = ref('hats')
 export const lastBought = ref(null)
@@ -24,8 +24,8 @@ export const currentList = computed(() => {
         return foodList.filter(item => item.category === 'bath accessories')
     } else {
         // Активен Гардероб
-        if (wardrobeTab.value === 'costumes') {
-            return costumeItems.map(item => ({
+        if (wardrobeTab.value === 'clothes') {
+            return clothesItems.map(item => ({
                 ...item,
                 image: item.preview || item.image_normal
             }))
@@ -51,8 +51,8 @@ export function isItemLocked(item) {
     }
 
     if (activeTab.value === 'clothes') {
-        const isUnlockedItem = wardrobeTab.value === 'costumes'
-            ? gameData.unlockedCostumes?.includes(item.id)
+        const isUnlockedItem = wardrobeTab.value === 'clothes'
+            ? gameData.unlockedClothes?.includes(item.id)
             : gameData.unlockedHeads?.includes(item.id)
 
         if (!isUnlockedItem && Boolean(item.level) && gameData.level < item.level) {
@@ -65,16 +65,16 @@ export function isItemLocked(item) {
 
 // Проверка надета ли одежда/шляпа
 export function isEquipped(itemId) {
-    if (wardrobeTab.value === 'costumes') {
-        return gameData.equippedCostume === itemId
+    if (wardrobeTab.value === 'clothes') {
+        return gameData.equippedClothes === itemId
     }
     return gameData.equippedHead === itemId
 }
 
 // Проверка куплен ли предмет
 export function isUnlocked(itemId) {
-    if (wardrobeTab.value === 'costumes') {
-        return gameData.unlockedCostumes?.includes(itemId)
+    if (wardrobeTab.value === 'clothes') {
+        return gameData.unlockedClothes?.includes(itemId)
     }
     return gameData.unlockedHeads?.includes(itemId)
 }
@@ -102,8 +102,8 @@ export function handleItemClick(item) {
         }
     } else {
         if (isUnlocked(item.id)) {
-            if (wardrobeTab.value === 'costumes') {
-                selectCostume(item.id)
+            if (wardrobeTab.value === 'clothes') {
+                selectClothes(item.id)
             } else {
                 selectHeadwear(item.id)
             }
@@ -111,9 +111,9 @@ export function handleItemClick(item) {
             if (gameData.coins >= itemCost) {
                 gameData.coins -= itemCost // 👈 Списываем с учетом уровня
 
-                if (wardrobeTab.value === 'costumes') {
-                    if (!gameData.unlockedCostumes) gameData.unlockedCostumes = []
-                    buyCostume(item.id)
+                if (wardrobeTab.value === 'clothes') {
+                    if (!gameData.unlockedClothes) gameData.unlockedClothes = []
+                    buyClothes(item.id)
                 } else {
                     buyHeadwear(item.id)
                 }
@@ -134,11 +134,11 @@ function selectHeadwear(headId) {
     }
 }
 
-function selectCostume(costumeId) {
-    if (gameData.equippedCostume === costumeId) {
-        gameData.equippedCostume = null
+function selectClothes(clothesId) {
+    if (gameData.equippedClothes === clothesId) {
+        gameData.equippedClothes = null
     } else {
-        gameData.equippedCostume = costumeId
+        gameData.equippedClothes = clothesId
     }
 }
 

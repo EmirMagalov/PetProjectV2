@@ -138,8 +138,8 @@ export async function initGameData() {
             gameData.cart = serverData.cart || {}
             gameData.unlockedHeads = serverData.unlocked_heads || []
             gameData.equippedHead = serverData.equipped_head || null
-            gameData.unlockedCostumes = serverData.unlocked_costumes || []
-            gameData.equippedCostume = serverData.equipped_costume || null
+            gameData.unlockedClothes = serverData.unlocked_clothes || []
+            gameData.equippedClothes = serverData.equipped_clothes || null
             gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
 
             isDataLoaded = true
@@ -204,8 +204,8 @@ function getPayload() {
         is_pooped: gameData.isPooped,
         unlocked_heads: gameData.unlockedHeads,
         equipped_head: gameData.equippedHead,
-        equipped_costume: gameData.equippedCostume,
-        unlocked_costumes: gameData.unlockedCostumes,
+        equipped_clothes: gameData.equippedClothes,
+        unlocked_clothes: gameData.unlockedClothes,
         addiction_streak: gameData.addictionStreak,
         last_update: Math.floor(Date.now() / 1000)
     }

@@ -46,6 +46,13 @@ export const headItems = [
         level:20
     },
     {
+        id: 'cylinder_hat',
+        name: 'Цилиндр"',
+        image: `/headwear/cylinder.webp?v=${APP_VERSION}`,
+        price: 2500,
+        level:20
+    },
+    {
         id: 'women_hat',
         name: 'Дамская шляпа',
         image: `/headwear/womenhat.webp?v=${APP_VERSION}`,
@@ -59,5 +66,6 @@ export const headItems = [
         price: 2200,
         level:25
     },
+
 
 ]

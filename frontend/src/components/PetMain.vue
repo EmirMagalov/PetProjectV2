@@ -28,7 +28,7 @@ import {
   isComboAnimating, isUserLooking, pupilOffset, resetEyeLook,
   sunAnimating, updateEyeLook
 } from "@/scripts/actions.js";
-import PetCostume from "@/components/PetCostume.vue";
+import PetClothes from "@/components/PetClothes.vue";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 import FortuneWheel from "@/components/FortuneWheel.vue";
 import SunAndMoon from "@/components/Decorations/SunAndMoon.vue";
@@ -283,7 +283,7 @@ onUnmounted(() => {
           <!-- Персонаж -->
           <div :class="['absolute flex justify-center items-center w-45 h-45', isPopping ? 'animate-pop' : '',tutorialStep === 3 ? 'animate-quick-pulse' : '']">
             <PetHeadwear/>
-            <PetCostume/>
+            <PetClothes/>
             <div class="absolute w-45 h-45 pointer-events-none">
               <!-- Худое тело -->
               <img

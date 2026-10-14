@@ -75,7 +75,7 @@ export const defaultGameData = {
     sleepEndTime: 0,
     feedCount: 9,
     equippedHead: null,
-    equippedCostume: null,
+    equippedClothes: null,
     foodStreak: 0,
     fastfoodStreak: 0,
     sick: false,
@@ -86,7 +86,7 @@ export const defaultGameData = {
     isPooped: false,
     badStatsMinutes: 0,
     unlockedHeads: [],
-    unlockedCostumes: [],
+    unlockedClothes: [],
     cart: {}
 }
 
