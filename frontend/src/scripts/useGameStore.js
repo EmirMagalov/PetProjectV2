@@ -118,6 +118,12 @@ export async function resetLocal() {
     const savedCoins = gameData.coins
     const savedClicks = gameData.clickCounter
     const savedDeathsCount = gameData.deathsCount
+
+    const savedClothes = gameData.equippedClothes
+    const savedHead = gameData.equippedHead
+    const savedUnlockedClothes = gameData.unlockedClothes ? [...gameData.unlockedClothes] : []
+    const savedUnlockedHeads = gameData.unlockedHeads ? [...gameData.unlockedHeads] : []
+
     currentStatus.value = null
     // 2. Применяем дефолтные значения ко всем остальным полям
     Object.assign(gameData, defaultGameData, {
@@ -128,6 +134,12 @@ export async function resetLocal() {
     gameData.coins = savedCoins
     gameData.clickCounter = savedClicks
     gameData.deathsCount = savedDeathsCount
+
+    gameData.equippedClothes = savedClothes
+    gameData.equippedHead = savedHead
+    gameData.unlockedClothes = savedUnlockedClothes
+    gameData.unlockedHeads = savedUnlockedHeads
+
 }
 
 
