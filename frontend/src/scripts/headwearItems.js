@@ -80,5 +80,25 @@ export const headItems = [
         price: 2200,
         level:25
     },
-
+    {
+        id: 'conical_hat',
+        name: 'Азиатская конусная шляпа',
+        image: `/headwear/conicalhat.webp?v=${APP_VERSION}`,
+        price: 3500,
+        level:30
+    },
+    {
+        id: 'yellow_hat',
+        name: 'Древняя шляпа',
+        image: `/headwear/yellowhat.webp?v=${APP_VERSION}`,
+        price: 3500,
+        level:30
+    },
+    {
+        id: 'ancient_hat',
+        name: 'Древняя шляпа',
+        image: `/headwear/ancienthat.webp?v=${APP_VERSION}`,
+        price: 3500,
+        level:30
+    },
 ]
