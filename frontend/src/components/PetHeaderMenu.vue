@@ -144,12 +144,13 @@ const getClipInset = (progress) => {
         </div>
       </div>
 
-      <div class="absolute bottom-0 left-5 flex items-center gap-2 w-full">
+      <div class="absolute bottom-0 left-5 flex items-center gap-2 w-full" >
         <div class="flex justify-center items-center gap-1.5 pb-1">
           <img
               v-for="i in 3"
               :key="i"
               :src="i <= gameData.lives ? `/gamePlay/heart.webp?v=${APP_VERSION}` : `/gamePlay/heart_empty.webp?v=${APP_VERSION}`"
+              :class="i <= gameData.lives && gameData.lives<=1 ? 'animate-pulse' : ''"
               alt="Жизнь"
               width="18"
           >
@@ -286,6 +287,20 @@ const getClipInset = (progress) => {
 </template>
 
 <style scoped>
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    transform: scale(1.2) translateY(0px);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 0.7s ease-in-out infinite;
+}
+
+
 @keyframes comboActivePulse {
   0%, 100% {
     transform: scale(1.2) rotate(-5deg);

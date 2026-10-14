@@ -123,13 +123,14 @@ watch(
         () => gameData.foodLevel,
         () => gameData.isFat,
         () => gameData.energy, // <--- Добавили энергию!
-        () => gameData.sick     // <--- Добавили болезнь!
+        () => gameData.sick,     // <--- Добавили болезнь!
+        () => gameData.lives
     ],
-    ([hovered, isBathe, isShowTongue, foodLevel, isFat, energy, sick]) => {
+    ([hovered, isBathe, isShowTongue, foodLevel, isFat, energy, sick,lives]) => {
         const isLowEnergy = energy < 20
         const isHungry = foodLevel < 20
         const isSick = sick
-        const hasIssues = isLowEnergy || isHungry || isSick
+        const hasIssues = isLowEnergy || isHungry || isSick || lives<=1
         if (foodLevel <= 85) {
             gameData.foodStreak = 0
             gameData.isFat = false
