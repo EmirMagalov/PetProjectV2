@@ -17,7 +17,7 @@ export const headItems = [
         level:5
     },
     {
-        id: 'bowlerhat',
+        id: 'bowler_hat',
         name: 'Шляпа котелок',
         image: `/headwear/bowlerhat.webp?v=${APP_VERSION}`,
         price: 1000,
@@ -42,7 +42,7 @@ export const headItems = [
         id: 'pillbox',
         name: 'Шляпа-таблетка',
         image: `/headwear/pillbox.webp?v=${APP_VERSION}`,
-        price: 1666,
+        price: 1300,
         level:15
     },
     {
