@@ -17,13 +17,12 @@ export const headItems = [
         level:5
     },
     {
-        id: 'bowler_hat',
-        name: 'Шляпа котелок',
-        image: `/headwear/bowlerhat.webp?v=${APP_VERSION}`,
-        price: 1000,
+        id: 'pillbox',
+        name: 'Шляпа-таблетка',
+        image: `/headwear/pillbox.webp?v=${APP_VERSION}`,
+        price: 1200,
         level:5
     },
-
     {
         id: 'pirate_hat',
         name: 'Пиратская шляпа',
@@ -38,12 +37,13 @@ export const headItems = [
         price: 1666,
         level:15
     },
+
     {
-        id: 'pillbox',
-        name: 'Шляпа-таблетка',
-        image: `/headwear/pillbox.webp?v=${APP_VERSION}`,
-        price: 1300,
-        level:15
+        id: 'bowler_hat',
+        name: 'Шляпа котелок',
+        image: `/headwear/bowlerhat.webp?v=${APP_VERSION}`,
+        price: 1700,
+        level:20
     },
     {
         id: 'sombrero_hat',
@@ -80,6 +80,5 @@ export const headItems = [
         price: 2200,
         level:25
     },
-
 
 ]
