@@ -524,13 +524,13 @@ export function triggerExpAnimation(count = 5, startX = 160, startY = 135) {
     const visualCount = Math.min(count, 10)
     const id = Date.now() + Math.random()
 
-    const offsetY = 0
-    const offsetX = -25
+    // const offsetY = 0
+    // const offsetX = -25
 
     const exp = Array.from({length: visualCount}, (_, i) => ({
         id: `${id}-${i}`,
-        x: (startX + offsetX) + (visualCount > 1 ? (Math.random() - 0.5) * 40 : 0),
-        y: (startY + offsetY) + (visualCount > 1 ? (Math.random() - 0.5) * 20 : 0),
+        x: (startX) + (visualCount > 1 ? (Math.random() - 0.5) * 40 : 0),
+        y: (startY) + (visualCount > 1 ? (Math.random() - 0.5) * 20 : 0),
         delay: i * 0.04
     }))
     if (activeExp.value.length > 15) {

@@ -247,7 +247,7 @@ onUnmounted(() => {
           <CloudMessage />
 
         <!-- Монетки / Опыт -->
-        <coins-and-x-p/>
+        <CoinsAndXP/>
         <Status
             :class="tutorialStep === 3 ? 'z-205' : ''"
             v-if="activeStatus.show"
