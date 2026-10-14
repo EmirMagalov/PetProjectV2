@@ -1,10 +1,11 @@
 <script setup>
-import {tutorialStep, location, activeStatus} from "@/scripts/useGameStore.js";
+import {tutorialStep, location, activeStatus, gameData} from "@/scripts/useGameStore.js";
 
 
 function Skip() {
   tutorialStep.value = 0 // Исправлено: работаем через .value
   localStorage.setItem('tutorial_completed', 'true')
+  gameData.tutorialCompleted = true
 }
 </script>
 

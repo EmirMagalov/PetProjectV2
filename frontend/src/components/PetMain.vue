@@ -20,7 +20,7 @@ import {
   mouth,
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
-  location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus, colorFoam
+  location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus, colorFoam, isTutorialCompleted, resetLocal
 } from "@/scripts/useGameStore.js";
 import {
   activeCoins, activeExp,
@@ -35,6 +35,7 @@ import SunAndMoon from "@/components/Decorations/SunAndMoon.vue";
 import Clouds from "@/components/Decorations/Clouds.vue";
 import CoinsAndXP from "@/components/Decorations/CoinsAndXP.vue";
 import Rain from "@/components/Decorations/Rain.vue";
+import {addToCart} from "@/scripts/basket.js";
 
 let blinkInterval = null
 let lookInterval = null
@@ -160,6 +161,11 @@ onMounted(async () => {
   updateClock();
   clockInterval = setInterval(updateClock, 1000);
 
+  if(!isTutorialCompleted.value){
+    await resetLocal()
+    addToCart('burger')
+    addToCart('shampoo')
+  }
 })
 
 onUnmounted(() => {

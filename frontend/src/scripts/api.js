@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {gameData} from './useGameStore.js'
+import {gameData, tutorialStep} from './useGameStore.js'
 import {ref} from "vue";
 import {syncFortuneTime} from "@/scripts/fortune.js";
 
@@ -141,7 +141,27 @@ export async function initGameData() {
             gameData.unlockedClothes = serverData.unlocked_clothes || []
             gameData.equippedClothes = serverData.equipped_clothes || null
             gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
+            gameData.tutorialCompleted = serverData.tutorial_completed || false
 
+            // 👈 ДОБАВЛЯЕМ ЭТУ ПРОВЕРКУ:
+            const localTutorialDone = localStorage.getItem('tutorial_completed') === 'true'
+
+            if (localTutorialDone) {
+                gameData.tutorialCompleted = true
+                tutorialStep.value = 0
+            }
+
+            if (gameData.tutorialCompleted) {
+                localStorage.setItem('tutorial_completed', 'true')
+                tutorialStep.value = 0
+
+                // 👈 ЕСЛИ НА СЕРВЕРЕ БЫЛО false, А ЛОКАЛЬНО true — СИНХРОНИЗИРУЕМ С БАЗОЙ
+                if (!serverData.tutorial_completed) {
+                    console.log("🔄 Обнаружен локальный прогресс туториала. Синхронизируем с сервером...")
+                    // Отправляем актуальные данные на сервер, чтобы в базе тоже стало true
+                    syncToBackend()
+                }
+            }
             isDataLoaded = true
 
             // Если всё прошло успешно, выключаем экран загрузки
@@ -207,6 +227,7 @@ function getPayload() {
         equipped_clothes: gameData.equippedClothes,
         unlocked_clothes: gameData.unlockedClothes,
         addiction_streak: gameData.addictionStreak,
+        tutorial_completed: gameData.tutorialCompleted,
         last_update: Math.floor(Date.now() / 1000)
     }
 }

@@ -24,7 +24,7 @@ services:
     container_name: pet_backend
     restart: always
     # Добавили флаг --reload для автоматического обновления FastAPI при сохранении файлов
-    command: sh -c "sleep 3 && uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: sh -c "sleep 3 && aerich migrate && aerich upgrade && uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload"
     ports:
       - "8000:8000"
     volumes:

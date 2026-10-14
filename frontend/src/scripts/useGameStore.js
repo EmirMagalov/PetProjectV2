@@ -34,7 +34,7 @@ export const fruitStreak = ref(
 
 
 export const isTutorialCompleted = computed(() => {
-    return localStorage.getItem('tutorial_completed') === 'true';
+    return localStorage.getItem('tutorial_completed') === 'true' || gameData.tutorialCompleted;
 });
 
 // Автоматически сохраняем при любом изменении
@@ -78,7 +78,7 @@ export const defaultGameData = {
     stinky: false,
     sleep: false,
     sleepEndTime: 0,
-    feedCount: 9,
+    feedCount: 14,
     equippedHead: null,
     equippedClothes: null,
     foodStreak: 0,
@@ -92,6 +92,7 @@ export const defaultGameData = {
     badStatsMinutes: 0,
     unlockedHeads: [],
     unlockedClothes: [],
+    tutorialCompleted: false,
     cart: {}
 }
 
@@ -151,6 +152,7 @@ export function nextTutorialStep() {
         if (tutorialStep.value > 7) { // Всего 3 шага, например
             tutorialStep.value = 0
             localStorage.setItem('tutorial_completed', 'true') // Чтобы больше не показывать
+            gameData.tutorialCompleted = true
         }
     }
 }

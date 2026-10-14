@@ -89,6 +89,10 @@ class Pet(models.Model):
     fortune_notified = fields.BooleanField(default=False)  # Отправлено ли уже уведомление
     paid_spin_count = fields.IntField(default=0)
     # ==========================================
+
+    # Обучение
+    tutorial_completed = fields.BooleanField(default=False)
+
     # МЕТОДЫ МОДЕЛИ
     # ==========================================
     def clean_up_stats(self) -> None:
