@@ -162,9 +162,12 @@ onMounted(async () => {
   clockInterval = setInterval(updateClock, 1000);
 
   if(!isTutorialCompleted.value){
-    await resetLocal()
-    addToCart('burger')
-    addToCart('shampoo')
+    if (gameData.level <2){
+      await resetLocal()
+      addToCart('burger')
+      addToCart('shampoo')
+    }
+
   }
 })
 
