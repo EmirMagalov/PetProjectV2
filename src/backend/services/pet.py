@@ -75,7 +75,7 @@ async def pet_tick_job():
         # --- 5. НАКАЗАНИЕ ЗА 0 ЕДЫ ИЛИ 0 ЭНЕРГИИ (8 часов = 480 мин) ---
         if pet.food_level == 0.0 or pet.energy == 0.0:
             pet.bad_stats_minutes += 1
-            if pet.bad_stats_minutes >= 1:
+            if pet.bad_stats_minutes >= 480:
                 pet.lives = max(0, pet.lives - 1)
                 if pet.lives == 0:
                     pet.deaths_count += 1
