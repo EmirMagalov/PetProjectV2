@@ -19,7 +19,7 @@ async def get_pet(tg_id: int):
                 "food_level": 50.0,
                 "energy": 50.0,
                 "lives": 3,
-                "feed_count": 3,
+                "feed_count": 9,
                 "bad_stats_minutes": 0,
                 "poop_bad_minutes": 0,
                 "cart": {"burger": 1, "shampoo": 1},

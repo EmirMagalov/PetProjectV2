@@ -4,7 +4,7 @@ import {
     cloudShow,
     gameData, isBadMood, isGameOver,
     lowEnergy,
-    mouth, PlayCount,
+    mouth,
     showHunger, showStatus, showTongue,
     sleepTimeRemaining
 } from "@/scripts/useGameStore.js";
@@ -130,7 +130,6 @@ watch(
         const isHungry = foodLevel < 20
         const isSick = sick
         const hasIssues = isLowEnergy || isHungry || isSick
-
         if (foodLevel <= 85) {
             gameData.foodStreak = 0
             gameData.isFat = false

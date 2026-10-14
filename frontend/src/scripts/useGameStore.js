@@ -19,7 +19,6 @@ export const dropZoneRef = ref()
 export const feedStatus = ref(false)
 export const statusFoam = ref(false)
 export const colorFoam = ref(false)
-
 export const statusShower = ref(false)
 export const currentDraggedItem = ref(null)
 export const blink = ref(false)
@@ -44,15 +43,21 @@ watch(fruitStreak, (newValue) => {
 })
 
 
-export const PlayCount = ref(
-    Number(localStorage.getItem('pet_PlayCount')) || 0
+export const FatPlayCount = ref(
+    Number(localStorage.getItem('pet_FatPlayCount')) || 0
 )
-
+export const ZeroPlayCount = ref(
+    Number(localStorage.getItem('pet_ZeroPlayCount')) || 0
+)
 // Автоматически сохраняем при любом изменении
-watch(PlayCount, (newValue) => {
-    localStorage.setItem('pet_PlayCount', newValue)
+watch(FatPlayCount, (newValue) => {
+    localStorage.setItem('pet_FatPlayCount', newValue)
 })
 
+// Отслеживаем и сохраняем ZeroPlayCount
+watch(ZeroPlayCount, (newValue) => {
+    localStorage.setItem('pet_ZeroPlayCount', newValue)
+})
 
 // export const body = ref("/character/main_body.webp")
 export const bodyType = ref('normal')
@@ -292,4 +297,8 @@ export const activeStatus = computed(() => {
     }
 
     return {show: false}
+})
+export const clickLimit = 200;
+export const isBothStatsZero = computed(()=>{
+    return gameData.foodLevel <= 0 && gameData.energy <= 0;
 })

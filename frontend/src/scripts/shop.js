@@ -173,7 +173,7 @@ export function getItemCost(item) {
     const baseCost = item.baseCost ?? item.price ?? 0
 
     // Повышаем цену на (level * 2) ТОЛЬКО для товаров категории 'food'
-    if (item.category === 'food') {
+    if (item.category === 'food' ) {
         const rawLevel = gameData.level || 1
 
         // Ограничиваем уровень максимумом в 50

@@ -2,10 +2,10 @@ import {
     cloudShow,
     energyFull, fruitStreak,
     gameData,
-    isAnimating, isBadMood, isCoinPopping,
+    isAnimating, isBadMood, isBothStatsZero, isCoinPopping,
     isVibrating,
-    lastFedItem, nextTutorialStep, PlayCount, sameFoodCount,
-    showHunger, showStatus, showTongue, tutorialStep,
+    lastFedItem, nextTutorialStep, FatPlayCount, sameFoodCount,
+    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount,
 
 }
     from "@/scripts/useGameStore.js";
@@ -39,7 +39,6 @@ let lookResetTimer = null;
 let lastTouchTime = 0;
 const TOUCH_COOLDOWN = 50; // Минимальный интервал 50 мс (не более 20 кликов в секунду)
 const MAX_TOUCH_FINGERS = 3; // Не более 3 пальцев за один раз
-let zeroStatsClicks = 0;
 const recentFedItems = ref([])
 
 export function otherFeedPet(foodId) {
@@ -87,7 +86,6 @@ export function otherFeedPet(foodId) {
         }
 
 
-
     }
 }
 
@@ -100,6 +98,7 @@ export function feedPet(foodId) {
     const sameFoodCountInHistory = recentFedItems.value.filter(id => id === targetId).length
     const randomLimit = Math.floor(Math.random() * 2) + 2 // Например, от 2 до 3 раз
     let becameFatNow = false
+    ZeroPlayCount.value = 0;
     // Если блюдо уже часто встречалось в недавней истории и питомец достаточно сыт
     if (sameFoodCountInHistory >= randomLimit && gameData.foodLevel >= 50) {
         showTongue.value = true
@@ -111,7 +110,7 @@ export function feedPet(foodId) {
     // 1. Проверка по шкале сытости (100%)
     if (gameData.foodLevel >= 95) {
         if (foodItem.subcategory === 'fruits') {
-            if(!gameData.isFat || gameData.fatCount >=100){
+            if (!gameData.isFat || gameData.fatCount >= 100) {
                 showTongue.value = true
                 setTimeout(() => {
                     showTongue.value = false
@@ -120,7 +119,7 @@ export function feedPet(foodId) {
             }
 
             if (gameData.isFat) {
-                PlayCount.value= 0
+                FatPlayCount.value = 0
                 gameData.fatCount = Math.min(100, gameData.fatCount + 30)
             }
         } else {
@@ -128,7 +127,7 @@ export function feedPet(foodId) {
             if (!gameData.isFat) {
                 // Если НЕ был толстым — становимся толстым
                 gameData.fatCount = 30
-                PlayCount.value = 0
+                FatPlayCount.value = 0
                 gameData.isFat = true
                 becameFatNow = true
             } else {
@@ -160,15 +159,14 @@ export function feedPet(foodId) {
     gameData.feedCount += 1
     addCoin(1)
     addExp(20)
-    showStatus('feed', { fedItemId: foodId, actualGain,actualEnergyGain })
+    showStatus('feed', {fedItemId: foodId, actualGain, actualEnergyGain})
 
-    if (gameData.feedCount >= Math.floor(Math.random() * (15-10 + 1)) + 10) {
+    if (gameData.feedCount >= Math.floor(Math.random() * (15 - 10 + 1)) + 10) {
         gameData.stinky = true
         gameData.feedCount = 0
     }
 
     // Флаг, чтобы отследить, стал ли он толстым именно на этом шаге
-
 
 
     // 2. Проверяем обычный стрик еды
@@ -364,10 +362,10 @@ export function spawnHeart(x = 160, y = 135) {
 
 
     if (gameData.isFat) {
-        PlayCount.value++
-        if ((gameData.fatCount - PlayCount.value) <= 0) {
+        FatPlayCount.value++
+        if ((gameData.fatCount - FatPlayCount.value) <= 0) {
             gameData.isFat = false
-            PlayCount.value = 0
+            FatPlayCount.value = 0
             gameData.fastfoodStreak = 0
             addExp(10)
             addCoin(10, x, y)
@@ -375,31 +373,30 @@ export function spawnHeart(x = 160, y = 135) {
     }
 
 
-    const isBothStatsZero = gameData.foodLevel <= 0 && gameData.energy <= 0;
-    const coinInterval = isBothStatsZero ? 5 : 2
+    const coinInterval = isBothStatsZero.value ? 3 : 2
     if (gameData.clickCounter % coinInterval === 0) {
         addCoin(1, x, y)
     }
-    if (isBothStatsZero) {
-        zeroStatsClicks++;
+    if (isBothStatsZero.value) {
+        ZeroPlayCount.value++
 
-        const clickLimit = 300; // Лимит кликов, когда оба показателя на 0
+        // Лимит кликов, когда оба показателя на 0
 
         // При достижении 50 кликов списываем жизнь
-        if (zeroStatsClicks >= clickLimit) {
+        if (ZeroPlayCount.value >= clickLimit) {
             isLosingLife();
-            zeroStatsClicks = 0; // Сбрасываем счётчик для следующей жизни
+            ZeroPlayCount.value = 0; // Сбрасываем счётчик для следующей жизни
         }
 
-        return; // Прерываем выполнение (монеты, опыт и комбо не начисляются)
+        // return; // Прерываем выполнение (монеты, опыт и комбо не начисляются)
     } else {
         // Если хотя бы один показатель выше 0 — штрафной счётчик обнуляется
-        zeroStatsClicks = 0;
+        ZeroPlayCount.value = 0;
     }
     comboClicks.value++
     if (comboTimer) clearTimeout(comboTimer)
 
-    if (comboClicks.value >= 150) {
+    if (comboClicks.value >= 150 && !isBothStatsZero.value) {
         comboMultiplier.value = 5
     } else if (comboClicks.value >= 100) {
         comboMultiplier.value = 3
@@ -424,7 +421,7 @@ export function spawnHeart(x = 160, y = 135) {
     // 3. Передаем координаты в addCoin
 
     const expAmount = comboMultiplier.value > 2 ? 1 * comboMultiplier.value : 1
-    addExp(expAmount, x, y)
+    if (!isBothStatsZero.value) addExp(expAmount, x, y)
 
     const cost = isBadMood.value ? 0.02 : 0.01
     gameData.energy = Math.max(0, gameData.energy - cost)

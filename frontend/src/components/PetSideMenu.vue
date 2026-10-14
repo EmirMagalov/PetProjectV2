@@ -1,6 +1,13 @@
 <script setup>
 
-import {fruitStreak, gameData, isGameOver, PlayCount} from "@/scripts/useGameStore.js";
+import {
+  gameData,
+  isGameOver,
+  FatPlayCount,
+  ZeroPlayCount,
+  isBothStatsZero,
+  clickLimit
+} from "@/scripts/useGameStore.js";
 </script>
 
 <template>
@@ -10,7 +17,7 @@ import {fruitStreak, gameData, isGameOver, PlayCount} from "@/scripts/useGameSto
     <div v-show="gameData.isFat" class="relative transition-transform duration-50 animate-pulse">
       <img class="absolute left-5 top-4  w-7 z-10" src="/gamePlay/click_icon.webp" alt="">
       <img class="relative w-10" src="/gamePlay/fat_icon.webp" alt="">
-      <p class="absolute left-10 text-shadow-xs text-shadow-amber-50  top-6 font-bold text-[15px] z-20">{{ gameData.fatCount - PlayCount }}</p>
+      <p class="absolute left-10 text-shadow-xs text-shadow-amber-50  top-6 font-bold text-sm z-20">{{ gameData.fatCount - FatPlayCount }}</p>
     </div>
 
     <!-- Вторая иконка (Sick) -->
@@ -19,7 +26,11 @@ import {fruitStreak, gameData, isGameOver, PlayCount} from "@/scripts/useGameSto
       <img class="relative w-10" src="/gamePlay/sick_icon.webp" alt="">
 <!--      <p class="absolute left-10 text-shadow-xs text-shadow-amber-50  top-6 font-bold text-[15px] z-20">{{ 10 - fruitStreak }}</p>-->
     </div>
-
+    <div v-show="isBothStatsZero" class="relative animate-pulse ">
+      <img class="w-8" src="/gamePlay/heart_broken.webp" alt="">
+      <img class="absolute w-6 left-5 top-0" src="/gamePlay/warning_icons.webp" alt="">
+      <p class="absolute text-shadow-xs text-shadow-amber-50  top-4 left-5 font-bold text-sm z-20">{{clickLimit -  ZeroPlayCount}}</p>
+    </div>
   </div>
 
 

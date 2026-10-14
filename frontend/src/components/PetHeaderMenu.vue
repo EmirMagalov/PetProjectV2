@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from "vue";
-import {gameData, isCoinPopping, isExpPopping, isPopping} from "@/scripts/useGameStore.js";
+import {gameData, isBothStatsZero, isCoinPopping, isExpPopping, isPopping} from "@/scripts/useGameStore.js";
 import ProgressBar from "@/components/ProgressBar.vue";
 import { expPercentage } from "@/scripts/level.js";
 import { comboClicks } from "@/scripts/actions.js";
@@ -196,18 +196,19 @@ const getClipInset = (progress) => {
 
         <!-- Иконка X5 -->
         <div
+
             class="relative w-7 h-7 transition-transform duration-100"
             :class="{
-              'animate-combo-active z-10': progressX5 >= 100,
-              'scale-115': isClicking && progressX5 > 0 && progressX5 < 100
+              'animate-combo-active z-10': progressX5 >= 100 && !isBothStatsZero,
+              'scale-115': isClicking && progressX5 > 0 && progressX5 < 100 &&!isBothStatsZero
             }"
         >
           <img :src="`/gamePlay/x5_combo_icons.webp?v=${APP_VERSION}`" class="absolute inset-0 w-full h-full brightness-45" alt="x5" />
           <img
               src="/gamePlay/x5_combo_icons.webp"
               class="absolute inset-0 w-full h-full transition-all duration-75 ease-linear"
-              :class="{ ' brightness-125': progressX5 >= 100, 'brightness-100': progressX5 < 100 }"
-              :style="{ clipPath: `inset(${getClipInset(progressX5)})` }"
+              :class="{ ' brightness-125': progressX5 >= 100 &&!isBothStatsZero, 'brightness-100': progressX5 < 100 &&!isBothStatsZero }"
+              :style="{ clipPath: `inset(${isBothStatsZero ? '100%' : getClipInset(progressX5)})` }"
               alt="x5"
           />
         </div>
