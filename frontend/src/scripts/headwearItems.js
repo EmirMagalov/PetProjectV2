@@ -89,7 +89,7 @@ export const headItems = [
     },
     {
         id: 'yellow_hat',
-        name: 'Древняя шляпа',
+        name: 'Жёлтая шляпа',
         image: `/headwear/yellowhat.webp?v=${APP_VERSION}`,
         price: 3500,
         level:30
