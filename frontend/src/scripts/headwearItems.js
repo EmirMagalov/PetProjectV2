@@ -3,6 +3,13 @@ import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 export const headItems = [
     {
+        id: 'incognito_hat',
+        name: 'Инкогнито кепка',
+        image: `/headwear/incognito.webp?v=${APP_VERSION}`,
+        price: 0,
+        level:0
+    },
+    {
         id: 'cowboy_hat',
         name: 'Ковбойская шляпа',
         image: `/headwear/cowboyhat.webp?v=${APP_VERSION}`,
@@ -10,11 +17,11 @@ export const headItems = [
         level:5
     },
     {
-        id: 'incognito_hat',
-        name: 'Инкогнито кепка',
-        image: `/headwear/incognito.webp?v=${APP_VERSION}`,
-        price: 0,
-        level:0
+        id: 'bowlerhat',
+        name: 'Шляпа котелок',
+        image: `/headwear/bowlerhat.webp?v=${APP_VERSION}`,
+        price: 1000,
+        level:5
     },
 
     {
@@ -28,6 +35,13 @@ export const headItems = [
         id: 'mafia_hat',
         name: 'Розовая шляпа',
         image: `/headwear/mafiahat.webp?v=${APP_VERSION}`,
+        price: 1666,
+        level:15
+    },
+    {
+        id: 'pillbox',
+        name: 'Шляпа-таблетка',
+        image: `/headwear/pillbox.webp?v=${APP_VERSION}`,
         price: 1666,
         level:15
     },

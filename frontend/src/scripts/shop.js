@@ -45,7 +45,13 @@ export function getItemQuantity(item) {
 }
 
 // Универсальная проверка блокировки товара по уровню
+// Универсальная проверка блокировки товара по уровню
 export function isItemLocked(item) {
+    // Если предмет уже куплен, он никогда не должен быть заблокирован
+    if (activeTab.value === 'clothes' && isUnlocked(item.id)) {
+        return false
+    }
+
     if (Boolean(item.level) && gameData.level < item.level) {
         return true
     }

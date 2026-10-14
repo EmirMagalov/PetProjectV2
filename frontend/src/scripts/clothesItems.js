@@ -58,4 +58,15 @@ export const clothesItems = [
         price: 10000,
         level:20
     },
+    {
+        id: 'blue_dresses',
+        name: 'Голубое плате',
+        preview:`/clothes/dresses/preview_blue_dresses.webp?v=${APP_VERSION}`,
+        image_normal: `/clothes/dresses/normal_blue_dresses.webp?v=${APP_VERSION}`,
+        image_fat: `/clothes/dresses/fat_blue_dresses.webp?v=${APP_VERSION}`,
+        image_skinny: `/clothes/dresses/skinny_blue_dresses.webp?v=${APP_VERSION}`,
+        category:"costumes",
+        price: 10000,
+        level:20
+    },
 ]

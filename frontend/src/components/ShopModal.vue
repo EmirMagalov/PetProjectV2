@@ -162,11 +162,11 @@ defineEmits(['close'])
             v-for="item in currentList"
             :key="item.id"
             class="relative flex items-center justify-between gap-3 bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 hover:border-slate-600 transition-all overflow-hidden"
-            :class="{'opacity-50 pointer-events-none': isItemLocked(item)}"
+            :class="{'opacity-50 pointer-events-none': isItemLocked(item) && !isUnlocked(item)}"
         >
           <!-- Плашка блокировки по уровню -->
           <div
-              v-if="isItemLocked(item)"
+              v-if="isItemLocked(item) && !isUnlocked(item)"
               class="absolute inset-0 z-20 bg-slate-950/70 flex items-center justify-center rounded-xl"
           >
             <span class="text-amber-400 font-bold text-sm tracking-wide px-3 py-1">
