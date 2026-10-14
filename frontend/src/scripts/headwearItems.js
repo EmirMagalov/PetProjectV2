@@ -67,9 +67,9 @@ export const headItems = [
         level:20
     },
     {
-        id: 'women_hat',
-        name: 'Дамская шляпа',
-        image: `/headwear/womenhat.webp?v=${APP_VERSION}`,
+        id: 'velvet_hat',
+        name: 'Бархатная шляпа',
+        image: `/headwear/velvethat.webp?v=${APP_VERSION}`,
         price: 1800,
         level:25
     },
