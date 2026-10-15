@@ -32,6 +32,9 @@ const removeSerum = (index) => {
     activeIngredient.value.splice(index, 1); // Если остался 1 — полностью убираем со стола
   }
 };
+
+
+
 </script>
 
 <template>

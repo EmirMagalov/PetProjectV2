@@ -5,10 +5,18 @@ import { ingredientList } from "@/scripts/laboratoryScripts/ingredientItems.js";
 import { getItemCost, handleItemClick, lastBought, lastBoughtQuantity } from "@/scripts/shop.js";
 import { APP_VERSION } from "@/scripts/imageVersion.js";
 import { getAvailableIngredientCount, getTotalIngredientCount } from "../../scripts/laboratoryScripts/dragAndDrop.js";
-
+import {gameData} from "@/scripts/useGameStore.js";
+import {ref} from "vue";
+import {serumRecipes} from "@/scripts/laboratoryScripts/recipes.js";
+const showRecipeModal = ref(false);
 const getPurchasedItem = (ingredientId) => {
   return laboratoryIngredientsList.value.find(item => item.id === ingredientId);
 };
+
+function getIngredient(id) {
+  return ingredientList.find(i => i.id === id)
+}
+
 </script>
 
 <template>
@@ -25,6 +33,14 @@ const getPurchasedItem = (ingredientId) => {
         <span class="text-xs font-bold text-gray-600 pointer-events-none"></span>
       </div>
     </RouterLink>
+
+
+
+    <div @click="showRecipeModal=true" class="absolute -top-5 -right-2 w-8 rounded-full bg-white p-1 border border-[#f7c9a5] ">
+      <img src="/gamePlay/question_mark.webp" alt="">
+    </div>
+
+
 
     <div class="grid grid-cols-2 gap-2 w-70">
       <div
@@ -74,6 +90,7 @@ const getPurchasedItem = (ingredientId) => {
           </template>
         </button>
       </div>
+
     </div>
 
     <transition name="toast">
@@ -97,4 +114,68 @@ const getPurchasedItem = (ingredientId) => {
       </div>
     </transition>
   </div>
+
+  <div
+      v-if="showRecipeModal"
+
+      class="fixed inset-0 z-300 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      @click.self="showRecipeModal = false"
+  >
+    <div  class="bg-[#CCFFFF] border-2 border-[#99FFFF] rounded-3xl p-5 w-full max-w-xs shadow-2xl relative flex flex-col gap-3">
+
+      <h3 class="text-lg font-bold text-center text-gray-800">Синтез</h3>
+
+      <div class="flex flex-col  gap-2 text-sm">
+        <div v-for="serum in serumRecipes" :key="serum.id" class="flex justify-between items-center bg-white/60 p-2 rounded-2xl border border-[#f7c9a5]/40">
+
+          <div class="flex flex-col gap-2 items-center w-full">
+            <p class="text-sm">{{ serum.name }}</p>
+
+            <!-- Общий контейнер со стабильным gap и выравниванием по центру -->
+            <div class="flex items-center gap-2 ">
+
+              <!-- Цикл по ингредиентам -->
+              <template v-for="(quantity, receptId, index) in serum.requirements" :key="receptId">
+
+                <!-- Карточка ингредиента -->
+                <div class="relative flex items-center ">
+                  <span class="absolute -top-2 -left-2 bg-slate-900/80 text-xs px-1 rounded font-bold text-amber-400 z-10">
+                    x{{ quantity }}
+                  </span>
+                  <img class="w-12 h-12 object-contain bg-emerald-300/50 rounded-lg p-0.5" :src="getIngredient(receptId)?.image" alt="">
+                </div>
+
+                <!-- Плюс между ингредиентами (рендерится, если это НЕ последний элемент) -->
+                <div v-if="index < Object.keys(serum.requirements).length - 1" class="text-xl font-bold text-slate-400">
+                  +
+                </div>
+
+              </template>
+
+              <!-- Знак равенства перед результатом -->
+              <div class="text-xl font-bold text-slate-400">
+                =
+              </div>
+
+              <!-- Итоговая сыворотка -->
+              <img :src="serum.image" class="w-12 h-12 object-contain bg-emerald-300/50 rounded-lg p-0.5" alt="">
+
+            </div>
+          </div>
+
+
+        </div>
+
+
+      </div>
+
+      <button
+          @click="showRecipeModal = false"
+          class="mt-1 bg-[#99FFCC]  text-gray-800 font-bold py-2 rounded-2xl border border-[#99FFFF] transition-colors active:scale-95"
+      >
+        Закрыть
+      </button>
+    </div>
+  </div>
+
 </template>

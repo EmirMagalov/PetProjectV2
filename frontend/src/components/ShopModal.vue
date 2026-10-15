@@ -46,9 +46,9 @@ defineEmits(['close'])
 
         <button
             @click="$emit('close')"
-            class="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-800 cursor-pointer"
+            class="hover:text-white transition-colors text-3xl p-1 rounded-lg text-red-600  cursor-pointer"
         >
-          ✕
+          X
         </button>
       </div>
 

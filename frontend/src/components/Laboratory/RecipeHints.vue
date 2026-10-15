@@ -29,7 +29,7 @@ const isClosed = (recipeId) => {
         <!-- Твоя оригинальная плашка -->
         <div
             :class="[
-              'flex flex-col  rounded-2xl items-center border-2 w-65 h-15 justify-center  shadow-md',
+              'flex flex-col  rounded-2xl items-center border-2 w-70 h-16 justify-center  shadow-md',
               recipe.isReady
                 ? 'bg-emerald-500/90 border-emerald-300 animate-pulse'
                 : 'bg-slate-700/90 border-white/20'
@@ -55,7 +55,7 @@ const isClosed = (recipeId) => {
                   ]"
                     :title="`${req.name}: есть ${req.current} из ${req.required}`"
                 >
-                  <img :src="req.image" class="w-6 h-6 object-contain" />
+                  <img :src="req.image" class="w-7 h-7 object-contain" />
                   <span>{{ req.current }}/{{ req.required }}</span>
                 </span>
               </div>
