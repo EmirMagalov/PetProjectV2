@@ -93,6 +93,9 @@ class Pet(models.Model):
     # Обучение
     tutorial_completed = fields.BooleanField(default=False)
 
+    #Реферальная программа
+    referred_by = fields.BigIntField(null=True)
+
     # МЕТОДЫ МОДЕЛИ
     # ==========================================
     def clean_up_stats(self) -> None:

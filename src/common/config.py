@@ -6,6 +6,7 @@ ADMIN_IDS = [1059422557]
 class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str
     DOMAIN:str
+    API_URL: str
     DATABASE_URL: str
     FRONTEND_URL:str
     model_config = SettingsConfigDict(
