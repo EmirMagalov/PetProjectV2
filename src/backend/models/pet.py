@@ -123,8 +123,8 @@ class Pet(models.Model):
     referred_by = fields.BigIntField(null=True)
 
     # Ежедневные задания (храним в формате JSON: {"feed": {"progress": 3, "claimed": false}, ...})
-    daily_tasks = fields.JSONField(default=get_fresh_daily_tasks)
-    tasks_reset_date = fields.CharField(max_length=20, default="")  # Дата последнего сброса (например, "2026-10-17")
+    daily_tasks = fields.JSONField(default=get_fresh_daily_tasks, null=True)  # 👈 Добавили null=True
+    tasks_reset_date = fields.CharField(max_length=20, default="", null=True)
 
 
 
