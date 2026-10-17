@@ -3,20 +3,11 @@ import time
 from datetime import date
 
 from fastapi import APIRouter, HTTPException
-from backend.models.pet import Pet as PetModel
+from backend.models.pet import Pet as PetModel, get_fresh_daily_tasks, TASKS_CONFIG
 from bot.workers.pet import check_pet_notifications_job
 
 pet_router = APIRouter(prefix="/api", tags=["api"])
-TASKS_CONFIG = {
-    "feed": {"target": 5, "reward": 50},
-    "wash": {"target": 2, "reward": 30},
-    "click": {"target": 500, "reward": 100},
-    "serum": {"target": 1, "reward": 100},
-}
 
-def get_fresh_daily_tasks():
-    """Возвращает чистый словарь ежедневных заданий с нулевым прогрессом."""
-    return {k: {"progress": 0, "claimed": False} for k in TASKS_CONFIG.keys()}
 
 def check_and_reset_tasks(pet) -> bool:
     """

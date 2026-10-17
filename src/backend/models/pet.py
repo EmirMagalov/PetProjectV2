@@ -1,5 +1,14 @@
 from tortoise import fields, models
+TASKS_CONFIG = {
+    "feed": {"target": 5, "reward": 50},
+    "wash": {"target": 2, "reward": 30},
+    "click": {"target": 500, "reward": 100},
+    "serum": {"target": 1, "reward": 100},
+}
 
+def get_fresh_daily_tasks():
+    """Возвращает чистый словарь ежедневных заданий с нулевым прогрессом."""
+    return {k: {"progress": 0, "claimed": False} for k in TASKS_CONFIG.keys()}
 
 class Pet(models.Model):
     """Модель питомца, хранящая его характеристики, состояние и игровой прогресс."""
@@ -114,7 +123,7 @@ class Pet(models.Model):
     referred_by = fields.BigIntField(null=True)
 
     # Ежедневные задания (храним в формате JSON: {"feed": {"progress": 3, "claimed": false}, ...})
-    daily_tasks = fields.JSONField(default=dict)
+    daily_tasks = fields.JSONField(default=get_fresh_daily_tasks)
     tasks_reset_date = fields.CharField(max_length=20, default="")  # Дата последнего сброса (например, "2026-10-17")
 
 
