@@ -14,7 +14,7 @@ export const nextSpinTime = ref(Number(localStorage.getItem('pet_nextSpinAt')) |
 
 export const currentSpinPrice = ref(
     (Number(localStorage.getItem('pet_nextSpinAt')) || 0) > Date.now()
-        ? Math.min(1000, 100 + (Number(localStorage.getItem('pet_paidSpinsCount')) || 0) * 100)
+        ? Math.min(500, 100 + (Number(localStorage.getItem('pet_paidSpinsCount')) || 0) * 100)
         : 0
 )
 
@@ -39,7 +39,7 @@ export function syncFortuneTime(serverLastFortuneSpin, serverPaidCount, serverNe
     } else if (now.value >= nextSpinTime.value) {
         currentSpinPrice.value = 0
     } else {
-        currentSpinPrice.value = Math.min(1000, 100 + (paidSpinsCount.value * 100))
+        currentSpinPrice.value = Math.min(500, 100 + (paidSpinsCount.value * 100))
     }
 }
 

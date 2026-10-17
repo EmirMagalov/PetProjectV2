@@ -2,6 +2,7 @@ import random
 import time
 
 from backend.models.pet import Pet as PetModel
+
 # 24 часа в секундах
 FORTUNE_COOLDOWN = 86400
 
@@ -42,31 +43,33 @@ async def pet_tick_job():
             washed_time = pet.last_washed_time if pet.last_washed_time > 0 else NOW
             time_since_washed = NOW - washed_time
 
-            if time_since_washed >= 10800:
-                # Через 3 часа — гарантированная грязь
+            if time_since_washed >= 14400:
+                # Через 4 часа — гарантированная грязь
                 pet.stinky = True
-            elif time_since_washed >= 7200:
+            elif time_since_washed >= 10800:
                 # Через 2 часа — шанс испачкаться (1/90)
                 if random.random() < (1 / 90):
                     pet.stinky = True
 
         # --- ПРОВЕРКА КАКАХИ (IS_POOPED) ---
         if not pet.is_pooped:
-            poop_time = pet.last_poop_cleaned_time if pet.last_poop_cleaned_time > 0 else NOW
+            poop_time = (
+                pet.last_poop_cleaned_time if pet.last_poop_cleaned_time > 0 else NOW
+            )
             time_since_poop = NOW - poop_time
 
             if time_since_poop >= 10800:
                 # Через 3 часа — гарантированная кучка
                 pet.is_pooped = True
-            elif time_since_poop >= 5400:
-                # Через 1.5 часа — шанс накакать (1/90)
+            elif time_since_poop >= 7200:
+                # Через 2 часа — шанс накакать (1/90)
                 if random.random() < (1 / 90):
                     pet.is_pooped = True
 
-        # --- 4. НАКОПЛЕНИЕ ГРЯЗИ И БОЛЕЗНЬ (через 60 минут грязи) ---
+        # --- 4. НАКОПЛЕНИЕ ГРЯЗИ И БОЛЕЗНЬ ---
         if (pet.is_pooped or pet.stinky) and not pet.sick:
             pet.poop_bad_minutes += 1
-            if pet.poop_bad_minutes >= 60:
+            if pet.poop_bad_minutes >= 120:
                 pet.sick = True
                 pet.poop_bad_minutes = 0
         elif not pet.is_pooped and not pet.stinky:

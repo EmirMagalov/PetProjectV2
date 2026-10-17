@@ -42,8 +42,12 @@ class Pet(models.Model):
     # 5. СЧЁТЧИКИ И СТРИКИ ДЕЙСТВИЙ (МЕХАНИКИ)
     # ==========================================
     feed_count = fields.IntField(default=0)  # Счётчик кормлений (до вони/грязи)
-    play_count = fields.IntField(default=0)  # Счётчик игр/кликов (для похудения/механик)
-    fat_count = fields.IntField(default=0)  # Счётчик съеденных фруктов во время ожирения
+    play_count = fields.IntField(
+        default=0
+    )  # Счётчик игр/кликов (для похудения/механик)
+    fat_count = fields.IntField(
+        default=0
+    )  # Счётчик съеденных фруктов во время ожирения
     fastfood_streak = fields.IntField(default=0)  # Стрик поедания фастфуда
     addiction_streak = fields.IntField(default=0)  # Стрик зависимости
     addiction_time = fields.FloatField(default=0.0)  # Timestamp отсчёта зависимости
@@ -51,13 +55,21 @@ class Pet(models.Model):
     # ==========================================
     # 6. ВРЕМЕННЫЕ МЕТКИ (TIMESTAMPS) И ТАЙМЕРЫ
     # ==========================================
-    last_update = fields.FloatField(default=0.0)  # Timestamp последнего обновления тикера
-    last_interaction = fields.FloatField(default=0.0)  # Timestamp последнего взаимодействия игрока
+    last_update = fields.FloatField(
+        default=0.0
+    )  # Timestamp последнего обновления тикера
+    last_interaction = fields.FloatField(
+        default=0.0
+    )  # Timestamp последнего взаимодействия игрока
     last_washed_time = fields.BigIntField(default=0)  # Timestamp последнего мытья
-    last_poop_cleaned_time = fields.BigIntField(default=0)  # Timestamp последней уборки какахи
+    last_poop_cleaned_time = fields.BigIntField(
+        default=0
+    )  # Timestamp последней уборки какахи
 
     # Таймеры плохого состояния (в минутах)
-    bad_stats_minutes = fields.IntField(default=0)  # Минуты в состоянии полного голода/усталости
+    bad_stats_minutes = fields.IntField(
+        default=0
+    )  # Минуты в состоянии полного голода/усталости
     stinky_bad_minutes = fields.IntField(default=0)  # Минуты в грязном состоянии
     poop_bad_minutes = fields.IntField(default=0)  # Минуты не убранной какахи
 
@@ -81,20 +93,31 @@ class Pet(models.Model):
     stinky_notified = fields.BooleanField(default=False)  # Уведомление о вони
     sick_notified = fields.BooleanField(default=False)  # Уведомление о болезни
     low_lives_notified = fields.BooleanField(default=False)  # Уведомление о малой жизни
-    critical_life_notified = fields.BooleanField(default=False)  # Уведомление о критической жизни
+    daily_tasks_notified = fields.BooleanField(default=False)
+    critical_life_notified = fields.BooleanField(
+        default=False
+    )  # Уведомление о критической жизни
     game_over_notified = fields.BooleanField(default=False)  # Уведомление о смерти
 
     # Поля для Колеса Фортуны
     last_fortune_spin = fields.IntField(default=0)  # Timestamp последнего кручения
-    fortune_notified = fields.BooleanField(default=False)  # Отправлено ли уже уведомление
+    fortune_notified = fields.BooleanField(
+        default=False
+    )  # Отправлено ли уже уведомление
     paid_spin_count = fields.IntField(default=0)
     # ==========================================
 
     # Обучение
     tutorial_completed = fields.BooleanField(default=False)
 
-    #Реферальная программа
+    # Реферальная программа
     referred_by = fields.BigIntField(null=True)
+
+    # Ежедневные задания (храним в формате JSON: {"feed": {"progress": 3, "claimed": false}, ...})
+    daily_tasks = fields.JSONField(default=dict)
+    tasks_reset_date = fields.CharField(max_length=20, default="")  # Дата последнего сброса (например, "2026-10-17")
+
+
 
     # МЕТОДЫ МОДЕЛИ
     # ==========================================

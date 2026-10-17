@@ -1,5 +1,5 @@
 import {ref, reactive, watch, computed} from 'vue'
-import {initGameData, isLoading, resetPet} from "@/scripts/api.js";
+import {initGameData, isLoading, resetPet, syncToBackend} from "@/scripts/api.js";
 import {foodList} from "@/scripts/objectItems.js";
 
 export const mouth = ref('/character/happy_mouth.webp')
@@ -31,7 +31,53 @@ export const isExpPopping = ref(false)
 export const fruitStreak = ref(
     Number(localStorage.getItem('pet_fruitStreak')) || 0
 )
+import axios from 'axios'
+import { API_URL, tgId } from "@/scripts/api.js"
 
+let saveTimeout = null
+
+export async function incrementTaskProgress(taskKey, amount = 1) {
+    if (!gameData.daily_tasks) {
+        gameData.daily_tasks = {}
+    }
+
+    const currentTask = gameData.daily_tasks[taskKey] || { progress: 0, claimed: false }
+
+    const targets = {
+        feed: 5,
+        wash: 2,
+        click: 500
+    }
+
+    const target = targets[taskKey] || 1
+
+    if (currentTask.progress < target && !currentTask.claimed) {
+        currentTask.progress = Math.min(target, currentTask.progress + amount)
+        gameData.daily_tasks[taskKey] = currentTask
+
+        // 🟢 Для кормления и мойки сохраняем сразу (их мало)
+        if (taskKey !== 'click') {
+            try {
+                await syncToBackend()
+            } catch (e) {
+                console.error('Ошибка сохранения задачи:', e)
+            }
+            return
+        }
+
+        // 🟡 Для КЛИКОВ делаем Debounce (отложенное сохранение)
+        // Запрос уйдет только через 2 секунды после того, как игрок перестал кликать
+        if (saveTimeout) clearTimeout(saveTimeout)
+
+        saveTimeout = setTimeout(async () => {
+            try {
+                await syncToBackend()
+            } catch (e) {
+                console.error('Ошибка сохранения кликов:', e)
+            }
+        }, 2000)
+    }
+}
 
 export const isTutorialCompleted = computed(() => {
     return localStorage.getItem('tutorial_completed') === 'true' || gameData.tutorialCompleted;
@@ -93,7 +139,12 @@ export const defaultGameData = {
     unlockedHeads: [],
     unlockedClothes: [],
     tutorialCompleted: false,
-    cart: {}
+    cart: {},
+    daily_tasks: {
+        feed: { progress: 0, claimed: false },
+        wash: { progress: 0, claimed: false },
+        click: { progress: 0, claimed: false }
+    }
 }
 
 // Создаем реактивный объект, используя дефолты

@@ -1,5 +1,5 @@
 from urllib.parse import quote
-from aiogram import Router, types,F,Bot
+from aiogram import Router, types, F, Bot
 import time
 from tortoise.expressions import F as db_f
 from aiogram import Router, types, Bot
@@ -7,13 +7,10 @@ from aiogram.filters import Command, CommandObject
 from common.config import settings
 from backend.models.pet import Pet as PetModel
 from common.config import ADMIN_IDS
+
 user_router = Router()
 
-PHOTO_CACHE = {
-    "photo1": None,
-    "photo2": None
-}
-
+PHOTO_CACHE = {"photo1": None, "photo2": None}
 
 
 user_router = Router()
@@ -70,7 +67,7 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
             last_interaction=int(time.time()),
             last_fortune_spin=0,
             paid_spin_count=0,
-            referred_by=referrer_id
+            referred_by=referrer_id,
         )
     else:
         # Если пользователь уже существовал, просто обновляем время взаимодействия
@@ -83,7 +80,7 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
             [
                 types.InlineKeyboardButton(
                     text="🎮 Открыть игру",
-                    web_app=types.WebAppInfo(url=settings.DOMAIN)
+                    web_app=types.WebAppInfo(url=settings.DOMAIN),
                 )
             ]
         ]
@@ -94,7 +91,7 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
     # Если новичок зарегистрировался по рефералке
     if is_new and bonus_coins > 0 and start_param:
         text += f"\n\n🎁 Вы активировали реферальную ссылку и получили бонус +{bonus_coins} монет!"
-        coins_amount=1500
+        coins_amount = 1500
         callback_data_str = f"claim_bonus_{coins_amount}"
 
         ref_keyboard = types.InlineKeyboardMarkup(
@@ -102,7 +99,7 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
                 [
                     types.InlineKeyboardButton(
                         text=f"🎁 Забрать {coins_amount} монет!",
-                        callback_data=callback_data_str
+                        callback_data=callback_data_str,
                     )
                 ]
             ]
@@ -118,13 +115,12 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
                 chat_id=referrer_tg_id,
                 text=f"🎉 По вашей реферальной ссылке зарегистрировался пользователь {user_link}!",
                 parse_mode="HTML",
-                reply_markup=ref_keyboard
+                reply_markup=ref_keyboard,
             )
         except Exception as e:
             print(f"Не удалось отправить уведомление рефереру: {e}")
-    text+="\n\nПригласи друга 🎁 - /ref"
+    text += "\n\nПригласи друга 🎁 - /ref"
     await message.answer(text, reply_markup=keyboard)
-
 
 
 @user_router.message(F.text.lower().startswith("отзыв"))
@@ -133,7 +129,9 @@ async def feedback_handler(message: types.Message):
     feedback_text = message.text[6:].strip()
 
     if not feedback_text:
-        await message.answer("⚠️ Вы написали «Отзыв:», но забыли добавить сам текст. Попробуйте еще раз!")
+        await message.answer(
+            "⚠️ Вы написали «Отзыв:», но забыли добавить сам текст. Попробуйте еще раз!"
+        )
         return
 
     # Формируем информацию об отправителе
@@ -149,16 +147,16 @@ async def feedback_handler(message: types.Message):
         # Отправляем сообщение администратору
         for admin in ADMIN_IDS:
             await message.bot.send_message(
-                chat_id=admin,
-                text=user_info,
-                parse_mode="Markdown"
+                chat_id=admin, text=user_info, parse_mode="Markdown"
             )
 
         # Подтверждаем пользователю отправку
         await message.answer("✨ Спасибо за отзыв!")
 
     except Exception as e:
-        await message.answer("❌ Произошла ошибка при отправке отзыва. Попробуйте позже.")
+        await message.answer(
+            "❌ Произошла ошибка при отправке отзыва. Попробуйте позже."
+        )
         print(f"Ошибка отправки отзыва админу: {e}")
 
 
@@ -181,7 +179,7 @@ async def ref_link_handler(message: types.Message):
             [
                 types.InlineKeyboardButton(
                     text="📤 Поделиться с другом",
-                    url=share_url  # 👈 Теперь здесь ссылка для шаринга
+                    url=share_url,  # 👈 Теперь здесь ссылка для шаринга
                 )
             ]
         ]
@@ -193,5 +191,5 @@ async def ref_link_handler(message: types.Message):
         f"👤 Приглашено друзей: <b>{invited_count}</b>\n\n"
         f"🔗 Ваша ссылка:\n<code>{ref_link}</code>",
         parse_mode="HTML",
-        reply_markup=keyboard
+        reply_markup=keyboard,
     )

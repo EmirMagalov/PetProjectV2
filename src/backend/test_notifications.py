@@ -1,7 +1,10 @@
 import asyncio
 import time
 from backend.models.pet import Pet as PetModel
-from bot.workers.pet import check_pet_notifications_job, send_telegram_message  # укажите ваши импорты
+from bot.workers.pet import (
+    check_pet_notifications_job,
+    send_telegram_message,
+)  # укажите ваши импорты
 from tortoise import Tortoise
 from common.config import settings
 
@@ -10,7 +13,7 @@ async def test():
     # 1. Инициализируем БД
     await Tortoise.init(
         db_url=settings.DATABASE_URL,  # ваша строка подключения
-        modules={'models': ['backend.models.pet']}
+        modules={"models": ["backend.models.pet"]},
     )
 
     MY_TG_ID = 1059422557  # <--- Вставьте ваш Telegram ID

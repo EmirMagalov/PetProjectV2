@@ -1,5 +1,4 @@
 <script setup>
-
 import {
   canSpin, currentSpinPrice,
   formattedCooldown,
@@ -11,7 +10,6 @@ import {
 } from "@/scripts/fortune.js";
 import {gameData, isGameOver, isTutorialCompleted} from "@/scripts/useGameStore.js";
 import {onMounted, watch} from "vue";
-
 
 onMounted(() => {
   if (canSpin.value) {

@@ -1,7 +1,7 @@
 import { computed, ref } from "vue";
 import { laboratoryIngredientsList } from "@/scripts/basket.js";
 import { serumRecipes } from "@/scripts/laboratoryScripts/recipes.js";
-import { gameData } from "@/scripts/useGameStore.js";
+import {gameData, incrementTaskProgress} from "@/scripts/useGameStore.js";
 import { ingredientList } from "@/scripts/laboratoryScripts/ingredientItems.js";
 
 
@@ -115,7 +115,7 @@ export function craftSerum(targetRecipe) {
         }
     }
     gameData.cart = updatedCart;
-
+    incrementTaskProgress('serum', 1)
     // 2. Списываем ингредиенты СО СТОЛА
     for (const [reqId, reqCount] of Object.entries(recipe.requirements)) {
         const tableIndex = activeIngredient.value.findIndex(i => i.id === reqId);

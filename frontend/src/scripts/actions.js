@@ -5,7 +5,7 @@ import {
     isAnimating, isBadMood, isBothStatsZero, isCoinPopping,
     isVibrating,
     lastFedItem, nextTutorialStep, FatPlayCount, sameFoodCount,
-    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount,
+    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount, incrementTaskProgress,
 
 }
     from "@/scripts/useGameStore.js";
@@ -40,6 +40,9 @@ let lastTouchTime = 0;
 const TOUCH_COOLDOWN = 50; // Минимальный интервал 50 мс (не более 20 кликов в секунду)
 const MAX_TOUCH_FINGERS = 3; // Не более 3 пальцев за один раз
 const recentFedItems = ref([])
+
+
+
 
 export function otherFeedPet(foodId) {
     const targetId = foodId || cartItemsList.value[currentIndex.value]?.id
@@ -145,6 +148,7 @@ export function feedPet(foodId) {
 
     // 3. Основная логика кормления
     removeFromCart(targetId)
+    incrementTaskProgress('feed', 1)
     const oldFoodLevel = gameData.foodLevel
     const oldEnergy = gameData.energy
     gameData.foodLevel = Math.min(100, gameData.foodLevel + foodItem.foodGain)
@@ -341,7 +345,7 @@ export function spawnHeart(x = 160, y = 135) {
     if (tutorialStep.value === 6 || tutorialStep.value === 7) {
         return
     }
-
+    incrementTaskProgress('click', 1)
     if (comboHideTimer) clearTimeout(comboHideTimer)
     if (sunHideTimer) clearTimeout(sunHideTimer)
 

@@ -136,6 +136,12 @@ export async function initGameData() {
             gameData.isPooped = serverData.is_pooped
             gameData.addictionStreak = serverData.addiction_streak
             gameData.cart = serverData.cart || {}
+            gameData.daily_tasks = serverData.daily_tasks || {
+                feed: { progress: 0, claimed: false },
+                wash: { progress: 0, claimed: false },
+                click: { progress: 0, claimed: false }
+            }
+            gameData.unlockedHeads = serverData.unlocked_heads || []
             gameData.unlockedHeads = serverData.unlocked_heads || []
             gameData.equippedHead = serverData.equipped_head || null
             gameData.unlockedClothes = serverData.unlocked_clothes || []
@@ -228,6 +234,7 @@ function getPayload() {
         unlocked_clothes: gameData.unlockedClothes,
         addiction_streak: gameData.addictionStreak,
         tutorial_completed: gameData.tutorialCompleted,
+        daily_tasks: gameData.daily_tasks,
         last_update: Math.floor(Date.now() / 1000)
     }
 }

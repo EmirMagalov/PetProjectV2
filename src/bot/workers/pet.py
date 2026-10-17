@@ -13,8 +13,7 @@ keyboard = types.InlineKeyboardMarkup(
     inline_keyboard=[
         [
             types.InlineKeyboardButton(
-                text="Открыть игру",
-                web_app=types.WebAppInfo(url=settings.DOMAIN)
+                text="Открыть игру", web_app=types.WebAppInfo(url=settings.DOMAIN)
             )
         ]
     ]
@@ -33,7 +32,9 @@ async def send_telegram_message(tg_id: int, text: str, last_interaction: int) ->
 
     async with SEMAPHORE:
         try:
-            await bot.send_message(tg_id, text, reply_markup=keyboard, parse_mode="HTML")
+            await bot.send_message(
+                tg_id, text, reply_markup=keyboard, parse_mode="HTML"
+            )
             await asyncio.sleep(0.04)  # Небольшая пауза для соблюдения RPS Telegram
             return True
         except TelegramForbiddenError:
@@ -57,7 +58,9 @@ async def process_pet_notifications(pet: PetModel, now: float):
     if pet.addiction_streak > 0:
         if pet.addiction_time > 0 and (now - pet.addiction_time) >= 1200:
             if not getattr(pet, "addiction_notified", False):
-                if await send_telegram_message(pet.tg_id, "🚬 Трубка сама себя не покурит!", last_act):
+                if await send_telegram_message(
+                    pet.tg_id, "🚬 Трубка сама себя не покурит!", last_act
+                ):
                     pet.addiction_notified = True
                     is_notified_changed = True
     else:
@@ -68,7 +71,9 @@ async def process_pet_notifications(pet: PetModel, now: float):
     # --- 2. ПРОВЕРКА НА ГИБЕЛЬ ---
     if pet.lives <= 0:
         if not pet.game_over_notified:
-            if await send_telegram_message(pet.tg_id, "💀 Питомец погиб из-за плохих условий!", last_act):
+            if await send_telegram_message(
+                pet.tg_id, "💀 Питомец погиб из-за плохих условий!", last_act
+            ):
                 pet.game_over_notified = True
                 pet.low_lives_notified = False
                 pet.critical_life_notified = False
@@ -81,7 +86,9 @@ async def process_pet_notifications(pet: PetModel, now: float):
         # --- 3. ПРЕДУПРЕЖДЕНИЯ О ЖИЗНЯХ ---
         if pet.lives == 2:
             if not pet.low_lives_notified:
-                if await send_telegram_message(pet.tg_id, "❤️ У питомца осталось всего жизней: <b>2</b>!", last_act):
+                if await send_telegram_message(
+                    pet.tg_id, "❤️ У питомца осталось всего жизней: <b>2</b>!", last_act
+                ):
                     pet.low_lives_notified = True
                     is_notified_changed = True
         else:
@@ -92,7 +99,9 @@ async def process_pet_notifications(pet: PetModel, now: float):
         if pet.lives == 1:
             if not pet.critical_life_notified:
                 if await send_telegram_message(
-                    pet.tg_id, "🚨 <b>Внимание!</b> У питомца осталась всего <b>1 жизнь</b>! Он на грани гибели!", last_act
+                    pet.tg_id,
+                    "🚨 <b>Внимание!</b> У питомца осталась всего <b>1 жизнь</b>! Он на грани гибели!",
+                    last_act,
                 ):
                     pet.critical_life_notified = True
                     is_notified_changed = True
@@ -104,7 +113,9 @@ async def process_pet_notifications(pet: PetModel, now: float):
         # --- 4. ГОЛОД И ЭНЕРГИЯ ---
         if pet.food_level < 20:
             if not pet.hungry_notified:
-                if await send_telegram_message(pet.tg_id, "🍽️ Питомец проголодался!", last_act):
+                if await send_telegram_message(
+                    pet.tg_id, "🍽️ Питомец проголодался!", last_act
+                ):
                     pet.hungry_notified = True
                     is_notified_changed = True
         else:
@@ -114,7 +125,9 @@ async def process_pet_notifications(pet: PetModel, now: float):
 
         if pet.energy < 20:
             if not pet.energy_notified:
-                if await send_telegram_message(pet.tg_id, "😴 Питомец сильно устал и хочет спать!", last_act):
+                if await send_telegram_message(
+                    pet.tg_id, "😴 Питомец сильно устал и хочет спать!", last_act
+                ):
                     pet.energy_notified = True
                     is_notified_changed = True
         else:
@@ -125,7 +138,9 @@ async def process_pet_notifications(pet: PetModel, now: float):
         # --- 5. ГРЯЗЬ И БОЛЕЗНЬ ---
         if pet.is_pooped:
             if not pet.poop_notified:
-                if await send_telegram_message(pet.tg_id, "💩 Питомец тут набедокурил... Надо убрать!", last_act):
+                if await send_telegram_message(
+                    pet.tg_id, "💩 Питомец тут набедокурил... Надо убрать!", last_act
+                ):
                     pet.poop_notified = True
                     is_notified_changed = True
         else:
@@ -135,7 +150,11 @@ async def process_pet_notifications(pet: PetModel, now: float):
 
         if pet.stinky:
             if not pet.stinky_notified:
-                if await send_telegram_message(pet.tg_id, "🤢 Питомец начал сильно вонять! Пора его помыть!", last_act):
+                if await send_telegram_message(
+                    pet.tg_id,
+                    "🤢 Питомец начал сильно вонять! Пора его помыть!",
+                    last_act,
+                ):
                     pet.stinky_notified = True
                     is_notified_changed = True
         else:
@@ -145,7 +164,9 @@ async def process_pet_notifications(pet: PetModel, now: float):
 
         if pet.sick:
             if not pet.sick_notified:
-                if await send_telegram_message(pet.tg_id, "🤒 Питомец заболел, нужно его подлечить!", last_act):
+                if await send_telegram_message(
+                    pet.tg_id, "🤒 Питомец заболел, нужно его подлечить!", last_act
+                ):
                     pet.sick_notified = True
                     is_notified_changed = True
         else:
@@ -158,9 +179,9 @@ async def process_pet_notifications(pet: PetModel, now: float):
         if time_since_spin >= 86400:
             if not getattr(pet, "fortune_notified", False):
                 if await send_telegram_message(
-                        pet.tg_id,
-                        "🎰 <b>Бесплатный спин готов!</b> Заходи и крути Колесо Фортуны!",
-                        last_act
+                    pet.tg_id,
+                    "🎰 <b>Бесплатный спин готов!</b> Заходи и крути Колесо Фортуны!",
+                    last_act,
                 ):
                     pet.fortune_notified = True
                     is_notified_changed = True
@@ -168,6 +189,15 @@ async def process_pet_notifications(pet: PetModel, now: float):
             # Если игрок уже прокрутил колесо (last_spin обновился), сбрасываем флаг
             if getattr(pet, "fortune_notified", False):
                 pet.fortune_notified = False
+                is_notified_changed = True
+
+        if not getattr(pet, "daily_tasks_notified", False):
+            if await send_telegram_message(
+                    pet.tg_id,
+                    "📆 Ежедневные задания обновились — заходи в игру!",
+                    last_act,
+            ):
+                pet.daily_tasks_notified = True
                 is_notified_changed = True
     # Сохраняем измененные состояния
     if is_notified_changed:
@@ -181,6 +211,7 @@ async def process_pet_notifications(pet: PetModel, now: float):
             "stinky_notified",
             "sick_notified",
             "fortune_notified",
+            "daily_tasks_notified"
         ]
         if hasattr(pet, "addiction_notified"):
             update_fields.append("addiction_notified")

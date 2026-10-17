@@ -1,18 +1,17 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ADMIN_IDS = [1059422557]
 
+
 class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str
-    DOMAIN:str
-    API_URL: str
+    DOMAIN: str
     DATABASE_URL: str
-    FRONTEND_URL:str
+    FRONTEND_URL: str
     model_config = SettingsConfigDict(
-        env_file=BASE_DIR / ".env",
-        env_file_encoding='utf-8',
-        extra='ignore'
+        env_file=BASE_DIR / ".env", env_file_encoding="utf-8", extra="ignore"
     )
 
 

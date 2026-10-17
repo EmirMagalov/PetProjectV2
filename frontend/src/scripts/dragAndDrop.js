@@ -5,7 +5,7 @@ import {
     colorFoam,
     currentDraggedItem,
     dropZoneRef, energyFull,
-    gameData, nextTutorialStep, showTongue,
+    gameData, incrementTaskProgress, nextTutorialStep, showTongue,
     statusFoam,
     statusShower
 } from "@/scripts/useGameStore.js";
@@ -59,30 +59,7 @@ export function handleMove(event,itemType ,Item) {
 
     if (isInside) {
         isHovered.value = true
-        if (itemType === 'food') {
-            if (gameData.cart['pipe'] && Item.category ==='laboratory' && Item.subcategory==='pipe') {
-                statusSmoke.value = true
-                if (!actionTimer) {
-                    actionTimer = setTimeout(() => {
-                        if (isHovered.value && currentDraggedItem.value === 'food') {
-                            statusSmoke.value = false
-                            otherFeedPet(Item.id)
-                            addCoin(2)
-                            addExp(5)
-
-                            foodConsumedByPipe.value = true
-                            foodDrag.x.value = -9999
-                            foodDrag.y.value = -9999
-
-                            isHovered.value = false
-                            currentDraggedItem.value = null
-                        }
-                        clearActionTimer()
-                    }, 3000)
-                }
-            }
-            gameData.sleep = false
-        } else if (itemType === 'shower') {
+        if (itemType === 'shower') {
             batheStatus.value = true
             if (statusFoam.value === true) {
                 statusShower.value = true
@@ -109,6 +86,7 @@ export function handleMove(event,itemType ,Item) {
                             nextTutorialStep()
                             addCoin(2)
                             addExp(25)
+                            incrementTaskProgress('wash', 1)
                             gameData.feedCount = 0
                         } else {
                             statusShower.value = false
@@ -119,7 +97,7 @@ export function handleMove(event,itemType ,Item) {
             }
         } else if (itemType === 'foam') {
             batheStatus.value = true
-            console.log(batheStatus.value)
+
         }
     } else {
         // Если вышли за пределы зоны — СРАЗУ отменяем таймер и сбрасываем эффекты
@@ -164,6 +142,7 @@ export function handleEnd(itemType, Item) {
         } else if (itemType === 'foam') {
             if (!statusFoam.value) {
                 statusFoam.value = true
+
                 colorFoam.value = Item.color
                 nextTutorialStep()
                 if (Item.id) {

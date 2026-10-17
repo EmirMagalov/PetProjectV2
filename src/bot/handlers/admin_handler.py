@@ -45,7 +45,10 @@ async def static_text(page: int, per_page: int = 5, bot=None):
             first_name = "Неизвестен"
         statistics += f"Пользователь: {user_name}({first_name})\nИмя питомца: {name}\nКликов: {click_counter}\nУровень: {level}\nМонет: {coins}\n---------\n"
 
-    return f"📊 <b>Всего пользователей:</b> {total_count} (Стр. {page})\n\n{statistics}", total_count
+    return (
+        f"📊 <b>Всего пользователей:</b> {total_count} (Стр. {page})\n\n{statistics}",
+        total_count,
+    )
 
 
 @admin_router.message(Command("statistics"))
@@ -63,16 +66,16 @@ async def statistics_handler(message: types.Message, bot: Bot):
     buttons = {}
     # Кнопка "Вперед" нужна только если записей больше, чем умещается на первой странице
     if total_count > per_page:
-        buttons['Вперед ➡️'] = f'page_{page + 1}'
+        buttons["Вперед ➡️"] = f"page_{page + 1}"
 
     keyboard = keyboard_callback(buttons) if buttons else None
 
     await message.answer(text, parse_mode="HTML", reply_markup=keyboard)
 
 
-@admin_router.callback_query(aiogram_F.data.startswith('page_'))
+@admin_router.callback_query(aiogram_F.data.startswith("page_"))
 async def pagination_handler(call: types.CallbackQuery, bot: Bot):
-    page = int(call.data.split('_')[1])
+    page = int(call.data.split("_")[1])
     per_page = 5
 
     text, total_count = await static_text(page=page, per_page=per_page, bot=bot)
@@ -81,20 +84,19 @@ async def pagination_handler(call: types.CallbackQuery, bot: Bot):
 
     # ЗАЩИТА НАЗАД: Показываем кнопку "Назад", только если мы дальше 1-й страницы
     if page > 1:
-        buttons['⬅️ Назад'] = f'page_{page - 1}'
+        buttons["⬅️ Назад"] = f"page_{page - 1}"
 
     # ЗАЩИТА ВПЕРЕД: Показываем кнопку "Вперед", только если впереди еще есть пользователи
     # Считаем максимальное количество страниц: total_count / per_page (с округлением вверх)
     import math
+
     max_pages = math.ceil(total_count / per_page) if total_count > 0 else 1
 
     if page < max_pages:
-        buttons['Вперед ➡️'] = f'page_{page + 1}'
+        buttons["Вперед ➡️"] = f"page_{page + 1}"
 
     await call.message.edit_text(
-        text,
-        parse_mode="HTML",
-        reply_markup=keyboard_callback(buttons)
+        text, parse_mode="HTML", reply_markup=keyboard_callback(buttons)
     )
 
 
@@ -109,19 +111,25 @@ async def give_me_coins_handler(message: types.Message):
     if len(command_parts) < 2:
         await message.answer(
             "❌ Неверный формат! Пример:\n<code>/give_coins 150</code>",
-            parse_mode="HTML"
+            parse_mode="HTML",
         )
         return
 
     try:
         coins_amount = int(command_parts[1])
     except ValueError:
-        await message.answer("❌ Количество монет должно быть числом! Пример:\n<code>/give_coins 150</code>",
-                             parse_mode="HTML")
+        await message.answer(
+            "❌ Количество монет должно быть числом! Пример:\n<code>/give_coins 150</code>",
+            parse_mode="HTML",
+        )
         return
 
     # Текст сообщения, которое бот пришлет лично тебе
-    custom_text = command_parts[2] if len(command_parts) > 2 else f"🎁 Бонус от администратора: +{coins_amount} монет!"
+    custom_text = (
+        command_parts[2]
+        if len(command_parts) > 2
+        else f"🎁 Бонус от администратора: +{coins_amount} монет!"
+    )
 
     # Динамический callback, который подхватится твоим же обработчиком claim_bonus_handler
     callback_data_str = f"claim_bonus_{coins_amount}"
@@ -131,7 +139,7 @@ async def give_me_coins_handler(message: types.Message):
             [
                 types.InlineKeyboardButton(
                     text=f"🎁 Забрать {coins_amount} монет!",
-                    callback_data=callback_data_str
+                    callback_data=callback_data_str,
                 )
             ]
         ]
@@ -143,7 +151,7 @@ async def give_me_coins_handler(message: types.Message):
             chat_id=message.from_user.id,
             text=custom_text,
             reply_markup=keyboard,
-            parse_mode="HTML"
+            parse_mode="HTML",
         )
     except Exception as e:
         await message.answer(f"❌ Не удалось отправить бонус: {e}")
@@ -160,7 +168,7 @@ async def broadcast_handler(message: types.Message):
     if len(command_parts) < 3:
         await message.answer(
             "❌ Неверный формат! Пример:\n<code>/broadcast_coins 150 Текст сообщения</code>",
-            parse_mode="HTML"
+            parse_mode="HTML",
         )
         return
 
@@ -170,7 +178,8 @@ async def broadcast_handler(message: types.Message):
     except ValueError:
         await message.answer(
             "❌ Второе слово должно быть числом (количеством монет)! Пример:\n<code>/broadcast_coins 150 Текст</code>",
-            parse_mode="HTML")
+            parse_mode="HTML",
+        )
         return
 
     custom_text = command_parts[2]
@@ -184,7 +193,7 @@ async def broadcast_handler(message: types.Message):
             [
                 types.InlineKeyboardButton(
                     text=f"🎁 Забрать {coins_amount} монет!",
-                    callback_data=callback_data_str
+                    callback_data=callback_data_str,
                 )
             ]
         ]
@@ -200,7 +209,7 @@ async def broadcast_handler(message: types.Message):
                 chat_id=pet.tg_id,
                 text=custom_text,
                 reply_markup=keyboard,
-                parse_mode="HTML"
+                parse_mode="HTML",
             )
             success_count += 1
         except Exception as e:
@@ -228,10 +237,14 @@ async def claim_bonus_handler(callback: types.CallbackQuery):
     # updated_count = await PetModel.filter(tg_id=tg_id).update(coins=PetModel.coins + coins_amount)
 
     # Стало:
-    updated_count = await PetModel.filter(tg_id=tg_id).update(coins=db_f("coins") + coins_amount)
+    updated_count = await PetModel.filter(tg_id=tg_id).update(
+        coins=db_f("coins") + coins_amount
+    )
 
     if updated_count == 0:
-        await callback.answer("❌ Питомец не найден! Сначала запусти игру.", show_alert=True)
+        await callback.answer(
+            "❌ Питомец не найден! Сначала запусти игру.", show_alert=True
+        )
         return
 
     # Достаем свежий актуальный баланс из базы
@@ -258,7 +271,7 @@ async def broadcast_lives_handler(message: types.Message):
     if len(command_parts) < 3:
         await message.answer(
             "❌ Неверный формат! Пример:\n<code>/broadcast_lives 1 Текст сообщения</code>",
-            parse_mode="HTML"
+            parse_mode="HTML",
         )
         return
 
@@ -268,7 +281,8 @@ async def broadcast_lives_handler(message: types.Message):
     except ValueError:
         await message.answer(
             "❌ Второе слово должно быть числом (количеством жизней)! Пример:\n<code>/broadcast_lives 1 Текст</code>",
-            parse_mode="HTML")
+            parse_mode="HTML",
+        )
         return
 
     custom_text = command_parts[2]
@@ -281,7 +295,7 @@ async def broadcast_lives_handler(message: types.Message):
             [
                 types.InlineKeyboardButton(
                     text=f"❤️ Забрать +{lives_amount} жизнь!",
-                    callback_data=callback_data_str
+                    callback_data=callback_data_str,
                 )
             ]
         ]
@@ -297,13 +311,15 @@ async def broadcast_lives_handler(message: types.Message):
                 chat_id=pet.tg_id,
                 text=custom_text,
                 reply_markup=keyboard,
-                parse_mode="HTML"
+                parse_mode="HTML",
             )
             success_count += 1
         except Exception as e:
             print(f"Не удалось отправить сообщение для {pet.tg_id}: {e}")
 
-    await message.answer(f"✅ Рассылка жизней завершена. Успешно отправлено: {success_count}")
+    await message.answer(
+        f"✅ Рассылка жизней завершена. Успешно отправлено: {success_count}"
+    )
 
 
 # Обработчик нажатия на кнопку получения жизней
@@ -320,13 +336,17 @@ async def claim_lives_handler(callback: types.CallbackQuery):
     # 1. Сначала достаем питомца, чтобы проверить текущие жизни
     pet = await PetModel.filter(tg_id=tg_id).first()
     if not pet:
-        await callback.answer("❌ Питомец не найден! Сначала запусти игру.", show_alert=True)
+        await callback.answer(
+            "❌ Питомец не найден! Сначала запусти игру.", show_alert=True
+        )
         return
 
     # 2. Если уже 3 или больше — прерываем
     MAX_LIVES = 3
     if pet.lives >= MAX_LIVES:
-        await callback.answer("❌ У вас уже максимальное количество жизней (3/3)! ❤️", show_alert=True)
+        await callback.answer(
+            "❌ У вас уже максимальное количество жизней (3/3)! ❤️", show_alert=True
+        )
         return
 
     # 3. Вычисляем, сколько реально можно добавить, чтобы не превысить лимит в 3
@@ -360,10 +380,12 @@ async def cmd_reset_flags(message: types.Message):
         stinky_notified=False,
         game_over_notified=False,
         low_lives_notified=False,
-        critical_life_notified=False
+        critical_life_notified=False,
     )
 
-    await message.answer(f"✅ Успешно сброшены флаги уведомлений для всех питомцев (затронуто: {updated_count}).")
+    await message.answer(
+        f"✅ Успешно сброшены флаги уведомлений для всех питомцев (затронуто: {updated_count})."
+    )
 
 
 @admin_router.message(Command("send_coins"))
@@ -376,7 +398,7 @@ async def send_coins_to_user_handler(message: types.Message):
     if len(command_parts) < 3:
         await message.answer(
             "❌ Неверный формат! Пример:\n<code>/send_coins 123456789 150 [Текст]</code>",
-            parse_mode="HTML"
+            parse_mode="HTML",
         )
         return
 
@@ -386,18 +408,24 @@ async def send_coins_to_user_handler(message: types.Message):
     except ValueError:
         await message.answer(
             "❌ ID пользователя и количество монет должны быть числами!\nПример: <code>/send_coins 123456789 150 Привет!</code>",
-            parse_mode="HTML"
+            parse_mode="HTML",
         )
         return
 
     # Если текст сообщения передан, используем его, иначе дефолтный
-    custom_text = command_parts[3] if len(
-        command_parts) > 3 else f"🎁 Персональный подарок от администратора: +{coins_amount} монет!"
+    custom_text = (
+        command_parts[3]
+        if len(command_parts) > 3
+        else f"🎁 Персональный подарок от администратора: +{coins_amount} монет!"
+    )
 
     # Проверяем, существует ли питомец/пользователь в базе
     pet_exists = await PetModel.filter(tg_id=target_tg_id).exists()
     if not pet_exists:
-        await message.answer(f"❌ Пользователь с ID <code>{target_tg_id}</code> не найден в базе!", parse_mode="HTML")
+        await message.answer(
+            f"❌ Пользователь с ID <code>{target_tg_id}</code> не найден в базе!",
+            parse_mode="HTML",
+        )
         return
 
     callback_data_str = f"claim_bonus_{coins_amount}"
@@ -407,7 +435,7 @@ async def send_coins_to_user_handler(message: types.Message):
             [
                 types.InlineKeyboardButton(
                     text=f"🎁 Забрать {coins_amount} монет!",
-                    callback_data=callback_data_str
+                    callback_data=callback_data_str,
                 )
             ]
         ]
@@ -418,9 +446,13 @@ async def send_coins_to_user_handler(message: types.Message):
             chat_id=target_tg_id,
             text=custom_text,
             reply_markup=keyboard,
-            parse_mode="HTML"
+            parse_mode="HTML",
         )
-        await message.answer(f"✅ Награда успешно отправлена пользователю <code>{target_tg_id}</code>!",
-                             parse_mode="HTML")
+        await message.answer(
+            f"✅ Награда успешно отправлена пользователю <code>{target_tg_id}</code>!",
+            parse_mode="HTML",
+        )
     except Exception as e:
-        await message.answer(f"❌ Не удалось отправить сообщение пользователю {target_tg_id}: {e}")
+        await message.answer(
+            f"❌ Не удалось отправить сообщение пользователю {target_tg_id}: {e}"
+        )
