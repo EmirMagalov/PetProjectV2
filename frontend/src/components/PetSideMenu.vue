@@ -11,7 +11,7 @@ import {
 </script>
 
 <template>
-  <div v-show="!isGameOver"  class="absolute top-10 left-2 z-150 flex flex-col gap-1">
+  <div v-show="!isGameOver"  class="absolute top-10 left-2 z-20 flex flex-col gap-1">
 
     <!-- Первая иконка (Fat) -->
     <div v-show="gameData.isFat" class="relative transition-transform duration-50 animate-pulse">
