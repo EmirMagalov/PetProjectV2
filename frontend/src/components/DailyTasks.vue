@@ -70,19 +70,19 @@ const sortedTasks = computed(() => {
         </div>
 
         <!-- Кнопка статуса / получения -->
-        <div class="flex items-end justify-between gap-2 mt-1">
+        <div class="flex flex-col items-center gap-2 mt-1">
           <!-- Награда -->
           <div class="flex items-center  flex-col">
             <span class="text-xs text-gray-700">Награда</span>
             <div
                 class="flex flex-col items-center justify-center gap-0.5  text-xs font-bold bg-yellow-100 px-3 py-1 rounded-lg border border-yellow-400/20">
-              <div  class="flex items-center justify-center gap-0.5">
+              <div  class="flex items-center justify-center gap-1">
                 <img class="w-5 drop-shadow-[0_2px_1px_rgba(0,0,5,0.8)]" src="/gamePlay/coin.webp" alt="">
-                <span class="text-shadow-sm text-yellow-500 text-shadow-black">{{ config.reward }}</span>
+                <span class="text-shadow-sm w-5 text-amber-600 text-shadow-black">{{ config.reward }}</span>
               </div>
-              <div  class="flex items-center justify-center gap-0.5">
+              <div  class="flex items-center justify-center gap-1">
                 <img class="w-5 drop-shadow-[0_2px_1px_rgba(0,0,5,0.8)]" src="/gamePlay/exp.webp" alt="">
-                <span class="text-shadow-sm text-blue-400 text-shadow-black">{{ config.exp }}</span>
+                <span class="text-shadow-sm w-5 text-amber-600 text-shadow-black">{{ config.exp }}</span>
               </div>
 
             </div>
