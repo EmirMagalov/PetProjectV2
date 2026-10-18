@@ -50,7 +50,7 @@ const sortedTasks = computed(() => {
           class="p-3.5 relative rounded-xl border border-[#f7c9a5]/40 flex flex-col gap-2 transition-all"
           :class="{
             'bg-green-200': isTaskCompleted(key, config.target) && !isTaskClaimed(key),
-            'bg-gray-400 opacity-75': isTaskClaimed(key),
+            'bg-gray-400 opacity-50': isTaskClaimed(key),
             'bg-[#f7c9a5]': !isTaskCompleted(key, config.target) && !isTaskClaimed(key)
           }"
       >
@@ -86,7 +86,7 @@ const sortedTasks = computed(() => {
               v-if="isTaskCompleted(key, config.target) && !isTaskClaimed(key)"
               @click="claimReward(key)"
               :disabled="loadingKey === key"
-              class="text-xs px-2 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-green-600  text-white font-bold shadow-md flex items-center gap-1"
+              class="text-xs px-2 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-green-600 animate-pulse text-white font-bold shadow-md flex items-center gap-1"
           >
             <span v-show="loadingKey !== key">Забрать награду</span>
           </button>
@@ -110,11 +110,11 @@ const sortedTasks = computed(() => {
     transform: scale(1) translateY(0);
   }
   50% {
-    transform: scale(1.2) translateY(0px);
+    transform: scale(1.05) translateY(0px);
   }
 }
 
 .animate-pulse {
-  animation: pulse 0.7s ease-in-out infinite;
+  animation: pulse 1s ease-in-out infinite;
 }
 </style>

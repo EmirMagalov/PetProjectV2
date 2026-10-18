@@ -254,9 +254,7 @@ const getClipInset = (progress) => {
             >
 
               <span class="flex items-center justify-center">
-                <div v-show="hasAvailableRewards" class="rounded-full bg-red-600 p-0.5 animate-pulse border border-[#f7c9a5]  w-5 right-0  z-5">
-                <img src="/gamePlay/exclamation_mark.webp" alt="">
-              </div>
+
                 <img src="/gamePlay/calendar.webp" class="w-5" alt=""> Задания
               </span>
             </button>
