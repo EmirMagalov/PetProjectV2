@@ -3,7 +3,7 @@ TASKS_CONFIG = {
     "feed": {"target": 5, "reward": 50},
     "wash": {"target": 2, "reward": 30},
     "click": {"target": 500, "reward": 100},
-    "serum": {"target": 1, "reward": 100},
+    "serum": {"target": 2, "reward": 100},
 }
 
 def get_fresh_daily_tasks():

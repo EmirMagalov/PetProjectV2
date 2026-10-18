@@ -101,7 +101,7 @@ const getClipInset = (progress) => {
     >
 
 
-      <div v-show="hasAvailableRewards" class="absolute rounded-full bg-white/80 border-[#f7c9a5]  animate-pulse p-0.5 w-8 h-8 left-0 -bottom-5  z-5">
+      <div v-show="hasAvailableRewards" class="absolute rounded-full  animate-pulse p-0.5 w-8 h-8 left-0 -bottom-6  z-5">
         <img class="relative" src="/gamePlay/calendar.webp" alt="">
 
       </div>

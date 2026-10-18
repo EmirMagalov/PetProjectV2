@@ -10,7 +10,7 @@ export const TASKS_CONFIG = {
     feed: {target: 5, reward: 50, title: 'Покормить питомца '},
     wash: {target: 2, reward: 30, title: 'Искупать питомца '},
     click: {target: 500, reward: 100, title: 'Кликнуть по питомцу '},
-    serum: {target: 1, reward: 100, title: 'Создать зелье'}
+    serum: {target: 2, reward: 100, title: 'Создать зелье'}
 }
 
 // Получить текущий прогресс напрямую из gameData
