@@ -1,9 +1,9 @@
 from tortoise import fields, models
 TASKS_CONFIG = {
-    "feed": {"target": 5, "reward": 50},
-    "wash": {"target": 2, "reward": 30},
-    "click": {"target": 500, "reward": 100},
-    "serum": {"target": 2, "reward": 100},
+    "feed": {"target": 5, "reward": 50, "exp": 40},
+    "wash": {"target": 2, "reward": 30, "exp": 30},
+    "click": {"target": 500, "reward": 100, "exp": 50},
+    "serum": {"target": 2, "reward": 100, "exp": 80},
 }
 
 def get_fresh_daily_tasks():

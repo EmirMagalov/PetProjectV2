@@ -2,6 +2,8 @@ import {computed, ref} from 'vue'
 import axios from 'axios'
 import {API_URL, syncToBackend, tgId} from "@/scripts/api.js";
 import {gameData} from "@/scripts/useGameStore.js";
+import {addCoin} from "@/scripts/actions.js";
+import {addExp} from "@/scripts/level.js";
 
 export const loadingKey = ref(null)
 let saveTimeout = null
@@ -52,10 +54,10 @@ export async function incrementTaskProgress(taskKey, amount = 1) {
 
 // Конфиг заданий
 export const TASKS_CONFIG = {
-    feed: {target: 5, reward: 50, title: 'Покормить питомца '},
-    wash: {target: 2, reward: 30, title: 'Искупать питомца '},
-    click: {target: 500, reward: 100, title: 'Кликнуть по питомцу '},
-    serum: {target: 2, reward: 100, title: 'Создать зелье'}
+    feed: { target: 5, reward: 50, exp: 40, title: 'Покормить питомца' },
+    wash: { target: 2, reward: 30, exp: 30, title: 'Искупать питомца' },
+    click: { target: 500, reward: 100, exp: 50, title: 'Кликнуть по питомцу' },
+    serum: { target: 2, reward: 100, exp: 80, title: 'Создать зелье' }
 }
 
 // Получить текущий прогресс напрямую из gameData
@@ -92,7 +94,8 @@ export const claimReward = async (taskKey) => {
         const data = response.data
 
         if (data.success) {
-            gameData.coins = data.coins
+            addCoin(data.reward)
+            addExp(data.exp)
             gameData.daily_tasks = data.daily_tasks
         }
     } catch (e) {

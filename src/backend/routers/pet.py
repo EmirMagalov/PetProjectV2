@@ -258,7 +258,7 @@ async def claim_task(tg_id: int, data: dict):
 
     target = TASKS_CONFIG[task_key]["target"]
     reward = TASKS_CONFIG[task_key]["reward"]
-
+    exp = TASKS_CONFIG[task_key]["exp"]
     # Проверки безопасности
     if task_data["progress"] < target:
         raise HTTPException(status_code=400, detail="Task not completed yet")
@@ -270,12 +270,12 @@ async def claim_task(tg_id: int, data: dict):
     tasks[task_key] = task_data
     pet.daily_tasks = tasks
 
-    pet.coins += reward
     await pet.save(update_fields=["daily_tasks", "coins"])
 
     return {
         "success": True,
-        "coins": pet.coins,
+        "reward":reward,
+        "exp": exp,
         "daily_tasks": pet.daily_tasks
     }
 
