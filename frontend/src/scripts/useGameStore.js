@@ -31,10 +31,6 @@ export const isExpPopping = ref(false)
 export const fruitStreak = ref(
     Number(localStorage.getItem('pet_fruitStreak')) || 0
 )
-import axios from 'axios'
-import { API_URL, tgId } from "@/scripts/api.js"
-
-let saveTimeout = null
 
 
 

@@ -1,15 +1,17 @@
 import {computed, ref} from 'vue'
 import axios from 'axios'
-import {API_URL, tgId} from "@/scripts/api.js";
+import {API_URL, syncToBackend, tgId} from "@/scripts/api.js";
 import {gameData} from "@/scripts/useGameStore.js";
 
 export const loadingKey = ref(null)
+let saveTimeout = null
+
 export async function incrementTaskProgress(taskKey, amount = 1) {
     if (!gameData.daily_tasks) {
         gameData.daily_tasks = {}
     }
 
-    const currentTask = gameData.daily_tasks[taskKey] || { progress: 0, claimed: false }
+    const currentTask = gameData.daily_tasks[taskKey] || {progress: 0, claimed: false}
 
     const targets = {
         feed: 5,
@@ -47,6 +49,7 @@ export async function incrementTaskProgress(taskKey, amount = 1) {
         }, 2000)
     }
 }
+
 // Конфиг заданий
 export const TASKS_CONFIG = {
     feed: {target: 5, reward: 50, title: 'Покормить питомца '},
