@@ -5,13 +5,14 @@ import {
     colorFoam,
     currentDraggedItem,
     dropZoneRef, energyFull,
-    gameData, incrementTaskProgress, nextTutorialStep, showTongue,
+    gameData, nextTutorialStep, showTongue,
     statusFoam,
     statusShower
 } from "@/scripts/useGameStore.js";
 
 import {currentBathItem, currentFoodItem, removeFromCart,} from "@/scripts/basket.js";
 import {addExp} from "@/scripts/level.js";
+import {incrementTaskProgress} from "@/scripts/dealyTasks.js";
 
 export let actionTimer = null
 export let previousMouth = ''

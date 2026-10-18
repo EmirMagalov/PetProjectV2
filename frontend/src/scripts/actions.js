@@ -5,7 +5,7 @@ import {
     isAnimating, isBadMood, isBothStatsZero, isCoinPopping,
     isVibrating,
     lastFedItem, nextTutorialStep, FatPlayCount, sameFoodCount,
-    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount, incrementTaskProgress,
+    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount
 
 }
     from "@/scripts/useGameStore.js";
@@ -15,6 +15,7 @@ import {foodList} from "@/scripts/objectItems.js";
 import {addExp} from "@/scripts/level.js";
 import {toggleSleep} from "@/scripts/stats.js";
 import {ref} from "vue";
+import {incrementTaskProgress} from "@/scripts/dealyTasks.js";
 
 export const comboClicks = ref(0)     // Счетчик кликов подряд
 export const comboMultiplier = ref(1) // Текущий множитель (1, 5, 10, 20)

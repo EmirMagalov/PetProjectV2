@@ -194,6 +194,7 @@ export const foodList = [
         name: 'Сыворотка здоровья',
         image: `Laboratory/serums/health_serum.webp?v=${APP_VERSION}`,
         category: 'laboratory',
+        subcategory: 'serum',
         health: 1,
         price: 800,
 

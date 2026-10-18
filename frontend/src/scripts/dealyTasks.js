@@ -4,7 +4,49 @@ import {API_URL, tgId} from "@/scripts/api.js";
 import {gameData} from "@/scripts/useGameStore.js";
 
 export const loadingKey = ref(null)
+export async function incrementTaskProgress(taskKey, amount = 1) {
+    if (!gameData.daily_tasks) {
+        gameData.daily_tasks = {}
+    }
 
+    const currentTask = gameData.daily_tasks[taskKey] || { progress: 0, claimed: false }
+
+    const targets = {
+        feed: 5,
+        wash: 2,
+        click: 500,
+        serum: 2
+    }
+
+    const target = targets[taskKey] || 1
+
+    if (currentTask.progress < target && !currentTask.claimed) {
+        currentTask.progress = Math.min(target, currentTask.progress + amount)
+        gameData.daily_tasks[taskKey] = currentTask
+
+        // 🟢 Для кормления и мойки сохраняем сразу (их мало)
+        if (taskKey !== 'click') {
+            try {
+                await syncToBackend()
+            } catch (e) {
+                console.error('Ошибка сохранения задачи:', e)
+            }
+            return
+        }
+
+        // 🟡 Для КЛИКОВ делаем Debounce (отложенное сохранение)
+        // Запрос уйдет только через 2 секунды после того, как игрок перестал кликать
+        if (saveTimeout) clearTimeout(saveTimeout)
+
+        saveTimeout = setTimeout(async () => {
+            try {
+                await syncToBackend()
+            } catch (e) {
+                console.error('Ошибка сохранения кликов:', e)
+            }
+        }, 2000)
+    }
+}
 // Конфиг заданий
 export const TASKS_CONFIG = {
     feed: {target: 5, reward: 50, title: 'Покормить питомца '},

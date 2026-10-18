@@ -1,8 +1,9 @@
 import { computed, ref } from "vue";
 import { laboratoryIngredientsList } from "@/scripts/basket.js";
 import { serumRecipes } from "@/scripts/laboratoryScripts/recipes.js";
-import {gameData, incrementTaskProgress} from "@/scripts/useGameStore.js";
+import {gameData} from "@/scripts/useGameStore.js";
 import { ingredientList } from "@/scripts/laboratoryScripts/ingredientItems.js";
+import {incrementTaskProgress} from "@/scripts/dealyTasks.js";
 
 
 export const ingredientDropZoneRef = ref(null);
