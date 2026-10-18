@@ -93,19 +93,20 @@ const getClipInset = (progress) => {
 </script>
 
 <template>
-  <div class="p-2">
+  <div class="relative p-2 z-40">
     <!-- Клик по любому месту плашки откроет подробную статистику -->
     <div
         @click="showStatsModal = true"
         class="relative shadow-2xl rounded-2xl bg-white/20 backdrop-blur-md cursor-pointer active:scale-[0.99] transition-transform"
     >
-      <div class="absolute rounded-full bg-white/80 border-[#f7c9a5] p-0.5 w-5 left-0 -bottom-2  z-5">
-        <img src="/gamePlay/calendar.webp" alt="">
+
+
+      <div v-show="hasAvailableRewards" class="absolute rounded-full bg-white/80 border-[#f7c9a5]  animate-pulse p-0.5 w-8 h-8 left-0 -bottom-5  z-5">
+        <img class="relative" src="/gamePlay/calendar.webp" alt="">
+
       </div>
 
-      <div v-show="hasAvailableRewards" class="absolute rounded-full bg-red-600/60 p-0.5 animate-pulse border border-[#f7c9a5]  w-8 right-0  z-5">
-        <img src="/gamePlay/exclamation_mark.webp" alt="">
-      </div>
+
       <div class="flex justify-between gap-2 p-2">
         <div class="flex flex-col gap-1" >
           <ProgressBar :class="gameData.foodLevel<=0?'animate-custom-pulse ':''" :image="`/gamePlay/hunger.webp?v=${APP_VERSION}`" name="Сытость" :value="gameData.foodLevel" color="#FFF700"/>
@@ -242,10 +243,10 @@ const getClipInset = (progress) => {
           class="fixed inset-0 z-300 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           @click.self="showStatsModal = false"
       >
-        <div class="bg-[#fff6ef] border-2 border-[#f7c9a5] rounded-3xl p-5 w-full max-w-xs h-130 shadow-2xl relative flex flex-col justify-between">
+        <div class="bg-[#fff6ef] border-2 border-[#3399FF] rounded-3xl p-5 w-full max-w-xs h-130 shadow-2xl relative flex flex-col justify-between">
 
           <!-- Верхняя часть: переключатель вкладок (Задания теперь первые) -->
-          <div class="flex bg-[#f3d9c4]/60 p-1 rounded-2xl border border-[#f7c9a5] shrink-0">
+          <div class="flex bg-[#98E5FE]/60 p-1 rounded-2xl border border-[#3399FF] shrink-0">
             <button
                 @click="activeTab = 'tasks'"
                 class="flex-1 py-1.5 text-xs font-bold rounded-xl transition-all"
@@ -328,7 +329,7 @@ const getClipInset = (progress) => {
           <!-- Нижняя кнопка «Закрыть» -->
           <button
               @click="showStatsModal = false"
-              class="w-full bg-[#f7c9a5] hover:bg-[#f3b584] text-gray-800 font-bold py-2 rounded-2xl border border-[#e2a87a] transition-colors active:scale-95 shrink-0"
+              class="w-full bg-[#98E5FE] hover:bg-[#f3b584] text-gray-800 font-bold py-2 rounded-2xl border border-[#3399FF] transition-colors active:scale-95 shrink-0"
           >
             Закрыть
           </button>

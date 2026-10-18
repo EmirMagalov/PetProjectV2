@@ -1,9 +1,11 @@
 import asyncio
 import logging
 import time
+from datetime import date
+
 from aiogram import types
 from aiogram.exceptions import TelegramAPIError, TelegramForbiddenError
-from backend.models.pet import Pet as PetModel
+from backend.models.pet import Pet as PetModel, get_fresh_daily_tasks
 from bot.main import bot
 from common.config import settings
 
@@ -53,7 +55,13 @@ async def process_pet_notifications(pet: PetModel, now: float):
     """Обработка одного питомца."""
     is_notified_changed = False
     last_act = pet.last_interaction or 0
-
+    # --- 0. АВТОМАТИЧЕСКИЙ СБРОС ЗАДАНИЙ НА НОВЫЙ ДЕНЬ ---
+    today_str = str(date.today())
+    if pet.tasks_reset_date != today_str:
+        pet.tasks_reset_date = today_str
+        pet.daily_tasks = get_fresh_daily_tasks()
+        pet.daily_tasks_notified = False  # Сбрасываем флаг, чтобы пришло уведомление
+        is_notified_changed = True
     # --- 1. ПРОВЕРКА ЗАВИСИМОСТИ ---
     if pet.addiction_streak > 0:
         if pet.addiction_time > 0 and (now - pet.addiction_time) >= 1200:
@@ -211,7 +219,9 @@ async def process_pet_notifications(pet: PetModel, now: float):
             "stinky_notified",
             "sick_notified",
             "fortune_notified",
-            "daily_tasks_notified"
+            "daily_tasks_notified",
+            "tasks_reset_date",
+            "daily_tasks"
         ]
         if hasattr(pet, "addiction_notified"):
             update_fields.append("addiction_notified")
