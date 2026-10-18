@@ -49,19 +49,23 @@ import {
         </div>
 
         <!-- Кнопка статуса / получения -->
-        <div class="flex justify-between mt-1">
+        <div class="flex items-end justify-center gap-2 mt-1">
           <!-- Награда -->
-          <div
-              class="flex items-center gap-0.5 text-yellow-500 text-xs font-bold bg-yellow-100 px-3 py-1 rounded-lg border border-yellow-400/20">
-            <img class="w-5 drop-shadow-[0_2px_1px_rgba(0,0,5,0.8)]" src="/gamePlay/coin.webp" alt="">
-            <span class="text-shadow-sm text-shadow-black">{{ config.reward }} </span>
+          <div class="flex flex-col ">
+            <span>Награда</span>
+            <div
+                class="flex items-center gap-0.5 text-yellow-500 text-xs font-bold bg-yellow-100 px-3 py-1 rounded-lg border border-yellow-400/20">
+              <img class="w-5 drop-shadow-[0_2px_1px_rgba(0,0,5,0.8)]" src="/gamePlay/coin.webp" alt="">
+              <span class="text-shadow-sm text-shadow-black">{{ config.reward }} </span>
+            </div>
           </div>
+
           <!-- Задание выполнено, но награда не забрана -->
           <button
               v-if="isTaskCompleted(key, config.target) && !isTaskClaimed(key)"
               @click="claimReward(key)"
               :disabled="loadingKey === key"
-              class="text-xs px-2 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-bold shadow-md active:scale-95 transition-all flex items-center gap-1"
+              class="text-xs px-2 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-bold shadow-md active:scale-95 transition-all flex items-center gap-1"
           >
 
             <span  v-show="loadingKey !== key">Забрать награду</span>
