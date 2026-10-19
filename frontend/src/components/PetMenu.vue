@@ -52,15 +52,15 @@ function goToSaloon() {
   const coins = Number(gameData?.value?.coins ?? gameData?.coins) || 0;
 
   if (coins < 50 && !currentBet.value) {
-    alert('Нужно минимум 50 монет, чтобы зайти в Jackpot!');
+    alert('Нужно минимум 50 монет, чтобы зайти в «Jackpot»!');
     return;
   }
   if (gameData.foodLevel < 3) {
-    alert('Чтобы зайти в Jackpot нужно быть сытым!');
+    alert('Чтобы зайти в «Jackpot» нужно быть сытым!');
     return;
   }
   if (gameData.energy < 3) {
-    alert('Чтобы зайти в Jackpot нужно быть бодрым!');
+    alert('Чтобы зайти в «Jackpot» нужно быть бодрым!');
     return;
   }
 
@@ -79,6 +79,41 @@ function goToSaloon() {
     router.push('/saloon');
   }
 }
+
+
+function goToCatchTheFood() {
+  // Безопасный расчет монет (поддерживает ref и обычный объект)
+  const coins = Number(gameData?.value?.coins ?? gameData?.coins) || 0;
+
+  if (coins < 50 && !currentBet.value) {
+    alert('Нужно минимум 50 монет, чтобы зайти в «Поймай еду»!');
+    return;
+  }
+  if (gameData.foodLevel < 3) {
+    alert('Чтобы зайти в «Поймай еду» нужно быть сытым!');
+    return;
+  }
+  if (gameData.energy < 3) {
+    alert('Чтобы зайти в «Поймай еду» нужно быть бодрым!');
+    return;
+  }
+
+  // Определение устройства iOS (iPhone, iPad, iPod)
+  const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  if (isIOS) {
+    // Жёсткая перезагрузка для iOS: очищает застрявший WebKit/GPU кэш Safari
+    console.log('iOS')
+    window.location.href = '/thefoodgame';
+  } else {
+    console.log('Android')
+    // Для Android и ПК оставляем быструю SPA-навигацию
+    router.push('/thefoodgame');
+  }
+}
+
 
 function resetTutorial() {
   localStorage.removeItem('tutorial_completed')
@@ -164,9 +199,9 @@ const currentBathImage = computed(() => {
         <div class="absolute gap-2 flex  -top-10 left-1/2 -translate-x-1/2">
           <div
               @click="isFortuneOpen = true"
-              class="bg-[#fff6ef]  overflow-hidden   rounded-4xl border-2 border-purple-400 transition-transform duration-50 cursor-pointer"
+              class="bg-purple-200  overflow-hidden   rounded-4xl border-2 border-purple-400 transition-transform duration-50 cursor-pointer"
               style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-            <div class=" h-10 w-10  bg-contain bg-no-repeat bg-center"
+            <div class=" h-9 w-9  bg-contain bg-no-repeat bg-center"
                  :style="{ backgroundImage: `url('/gamePlay/fortune_icons.webp?v=${APP_VERSION}')` }">
             </div>
             <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
@@ -186,15 +221,29 @@ const currentBathImage = computed(() => {
             </div>
           <div
               @click="goToSaloon()"
-              class="bg-[#fff6ef] overflow-hidden rounded-4xl border-2 border-red-600 transition-transform duration-50 cursor-pointer"
+              class="bg-red-200 overflow-hidden rounded-4xl border-2 border-red-600 transition-transform duration-50 cursor-pointer"
               style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-            <div class="h-10 w-10 bg-contain bg-no-repeat bg-center"
+            <div class="h-9 w-9 bg-contain bg-no-repeat bg-center"
                  :style="{ backgroundImage: `url('/gamePlay/jackpot_icon.webp?v=${APP_VERSION}')` }">
             </div>
             <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
           </div>
+
+
+
+
         </div>
+          <div
+              @click="goToCatchTheFood()"
+              class="bg-orange-200 overflow-hidden rounded-4xl border-2 border-orange-400 transition-transform duration-50 cursor-pointer"
+              style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+            <div class="h-9 w-9 bg-contain bg-no-repeat bg-center"
+                 :style="{ backgroundImage: `url('/gamePlay/cart_for_game.webp?v=${APP_VERSION}')` }">
+            </div>
+            <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
+          </div>
         </div>
+
         <div
             @click="location = 'food',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95"
