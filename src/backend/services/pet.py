@@ -43,12 +43,12 @@ async def pet_tick_job():
             washed_time = pet.last_washed_time if pet.last_washed_time > 0 else NOW
             time_since_washed = NOW - washed_time
 
-            if time_since_washed >= 14400:
-                # Через 4 часа — гарантированная грязь
+            if time_since_washed >= 18000:
+                # Через 5 часа — гарантированная грязь
                 pet.stinky = True
-            elif time_since_washed >= 10800:
-                # Через 2 часа — шанс испачкаться (1/90)
-                if random.random() < (1 / 90):
+            elif time_since_washed >= 14400:
+                # Через 4 часа — шанс испачкаться (1/90)
+                if random.random() < (1 / 180):
                     pet.stinky = True
 
         # --- ПРОВЕРКА КАКАХИ (IS_POOPED) ---
@@ -58,12 +58,12 @@ async def pet_tick_job():
             )
             time_since_poop = NOW - poop_time
 
-            if time_since_poop >= 10800:
-                # Через 3 часа — гарантированная кучка
+            if time_since_poop >= 14400:
+                # Через 4 часа — гарантированная кучка
                 pet.is_pooped = True
-            elif time_since_poop >= 7200:
-                # Через 2 часа — шанс накакать (1/90)
-                if random.random() < (1 / 90):
+            elif time_since_poop >= 10800:
+                # Через 3 часа — шанс накакать (1/90)
+                if random.random() < (1 / 100):
                     pet.is_pooped = True
 
         # --- 4. НАКОПЛЕНИЕ ГРЯЗИ И БОЛЕЗНЬ ---
