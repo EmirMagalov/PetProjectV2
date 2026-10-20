@@ -1,4 +1,6 @@
+import datetime
 import types
+from zoneinfo import ZoneInfo
 
 from aiogram import Router, F as aiogram_F, types, Bot
 from aiogram.filters import Command
@@ -23,7 +25,7 @@ def keyboard_callback(callback: dict[str, str]):
 async def static_text(page: int, per_page: int = 5, bot=None):
     offset = (page - 1) * per_page
     total_count = await PetModel.all().count()
-
+    tz = ZoneInfo("Asia/Baku")
     pets = await PetModel.all().offset(offset).limit(per_page)
 
     if not pets:
@@ -36,6 +38,8 @@ async def static_text(page: int, per_page: int = 5, bot=None):
         click_counter = pet.click_counter
         level = pet.level
         coins = pet.coins
+        deaths_count = pet.deaths_count
+        last_interaction = datetime.datetime.fromtimestamp(pet.last_interaction,tz)
         try:
             chat_info = await bot.get_chat(tg_id)
             user_name = f"@{chat_info.username}" if chat_info.username else "Неизвестен"
@@ -43,7 +47,7 @@ async def static_text(page: int, per_page: int = 5, bot=None):
         except Exception:
             user_name = "Неизвестен"
             first_name = "Неизвестен"
-        statistics += f"Пользователь: {user_name}({first_name})\nИмя питомца: {name}\nКликов: {click_counter}\nУровень: {level}\nМонет: {coins}\n---------\n"
+        statistics += f"Пользователь: {user_name}({first_name})\nИмя питомца: {name}\nКликов: {click_counter}\nУровень: {level}\nМонет: {coins}\nСмертей: {deaths_count}\nПоследнее действие: {last_interaction}\n---------\n"
 
     return (
         f"📊 <b>Всего пользователей:</b> {total_count} (Стр. {page})\n\n{statistics}",
