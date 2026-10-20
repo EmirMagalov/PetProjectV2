@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import types
 from zoneinfo import ZoneInfo
@@ -460,3 +461,47 @@ async def send_coins_to_user_handler(message: types.Message):
         await message.answer(
             f"❌ Не удалось отправить сообщение пользователю {target_tg_id}: {e}"
         )
+
+
+# --- НОВАЯ КОМАНДА ДЛЯ ОЧИСТКИ БАЗЫ ОТ УДАЛЕННЫХ/ЗАБЛОКИРОВАННЫХ ПОЛЬЗОВАТЕЛЕЙ ---
+@admin_router.message(Command("clean_users"))
+async def clean_users_handler(message: types.Message, bot: Bot):
+  if message.from_user.id not in ADMIN_IDS:
+    return
+
+  status_msg = await message.answer(
+      "🔄 Начинаю проверку и очистку базы данных... Это может занять некоторое"
+      " время."
+  )
+
+  pets = await PetModel.all()
+  total_checked = len(pets)
+  deleted_count = 0
+
+  for pet in pets:
+    try:
+      # Проверяем существование чата/пользователя через Telegram API
+      await bot.get_chat(pet.tg_id)
+    except Exception as e:
+      error_text = str(e).lower()
+      # Если пользователь заблокировал бота, удалил аккаунт или чат не найден
+      if any(
+          err in error_text
+          for err in [
+              "bot was blocked",
+              "user is deactivated",
+              "chat not found",
+              "is blocked",
+              "PEER_ID_INVALID",
+          ]
+      ):
+        await PetModel.filter(tg_id=pet.tg_id).delete()
+        deleted_count += 1
+    # Небольшая пауза, чтобы не превысить лимиты Telegram API (Flood control)
+    await asyncio.sleep(0.05)
+
+  await status_msg.edit_text(
+      f"✅ Очистка завершена!\n\n"
+      f"👥 Проверено пользователей: {total_checked}\n"
+      f"🗑 Удалено неактивных/заблокированных: {deleted_count}"
+  )
