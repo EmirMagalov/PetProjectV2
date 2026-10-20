@@ -28,6 +28,13 @@ const popupPoints = ref(0)
 const popupCoins = ref(0)
 let popupTimeout = null
 
+// Состояния для вспышек пола
+const isMissedFlash = ref(false)
+let missFlashTimeout = null
+
+const isComboFlash = ref(false)
+let comboFlashTimeout = null
+
 const triggerPopup = (type, title = '', points = 0, coins = 0) => {
   popupType.value = type
   popupTitle.value = title
@@ -39,6 +46,15 @@ const triggerPopup = (type, title = '', points = 0, coins = 0) => {
   popupTimeout = setTimeout(() => {
     showPopup.value = false
   }, 1000)
+
+  // Если промах — включаем красную вспышку пола на 400мс
+  if (type === 'miss') {
+    isMissedFlash.value = true
+    if (missFlashTimeout) clearTimeout(missFlashTimeout)
+    missFlashTimeout = setTimeout(() => {
+      isMissedFlash.value = false
+    }, 400)
+  }
 }
 
 // --- CANVAS & RENDERING ---
@@ -130,6 +146,8 @@ const startGame = async () => {
   foods = []
   particles = []
   showPopup.value = false
+  isMissedFlash.value = false
+  isComboFlash.value = false
   spawnInterval = 1200
 
   const canvas = canvasRef.value
@@ -215,7 +233,7 @@ const updateGame = (timestamp) => {
     const cartLeft = cart.x + hitBoxPaddingX
     const cartRight = (cart.x + cart.width) - hitBoxPaddingX
     const cartTop = cart.y + 15
-    const cartBottom = cart.y + 50
+    const cartBottom = cart.y + 20
 
     const isInsideX = item.x >= cartLeft && item.x <= cartRight
     const isInsideY = item.y + item.radius >= cartTop && item.y - item.radius <= cartBottom
@@ -226,6 +244,16 @@ const updateGame = (timestamp) => {
 
       if (isPerfect) {
         combo.value++
+
+        // Включаем оранжевую вспышку комбо на 600мс при идеальной поимке
+        if (combo.value > 1) {
+          isComboFlash.value = true
+          if (comboFlashTimeout) clearTimeout(comboFlashTimeout)
+          comboFlashTimeout = setTimeout(() => {
+            isComboFlash.value = false
+          }, 600)
+        }
+
         const points = 10 * combo.value + 5
         score.value += points
 
@@ -473,21 +501,23 @@ onUnmounted(() => {
 
     <!-- Всплывающий попап -->
     <transition name="fade-down">
-      <div v-if="showPopup" class="absolute top-[25%] left-1/2 -translate-x-1/2 pointer-events-none z-30">
+
+
+      <div  v-if="showPopup" class="absolute top-[25%] left-1/2 -translate-x-1/2 pointer-events-none z-30">
         <div class="px-5 py-2.5 text-center animate-pulse">
-          <div v-if="combo > 1" class="absolute -bottom-4 right-0 bg-amber-500 text-white font-extrabold text-sm px-3 py-1 rounded-full shadow-lg">
+          <div v-if="combo > 1" class="absolute -top-6 right-0 bg-amber-500  text-white font-extrabold text-md px-3 py-1 rounded-full shadow-lg">
             COMBO x{{ combo }}
           </div>
-          <p v-if="popupType === 'miss'" class="text-4xl font-extrabold text-red-500 whitespace-nowrap drop-shadow-sm">
+          <p v-if="popupType === 'miss'" class="text-4xl text-shadow-md text-shadow-black font-extrabold text-red-500 whitespace-nowrap drop-shadow-sm">
             {{ popupTitle }}
           </p>
           <div v-else class="flex items-center justify-center gap-2 whitespace-nowrap">
-            <span class="text-4xl font-extrabold" :class="popupType === 'perfect' ? 'text-emerald-600' : 'text-amber-600'">
+            <span class="text-4xl text-shadow-md text-shadow-black font-extrabold" :class="combo > 1 ? 'text-amber-500' : 'text-blue-400'">
               {{ popupTitle }}
             </span>
             <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg">
               <img src="/gamePlay/coin.webp" alt="coin" class="w-5 h-5 object-contain" />
-              <span class="text-amber-800 font-extrabold text-2xl">+{{ popupCoins }}</span>
+              <span class="text-amber-800 font-extrabold text-2xl text-shadow-md text-shadow-black">+{{ popupCoins }}</span>
             </div>
           </div>
         </div>
@@ -571,18 +601,24 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Кафельный пол супермаркета с эффектом огня при комбо -->
+    <!-- Кафельный пол супермаркета с временными вспышками (комбо или промах) -->
     <div
         class="absolute bottom-0 h-33.5 w-full flex flex-col z-20 pointer-events-none transition-all duration-300 shadow-[inset_0_8px_16px_rgba(0,0,0,0.25)]"
-        :class="{ 'shadow-[inset_0_-15px_30px_rgba(239,68,68,0.8),0_-10px_25px_rgba(245,158,11,0.9)]': combo > 1 }"
+        :class="{
+          'shadow-[inset_0_-15px_30px_rgba(245,158,11,0.8),0_-10px_25px_rgba(245,158,11,0.9)]': isComboFlash,
+          'shadow-[inset_0_-15px_30px_rgba(239,68,68,0.9),0_-10px_25px_rgba(239,68,68,0.9)]': isMissedFlash
+        }"
     >
       <div
           class="h-2.5 border-t shadow-md transition-colors duration-300"
-          :class="combo > 1 ? 'bg-orange-600 border-yellow-400 shadow-orange-500/50' : 'bg-slate-700 border-slate-500'"
+          :class="isMissedFlash ? 'bg-red-600 border-red-400 shadow-red-500/80' : (isComboFlash ? 'bg-orange-500 border-yellow-300 shadow-orange-500/80' : 'bg-slate-700 border-slate-500')"
       ></div>
 
       <div class="flex-1 w-full relative overflow-hidden bg-[#f8fafc] border-t-2 border-slate-300 [background-image:linear-gradient(45deg,#e2e8f0_25%,transparent_25%),linear-gradient(-45deg,#e2e8f0_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e2e8f0_75%),linear-gradient(-45deg,transparent_75%,#e2e8f0_75%)] [background-size:40px_40px] [background-position:0_0,0_20px,20px_-20px,-20px_0px]">
-        <div v-if="combo > 1" class="absolute inset-0 pointer-events-none bg-gradient-to-t from-[rgba(220,38,38,0.75)] via-[rgba(245,158,11,0.6)] to-[rgba(254,240,138,0.2)] animate-[flameFlicker_0.4s_infinite_alternate_ease-in-out]"></div>
+        <!-- Оранжевая вспышка при комбо -->
+        <div v-if="isComboFlash" class="absolute inset-0 pointer-events-none bg-gradient-to-t from-[rgba(245,158,11,0.7)] via-[rgba(251,191,36,0.5)] to-transparent animate-[flameFlicker_0.4s_infinite_alternate_ease-in-out]"></div>
+        <!-- Красная вспышка при промахе -->
+        <div v-if="isMissedFlash" class="absolute inset-0 pointer-events-none bg-red-600/60 transition-opacity duration-300"></div>
       </div>
     </div>
 
@@ -608,18 +644,15 @@ onUnmounted(() => {
   transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
-/* Начало: выше по оси Y, уменьшенный и прозрачный */
 .fade-down-enter-from {
   opacity: 0;
-  transform:  translateY(-20px) scale(0.9);
+  transform: translateY(-20px) scale(0.9);
 }
 
-/* Исчезновение: уходит ниже, увеличивается и растворяется */
 .fade-down-leave-to {
   opacity: 0;
-  transform:  translateY(25px) scale(1.1);
+  transform: translateY(25px) scale(1.1);
 }
-
 
 @keyframes pulse {
   0%, 100% {
