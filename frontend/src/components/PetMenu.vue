@@ -119,15 +119,15 @@ function goToHopHopGame() {
   const coins = Number(gameData?.value?.coins ?? gameData?.coins) || 0;
 
   if (coins < 50 && !currentBet.value) {
-    alert('Нужно минимум 50 монет, чтобы зайти в «Hop-Hop»!');
+    alert('Нужно минимум 50 монет, чтобы зайти в «Прыг-Скок»!');
     return;
   }
   if (gameData.foodLevel < 3) {
-    alert('Чтобы зайти в «Hop-Hop» нужно быть сытым!');
+    alert('Чтобы зайти в «Прыг-Скок» нужно быть сытым!');
     return;
   }
   if (gameData.energy < 3) {
-    alert('Чтобы зайти в «Hop-Hop» нужно быть бодрым!');
+    alert('Чтобы зайти в «Прыг-Скок» нужно быть бодрым!');
     return;
   }
 

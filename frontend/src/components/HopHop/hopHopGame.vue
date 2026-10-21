@@ -500,7 +500,7 @@ onUnmounted(() => {
           </div>
         </div>
         <span class="text-[#D18900] font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
-          Идем ловить еду...
+          Прыг-Скок...
         </span>
         <div class="mt-4 w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></div>
       </div>
