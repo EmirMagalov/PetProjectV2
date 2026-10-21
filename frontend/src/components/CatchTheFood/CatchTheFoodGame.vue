@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import { addCoin } from "@/scripts/actions.js";
-import {APP_VERSION} from "@/scripts/imageVersion.js";
+import { APP_VERSION } from "@/scripts/imageVersion.js";
 
 const isLoading = ref(true);
 
@@ -42,7 +42,6 @@ const triggerPopup = (type, title = '', points = 0, coins = 0) => {
     showPopup.value = false
   }, 1000)
 
-  // Если промах — включаем красную вспышку пола на 400мс
   if (type === 'miss') {
     isMissedFlash.value = true
     if (missFlashTimeout) clearTimeout(missFlashTimeout)
@@ -56,6 +55,9 @@ const triggerPopup = (type, title = '', points = 0, coins = 0) => {
 const canvasRef = ref(null)
 let ctx = null
 let animationFrameId = null
+let lastTime = 0
+const FRAME_TIME = 1000 / 60
+let isLoopRunning = false
 
 // --- ИГРОВЫЕ ОБЪЕКТЫ И НАСТРОЙКИ ---
 const FOOD_IMAGE_PATHS = [
@@ -126,6 +128,22 @@ const preloadAssets = () => {
   })
 }
 
+// --- Управление циклом ---
+const startLoop = () => {
+  if (isLoopRunning) return
+  isLoopRunning = true
+  lastTime = 0
+  animationFrameId = requestAnimationFrame(loop)
+}
+
+const stopLoop = () => {
+  isLoopRunning = false
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+    animationFrameId = null
+  }
+}
+
 // --- ЛОГИКА ИГРЫ ---
 const startGame = async () => {
   initAudio()
@@ -157,6 +175,7 @@ const startGame = async () => {
 
   gameState.value = 'PLAYING'
   lastSpawnTime = performance.now()
+  startLoop()
 }
 
 const spawnFood = (timestamp) => {
@@ -240,7 +259,6 @@ const updateGame = (timestamp) => {
       if (isPerfect) {
         combo.value++
 
-        // Включаем оранжевую вспышку комбо на 600мс при идеальной поимке
         if (combo.value > 1) {
           isComboFlash.value = true
           if (comboFlashTimeout) clearTimeout(comboFlashTimeout)
@@ -288,6 +306,7 @@ const updateGame = (timestamp) => {
         }
 
         gameState.value = 'GAMEOVER'
+        stopLoop()
       }
     }
   }
@@ -342,11 +361,28 @@ const drawGame = () => {
     ctx.fill()
     ctx.restore()
   })
+
 }
 
 const loop = (timestamp) => {
-  updateGame(timestamp)
-  drawGame()
+  if (!isLoopRunning) return
+
+  if (!lastTime) lastTime = timestamp
+  const delta = timestamp - lastTime
+
+  // Ограничиваем ~60 FPS
+  if (delta < FRAME_TIME * 0.92) {
+    animationFrameId = requestAnimationFrame(loop)
+    return
+  }
+
+  lastTime = timestamp
+
+  if (gameState.value === 'PLAYING') {
+    updateGame(timestamp)
+    drawGame()
+  }
+
   animationFrameId = requestAnimationFrame(loop)
 }
 
@@ -440,18 +476,20 @@ onMounted(() => {
     window.addEventListener('resize', resizeCanvas)
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('mouseup', handleMouseUp)
-    animationFrameId = requestAnimationFrame(loop)
   }
   setTimeout(() => {
-    isLoading.value = false;
-  }, 800);
+    isLoading.value = false
+  }, 800)
 })
 
 onUnmounted(() => {
-  if (animationFrameId) cancelAnimationFrame(animationFrameId)
+  stopLoop()
   window.removeEventListener('resize', resizeCanvas)
   window.removeEventListener('keydown', handleKeyDown)
   window.removeEventListener('mouseup', handleMouseUp)
+  if (popupTimeout) clearTimeout(popupTimeout)
+  if (missFlashTimeout) clearTimeout(missFlashTimeout)
+  if (comboFlashTimeout) clearTimeout(comboFlashTimeout)
 })
 </script>
 
@@ -500,11 +538,9 @@ onUnmounted(() => {
 
     <!-- Всплывающий попап -->
     <transition name="fade-down">
-
-
-      <div  v-if="showPopup" class="absolute top-[25%] left-1/2 -translate-x-1/2 pointer-events-none z-30">
+      <div v-if="showPopup" class="absolute top-[25%] left-1/2 -translate-x-1/2 pointer-events-none z-30">
         <div class="px-5 py-2.5 text-center animate-pulse">
-          <div v-if="combo > 1" class="absolute -top-6 right-0 bg-amber-500  text-white font-extrabold text-md px-3 py-1 rounded-full shadow-lg">
+          <div v-if="combo > 1" class="absolute -top-6 right-0 bg-amber-500 text-white font-extrabold text-md px-3 py-1 rounded-full shadow-lg">
             COMBO x{{ combo }}
           </div>
           <p v-if="popupType === 'miss'" class="text-4xl text-shadow-md text-shadow-black font-extrabold text-red-500 whitespace-nowrap drop-shadow-sm">
@@ -523,7 +559,7 @@ onUnmounted(() => {
       </div>
     </transition>
 
-    <!-- HUD (Интерфейс игры) -->
+    <!-- HUD -->
     <div v-if="gameState === 'PLAYING'" class="absolute top-4 left-4 right-4 z-20 pointer-events-none flex flex-col gap-2 mt-22">
       <div class="flex justify-between items-center">
         <div class="bg-white/85 backdrop-blur-sm px-3.5 py-1.5 rounded-xl flex flex-col shadow-sm">
@@ -600,7 +636,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Кафельный пол супермаркета с временными вспышками (комбо или промах) -->
+    <!-- Кафельный пол -->
     <div
         class="absolute bottom-0 h-33.5 w-full flex flex-col z-20 pointer-events-none transition-all duration-300 shadow-[inset_0_8px_16px_rgba(0,0,0,0.25)]"
         :class="{
@@ -614,9 +650,7 @@ onUnmounted(() => {
       ></div>
 
       <div class="flex-1 w-full relative overflow-hidden bg-[#f8fafc] border-t-2 border-slate-300 [background-image:linear-gradient(45deg,#e2e8f0_25%,transparent_25%),linear-gradient(-45deg,#e2e8f0_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e2e8f0_75%),linear-gradient(-45deg,transparent_75%,#e2e8f0_75%)] [background-size:40px_40px] [background-position:0_0,0_20px,20px_-20px,-20px_0px]">
-        <!-- Оранжевая вспышка при комбо -->
         <div v-if="isComboFlash" class="absolute inset-0 pointer-events-none bg-gradient-to-t from-[rgba(245,158,11,0.7)] via-[rgba(251,191,36,0.5)] to-transparent animate-[flameFlicker_0.4s_infinite_alternate_ease-in-out]"></div>
-        <!-- Красная вспышка при промахе -->
         <div v-if="isMissedFlash" class="absolute inset-0 pointer-events-none bg-red-600/60 transition-opacity duration-300"></div>
       </div>
     </div>
@@ -625,7 +659,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* Кастомная анимация для мерцания огня */
 @keyframes flameFlicker {
   0% {
     opacity: 0.7;
@@ -637,7 +670,6 @@ onUnmounted(() => {
   }
 }
 
-/* Плавные анимации появления/исчезновения попапа */
 .fade-down-enter-active,
 .fade-down-leave-active {
   transition: opacity 0.35s ease, transform 0.35s ease;
