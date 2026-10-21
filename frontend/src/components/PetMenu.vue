@@ -277,7 +277,7 @@ const currentBathImage = computed(() => {
                  :style="{ backgroundImage: `url('/gamePlay/hop_hop_game_logo.webp?v=${APP_VERSION}')` }">
             </div>
             <div
-                v-if="gameData.level < 5"
+            
                 class="absolute inset-0 z-20 flex flex-col items-center justify-end pb-0.5 text-center pointer-events-none bg-black/10"
             >
       <span class="text-amber-400 font-bold text-[7px] tracking-wide leading-tight">
