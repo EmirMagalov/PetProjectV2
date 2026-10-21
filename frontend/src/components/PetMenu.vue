@@ -14,7 +14,8 @@ import {
   isShopOpen,
   showHunger,
   sleepTimeRemaining,
-  statusFoam, location, isGameOver, handleRestart, warning, lowEnergy, activeTab, tutorialStep, nextTutorialStep
+  statusFoam, location, isGameOver, handleRestart, warning, lowEnergy, activeTab, tutorialStep, nextTutorialStep,
+  isAdmin
 } from "@/scripts/useGameStore.js";
 import {goSleep} from "@/scripts/actions.js";
 import {
@@ -152,20 +153,11 @@ function resetTutorial() {
   location.reload() // Перезагружаем страницу
 }
 
-const ADMIN_IDS = [
-  '1059422557',
-  '2101015196',
-  '743865425',
-  '7287871980'
 
-]
 
-const userId = computed(() => {
-  return String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '')
-})
 
 // Проверяем, входит ли текущий userId в список админов
-const isAdmin = computed(() => ADMIN_IDS.includes(userId.value))
+
 
 const foodWarning = computed(() => {
   const list = foodCartList.value
@@ -277,7 +269,7 @@ const currentBathImage = computed(() => {
                  :style="{ backgroundImage: `url('/gamePlay/hop_hop_game_logo.webp?v=${APP_VERSION}')` }">
             </div>
             <div
-            
+
                 class="absolute inset-0 z-20 flex flex-col items-center justify-end pb-0.5 text-center pointer-events-none bg-black/10"
             >
       <span class="text-amber-400 font-bold text-[7px] tracking-wide leading-tight">

@@ -3,6 +3,8 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import { addCoin } from "@/scripts/actions.js";
 import { APP_VERSION } from "@/scripts/imageVersion.js";
+import {tgId} from "@/scripts/api.js";
+import {isAdmin} from "@/scripts/useGameStore.js";
 
 const isLoading = ref(true);
 
@@ -63,8 +65,11 @@ const canvasRef = ref(null)
 let ctx = null
 let animationFrameId = null
 let lastTime = 0
+let fps = 0
+let frameCount = 0
+let fpsTimer = 0
 const FRAME_TIME = 1000 / 60
-const SPEED = 1.8
+const SPEED = 2
 
 // --- ИГРОК (СОСИСКА) ---
 const player = {
@@ -443,18 +448,45 @@ const drawGame = () => {
       ctx.fillStyle = '#f97316'
       ctx.fillRect(-player.width / 2, -player.height / 2, player.width, player.height)
     }
+    // Показываем FPS (для отладки)
+
 
     ctx.restore()
+    if (isAdmin){
+      ctx.fillStyle = 'rgba(0,0,0,0.6)'
+
+      ctx.fillStyle = '#00ff88'
+      ctx.font = 'bold 14px monospace'
+      ctx.fillText(`FPS: ${fps}`, 18, 100)
+    }
   }
+
 }
 
 // Главный цикл
 const loop = (timestamp) => {
   if (!lastTime) lastTime = timestamp
+
   const delta = timestamp - lastTime
+
+  // Пропускаем лишние кадры, если телефон даёт 90/120 Гц
+  if (delta < FRAME_TIME * 0.9) {
+    animationFrameId = requestAnimationFrame(loop)
+    return
+  }
+
   lastTime = timestamp
 
-  const dt = Math.min(delta / FRAME_TIME, 2.5)
+  // Подсчёт FPS (оставь, если нужно)
+  frameCount++
+  fpsTimer += delta
+  if (fpsTimer >= 1000) {
+    fps = Math.round(frameCount * 1000 / fpsTimer)
+    frameCount = 0
+    fpsTimer = 0
+  }
+
+  const dt = Math.min(delta / FRAME_TIME, 1.6)
 
   updateGame(dt)
   drawGame()

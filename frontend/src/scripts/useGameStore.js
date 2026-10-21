@@ -31,8 +31,18 @@ export const isExpPopping = ref(false)
 export const fruitStreak = ref(
     Number(localStorage.getItem('pet_fruitStreak')) || 0
 )
+const ADMIN_IDS = [
+    '1059422557',
+    '2101015196',
+    '743865425',
+    '7287871980'
 
+]
+const userId = computed(() => {
+    return String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '')
+})
 
+export const isAdmin = computed(() => ADMIN_IDS.includes(userId.value))
 
 export const isTutorialCompleted = computed(() => {
     return localStorage.getItem('tutorial_completed') === 'true' || gameData.tutorialCompleted;
