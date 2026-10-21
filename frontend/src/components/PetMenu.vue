@@ -114,7 +114,38 @@ function goToCatchTheFood() {
   }
 }
 
+function goToHopHopGame() {
+  // Безопасный расчет монет (поддерживает ref и обычный объект)
+  const coins = Number(gameData?.value?.coins ?? gameData?.coins) || 0;
 
+  if (coins < 50 && !currentBet.value) {
+    alert('Нужно минимум 50 монет, чтобы зайти в «Hop-Hop»!');
+    return;
+  }
+  if (gameData.foodLevel < 3) {
+    alert('Чтобы зайти в «Hop-Hop» нужно быть сытым!');
+    return;
+  }
+  if (gameData.energy < 3) {
+    alert('Чтобы зайти в «Hop-Hop» нужно быть бодрым!');
+    return;
+  }
+
+  // Определение устройства iOS (iPhone, iPad, iPod)
+  const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  if (isIOS) {
+    // Жёсткая перезагрузка для iOS: очищает застрявший WebKit/GPU кэш Safari
+    console.log('iOS')
+    window.location.href = '/thejumpgame';
+  } else {
+    console.log('Android')
+    // Для Android и ПК оставляем быструю SPA-навигацию
+    router.push('/thejumpgame');
+  }
+}
 function resetTutorial() {
   localStorage.removeItem('tutorial_completed')
   tutorialStep.value = 1 // Возвращаем на 1 шаг
@@ -196,43 +227,38 @@ const currentBathImage = computed(() => {
           <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
         </div>
 
-        <div class="absolute gap-2 flex  -top-10 left-1/2 -translate-x-1/2">
+        <div class="absolute gap-2 flex -top-10 left-1/2 -translate-x-1/2">
+
+          <!-- 1. Кнопка Фортуны -->
           <div
               @click="isFortuneOpen = true"
-              class="bg-purple-200  overflow-hidden   rounded-4xl border-2 border-purple-400 transition-transform duration-50 cursor-pointer"
-              style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-            <div class=" h-9 w-9  bg-contain bg-no-repeat bg-center"
-                 :style="{ backgroundImage: `url('/gamePlay/fortune_icons.webp?v=${APP_VERSION}')` }">
-            </div>
-            <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
-          </div>
-
-          <!-- Кнопка Салуна -->
-          <div class="relative  rounded-4xl overflow-hidden">
-
-            <!-- Блокирующий оверлей (как в магазине) -->
-            <div
-                v-if="gameData.level < 5"
-                class="absolute inset-0 z-20 bg-slate-950/50  flex flex-col items-center justify-center text-center"
-            >
-        <span class="text-amber-400 font-bold text-[5px] tracking-wide leading-tight">
-          🔒 5 уровень
-        </span>
-            </div>
-          <div
-              @click="goToSaloon()"
-              class="bg-red-200 overflow-hidden rounded-4xl border-2 border-red-600 transition-transform duration-50 cursor-pointer"
+              class="bg-purple-200 overflow-hidden rounded-4xl border-2 border-purple-400 transition-transform duration-50 cursor-pointer"
               style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
             <div class="h-9 w-9 bg-contain bg-no-repeat bg-center"
-                 :style="{ backgroundImage: `url('/gamePlay/jackpot_icon.webp?v=${APP_VERSION}')` }">
+                 :style="{ backgroundImage: `url('/gamePlay/fortune_icons.webp?v=${APP_VERSION}')` }">
             </div>
-            <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
           </div>
 
+          <!-- 2. Кнопка Салуна (с замком) -->
+          <div class="relative rounded-4xl overflow-hidden cursor-pointer" @click="goToSaloon()">
+            <div
+                v-if="gameData.level < 5"
+                class="absolute inset-0 z-20 bg-slate-950/50 flex flex-col items-center justify-center text-center pointer-events-none"
+            >
+      <span class="text-amber-400 font-bold text-[7px] tracking-wide leading-tight">
+        🔒 5 ур.
+      </span>
+            </div>
+            <div
+                class="bg-red-200 overflow-hidden rounded-4xl border-2 border-red-600 transition-transform duration-50"
+                style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+              <div class="h-9 w-9 bg-contain bg-no-repeat bg-center"
+                   :style="{ backgroundImage: `url('/gamePlay/jackpot_icon.webp?v=${APP_VERSION}')` }">
+              </div>
+            </div>
+          </div>
 
-
-
-        </div>
+          <!-- 3. Кнопка Catch the Food -->
           <div
               @click="goToCatchTheFood()"
               class="bg-orange-200 overflow-hidden rounded-4xl border-2 border-orange-400 transition-transform duration-50 cursor-pointer"
@@ -240,8 +266,26 @@ const currentBathImage = computed(() => {
             <div class="h-9 w-9 bg-contain bg-no-repeat bg-center"
                  :style="{ backgroundImage: `url('/gamePlay/cart_for_game.webp?v=${APP_VERSION}')` }">
             </div>
-            <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
           </div>
+
+          <!-- 4. Кнопка Hop Hop (с плашкой Beta) -->
+          <div
+              @click="goToHopHopGame()"
+              class="bg-red-300 relative overflow-hidden rounded-4xl border-2 border-yellow-400 transition-transform duration-50 cursor-pointer"
+              style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+            <div class="h-9 w-9 bg-contain bg-no-repeat bg-center"
+                 :style="{ backgroundImage: `url('/gamePlay/hop_hop_game_logo.webp?v=${APP_VERSION}')` }">
+            </div>
+            <div
+                v-if="gameData.level < 5"
+                class="absolute inset-0 z-20 flex flex-col items-center justify-end pb-0.5 text-center pointer-events-none bg-black/10"
+            >
+      <span class="text-amber-400 font-bold text-[7px] tracking-wide leading-tight">
+        Beta
+      </span>
+            </div>
+          </div>
+
         </div>
 
         <div

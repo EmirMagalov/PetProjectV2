@@ -7,6 +7,7 @@ import App from '../App.vue'
 import '../assets/main.css'
 import LaboratoryMain from "@/components/Laboratory/LaboratoryMain.vue";
 import CatchTheFoodGame from "@/components/CatchTheFood/CatchTheFoodGame.vue";
+import HopHopGame from "@/components/HopHop/hopHopGame.vue";
 // 1. Принудительный сброс кэша для iOS Safari / Telegram WebApp
 const APP_VERSION = '1.0.2'; // Меняй версию при каждом обновлении
 const currentVersion = localStorage.getItem('app_version');
@@ -58,6 +59,7 @@ const routes = [
     { path: '/saloon', component: SaloonMain },
     { path: '/laboratory', component: LaboratoryMain },
     { path: '/thefoodgame', component: CatchTheFoodGame },
+    { path: '/thejumpgame', component: HopHopGame },
 ];
 
 export const router = createRouter({

@@ -5,11 +5,6 @@ import { addCoin } from "@/scripts/actions.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 const isLoading = ref(true);
-onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 800);
-});
 
 // --- СОСТОЯНИЕ ИГРЫ ---
 const gameState = ref('MENU') // 'MENU' | 'PLAYING' | 'GAMEOVER'
@@ -437,6 +432,7 @@ const resizeCanvas = () => {
 
 onMounted(() => {
   const canvas = canvasRef.value
+
   if (canvas) {
     ctx = canvas.getContext('2d')
     resizeCanvas()
@@ -446,6 +442,9 @@ onMounted(() => {
     window.addEventListener('mouseup', handleMouseUp)
     animationFrameId = requestAnimationFrame(loop)
   }
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 800);
 })
 
 onUnmounted(() => {
