@@ -8,10 +8,10 @@ const isLoading = ref(true);
 
 // --- НАСТРОЙКИ ПОЗИЦИЙ ---
 const config = {
-  shelfOffsetFromBottom: 140, // Насколько высоко вся полка от низа экрана
-  trampolineVisualOffset: 200, // Где визуально рисуется картинка батута
-  bounceSurfaceOffset: 130,    // Где находится физическая линия отскока ножек
-  playerSpawnHeight: 60        // Насколько выше точки отскока появляется сосиска
+  shelfOffsetFromBottom: 140,
+  trampolineVisualOffset: 200,
+  bounceSurfaceOffset: 130,
+  playerSpawnHeight: 60
 }
 
 // --- ИЗОБРАЖЕНИЯ ИГРЫ ---
@@ -23,7 +23,6 @@ const images = {
   hotdog: new Image()
 }
 
-// Флаги загрузки картинок
 const imagesLoaded = {
   player: false,
   trampoline: false,
@@ -63,6 +62,9 @@ const gameOverReason = ref('')
 const canvasRef = ref(null)
 let ctx = null
 let animationFrameId = null
+let lastTime = 0
+const FRAME_TIME = 1000 / 60
+const SPEED = 1.8
 
 // --- ИГРОК (СОСИСКА) ---
 const player = {
@@ -73,7 +75,7 @@ const player = {
   vy: 0,
   rotation: 0,
   vRot: 0,
-  bounceForce: 4.5,
+  bounceForce: 3,
   maxBounceForce: 6
 }
 
@@ -100,7 +102,7 @@ const spawnCoins = (centerX, currentShelfY) => {
   for (let i = 0; i < 3; i++) {
     coinsList.push({
       x: centerX,
-      y: trampolineSurfaceY - 300 - (i * 45),
+      y: trampolineSurfaceY - 250 - (i * 45),
       radius: 14,
       collected: false,
       floatOffset: Math.random() * Math.PI
@@ -132,11 +134,12 @@ const startGame = () => {
   player.vy = -player.bounceForce
   player.rotation = 0
   player.vRot = 0
+  player.bounceForce = 4.5
 
-  particlesList = [] // Очищаем массив частиц при старте
-  coinsList = []
+  particlesList = []
   spawnCoins(logicalWidth / 2, shelfY)
   gameState.value = 'PLAYING'
+  lastTime = 0
 }
 
 // --- УПРАВЛЕНИЕ ЗАЖАТИЕМ ---
@@ -159,20 +162,15 @@ const stopFlip = (e) => {
   isHolding = false
 }
 
-// Эффект разлома платформы (ограничено количество для производительности)
+// Эффект разлома платформы
 const createTrampolineShards = (x, y) => {
-  // Ограничиваем максимальное количество частиц в памяти, чтобы избежать лагов
-  if (particlesList.length > 50) {
-    particlesList.splice(0, 15)
-  }
-
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 22; i++) {
     particlesList.push({
       x: x + (Math.random() - 0.5) * 80,
       y: y + (Math.random() - 0.5) * 12,
-      vx: (Math.random() - 0.5) * 8,
-      vy: Math.random() * 6 + 2,
-      size: 4 + Math.random() * 4,
+      vx: (Math.random() - 0.5) * 10,
+      vy: Math.random() * 8 + 2,
+      size: 4 + Math.random() * 6,
       alpha: 1,
       color: Math.random() > 0.5 ? '#0284c7' : '#f59e0b'
     })
@@ -180,26 +178,28 @@ const createTrampolineShards = (x, y) => {
 }
 
 // Физический цикл
-const updateGame = () => {
+const updateGame = (dt = 1) => {
   const canvas = canvasRef.value
   if (!canvas) return
   const logicalWidth = canvas.clientWidth || 360
   const logicalHeight = canvas.clientHeight || 600
   const targetShelfY = logicalHeight - config.shelfOffsetFromBottom
 
-  if (trampolineBounceAnim > 0) trampolineBounceAnim -= 0.1
+  const realDt = dt * SPEED
+
+  if (trampolineBounceAnim > 0) trampolineBounceAnim -= 0.1 * realDt
 
   if (gameState.value === 'PLAYING') {
-    player.vy += 0.06
-    player.y += player.vy
+    player.vy += 0.06 * realDt
+    player.y += player.vy * realDt
 
     if (isHolding) {
-      player.vRot += 0.015
+      player.vRot += 0.015 * realDt
       if (player.vRot > 0.10) player.vRot = 0.10
     } else {
-      player.vRot *= 0.8
+      player.vRot *= Math.pow(0.8, realDt)
     }
-    player.rotation += player.vRot
+    player.rotation += player.vRot * realDt
 
     completedFlips.value = Math.floor((Math.abs(player.rotation) + 0.25) / (Math.PI * 2))
 
@@ -219,6 +219,7 @@ const updateGame = () => {
     })
 
     const trampolineSurfaceY = shelfY - config.bounceSurfaceOffset
+
 
     // Касание батута
     if (player.vy > 0 && player.y + player.height / 2 >= trampolineSurfaceY) {
@@ -247,16 +248,23 @@ const updateGame = () => {
           coinsEarned.value += 2
 
           gameState.value = 'PASSING'
-          passTimer = 60
+          passTimer = 120
           createTrampolineShards(centerX, trampolineSurfaceY)
         } else {
           trampolineBounceAnim = 1
           player.y = trampolineSurfaceY - player.height / 2
+
+          // === Здесь исправление ===
+          const wasSpinning = completedFlips.value > 0 || isHolding
+
           player.vRot = 0
 
-          if (player.bounceForce < player.maxBounceForce) {
-            player.bounceForce += 0.3
+          if (wasSpinning) {
+            if (player.bounceForce < player.maxBounceForce) {
+              player.bounceForce += 0.35
+            }
           }
+
           player.vy = -player.bounceForce
         }
       } else {
@@ -264,20 +272,20 @@ const updateGame = () => {
         triggerGameOver('Промазал мимо батута!')
       }
     }
-  }
+}
 
-  // ФАЗА УСПЕШНОГО ПРОХОЖДЕНИЯ (Сосиска падает в булочку)
+  // ФАЗА УСПЕШНОГО ПРОХОЖДЕНИЯ
   if (gameState.value === 'PASSING') {
-    passTimer--
+    passTimer -= realDt
 
     const targetAngle = Math.PI / 2
-    player.rotation += (targetAngle - player.rotation) * 0.2
+    player.rotation += (targetAngle - player.rotation) * 0.2 * realDt
     player.vRot = 0
 
-    const bunTargetY = shelfY + config.bounceSurfaceOffset + 35
+    const bunTargetY = shelfY - config.bounceSurfaceOffset + 90
 
     if (player.y < bunTargetY) {
-      player.y += 7
+      player.y += 7 * realDt
     } else {
       player.y = bunTargetY
     }
@@ -300,15 +308,13 @@ const updateGame = () => {
     }
   }
 
-  // Обновление частиц с гарантированной очисткой
+  // Частицы
   for (let i = particlesList.length - 1; i >= 0; i--) {
     let p = particlesList[i]
-    p.x += p.vx
-    p.y += p.vy
-    p.alpha -= 0.05
-    if (p.alpha <= 0) {
-      particlesList.splice(i, 1)
-    }
+    p.x += p.vx * realDt
+    p.y += p.vy * realDt
+    p.alpha -= 0.04 * realDt
+    if (p.alpha <= 0) particlesList.splice(i, 1)
   }
 }
 
@@ -324,7 +330,7 @@ const triggerGameOver = (reason = 'Не справился!') => {
   }
 }
 
-// Отрисовка элементов на холсте
+// Отрисовка
 const drawGame = () => {
   const canvas = canvasRef.value
   if (!canvas || !ctx) return
@@ -341,6 +347,7 @@ const drawGame = () => {
   const platformY = shelfY - config.trampolineVisualOffset + 75
 
   ctx.save()
+
   ctx.fillStyle = '#C0C0C0'
   ctx.beginPath()
   ctx.roundRect(platformX, platformY, platformWidth, platformHeight, 10)
@@ -350,12 +357,13 @@ const drawGame = () => {
   ctx.beginPath()
   ctx.roundRect(platformX, platformY, platformWidth, 5, [10, 10, 0, 0])
   ctx.fill()
+
   ctx.restore()
 
-  // 1. Отрисовка булочки хот-дога под батутом
+  // Булочка / хот-дог
   const bunX = centerX - bunWidth / 2
-  const bunY = shelfY + config.bounceSurfaceOffset + 43
-  const bunTargetY = shelfY + config.bounceSurfaceOffset + 35
+  const bunY = shelfY - config.bounceSurfaceOffset + 43
+  const bunTargetY = shelfY - config.bounceSurfaceOffset + 35
 
   const isSausageLanded = gameState.value === 'PASSING' && player.y >= bunTargetY
 
@@ -365,7 +373,7 @@ const drawGame = () => {
     ctx.drawImage(images.bun, bunX, bunY, bunWidth, bunHeight)
   }
 
-  // 2. Платформа и батут
+  // Батут
   if (gameState.value !== 'PASSING' || passTimer > 12) {
     const trampX = centerX - trampolineWidth / 2
     const trampY = shelfY - config.trampolineVisualOffset + (trampolineBounceAnim * 4)
@@ -380,7 +388,7 @@ const drawGame = () => {
     }
   }
 
-  // 3. Отрисовка монет
+  // Монеты
   coinsList.forEach(coin => {
     if (!coin.collected) {
       ctx.save()
@@ -408,7 +416,7 @@ const drawGame = () => {
     }
   })
 
-  // 4. Частицы
+  // Частицы
   particlesList.forEach(p => {
     ctx.save()
     ctx.globalAlpha = Math.max(0, p.alpha)
@@ -417,7 +425,7 @@ const drawGame = () => {
     ctx.restore()
   })
 
-  // 5. Отрисовка персонажа (сосиски)
+  // Сосиска
   if (gameState.value !== 'PASSING') {
     ctx.save()
     ctx.translate(player.x, player.y)
@@ -440,8 +448,15 @@ const drawGame = () => {
   }
 }
 
-const loop = () => {
-  updateGame()
+// Главный цикл
+const loop = (timestamp) => {
+  if (!lastTime) lastTime = timestamp
+  const delta = timestamp - lastTime
+  lastTime = timestamp
+
+  const dt = Math.min(delta / FRAME_TIME, 2.5)
+
+  updateGame(dt)
   drawGame()
   animationFrameId = requestAnimationFrame(loop)
 }
@@ -506,27 +521,24 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- ФОНОВЫЕ ИЗОБРАЖЕНИЯ В TEMPLATE -->
     <div class="absolute inset-0 z-0 bg-white overflow-hidden pointer-events-none">
       <div
           class="absolute bottom-60 left-1/2 -translate-x-1/2 w-60 h-60 bg-contain bg-bottom bg-no-repeat"
           :style="{
-            backgroundImage: `url('/jumpGame/jumping_game_menu_background.webp?v=${APP_VERSION}')`,
-          }"
+          backgroundImage: `url('/jumpGame/jumping_game_menu_background.webp?v=${APP_VERSION}')`,
+        }"
       ></div>
     </div>
 
-    <!-- Вторая картинка (фоновый стол/полка) -->
     <div class="absolute inset-0 z-0 bg-transparent overflow-hidden pointer-events-none">
       <div
           class="absolute -bottom-10 left-1/2 -translate-x-1/2 w-80 h-80 bg-contain bg-bottom bg-no-repeat"
           :style="{
-            backgroundImage: `url('/jumpGame/jumping_game_table_background.webp?v=${APP_VERSION}')`,
-          }"
+          backgroundImage: `url('/jumpGame/jumping_game_table_background.webp?v=${APP_VERSION}')`,
+        }"
       ></div>
     </div>
 
-    <!-- Canvas -->
     <canvas
         ref="canvasRef"
         class="relative z-10 flex-1 w-full h-full cursor-pointer bg-transparent"
@@ -538,7 +550,6 @@ onUnmounted(() => {
         @touchcancel="stopFlip"
     ></canvas>
 
-    <!-- ИНДИКАТОР УРОВНЯ И ПРОГРЕССА САЛЬТО -->
     <div v-if="gameState === 'PLAYING'" class="absolute top-24 left-2 z-20 bg-slate-800/90 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-slate-700 shadow-xl pointer-events-none text-center flex flex-col items-center gap-1">
       <div class="text-xs font-black text-amber-400 uppercase tracking-widest">
         Уровень {{ level }}
@@ -551,7 +562,6 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- МЕНЮ СТАРТА -->
     <div v-if="gameState === 'MENU'" class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-center justify-center p-5 pointer-events-auto">
       <div class="bg-slate-800 border border-slate-700 w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
         <h1 class="text-2xl font-extrabold text-white m-0">Бунт Сосиски</h1>
@@ -566,7 +576,7 @@ onUnmounted(() => {
             class="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-base font-bold py-3 px-5 rounded-2xl shadow-lg shadow-orange-500/30 active:scale-95 transition-transform cursor-pointer pointer-events-auto z-50"
             @click="startGame"
         >
-          В бой!
+          Играть
         </button>
 
         <RouterLink to="/" class="absolute -left-4 top-1/2 -translate-y-1/2 z-50 pointer-events-auto">
@@ -577,7 +587,6 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- ЭКРАН ПРОИГРЫША -->
     <div v-if="gameState === 'GAMEOVER'" class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-center justify-center p-5 pointer-events-auto">
       <div class="bg-slate-800 border border-slate-700 w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
         <h2 class="text-2xl font-extrabold text-red-500 m-0">{{ gameOverReason }}</h2>
@@ -608,6 +617,5 @@ onUnmounted(() => {
         </RouterLink>
       </div>
     </div>
-
   </div>
 </template>
