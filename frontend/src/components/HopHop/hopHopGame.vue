@@ -452,7 +452,7 @@ const drawGame = () => {
 
 
     ctx.restore()
-    if (isAdmin){
+    if (isAdmin.value){
       ctx.fillStyle = 'rgba(0,0,0,0.6)'
 
       ctx.fillStyle = '#00ff88'
