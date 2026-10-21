@@ -269,22 +269,22 @@ const currentBathImage = computed(() => {
           </div>
 
           <!-- 4. Кнопка Hop Hop (с плашкой Beta) -->
-          <div
-              @click="goToHopHopGame()"
-              class="bg-red-300 relative overflow-hidden rounded-4xl border-2 border-yellow-400 transition-transform duration-50 cursor-pointer"
-              style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-            <div class="h-9 w-9 bg-contain bg-no-repeat bg-center"
-                 :style="{ backgroundImage: `url('/gamePlay/hop_hop_game_logo.webp?v=${APP_VERSION}')` }">
-            </div>
-            <div
-                v-if="gameData.level < 5"
-                class="absolute inset-0 z-20 flex flex-col items-center justify-end pb-0.5 text-center pointer-events-none bg-black/10"
-            >
-      <span class="text-amber-400 font-bold text-[7px] tracking-wide leading-tight">
-        Beta
-      </span>
-            </div>
-          </div>
+<!--          <div-->
+<!--              @click="goToHopHopGame()"-->
+<!--              class="bg-red-300 relative overflow-hidden rounded-4xl border-2 border-yellow-400 transition-transform duration-50 cursor-pointer"-->
+<!--              style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">-->
+<!--            <div class="h-9 w-9 bg-contain bg-no-repeat bg-center"-->
+<!--                 :style="{ backgroundImage: `url('/gamePlay/hop_hop_game_logo.webp?v=${APP_VERSION}')` }">-->
+<!--            </div>-->
+<!--            <div-->
+<!--                v-if="gameData.level < 5"-->
+<!--                class="absolute inset-0 z-20 flex flex-col items-center justify-end pb-0.5 text-center pointer-events-none bg-black/10"-->
+<!--            >-->
+<!--      <span class="text-amber-400 font-bold text-[7px] tracking-wide leading-tight">-->
+<!--        Beta-->
+<!--      </span>-->
+<!--            </div>-->
+<!--          </div>-->
 
         </div>
 

@@ -19,7 +19,7 @@ const images = {
   player: new Image(),
   trampoline: new Image(),
   coin: new Image(),
-  bun: new Image(), // <--- Добавили булочку
+  bun: new Image(),
   hotdog: new Image()
 }
 
@@ -42,12 +42,10 @@ onMounted(() => {
   images.coin.src = `/gamePlay/coin.webp?v=${APP_VERSION}`;
   images.coin.onload = () => { imagesLoaded.coin = true };
 
-  // Путь к булочке (подкорректируйте папку при необходимости):
   images.bun.src = `/jumpGame/hot_dog_bun.webp?v=${APP_VERSION}`;
   images.bun.onload = () => { imagesLoaded.bun = true };
 
-
-  images.hotdog.src = `/jumpGame/hot_dog.webp?v=${APP_VERSION}`; // Путь к вашей картинке хот-дога
+  images.hotdog.src = `/jumpGame/hot_dog.webp?v=${APP_VERSION}`;
   images.hotdog.onload = () => { imagesLoaded.hotdog = true };
 
   setTimeout(() => { isLoading.value = false; }, 800);
@@ -82,8 +80,8 @@ const player = {
 let shelfY = 480
 let passTimer = 0
 const trampolineWidth = 120
-const bunWidth = 80 // Ширина булочки
-const bunHeight = 80  // Высота булочки
+const bunWidth = 80
+const bunHeight = 80
 let particlesList = []
 let coinsList = []
 let trampolineBounceAnim = 0
@@ -135,7 +133,8 @@ const startGame = () => {
   player.rotation = 0
   player.vRot = 0
 
-  particlesList = []
+  particlesList = [] // Очищаем массив частиц при старте
+  coinsList = []
   spawnCoins(logicalWidth / 2, shelfY)
   gameState.value = 'PLAYING'
 }
@@ -160,15 +159,20 @@ const stopFlip = (e) => {
   isHolding = false
 }
 
-// Эффект разлома платформы
+// Эффект разлома платформы (ограничено количество для производительности)
 const createTrampolineShards = (x, y) => {
-  for (let i = 0; i < 22; i++) {
+  // Ограничиваем максимальное количество частиц в памяти, чтобы избежать лагов
+  if (particlesList.length > 50) {
+    particlesList.splice(0, 15)
+  }
+
+  for (let i = 0; i < 15; i++) {
     particlesList.push({
       x: x + (Math.random() - 0.5) * 80,
       y: y + (Math.random() - 0.5) * 12,
-      vx: (Math.random() - 0.5) * 10,
-      vy: Math.random() * 8 + 2,
-      size: 4 + Math.random() * 6,
+      vx: (Math.random() - 0.5) * 8,
+      vy: Math.random() * 6 + 2,
+      size: 4 + Math.random() * 4,
       alpha: 1,
       color: Math.random() > 0.5 ? '#0284c7' : '#f59e0b'
     })
@@ -266,21 +270,18 @@ const updateGame = () => {
   if (gameState.value === 'PASSING') {
     passTimer--
 
-    const targetAngle = Math.PI / 2 // 90 градусов (горизонтально)
+    const targetAngle = Math.PI / 2
     player.rotation += (targetAngle - player.rotation) * 0.2
     player.vRot = 0
 
-    // Булочка находится примерно здесь:
-    const bunTargetY = shelfY - config.bounceSurfaceOffset + 90
+    const bunTargetY = shelfY + config.bounceSurfaceOffset + 35
 
-    // Плавно опускаем сосиску до булочки, а затем останавливаем
     if (player.y < bunTargetY) {
       player.y += 7
     } else {
-      player.y = bunTargetY // Фиксируем сосиску прямо в булочке
+      player.y = bunTargetY
     }
 
-    // Когда прошли 2 секунды (120 кадров):
     if (passTimer <= 0) {
       shelfY = targetShelfY
       const newTrampolineSurfaceY = shelfY - config.bounceSurfaceOffset
@@ -299,12 +300,15 @@ const updateGame = () => {
     }
   }
 
+  // Обновление частиц с гарантированной очисткой
   for (let i = particlesList.length - 1; i >= 0; i--) {
     let p = particlesList[i]
     p.x += p.vx
     p.y += p.vy
-    p.alpha -= 0.04
-    if (p.alpha <= 0) particlesList.splice(i, 1)
+    p.alpha -= 0.05
+    if (p.alpha <= 0) {
+      particlesList.splice(i, 1)
+    }
   }
 }
 
@@ -331,46 +335,37 @@ const drawGame = () => {
   ctx.clearRect(0, 0, logicalWidth, logicalHeight)
 
   const centerX = logicalWidth / 2
-  const platformWidth = trampolineWidth + 500 // Чуть шире батута
+  const platformWidth = trampolineWidth + 500
   const platformHeight = 20
   const platformX = centerX - platformWidth / 2
-  // Платформа располагается прямо под ножками батута
   const platformY = shelfY - config.trampolineVisualOffset + 75
 
   ctx.save()
-
-  // Основная балка платформы
   ctx.fillStyle = '#C0C0C0'
   ctx.beginPath()
   ctx.roundRect(platformX, platformY, platformWidth, platformHeight, 10)
   ctx.fill()
 
-  // Верхний кант для объема
-
   ctx.fillStyle = '#99CCFF'
   ctx.beginPath()
   ctx.roundRect(platformX, platformY, platformWidth, 5, [10, 10, 0, 0])
   ctx.fill()
-
-
   ctx.restore()
+
   // 1. Отрисовка булочки хот-дога под батутом
   const bunX = centerX - bunWidth / 2
-  const bunY = shelfY - config.bounceSurfaceOffset + 43
-  const bunTargetY = shelfY - config.bounceSurfaceOffset + 35
+  const bunY = shelfY + config.bounceSurfaceOffset + 43
+  const bunTargetY = shelfY + config.bounceSurfaceOffset + 35
 
-  // Сосиска считается долетевшей, если она опустилась до позиции булочки
   const isSausageLanded = gameState.value === 'PASSING' && player.y >= bunTargetY
 
   if (isSausageLanded && imagesLoaded.hotdog) {
-    // Сосиска долетела и легла — рисуем готовый хот-дог вместо булочки
     ctx.drawImage(images.hotdog, bunX, bunY, bunWidth, bunHeight)
   } else if (imagesLoaded.bun) {
-    // Обычная булочка (во время игры или пока сосиска еще летит к ней)
     ctx.drawImage(images.bun, bunX, bunY, bunWidth, bunHeight)
   }
 
-  // 2. Платформа и батут (скрываем во второй половине падения)
+  // 2. Платформа и батут
   if (gameState.value !== 'PASSING' || passTimer > 12) {
     const trampX = centerX - trampolineWidth / 2
     const trampY = shelfY - config.trampolineVisualOffset + (trampolineBounceAnim * 4)
@@ -485,9 +480,6 @@ onUnmounted(() => {
 </script>
 
 <template>
-
-
-
   <div class="relative w-full max-w-[420px] h-screen max-h-[800px] mx-auto overflow-hidden shadow-2xl select-none touch-none bg-slate-900 flex flex-col">
     <Transition name="fade">
       <div v-if="isLoading" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#ABD7DD] via-[#ABD7DD] to-blue-300 text-[#D18900]">
@@ -513,6 +505,7 @@ onUnmounted(() => {
         В булочку! Отлично!
       </div>
     </div>
+
     <!-- ФОНОВЫЕ ИЗОБРАЖЕНИЯ В TEMPLATE -->
     <div class="absolute inset-0 z-0 bg-white overflow-hidden pointer-events-none">
       <div
