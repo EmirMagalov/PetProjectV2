@@ -159,9 +159,6 @@ onMounted(async () => {
     const bonus = Number(coinsParam)
     if (!gameData.referredBy) {
       gameData.coins += bonus // или gameData.coins = bonus, если это фиксированный стартовый баланс
-
-      // Очищаем URL от параметров, чтобы при F5/перезагрузке бонус не капал снова
-      window.history.replaceState({}, document.title, window.location.pathname)
     }
   }
   document.addEventListener('visibilitychange', handleVisibilityChange)
