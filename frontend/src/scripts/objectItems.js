@@ -48,7 +48,7 @@ export const foodList = [
         subcategory: 'fastfood',
         foodGain: 25,
         energyGain: 3,
-        price: 29,
+        price: 39,
         level: 10
     },
     {
@@ -59,7 +59,7 @@ export const foodList = [
         subcategory: 'fastfood',
         energyGain: 3,
         foodGain: 25,
-        price: 29,
+        price: 39,
         level: 10
     },
 
