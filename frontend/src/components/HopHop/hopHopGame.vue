@@ -565,7 +565,7 @@ onUnmounted(() => {
     <div class="absolute bottom-50 left-1/2 -translate-x-1/2 w-70 h-70">
 
       <img class="relative" :src="`/jumpGame/jumping_game_menu_background.webp?v=${APP_VERSION}`" alt="">
-      <div class="absolute flex flex-col gap-1 mt-1 items-center top-10 right-12">
+      <div class="absolute flex flex-col gap-1 mt-2 items-center top-10 right-10">
         <div>
           <span>Рекорд:</span>
           <span class="text-amber-400">{{highScore}}</span>
@@ -583,7 +583,10 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-
+      <div class="absolute top-11 left-26 w-10 h-10">
+        <img class="" src="/jumpGame/hop_hop_game_instructions_right.webp" alt="">
+        <img class="" src="/jumpGame/hop_hop_game_instructions_wrong.webp" alt="">
+      </div>
     </div>
 
     <div class="absolute inset-0 z-0 bg-transparent overflow-hidden pointer-events-none">
