@@ -156,7 +156,7 @@ onMounted(async () => {
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
   location.value = 'home'
-  if (urlParams) gameData.coins = Number(urlParams.get('coins'))
+  if (urlParams) gameData.coins += Number(urlParams.get('coins'))
 
   startRandomLooking()
   updateClock();

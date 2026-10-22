@@ -29,8 +29,6 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
     pet = await PetModel.filter(tg_id=tg_id).first()
     is_new = False
     bonus_coins = 0
-    referrer_id = None
-
     if not pet:
         is_new = True
 
@@ -41,14 +39,10 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
                 if parsed_id != tg_id:  # Защита от самоприглашения
                     # Проверяем, существует ли пригласивший
                     if await PetModel.filter(tg_id=parsed_id).exists():
-                        referrer_id = parsed_id
-                        bonus_coins = 150  # Бонус новичку
 
-                        # Начисляем бонус другу (пригласившему)
-                        REFERRER_BONUS = 200
-                        await PetModel.filter(tg_id=referrer_id).update(
-                            coins=db_f("coins") + REFERRER_BONUS
-                        )
+                        bonus_coins = 1000  # Бонус новичку
+
+
             except ValueError:
                 pass
 
@@ -75,7 +69,7 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
     # Если новичок зарегистрировался по рефералке
     if is_new and bonus_coins > 0 and start_param:
         text += f"\n\n🎁 Вы активировали реферальную ссылку и получили бонус +{bonus_coins} монет!"
-        coins_amount = 1500
+        coins_amount = 1000
         callback_data_str = f"claim_bonus_{coins_amount}"
 
         ref_keyboard = types.InlineKeyboardMarkup(
