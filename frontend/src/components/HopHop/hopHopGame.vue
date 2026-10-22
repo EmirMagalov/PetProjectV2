@@ -146,12 +146,12 @@ const startGame = () => {
   shelfY = logicalHeight - config.shelfOffsetFromBottom
 
   player.x = logicalWidth / 2
+  player.bounceForce = 4.5
   const trampolineSurfaceY = shelfY - config.bounceSurfaceOffset
   player.y = trampolineSurfaceY - config.playerSpawnHeight
   player.vy = -player.bounceForce
   player.rotation = 0
   player.vRot = 0
-  player.bounceForce = 4.5
 
   particlesList = []
   spawnCoins(logicalWidth / 2, shelfY)

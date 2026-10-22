@@ -232,10 +232,10 @@ const currentBathImage = computed(() => {
           </div>
 
           <!-- 2. Кнопка Салуна (с замком) -->
-          <div class="relative rounded-4xl overflow-hidden cursor-pointer" @click="goToSaloon()">
+          <div class="relative rounded-4xl overflow-hidden cursor-pointer" @click="gameData.level >= 5 && goToSaloon()">
             <div
                 v-if="gameData.level < 5"
-                class="absolute inset-0 z-20 bg-slate-950/50 flex flex-col items-center justify-center text-center pointer-events-none"
+                class="absolute inset-0 z-30 bg-slate-950/50 flex flex-col items-center justify-center text-center pointer-events-none"
             >
       <span class="text-amber-400 font-bold text-[7px] tracking-wide leading-tight">
         🔒 5 ур.
