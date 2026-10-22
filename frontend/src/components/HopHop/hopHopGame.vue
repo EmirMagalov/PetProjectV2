@@ -1,8 +1,8 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import {ref, onMounted, onUnmounted, computed} from 'vue'
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
-import { addCoin } from "@/scripts/actions.js";
-import { APP_VERSION } from "@/scripts/imageVersion.js";
+import {addCoin} from "@/scripts/actions.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {tgId} from "@/scripts/api.js";
 import {isAdmin} from "@/scripts/useGameStore.js";
 
@@ -35,21 +35,33 @@ const imagesLoaded = {
 
 onMounted(() => {
   images.player.src = `/jumpGame/jumping_sausage.webp?v=${APP_VERSION}`;
-  images.player.onload = () => { imagesLoaded.player = true };
+  images.player.onload = () => {
+    imagesLoaded.player = true
+  };
 
   images.trampoline.src = `/jumpGame/trampoline.webp?v=${APP_VERSION}`;
-  images.trampoline.onload = () => { imagesLoaded.trampoline = true };
+  images.trampoline.onload = () => {
+    imagesLoaded.trampoline = true
+  };
 
   images.coin.src = `/gamePlay/coin.webp?v=${APP_VERSION}`;
-  images.coin.onload = () => { imagesLoaded.coin = true };
+  images.coin.onload = () => {
+    imagesLoaded.coin = true
+  };
 
   images.bun.src = `/jumpGame/hot_dog_bun.webp?v=${APP_VERSION}`;
-  images.bun.onload = () => { imagesLoaded.bun = true };
+  images.bun.onload = () => {
+    imagesLoaded.bun = true
+  };
 
   images.hotdog.src = `/jumpGame/hot_dog.webp?v=${APP_VERSION}`;
-  images.hotdog.onload = () => { imagesLoaded.hotdog = true };
+  images.hotdog.onload = () => {
+    imagesLoaded.hotdog = true
+  };
 
-  setTimeout(() => { isLoading.value = false; }, 800);
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 800);
 });
 
 // --- СОСТОЯНИЕ ИГРЫ ---
@@ -246,7 +258,7 @@ const updateGame = (dt = 1) => {
           return
         }
 
-        if (isUpright && completedFlips.value >= level.value) {
+        if (!isHeadLanding && !isLeftSideLanding && completedFlips.value >= level.value) {
           score.value++
           level.value++
           addCoin(2)
@@ -263,15 +275,23 @@ const updateGame = (dt = 1) => {
           trampolineBounceAnim = 1
           player.y = trampolineSurfaceY - player.height / 2
 
-          const wasSpinning = completedFlips.value > 0 || isHolding
+          const targetFlips = level.value
+          const halfFlipsNeeded = Math.ceil(targetFlips / 2) // Округляем вверх (для 3 уровней половина это 2)
+
+          const reachedHalf = completedFlips.value >= halfFlipsNeeded || isHolding
 
           player.vRot = 0
 
-          if (wasSpinning) {
-            if (player.bounceForce < player.maxBounceForce) {
+          if (player.bounceForce < player.maxBounceForce) {
+            if (reachedHalf) {
+              // Набил половину или больше (или держал палец) — хороший буст к высоте
               player.bounceForce += 0.35
+            } else {
+              // Набил меньше половины — слабый прирост
+              player.bounceForce += 0.2
             }
           }
+
 
           player.vy = -player.bounceForce
         }
@@ -532,14 +552,19 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="relative w-full max-w-[420px] bg-yellow-100 h-screen max-h-[800px] mx-auto overflow-hidden shadow-2xl select-none touch-none bg-slate-900 flex flex-col">
+  <div
+      class="relative w-full max-w-[420px] bg-yellow-100 h-screen max-h-[800px] mx-auto overflow-hidden shadow-2xl select-none touch-none bg-slate-900 flex flex-col">
     <Transition name="fade">
-      <div v-if="isLoading" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#ABD7DD] via-[#ABD7DD] to-blue-300 text-[#D18900]">
+      <div v-if="isLoading"
+           class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#ABD7DD] via-[#ABD7DD] to-blue-300 text-[#D18900]">
         <div class="relative flex items-center justify-center mb-4">
           <div class="absolute w-24 h-24 rounded-full bg-amber-500/20 animate-ping"></div>
-          <div class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
-            <div class="w-full h-full bg-[#FADCCC] rounded-full flex items-center justify-center border border-amber-300/40">
-              <img :src="`/gamePlay/logo_icons.webp?v=${APP_VERSION}`" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
+          <div
+              class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
+            <div
+                class="w-full h-full bg-[#FADCCC] rounded-full flex items-center justify-center border border-amber-300/40">
+              <img :src="`/gamePlay/logo_icons.webp?v=${APP_VERSION}`" class="w-10 h-10 object-contain drop-shadow-md"
+                   alt="Loading..."/>
             </div>
           </div>
         </div>
@@ -552,12 +577,15 @@ onUnmounted(() => {
 
     <PetHeaderMenu/>
     <RouterLink to="/" class="absolute z-20 left-2 top-30 opacity-80">
-      <div class="bg-[#fff6ef] h-15 w-15 flex flex-col items-center justify-center p-0.5 rounded-xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer shadow-inner">
-        <div class="w-10 h-10 bg-contain bg-no-repeat bg-center" :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"></div>
+      <div
+          class="bg-[#fff6ef] h-15 w-15 flex flex-col items-center justify-center p-0.5 rounded-xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer shadow-inner">
+        <div class="w-10 h-10 bg-contain bg-no-repeat bg-center"
+             :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"></div>
       </div>
     </RouterLink>
     <div v-if="gameState === 'PASSING'" class="absolute inset-x-0 top-36 z-30 flex justify-center pointer-events-none">
-      <div class="bg-emerald-500/90 text-white font-black text-2xl px-6 py-2 rounded-2xl shadow-xl animate-bounce border-2 border-emerald-300">
+      <div
+          class="bg-emerald-500/90 text-white font-black text-2xl px-6 py-2 rounded-2xl shadow-xl animate-bounce border-2 border-emerald-300">
         В булочку! Отлично!
       </div>
     </div>
@@ -568,7 +596,7 @@ onUnmounted(() => {
       <div class="absolute flex flex-col gap-1 mt-2 items-center top-10 right-10">
         <div>
           <span>Рекорд:</span>
-          <span class="text-amber-400">{{highScore}}</span>
+          <span class="text-amber-400">{{ highScore }}</span>
         </div>
 
         <div v-if="gameState === 'PLAYING'" class="flex flex-col gap-1 items-center justify-center">
@@ -609,8 +637,10 @@ onUnmounted(() => {
         @touchcancel="stopFlip"
     ></canvas>
 
-    <div v-if="gameState === 'MENU'" class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-center justify-center p-5 pointer-events-auto">
-      <div class="bg-slate-800 border border-slate-700 w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
+    <div v-if="gameState === 'MENU'"
+         class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-center justify-center p-5 pointer-events-auto">
+      <div
+          class="bg-slate-800 border border-slate-700 w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
         <h1 class="text-2xl font-extrabold text-white m-0">Бунт Сосиски</h1>
         <p class="text-sm text-slate-400 m-0">Лови монетки в прыжке, делай сальто на ножки и запрыгивай в булочку!</p>
 
@@ -627,15 +657,19 @@ onUnmounted(() => {
         </button>
 
         <RouterLink to="/" class="absolute -left-4 top-1/2 -translate-y-1/2 z-50 pointer-events-auto">
-          <div class="bg-[#fff6ef] h-15 w-10 flex flex-col items-center justify-center p-0.5 rounded-l-4xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer shadow-inner">
-            <div class="w-10 h-10 bg-contain bg-no-repeat bg-center" :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"></div>
+          <div
+              class="bg-[#fff6ef] h-15 w-10 flex flex-col items-center justify-center p-0.5 rounded-l-4xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer shadow-inner">
+            <div class="w-10 h-10 bg-contain bg-no-repeat bg-center"
+                 :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"></div>
           </div>
         </RouterLink>
       </div>
     </div>
 
-    <div v-if="gameState === 'GAMEOVER'" class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-center justify-center p-5 pointer-events-auto">
-      <div class="bg-slate-800 border border-slate-700 w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
+    <div v-if="gameState === 'GAMEOVER'"
+         class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-center justify-center p-5 pointer-events-auto">
+      <div
+          class="bg-slate-800 border border-slate-700 w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
         <h2 class="text-2xl font-extrabold text-red-500 m-0">{{ gameOverReason }}</h2>
 
         <div class="flex flex-col gap-2 bg-slate-700/50 p-3 rounded-xl text-slate-300 text-sm">
@@ -658,8 +692,10 @@ onUnmounted(() => {
         </button>
 
         <RouterLink to="/" class="absolute -left-4 top-1/2 -translate-y-1/2 z-50 pointer-events-auto">
-          <div class="bg-[#fff6ef] h-15 w-10 flex flex-col items-center justify-center p-0.5 rounded-l-4xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer shadow-inner">
-            <div class="w-10 h-10 bg-contain bg-no-repeat bg-center" :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"></div>
+          <div
+              class="bg-[#fff6ef] h-15 w-10 flex flex-col items-center justify-center p-0.5 rounded-l-4xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer shadow-inner">
+            <div class="w-10 h-10 bg-contain bg-no-repeat bg-center"
+                 :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"></div>
           </div>
         </RouterLink>
       </div>
