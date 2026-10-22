@@ -152,10 +152,11 @@ onMounted(async () => {
       tg.disableVerticalSwipes()
     }
   }
-  // localStorage.removeItem('pet_nextSpinAt')
+  const urlParams = new URLSearchParams(window.location.search)
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
   location.value = 'home'
+  if (urlParams) gameData.coins = Number(urlParams.get('coins'))
 
   startRandomLooking()
   updateClock();

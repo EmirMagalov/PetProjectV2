@@ -52,23 +52,7 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
             except ValueError:
                 pass
 
-        # Создаем нового питомца в базе прямо из бота
-        pet = await PetModel.create(
-            tg_id=tg_id,
-            coins=50 + bonus_coins,  # Базовые 50 + бонус
-            food_level=50.0,
-            energy=50.0,
-            lives=3,
-            feed_count=9,
-            bad_stats_minutes=0,
-            poop_bad_minutes=0,
-            cart={"burger": 1, "shampoo": 1},
-            last_update=time.time(),
-            last_interaction=int(time.time()),
-            last_fortune_spin=0,
-            paid_spin_count=0,
-            referred_by=referrer_id,
-        )
+
     else:
         # Если пользователь уже существовал, просто обновляем время взаимодействия
         pet.last_interaction = int(time.time())
@@ -80,7 +64,7 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
             [
                 types.InlineKeyboardButton(
                     text="🎮 Открыть игру",
-                    web_app=types.WebAppInfo(url=settings.DOMAIN),
+                    web_app=types.WebAppInfo(url=f"{settings.DOMAIN}/?coins={bonus_coins if is_new and bonus_coins > 0 and start_param else 0}")
                 )
             ]
         ]
