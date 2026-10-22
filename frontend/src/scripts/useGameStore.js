@@ -89,7 +89,7 @@ export const defaultGameData = {
     stinky: false,
     sleep: false,
     sleepEndTime: 0,
-    feedCount: 14,
+    feedCount: 0,
     equippedHead: null,
     equippedClothes: null,
     foodStreak: 0,

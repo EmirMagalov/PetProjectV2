@@ -43,8 +43,6 @@ const MAX_TOUCH_FINGERS = 3; // Не более 3 пальцев за один �
 const recentFedItems = ref([])
 
 
-
-
 export function otherFeedPet(foodId) {
     const targetId = foodId || cartItemsList.value[currentIndex.value]?.id
     const foodItem = foodList.find(item => item.id === targetId)
@@ -98,6 +96,9 @@ export function feedPet(foodId) {
     const targetId = foodId || cartItemsList.value[currentIndex.value]?.id
     const foodItem = foodList.find(item => item.id === targetId)
     if (!foodItem || gameData.cart[targetId] <= 0) return
+    if (tutorialStep.value === 2) {
+        gameData.stinky = true
+    }
     // 1. Считаем, сколько раз это блюдо встречалось в последних приемах пищи
     const sameFoodCountInHistory = recentFedItems.value.filter(id => id === targetId).length
     const randomLimit = Math.floor(Math.random() * 2) + 2 // Например, от 2 до 3 раз
@@ -166,7 +167,7 @@ export function feedPet(foodId) {
     addExp(20)
     showStatus('feed', {fedItemId: foodId, actualGain, actualEnergyGain})
 
-    if (gameData.feedCount >= Math.floor(Math.random() * (15 - 10 + 1)) + 10) {
+    if (gameData.feedCount >= Math.floor(Math.random() * (10 - 8 + 1)) + 8) {
         gameData.stinky = true
         gameData.feedCount = 0
     }
@@ -341,7 +342,6 @@ export function spawnHeart(x = 160, y = 135) {
     if (tutorialStep.value === 3) {
         if (gameData.clickCounter > 10) nextTutorialStep()
     }
-
 
     if (tutorialStep.value === 6 || tutorialStep.value === 7) {
         return

@@ -219,7 +219,7 @@ const currentBathImage = computed(() => {
           <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
         </div>
 
-        <div class="absolute gap-2 flex -top-10 left-1/2 -translate-x-1/2">
+        <div class="absolute gap-2 z-20 flex -top-10 left-1/2 -translate-x-1/2">
 
           <!-- 1. Кнопка Фортуны -->
           <div
