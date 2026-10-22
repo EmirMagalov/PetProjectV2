@@ -152,15 +152,7 @@ onMounted(async () => {
       tg.disableVerticalSwipes()
     }
   }
-  const urlParams = new URLSearchParams(window.location.search)
-  const coinsParam = urlParams.get('coins')
-
-  if (coinsParam !== null) {
-    const bonus = Number(coinsParam)
-    if (!gameData.referredBy) {
-      gameData.coins += bonus // или gameData.coins = bonus, если это фиксированный стартовый баланс
-    }
-  }
+  // localStorage.removeItem('pet_nextSpinAt')
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
   location.value = 'home'

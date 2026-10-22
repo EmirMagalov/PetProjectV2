@@ -15,6 +15,19 @@ PHOTO_CACHE = {"photo1": None, "photo2": None}
 
 user_router = Router()
 
+def bonus(coins_amount,callback_data_str):
+    ref_keyboard = types.InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                types.InlineKeyboardButton(
+                    text=f"🎁 Забрать {coins_amount} монет!",
+                    callback_data=callback_data_str,
+                )
+            ]
+        ]
+    )
+    return ref_keyboard
+
 
 @user_router.message(Command("start"))
 async def start_handler(message: types.Message, command: CommandObject, bot: Bot):
@@ -29,6 +42,7 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
     pet = await PetModel.filter(tg_id=tg_id).first()
     is_new = False
     bonus_coins = 0
+
     if not pet:
         is_new = True
 
@@ -47,6 +61,8 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
                 pass
 
 
+
+
     else:
         # Если пользователь уже существовал, просто обновляем время взаимодействия
         pet.last_interaction = int(time.time())
@@ -58,7 +74,7 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
             [
                 types.InlineKeyboardButton(
                     text="🎮 Открыть игру",
-                    web_app=types.WebAppInfo(url=f"{settings.DOMAIN}/?coins={bonus_coins if is_new and bonus_coins > 0 and start_param else 0}")
+                    web_app=types.WebAppInfo(url=f"{settings.DOMAIN}")
                 )
             ]
         ]
@@ -68,20 +84,11 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
 
     # Если новичок зарегистрировался по рефералке
     if is_new and bonus_coins > 0 and start_param:
-        text += f"\n\n🎁 Вы активировали реферальную ссылку и получили бонус +{bonus_coins} монет!"
+
         coins_amount = 1000
         callback_data_str = f"claim_bonus_{coins_amount}"
 
-        ref_keyboard = types.InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    types.InlineKeyboardButton(
-                        text=f"🎁 Забрать {coins_amount} монет!",
-                        callback_data=callback_data_str,
-                    )
-                ]
-            ]
-        )
+
         try:
             referrer_tg_id = int(start_param.split("_")[1])
             user_link = f"<a href='tg://user?id={tg_id}'>{first_name}</a>"
@@ -93,12 +100,16 @@ async def start_handler(message: types.Message, command: CommandObject, bot: Bot
                 chat_id=referrer_tg_id,
                 text=f"🎉 По вашей реферальной ссылке зарегистрировался пользователь {user_link}!",
                 parse_mode="HTML",
-                reply_markup=ref_keyboard,
+                reply_markup=bonus(coins_amount,callback_data_str),
             )
         except Exception as e:
             print(f"Не удалось отправить уведомление рефереру: {e}")
     text += "\n\nПригласи друга 🎁 - /ref"
     await message.answer(text, reply_markup=keyboard)
+    if is_new and bonus_coins > 0 and start_param:
+        text = f"\n\n🎁 Вы активировали реферальную ссылку и получили бонус +{bonus_coins} монет!"
+        callback_data_str = f"claim_bonus_{bonus_coins}"
+        await message.answer(text,reply_markup=bonus(bonus_coins,callback_data_str))
 
 
 @user_router.message(F.text.lower().startswith("отзыв"))
