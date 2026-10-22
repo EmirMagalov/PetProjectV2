@@ -148,7 +148,7 @@ export async function initGameData() {
             gameData.equippedClothes = serverData.equipped_clothes || null
             gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
             gameData.tutorialCompleted = serverData.tutorial_completed || false
-
+            gameData.referredBy = serverData.referred_by || false
             // 👈 ДОБАВЛЯЕМ ЭТУ ПРОВЕРКУ:
             const localTutorialDone = localStorage.getItem('tutorial_completed') === 'true'
 
@@ -165,7 +165,7 @@ export async function initGameData() {
                 if (!serverData.tutorial_completed) {
                     console.log("🔄 Обнаружен локальный прогресс туториала. Синхронизируем с сервером...")
                     // Отправляем актуальные данные на сервер, чтобы в базе тоже стало true
-                    syncToBackend()
+                    await syncToBackend()
                 }
             }
             isDataLoaded = true

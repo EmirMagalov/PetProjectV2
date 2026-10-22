@@ -153,10 +153,20 @@ onMounted(async () => {
     }
   }
   const urlParams = new URLSearchParams(window.location.search)
+  const coinsParam = urlParams.get('coins')
+
+  if (coinsParam !== null) {
+    const bonus = Number(coinsParam)
+    if (!gameData.referredBy) {
+      gameData.coins += bonus // или gameData.coins = bonus, если это фиксированный стартовый баланс
+
+      // Очищаем URL от параметров, чтобы при F5/перезагрузке бонус не капал снова
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
   location.value = 'home'
-  if (urlParams) gameData.coins += Number(urlParams.get('coins'))
 
   startRandomLooking()
   updateClock();
