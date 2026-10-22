@@ -491,7 +491,7 @@ const loop = (timestamp) => {
     fpsTimer = 0
   }
 
-  const dt = Math.min(delta / FRAME_TIME, 1.6)
+  const dt = Math.min(delta / FRAME_TIME, 3)
 
   updateGame(dt)
   drawGame()
