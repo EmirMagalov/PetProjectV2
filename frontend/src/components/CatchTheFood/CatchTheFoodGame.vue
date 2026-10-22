@@ -562,10 +562,19 @@ onUnmounted(() => {
     <!-- HUD -->
     <div v-if="gameState === 'PLAYING'" class="absolute top-4 left-4 right-4 z-20 pointer-events-none flex flex-col gap-2 mt-22">
       <div class="flex justify-between items-center">
-        <div class="bg-white/85 backdrop-blur-sm px-3.5 py-1.5 rounded-xl flex flex-col shadow-sm">
-          <span class="text-[11px] text-slate-600 font-semibold uppercase">Очки</span>
-          <span class="text-xl font-extrabold text-slate-900">{{ score }}</span>
+        <div class="flex gap-1 flex-col">
+          <div class="bg-white/85 backdrop-blur-sm px-3.5 py-1.5 rounded-xl flex flex-col shadow-sm">
+            <span class="text-[11px] text-slate-600 font-semibold uppercase">Очки</span>
+            <span class="text-xl font-extrabold text-slate-900">{{ score }}</span>
+
+          </div>
+          <RouterLink to="/" class="pointer-events-auto opacity-80">
+            <div class="bg-[#fff6ef] h-15 w-15 flex flex-col items-center justify-center p-0.5 rounded-xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer shadow-inner">
+              <div class="w-10 h-10 bg-contain bg-no-repeat bg-center" :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"></div>
+            </div>
+          </RouterLink>
         </div>
+
         <div class="flex gap-1.5 items-center bg-white/85 backdrop-blur-sm px-3 py-2 rounded-xl">
           <img
               v-for="i in maxLives"

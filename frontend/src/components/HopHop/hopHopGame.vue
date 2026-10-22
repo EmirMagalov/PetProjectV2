@@ -107,7 +107,7 @@ const spawnCoins = (centerX, currentShelfY) => {
   for (let i = 0; i < 3; i++) {
     coinsList.push({
       x: centerX,
-      y: trampolineSurfaceY - 250 - (i * 45),
+      y: trampolineSurfaceY - 270 - (i * 40),
       radius: 14,
       collected: false,
       floatOffset: Math.random() * Math.PI
@@ -225,7 +225,6 @@ const updateGame = (dt = 1) => {
 
     const trampolineSurfaceY = shelfY - config.bounceSurfaceOffset
 
-
     // Касание батута
     if (player.vy > 0 && player.y + player.height / 2 >= trampolineSurfaceY) {
       const centerX = logicalWidth / 2
@@ -237,12 +236,13 @@ const updateGame = (dt = 1) => {
       if (normalizedAngle < 0) normalizedAngle += Math.PI * 2
 
       const isUpright = normalizedAngle < 0.6 || normalizedAngle > (Math.PI * 2 - 0.6)
-      const isHeadLanding = Math.abs(normalizedAngle - Math.PI) < 0.85
+      const isHeadLanding = Math.abs(normalizedAngle - Math.PI) < 1.2
+      const isLeftSideLanding = Math.abs(normalizedAngle - (Math.PI * 1.2)) < 0.75
 
       if (isOnTrampoline) {
-        if (isHeadLanding) {
+        if (isHeadLanding || isLeftSideLanding) {
           player.y = trampolineSurfaceY - player.height / 2
-          triggerGameOver('Упал на головку!')
+          triggerGameOver('Ударился головой!')
           return
         }
 
@@ -253,13 +253,16 @@ const updateGame = (dt = 1) => {
           coinsEarned.value += 2
 
           gameState.value = 'PASSING'
-          passTimer = 120
+          passTimer = 160
           createTrampolineShards(centerX, trampolineSurfaceY)
+
+          // Подпрыгиваем вверх перед полётом в булочку
+          player.vy = -6.2
+          // player.vRot = 0
         } else {
           trampolineBounceAnim = 1
           player.y = trampolineSurfaceY - player.height / 2
 
-          // === Здесь исправление ===
           const wasSpinning = completedFlips.value > 0 || isHolding
 
           player.vRot = 0
@@ -277,22 +280,29 @@ const updateGame = (dt = 1) => {
         triggerGameOver('Промазал мимо батута!')
       }
     }
-}
+  }
 
   // ФАЗА УСПЕШНОГО ПРОХОЖДЕНИЯ
   if (gameState.value === 'PASSING') {
     passTimer -= realDt
 
-    const targetAngle = Math.PI / 2
-    player.rotation += (targetAngle - player.rotation) * 0.2 * realDt
-    player.vRot = 0
+    // Гравитация + полёт
+    player.vy += 0.12 * realDt
+    player.y += player.vy * realDt
+    player.vRot = 0.09
+    player.rotation += player.vRot * realDt
+    // Плавный поворот в горизонталь (в булочку)
+    // const targetAngle = Math.PI / 2
+    // player.rotation += (targetAngle - player.rotation) * 0.12 * realDt
+    // player.vRot = 0
 
-    const bunTargetY = shelfY - config.bounceSurfaceOffset + 90
+    // Цель — центр булочки
+    const bunTargetY = shelfY - config.bounceSurfaceOffset + 78
 
-    if (player.y < bunTargetY) {
-      player.y += 7 * realDt
-    } else {
+    // Когда долетели — останавливаем
+    if (player.y >= bunTargetY) {
       player.y = bunTargetY
+      player.vy = 0
     }
 
     if (passTimer <= 0) {
@@ -368,9 +378,8 @@ const drawGame = () => {
   // Булочка / хот-дог
   const bunX = centerX - bunWidth / 2
   const bunY = shelfY - config.bounceSurfaceOffset + 43
-  const bunTargetY = shelfY - config.bounceSurfaceOffset + 35
-
-  const isSausageLanded = gameState.value === 'PASSING' && player.y >= bunTargetY
+  const bunTargetY = shelfY - config.bounceSurfaceOffset + 78
+  const isSausageLanded = gameState.value === 'PASSING' && player.y >= bunTargetY - 2
 
   if (isSausageLanded && imagesLoaded.hotdog) {
     ctx.drawImage(images.hotdog, bunX, bunY, bunWidth, bunHeight)
@@ -431,7 +440,7 @@ const drawGame = () => {
   })
 
   // Сосиска
-  if (gameState.value !== 'PASSING') {
+  if (!isSausageLanded) {
     ctx.save()
     ctx.translate(player.x, player.y)
     ctx.rotate(player.rotation)
@@ -448,19 +457,15 @@ const drawGame = () => {
       ctx.fillStyle = '#f97316'
       ctx.fillRect(-player.width / 2, -player.height / 2, player.width, player.height)
     }
-    // Показываем FPS (для отладки)
-
 
     ctx.restore()
-    if (isAdmin.value){
-      ctx.fillStyle = 'rgba(0,0,0,0.6)'
 
+    if (isAdmin.value) {
       ctx.fillStyle = '#00ff88'
       ctx.font = 'bold 14px monospace'
       ctx.fillText(`FPS: ${fps}`, 18, 100)
     }
   }
-
 }
 
 // Главный цикл
@@ -477,7 +482,7 @@ const loop = (timestamp) => {
 
   lastTime = timestamp
 
-  // Подсчёт FPS (оставь, если нужно)
+  // Подсчёт FPS
   frameCount++
   fpsTimer += delta
   if (fpsTimer >= 1000) {
@@ -527,7 +532,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="relative w-full max-w-[420px] h-screen max-h-[800px] mx-auto overflow-hidden shadow-2xl select-none touch-none bg-slate-900 flex flex-col">
+  <div class="relative w-full max-w-[420px] bg-yellow-100 h-screen max-h-[800px] mx-auto overflow-hidden shadow-2xl select-none touch-none bg-slate-900 flex flex-col">
     <Transition name="fade">
       <div v-if="isLoading" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#ABD7DD] via-[#ABD7DD] to-blue-300 text-[#D18900]">
         <div class="relative flex items-center justify-center mb-4">
@@ -546,20 +551,39 @@ onUnmounted(() => {
     </Transition>
 
     <PetHeaderMenu/>
-
+    <RouterLink to="/" class="absolute z-20 left-2 top-30 opacity-80">
+      <div class="bg-[#fff6ef] h-15 w-15 flex flex-col items-center justify-center p-0.5 rounded-xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer shadow-inner">
+        <div class="w-10 h-10 bg-contain bg-no-repeat bg-center" :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"></div>
+      </div>
+    </RouterLink>
     <div v-if="gameState === 'PASSING'" class="absolute inset-x-0 top-36 z-30 flex justify-center pointer-events-none">
       <div class="bg-emerald-500/90 text-white font-black text-2xl px-6 py-2 rounded-2xl shadow-xl animate-bounce border-2 border-emerald-300">
         В булочку! Отлично!
       </div>
     </div>
 
-    <div class="absolute inset-0 z-0 bg-white overflow-hidden pointer-events-none">
-      <div
-          class="absolute bottom-60 left-1/2 -translate-x-1/2 w-60 h-60 bg-contain bg-bottom bg-no-repeat"
-          :style="{
-          backgroundImage: `url('/jumpGame/jumping_game_menu_background.webp?v=${APP_VERSION}')`,
-        }"
-      ></div>
+    <div class="absolute bottom-50 left-1/2 -translate-x-1/2 w-70 h-70">
+
+      <img class="relative" :src="`/jumpGame/jumping_game_menu_background.webp?v=${APP_VERSION}`" alt="">
+      <div class="absolute flex flex-col gap-1 mt-1 items-center top-10 right-12">
+        <div>
+          <span>Рекорд:</span>
+          <span class="text-amber-400">{{highScore}}</span>
+        </div>
+
+        <div v-if="gameState === 'PLAYING'" class="flex flex-col gap-1 items-center justify-center">
+          <div class="text-xs font-black text-amber-400 uppercase tracking-widest">
+            Уровень {{ level }}
+          </div>
+          <div
+              class="text-xs p-1 rounded-2xl bg-slate-800/90 backdrop-blur-md font-extrabold transition-colors duration-150"
+              :class="isLevelGoalReached ? 'text-emerald-400 animate-pulse' : 'text-slate-200'"
+          >
+            Сальто: {{ completedFlips }} / {{ level }}
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <div class="absolute inset-0 z-0 bg-transparent overflow-hidden pointer-events-none">
@@ -581,18 +605,6 @@ onUnmounted(() => {
         @touchend="stopFlip"
         @touchcancel="stopFlip"
     ></canvas>
-
-    <div v-if="gameState === 'PLAYING'" class="absolute top-24 left-2 z-20 bg-slate-800/90 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-slate-700 shadow-xl pointer-events-none text-center flex flex-col items-center gap-1">
-      <div class="text-xs font-black text-amber-400 uppercase tracking-widest">
-        Уровень {{ level }}
-      </div>
-      <div
-          class="text-sm font-extrabold transition-colors duration-150"
-          :class="isLevelGoalReached ? 'text-emerald-400 animate-pulse' : 'text-slate-200'"
-      >
-        Сальто: {{ completedFlips }} / {{ level }}
-      </div>
-    </div>
 
     <div v-if="gameState === 'MENU'" class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-center justify-center p-5 pointer-events-auto">
       <div class="bg-slate-800 border border-slate-700 w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">

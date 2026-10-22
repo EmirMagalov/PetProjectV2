@@ -60,6 +60,7 @@ export function handleMove(event,itemType ,Item) {
 
     if (isInside) {
         isHovered.value = true
+        gameData.sleep = false
         if (itemType === 'shower') {
             batheStatus.value = true
             if (statusFoam.value === true) {
