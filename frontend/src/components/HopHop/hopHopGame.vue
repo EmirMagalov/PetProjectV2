@@ -75,7 +75,8 @@ const highScore = ref(Number(localStorage.getItem('flippy_highscore')) || 0)
 const gameOverReason = ref('')
 let savedFlips = 0       // Полные сальто, которые уже навсегда засчитаны
 let takeoffRotation = 0  // Угол начала текущего сальто
-// --- CANVAS & РЕНДЕР ---
+
+// --- CANVAS & РЕНДЕР (Фиксируем единую логическую сетку) ---
 const canvasRef = ref(null)
 let ctx = null
 let animationFrameId = null
@@ -86,9 +87,13 @@ let fpsTimer = 0
 const FRAME_TIME = 1000 / 60
 const SPEED = 2
 
+// 🟢 Жесткие фиксированные размеры игрового мира для расчета координат
+const LOGICAL_WIDTH = 360
+const LOGICAL_HEIGHT = 600
+
 // --- ИГРОК (СОСИСКА) ---
 const player = {
-  x: 180,
+  x: LOGICAL_WIDTH / 2,
   y: 400,
   width: 60,
   height: 60,
@@ -99,7 +104,7 @@ const player = {
   maxBounceForce: 6
 }
 
-let shelfY = 480
+let shelfY = LOGICAL_HEIGHT - config.shelfOffsetFromBottom
 let passTimer = 0
 const trampolineWidth = 120
 const bunWidth = 80
@@ -115,14 +120,14 @@ let completedFlips = ref(0)
 
 const isLevelGoalReached = computed(() => completedFlips.value >= level.value)
 
-// Спавн 3 монет над батутом
+// Спавн 3 монет над батутом (высоко, ровно как тебе нужно)
 const spawnCoins = (centerX, currentShelfY) => {
   coinsList = []
   const trampolineSurfaceY = currentShelfY - config.bounceSurfaceOffset
   for (let i = 0; i < 3; i++) {
     coinsList.push({
       x: centerX,
-      y: trampolineSurfaceY - 270 - (i * 40),
+      y: trampolineSurfaceY - 180 - (i * 40), // 🟢 Поправили синтаксис высоты монет
       radius: 14,
       collected: false,
       floatOffset: Math.random() * Math.PI
@@ -140,17 +145,13 @@ const startGame = () => {
   isHolding = false
   completedFlips.value = 0
   gameOverReason.value = ''
-  savedFlips = 0         // Сбрасываем засчитанные сальто
-  takeoffRotation = 0    // Сбрасываем точку отсчета
+  savedFlips = 0
+  takeoffRotation = 0
   if (holdTimer) clearTimeout(holdTimer)
 
-  const canvas = canvasRef.value
-  const logicalWidth = canvas ? canvas.clientWidth : 360
-  const logicalHeight = canvas ? canvas.clientHeight : 600
+  shelfY = LOGICAL_HEIGHT - config.shelfOffsetFromBottom
 
-  shelfY = logicalHeight - config.shelfOffsetFromBottom
-
-  player.x = logicalWidth / 2
+  player.x = LOGICAL_WIDTH / 2
   player.bounceForce = 4
   const trampolineSurfaceY = shelfY - config.bounceSurfaceOffset
   player.y = trampolineSurfaceY - config.playerSpawnHeight
@@ -159,7 +160,7 @@ const startGame = () => {
   player.vRot = 0
 
   particlesList = []
-  spawnCoins(logicalWidth / 2, shelfY)
+  spawnCoins(LOGICAL_WIDTH / 2, shelfY)
   gameState.value = 'PLAYING'
   lastTime = 0
 }
@@ -203,11 +204,12 @@ const createTrampolineShards = (x, y) => {
 const updateGame = (dt = 1) => {
   const canvas = canvasRef.value
   if (!canvas) return
-  const logicalWidth = canvas.clientWidth || 360
-  const logicalHeight = canvas.clientHeight || 600
+
+  const logicalWidth = LOGICAL_WIDTH
+  const logicalHeight = LOGICAL_HEIGHT
   const targetShelfY = logicalHeight - config.shelfOffsetFromBottom
 
-  const realDt = Math.min(dt * SPEED, 3)   // защита от очень больших dt
+  const realDt = Math.min(dt * SPEED, 3)
 
   if (trampolineBounceAnim > 0) trampolineBounceAnim -= 0.1 * realDt
 
@@ -223,7 +225,6 @@ const updateGame = (dt = 1) => {
     }
     player.rotation += player.vRot * realDt
 
-    // Считаем сальто строго от точки отрыва/последнего успешного оборота
     const airDelta = Math.abs(player.rotation - takeoffRotation)
     const currentJumpFlips = Math.floor(airDelta / (Math.PI * 2))
     completedFlips.value = savedFlips + currentJumpFlips
@@ -255,7 +256,6 @@ const updateGame = (dt = 1) => {
       let normalizedAngle = player.rotation % (Math.PI * 2)
       if (normalizedAngle < 0) normalizedAngle += Math.PI * 2
 
-      const isUpright = normalizedAngle < 0.6 || normalizedAngle > (Math.PI * 2 - 0.6)
       const isHeadLanding = Math.abs(normalizedAngle - Math.PI) < 1.2
       const isLeftSideLanding = Math.abs(normalizedAngle - (Math.PI * 1.2)) < 0.75
 
@@ -267,8 +267,6 @@ const updateGame = (dt = 1) => {
         }
 
         if (!isHeadLanding && !isLeftSideLanding && completedFlips.value >= level.value) {
-          const airDelta = Math.abs(player.rotation - takeoffRotation)
-          savedFlips += Math.floor(airDelta / (Math.PI * 2))
           score.value++
           level.value++
           addCoin(2)
@@ -278,29 +276,20 @@ const updateGame = (dt = 1) => {
           passTimer = 160
           createTrampolineShards(centerX, trampolineSurfaceY)
 
-          // Подпрыгиваем вверх перед полётом в булочку
           player.vy = -6.2
-          // player.vRot = 0
         } else {
           trampolineBounceAnim = 1
           player.y = trampolineSurfaceY - player.height / 2
 
-          // 1. Считаем, сколько полных сальто успело докрутиться в этом полете
           const airDelta = Math.abs(player.rotation - takeoffRotation)
           const completedThisJump = Math.floor(airDelta / (Math.PI * 2))
 
-          // 2. Добавляем их в общую копилку (они остаются навсегда)
           savedFlips += completedThisJump
-
-          // 3. Устанавливаем новый takeoffRotation на текущий угол приземления.
-          // Недокрут сгорает, и для следующего сальто нужно будет сделать полный круг с этого места.
-          // Визуально сосиска не дергается и продолжает крутиться плавно!
           takeoffRotation = player.rotation
 
           const targetFlips = level.value
           const halfFlipsNeeded = Math.ceil(targetFlips / 2)
 
-          // Проверяем, сделал ли хотя бы половину от текущего уровня или держал палец
           const reachedHalf = (completedFlips.value - savedFlips) >= halfFlipsNeeded || isHolding
 
           player.vRot = 0
@@ -326,20 +315,13 @@ const updateGame = (dt = 1) => {
   if (gameState.value === 'PASSING') {
     passTimer -= realDt
 
-    // Гравитация + полёт
     player.vy += 0.12 * realDt
     player.y += player.vy * realDt
     player.vRot = 0.09
     player.rotation += player.vRot * realDt
-    // Плавный поворот в горизонталь (в булочку)
-    // const targetAngle = Math.PI / 2
-    // player.rotation += (targetAngle - player.rotation) * 0.12 * realDt
-    // player.vRot = 0
 
-    // Цель — центр булочки
     const bunTargetY = shelfY - config.bounceSurfaceOffset + 78
 
-    // Когда долетели — останавливаем
     if (player.y >= bunTargetY) {
       player.y = bunTargetY
       player.vy = 0
@@ -392,8 +374,8 @@ const drawGame = () => {
   const canvas = canvasRef.value
   if (!canvas || !ctx) return
 
-  const logicalWidth = canvas.clientWidth || 360
-  const logicalHeight = canvas.clientHeight || 600
+  const logicalWidth = LOGICAL_WIDTH
+  const logicalHeight = LOGICAL_HEIGHT
 
   ctx.clearRect(0, 0, logicalWidth, logicalHeight)
 
@@ -516,7 +498,6 @@ const loop = (timestamp) => {
 
   const delta = timestamp - lastTime
 
-  // Пропускаем лишние кадры, если телефон даёт 90/120 Гц
   if (delta < FRAME_TIME * 0.9) {
     animationFrameId = requestAnimationFrame(loop)
     return
@@ -524,7 +505,6 @@ const loop = (timestamp) => {
 
   lastTime = timestamp
 
-  // Подсчёт FPS
   frameCount++
   fpsTimer += delta
   if (fpsTimer >= 1000) {
@@ -543,18 +523,16 @@ const loop = (timestamp) => {
 const resizeCanvas = () => {
   const canvas = canvasRef.value
   if (!canvas) return
-  const container = canvas.parentElement
-  const width = container.clientWidth || 360
-  const height = container.clientHeight || 600
   const dpr = window.devicePixelRatio || 1
 
-  canvas.width = width * dpr
-  canvas.height = height * dpr
+  // 🟢 Фиксируем логический размер канваса 360x600, чтобы координаты никогда не съезжали
+  canvas.width = LOGICAL_WIDTH * dpr
+  canvas.height = LOGICAL_HEIGHT * dpr
   if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
   canvas.style.width = '100%'
   canvas.style.height = '100%'
-  canvas.style.objectFit = 'cover' // 🟢 Обрезает лишнее по краям вместо сжатия
+  canvas.style.objectFit = 'cover' // 🟢 Обрезает лишний низ на маленьких экранах без сжатия объектов
 }
 
 onMounted(() => {
@@ -566,7 +544,6 @@ onMounted(() => {
     animationFrameId = requestAnimationFrame(loop)
   }
 
-  // 🟢 Блокируем скролл на уровне документа для мини-игры
   document.addEventListener('touchmove', preventDefaultScroll, { passive: false })
   document.documentElement.style.touchAction = 'none'
   document.body.style.touchAction = 'none'
@@ -577,14 +554,13 @@ onUnmounted(() => {
   if (holdTimer) clearTimeout(holdTimer)
   window.removeEventListener('resize', resizeCanvas)
 
-  // 🟢 Обязательно удаляем при выходе из мини-игры
   document.removeEventListener('touchmove', preventDefaultScroll)
 })
 </script>
 
 <template>
   <div
-      class="relative w-full max-w-[420px] h-[100dvh] max-h-[840px] bg-yellow-100 mx-auto overflow-hidden shadow-2xl select-none touch-none bg-slate-900 flex flex-col">
+      class="relative w-full max-w-[420px] bg-yellow-100 h-screen max-h-[800px] mx-auto overflow-hidden shadow-2xl select-none touch-none bg-slate-900 flex flex-col">
     <Transition name="fade">
       <div v-if="isLoading"
            class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#ABD7DD] via-[#ABD7DD] to-blue-300 text-[#D18900]">
@@ -621,8 +597,8 @@ onUnmounted(() => {
       </div>
     </div>
 
+    <!-- ТВОЁ ОРИГИНАЛЬНОЕ МЕНЮ С ИНСТРУКЦИЯМИ И КАРТИНКОЙ ОСТАЛОСЬ РОВНО НА СВОЕМ МЕСТЕ -->
     <div class="absolute bottom-50 left-1/2 -translate-x-1/2 w-70 h-70">
-
       <img class="relative" :src="`/jumpGame/jumping_game_menu_background.webp?v=${APP_VERSION}`" alt="">
       <div class="absolute flex flex-col gap-1 mt-2 items-center top-10 right-10">
         <div>
@@ -630,7 +606,7 @@ onUnmounted(() => {
           <span class="text-amber-400">{{ highScore }}</span>
         </div>
 
-        <div  class="flex flex-col gap-1 items-center justify-center">
+        <div class="flex flex-col gap-1 items-center justify-center">
           <div class="text-xs font-black text-amber-400 uppercase tracking-widest">
             Уровень {{ gameState === 'PLAYING'?level:level -1 }}
           </div>
@@ -650,7 +626,7 @@ onUnmounted(() => {
 
     <div class="absolute inset-0 z-0 bg-transparent overflow-hidden pointer-events-none">
       <div
-          class="absolute -bottom-10 left-1/2 -translate-x-1/2 w-80 h-80 bg-contain bg-bottom bg-no-repeat"
+          class="absolute bottom-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-contain bg-bottom bg-no-repeat"
           :style="{
           backgroundImage: `url('/jumpGame/jumping_game_table_background.webp?v=${APP_VERSION}')`,
         }"
@@ -672,7 +648,7 @@ onUnmounted(() => {
     <div v-if="gameState === 'MENU'"
          class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-center justify-center p-5 pointer-events-auto">
       <div
-          class="bg-white border  w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
+          class="bg-white border w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
         <h1 class="text-2xl font-extrabold text-slate-900 m-0">Бунт Сосиски</h1>
         <p class="text-sm text-slate-500 m-0">Лови монетки в прыжке, делай сальто на ножки и запрыгивай в булочку!</p>
 
@@ -711,7 +687,7 @@ onUnmounted(() => {
           </div>
           <div class="flex justify-between items-center text-slate-600">
             <span>Заработано монет:</span>
-            <div class="flex  items-center gap-1">
+            <div class="flex items-center gap-1">
               <img src="/gamePlay/coin.webp" alt="coin" class="w-4 h-4 object-contain" />
               <strong class="text-amber-600 text-lg">{{ coinsEarned }}</strong>
             </div>
