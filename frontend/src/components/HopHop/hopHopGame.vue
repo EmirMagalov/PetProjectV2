@@ -552,8 +552,9 @@ const resizeCanvas = () => {
   canvas.height = height * dpr
   if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
-  canvas.style.width = width + 'px'
-  canvas.style.height = height + 'px'
+  canvas.style.width = '100%'
+  canvas.style.height = '100%'
+  canvas.style.objectFit = 'cover' // 🟢 Обрезает лишнее по краям вместо сжатия
 }
 
 onMounted(() => {
@@ -583,7 +584,7 @@ onUnmounted(() => {
 
 <template>
   <div
-      class="relative w-full max-w-[420px] bg-yellow-100 h-screen max-h-[800px] mx-auto overflow-hidden shadow-2xl select-none touch-none bg-slate-900 flex flex-col">
+      class="relative w-full max-w-[420px] h-[100dvh] max-h-[840px] bg-yellow-100 mx-auto overflow-hidden shadow-2xl select-none touch-none bg-slate-900 flex flex-col">
     <Transition name="fade">
       <div v-if="isLoading"
            class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#ABD7DD] via-[#ABD7DD] to-blue-300 text-[#D18900]">
