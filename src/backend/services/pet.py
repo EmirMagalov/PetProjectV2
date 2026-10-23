@@ -8,11 +8,11 @@ FORTUNE_COOLDOWN = 86400
 
 
 # === Настройки расхода (в минуту) ===
-FOOD_PER_MIN_HEALTHY = 0.25
-FOOD_PER_MIN_SICK = 0.416
+FOOD_PER_MIN_HEALTHY = 0.2
+FOOD_PER_MIN_SICK = 0.3
 
-ENERGY_PER_MIN_HEALTHY = 0.16
-ENERGY_PER_MIN_SICK = 0.25
+ENERGY_PER_MIN_HEALTHY = 0.12
+ENERGY_PER_MIN_SICK = 0.2
 
 
 async def pet_tick_job():
@@ -57,7 +57,6 @@ async def pet_tick_job():
                 pet.last_poop_cleaned_time if pet.last_poop_cleaned_time > 0 else pet.last_interaction
             )
             time_since_poop = NOW - poop_time
-            print(time_since_poop)
             if time_since_poop >= 14400:
                 # Через 4 часа — гарантированная кучка
                 pet.is_pooped = True

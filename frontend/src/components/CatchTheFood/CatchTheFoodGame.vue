@@ -595,7 +595,7 @@ onUnmounted(() => {
         <p class="text-sm text-slate-500 m-0">Лови падающую еду в тележку!</p>
 
         <div v-if="highScore > 0" class="text-[15px] font-semibold text-slate-700 bg-slate-100 py-2 px-3 rounded-xl">
-          Рекорд: <span class="text-slate-900 font-extrabold">{{ highScore }}</span>
+          Рекорд: <span class="text-amber-400  font-extrabold">{{ highScore }}</span>
         </div>
 
         <button class="bg-gradient-to-r from-blue-500 to-blue-700 text-white text-base font-bold border-none py-3 px-5 rounded-2xl cursor-pointer shadow-lg shadow-blue-500/35 active:scale-95 transition-transform" @click="startGame">

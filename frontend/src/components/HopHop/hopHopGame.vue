@@ -32,7 +32,9 @@ const imagesLoaded = {
   bun: false,
   hotdog: false
 }
-
+const preventDefaultScroll = (e) => {
+  e.preventDefault()
+}
 onMounted(() => {
   images.player.src = `/jumpGame/jumping_sausage.webp?v=${APP_VERSION}`;
   images.player.onload = () => {
@@ -71,7 +73,8 @@ const score = ref(0)
 const coinsEarned = ref(0)
 const highScore = ref(Number(localStorage.getItem('flippy_highscore')) || 0)
 const gameOverReason = ref('')
-
+let savedFlips = 0       // Полные сальто, которые уже навсегда засчитаны
+let takeoffRotation = 0  // Угол начала текущего сальто
 // --- CANVAS & РЕНДЕР ---
 const canvasRef = ref(null)
 let ctx = null
@@ -92,7 +95,7 @@ const player = {
   vy: 0,
   rotation: 0,
   vRot: 0,
-  bounceForce: 3,
+  bounceForce: 4,
   maxBounceForce: 6
 }
 
@@ -137,6 +140,8 @@ const startGame = () => {
   isHolding = false
   completedFlips.value = 0
   gameOverReason.value = ''
+  savedFlips = 0         // Сбрасываем засчитанные сальто
+  takeoffRotation = 0    // Сбрасываем точку отсчета
   if (holdTimer) clearTimeout(holdTimer)
 
   const canvas = canvasRef.value
@@ -146,7 +151,7 @@ const startGame = () => {
   shelfY = logicalHeight - config.shelfOffsetFromBottom
 
   player.x = logicalWidth / 2
-  player.bounceForce = 4.5
+  player.bounceForce = 4
   const trampolineSurfaceY = shelfY - config.bounceSurfaceOffset
   player.y = trampolineSurfaceY - config.playerSpawnHeight
   player.vy = -player.bounceForce
@@ -202,7 +207,7 @@ const updateGame = (dt = 1) => {
   const logicalHeight = canvas.clientHeight || 600
   const targetShelfY = logicalHeight - config.shelfOffsetFromBottom
 
-  const realDt = dt * SPEED
+  const realDt = Math.min(dt * SPEED, 3)   // защита от очень больших dt
 
   if (trampolineBounceAnim > 0) trampolineBounceAnim -= 0.1 * realDt
 
@@ -218,7 +223,10 @@ const updateGame = (dt = 1) => {
     }
     player.rotation += player.vRot * realDt
 
-    completedFlips.value = Math.floor((Math.abs(player.rotation) + 0.25) / (Math.PI * 2))
+    // Считаем сальто строго от точки отрыва/последнего успешного оборота
+    const airDelta = Math.abs(player.rotation - takeoffRotation)
+    const currentJumpFlips = Math.floor(airDelta / (Math.PI * 2))
+    completedFlips.value = savedFlips + currentJumpFlips
 
     // Сбор монет
     coinsList.forEach(coin => {
@@ -259,6 +267,8 @@ const updateGame = (dt = 1) => {
         }
 
         if (!isHeadLanding && !isLeftSideLanding && completedFlips.value >= level.value) {
+          const airDelta = Math.abs(player.rotation - takeoffRotation)
+          savedFlips += Math.floor(airDelta / (Math.PI * 2))
           score.value++
           level.value++
           addCoin(2)
@@ -275,23 +285,33 @@ const updateGame = (dt = 1) => {
           trampolineBounceAnim = 1
           player.y = trampolineSurfaceY - player.height / 2
 
-          const targetFlips = level.value
-          const halfFlipsNeeded = Math.ceil(targetFlips / 2) // Округляем вверх (для 3 уровней половина это 2)
+          // 1. Считаем, сколько полных сальто успело докрутиться в этом полете
+          const airDelta = Math.abs(player.rotation - takeoffRotation)
+          const completedThisJump = Math.floor(airDelta / (Math.PI * 2))
 
-          const reachedHalf = completedFlips.value >= halfFlipsNeeded || isHolding
+          // 2. Добавляем их в общую копилку (они остаются навсегда)
+          savedFlips += completedThisJump
+
+          // 3. Устанавливаем новый takeoffRotation на текущий угол приземления.
+          // Недокрут сгорает, и для следующего сальто нужно будет сделать полный круг с этого места.
+          // Визуально сосиска не дергается и продолжает крутиться плавно!
+          takeoffRotation = player.rotation
+
+          const targetFlips = level.value
+          const halfFlipsNeeded = Math.ceil(targetFlips / 2)
+
+          // Проверяем, сделал ли хотя бы половину от текущего уровня или держал палец
+          const reachedHalf = (completedFlips.value - savedFlips) >= halfFlipsNeeded || isHolding
 
           player.vRot = 0
 
           if (player.bounceForce < player.maxBounceForce) {
             if (reachedHalf) {
-              // Набил половину или больше (или держал палец) — хороший буст к высоте
               player.bounceForce += 0.35
             } else {
-              // Набил меньше половины — слабый прирост
               player.bounceForce += 0.2
             }
           }
-
 
           player.vy = -player.bounceForce
         }
@@ -331,11 +351,13 @@ const updateGame = (dt = 1) => {
 
       player.x = logicalWidth / 2
       player.y = newTrampolineSurfaceY - config.playerSpawnHeight
-      player.bounceForce = 4.5
+      player.bounceForce = 4
       player.vy = -player.bounceForce
       player.rotation = 0
       player.vRot = 0
       completedFlips.value = 0
+      savedFlips = 0
+      takeoffRotation = 0
       isHolding = false
 
       spawnCoins(logicalWidth / 2, targetShelfY)
@@ -511,7 +533,7 @@ const loop = (timestamp) => {
     fpsTimer = 0
   }
 
-  const dt = Math.min(delta / FRAME_TIME, 3)
+  const dt = Math.min(delta / FRAME_TIME, 1.5)
 
   updateGame(dt)
   drawGame()
@@ -542,12 +564,20 @@ onMounted(() => {
     window.addEventListener('resize', resizeCanvas)
     animationFrameId = requestAnimationFrame(loop)
   }
+
+  // 🟢 Блокируем скролл на уровне документа для мини-игры
+  document.addEventListener('touchmove', preventDefaultScroll, { passive: false })
+  document.documentElement.style.touchAction = 'none'
+  document.body.style.touchAction = 'none'
 })
 
 onUnmounted(() => {
   if (animationFrameId) cancelAnimationFrame(animationFrameId)
   if (holdTimer) clearTimeout(holdTimer)
   window.removeEventListener('resize', resizeCanvas)
+
+  // 🟢 Обязательно удаляем при выходе из мини-игры
+  document.removeEventListener('touchmove', preventDefaultScroll)
 })
 </script>
 
@@ -599,15 +629,15 @@ onUnmounted(() => {
           <span class="text-amber-400">{{ highScore }}</span>
         </div>
 
-        <div v-if="gameState === 'PLAYING'" class="flex flex-col gap-1 items-center justify-center">
+        <div  class="flex flex-col gap-1 items-center justify-center">
           <div class="text-xs font-black text-amber-400 uppercase tracking-widest">
-            Уровень {{ level }}
+            Уровень {{ gameState === 'PLAYING'?level:level -1 }}
           </div>
           <div
               class="text-xs p-1 rounded-2xl bg-slate-800/90 backdrop-blur-md font-extrabold transition-colors duration-150"
               :class="isLevelGoalReached ? 'text-emerald-400 animate-pulse' : 'text-slate-200'"
           >
-            Сальто: {{ completedFlips }} / {{ level }}
+            Сальто: {{completedFlips}} / {{gameState === 'PLAYING'?level:level-1 }}
           </div>
         </div>
       </div>
@@ -629,22 +659,23 @@ onUnmounted(() => {
     <canvas
         ref="canvasRef"
         class="relative z-10 flex-1 w-full h-full cursor-pointer bg-transparent"
-        @mousedown="startFlip"
-        @mouseup="stopFlip"
-        @mouseleave="stopFlip"
-        @touchstart="startFlip"
-        @touchend="stopFlip"
-        @touchcancel="stopFlip"
+        @pointerdown.prevent="startFlip"
+        @pointerup.prevent="stopFlip"
+        @pointercancel.prevent="stopFlip"
+        @pointerleave.prevent="stopFlip"
+        @touchstart.prevent="startFlip"
+        @touchend.prevent="stopFlip"
+        @touchcancel.prevent="stopFlip"
     ></canvas>
 
     <div v-if="gameState === 'MENU'"
          class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-center justify-center p-5 pointer-events-auto">
       <div
-          class="bg-slate-800 border border-slate-700 w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
-        <h1 class="text-2xl font-extrabold text-white m-0">Бунт Сосиски</h1>
-        <p class="text-sm text-slate-400 m-0">Лови монетки в прыжке, делай сальто на ножки и запрыгивай в булочку!</p>
+          class="bg-white border  w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
+        <h1 class="text-2xl font-extrabold text-slate-900 m-0">Бунт Сосиски</h1>
+        <p class="text-sm text-slate-500 m-0">Лови монетки в прыжке, делай сальто на ножки и запрыгивай в булочку!</p>
 
-        <div v-if="highScore > 0" class="text-sm font-semibold text-slate-300 bg-slate-700/50 py-2 px-3 rounded-xl">
+        <div v-if="highScore > 0" class="text-sm font-semibold text-slate-700 bg-slate-100 py-2 px-3 rounded-xl">
           Рекорд: <span class="text-amber-400 font-extrabold">{{ highScore }} уровней</span>
         </div>
 
@@ -669,17 +700,21 @@ onUnmounted(() => {
     <div v-if="gameState === 'GAMEOVER'"
          class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-center justify-center p-5 pointer-events-auto">
       <div
-          class="bg-slate-800 border border-slate-700 w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
+          class="bg-white border w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
         <h2 class="text-2xl font-extrabold text-red-500 m-0">{{ gameOverReason }}</h2>
 
-        <div class="flex flex-col gap-2 bg-slate-700/50 p-3 rounded-xl text-slate-300 text-sm">
-          <div class="flex justify-between items-center">
+        <div class="flex flex-col gap-2 bg-slate-50 p-3 rounded-xl text-slate-300 text-sm">
+          <div class="flex justify-between text-slate-600 items-center">
             <span>Пройдено уровней:</span>
-            <strong class="text-white text-lg">{{ score }}</strong>
+            <strong class="text-lg">{{ score }}</strong>
           </div>
-          <div class="flex justify-between items-center">
-            <span>Монет получено:</span>
-            <strong class="text-amber-400 text-lg">+{{ coinsEarned }}</strong>
+          <div class="flex justify-between items-center text-slate-600">
+            <span>Заработано монет:</span>
+            <div class="flex  items-center gap-1">
+              <img src="/gamePlay/coin.webp" alt="coin" class="w-4 h-4 object-contain" />
+              <strong class="text-amber-600 text-lg">{{ coinsEarned }}</strong>
+            </div>
+
           </div>
         </div>
 
