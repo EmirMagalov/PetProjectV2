@@ -3,7 +3,6 @@ import {ref, onMounted, onUnmounted, computed} from 'vue'
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import {addCoin} from "@/scripts/actions.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
-import {tgId} from "@/scripts/api.js";
 import {isAdmin} from "@/scripts/useGameStore.js";
 
 const isLoading = ref(true);

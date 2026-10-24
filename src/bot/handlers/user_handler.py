@@ -12,8 +12,6 @@ user_router = Router()
 PHOTO_CACHE = {"photo1": None, "photo2": None}
 
 
-user_router = Router()
-
 def bonus(coins_amount,callback_data_str):
     ref_keyboard = types.InlineKeyboardMarkup(
         inline_keyboard=[

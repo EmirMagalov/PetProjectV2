@@ -267,27 +267,37 @@ async def broadcast_lives_handler(message: types.Message):
     if message.from_user.id not in ADMIN_IDS:
         return
 
-    # Разбираем сообщение на части: команда, количество жизней, текст
-    # Пример: /broadcast_lives 1 Получите жизнь в подарок!
-    command_parts = message.text.split(maxsplit=2)
-    if len(command_parts) < 3:
+    # Разбираем сообщение на части: команда, tg_id, количество жизней, текст
+    # Пример: /broadcast_lives 123456789 1 Получите жизнь в подарок!
+    command_parts = message.text.split(maxsplit=3)
+    if len(command_parts) < 4:
         await message.answer(
-            "❌ Неверный формат! Пример:\n<code>/broadcast_lives 1 Текст сообщения</code>",
+            "❌ Неверный формат! Пример:\n<code>/broadcast_lives TG_ID ЖИЗНИ Текст сообщения</code>",
             parse_mode="HTML",
         )
         return
 
-    # Проверяем, что вторым аргументом передано число (жизни)
+    # Проверяем tg_id (первый аргумент)
     try:
-        lives_amount = int(command_parts[1])
+        target_tg_id = int(command_parts[1])
     except ValueError:
         await message.answer(
-            "❌ Второе слово должно быть числом (количеством жизней)! Пример:\n<code>/broadcast_lives 1 Текст</code>",
+            "❌ TG_ID должен быть числом! Пример:\n<code>/broadcast_lives 123456789 1 Текст</code>",
             parse_mode="HTML",
         )
         return
 
-    custom_text = command_parts[2]
+    # Проверяем количество жизней (второй аргумент)
+    try:
+        lives_amount = int(command_parts[2])
+    except ValueError:
+        await message.answer(
+            "❌ Количество жизней должно быть числом! Пример:\n<code>/broadcast_lives 123456789 1 Текст</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    custom_text = command_parts[3]
 
     # Уникальный callback_data для жизней
     callback_data_str = f"claim_lives_{lives_amount}"
@@ -303,26 +313,28 @@ async def broadcast_lives_handler(message: types.Message):
         ]
     )
 
-    # Получаем всех питомцев из базы
-    pets = await PetModel.all()
+    # Проверяем, существует ли вообще такой питомец в базе (опционально, но полезно)
+    pet = await PetModel.filter(tg_id=target_tg_id).first()
+    if not pet:
+        await message.answer(f"❌ Питомец с tg_id <code>{target_tg_id}</code> не найден в базе данных.", parse_mode="HTML")
+        return
 
-    success_count = 0
-    for pet in pets:
-        try:
-            await message.bot.send_message(
-                chat_id=pet.tg_id,
-                text=custom_text,
-                reply_markup=keyboard,
-                parse_mode="HTML",
-            )
-            success_count += 1
-        except Exception as e:
-            print(f"Не удалось отправить сообщение для {pet.tg_id}: {e}")
-
-    await message.answer(
-        f"✅ Рассылка жизней завершена. Успешно отправлено: {success_count}"
-    )
-
+    try:
+        await message.bot.send_message(
+            chat_id=target_tg_id,
+            text=custom_text,
+            reply_markup=keyboard,
+            parse_mode="HTML",
+        )
+        await message.answer(
+            f"✅ Сообщение с жизнями успешно отправлено пользователю <code>{target_tg_id}</code>!",
+            parse_mode="HTML"
+        )
+    except Exception as e:
+        await message.answer(
+            f"❌ Не удалось отправить сообщение пользователю <code>{target_tg_id}</code>.\nОшибка: {e}",
+            parse_mode="HTML"
+        )
 
 # Обработчик нажатия на кнопку получения жизней
 @admin_router.callback_query(aiogram_F.data.startswith("claim_lives_"))

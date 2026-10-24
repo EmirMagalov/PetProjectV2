@@ -7,6 +7,8 @@ from bot.workers.pet import check_pet_notifications_job
 
 pet_router = APIRouter(prefix="/api", tags=["api"])
 
+SEASONS = ['summer', 'autumn', 'winter', 'spring']
+DAYS_SECONDS = 7 * 24 * 60 * 60
 
 def check_and_reset_tasks(pet) -> bool:
     """
@@ -20,8 +22,8 @@ def check_and_reset_tasks(pet) -> bool:
         pet.daily_tasks_notified = False
         return True
     return False
-SEASONS = ['summer', 'autumn', 'winter', 'spring']
-DAYS_SECONDS = 7 * 24 * 60 * 60
+
+
 @pet_router.get("/{tg_id}")
 async def get_pet(tg_id: int,device_id: str = Query(None)):
     pet = await PetModel.filter(tg_id=tg_id).first()
