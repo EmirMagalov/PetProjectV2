@@ -1,7 +1,6 @@
 import random
 import time
 from datetime import date
-
 from fastapi import APIRouter, HTTPException
 from backend.models.pet import Pet as PetModel, get_fresh_daily_tasks, TASKS_CONFIG
 from bot.workers.pet import check_pet_notifications_job
