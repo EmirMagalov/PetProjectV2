@@ -2,15 +2,12 @@ import asyncio
 import datetime
 import types
 from zoneinfo import ZoneInfo
-
 from aiogram import Router, F as aiogram_F, types, Bot
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-
 from backend.models.pet import Pet as PetModel
 from tortoise.expressions import F as db_f
-
 from common.config import ADMIN_IDS
 
 admin_router = Router()
