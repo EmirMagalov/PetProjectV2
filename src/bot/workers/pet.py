@@ -8,6 +8,7 @@ from backend.models.pet import Pet as PetModel, get_fresh_daily_tasks
 from bot.main import bot
 from common.config import settings
 
+
 logger = logging.getLogger(__name__)
 
 keyboard = types.InlineKeyboardMarkup(
