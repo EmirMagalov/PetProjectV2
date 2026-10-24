@@ -2,7 +2,6 @@ import asyncio
 import logging
 import time
 from datetime import date
-
 from aiogram import types
 from aiogram.exceptions import TelegramAPIError, TelegramForbiddenError
 from backend.models.pet import Pet as PetModel, get_fresh_daily_tasks
