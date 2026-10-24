@@ -196,7 +196,7 @@ export async function initGameData() {
                 document.body.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #1a1a1a; color: #fff; font-family: sans-serif; text-align: center; padding: 20px;">
                 <h2 style="color: #ff4757;">⚠️ Игра запущена на другом устройстве</h2>
-                <p style="color: #aaa; margin-top: 10px;">Закройте игру там и подожд, чтобы продолжить здесь.</p>
+                <p style="color: #aaa; margin-top: 10px;">Закройте игру там, чтобы продолжить играть здесь.</p>
             </div>
         `
                 return;
