@@ -29,7 +29,6 @@ watch(isEditing, async (newVal) => {
 <template>
   <div
       class="absolute inset-0  pointer-events-auto transition-all duration-1000 ease-in-out"
-      :class="gameData.sleep ? 'brightness-30' : 'brightness-100'"
       v-show="(location === 'home' || location === 'food')"
   >
   <div class="absolute w-19 left-4 top-19 pointer-events-auto">
