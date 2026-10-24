@@ -45,7 +45,7 @@ export const bathCartList = computed(() => {
 })
 
 export const ingredientCartList = computed(() => {
-    return cartItemsList.value.filter(item => item.category === 'ingredients' || ingredientList.some(s => s.id === item.id))
+    return cartItemsList.value.filter(item => item.category === 'ingredients')
 })
 
 export const currentFoodItem = computed(() => {

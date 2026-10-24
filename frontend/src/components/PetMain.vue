@@ -252,9 +252,7 @@ onUnmounted(() => {
 
 
 
-        <!-- Табличка с именем -->
 
-          <Nameplate />
 
 
           <CloudMessage />
@@ -292,7 +290,9 @@ onUnmounted(() => {
             <div class="absolute text-[#00BFFF] font-extrabold text-xl z-1 drop-shadow-md">Z</div>
             <div class="absolute  text-[#00BFFF] font-bold text-sm z-2 left-4 -top-3 drop-shadow-md">z</div>
           </div>
+          <!-- Табличка с именем -->
 
+          <Nameplate />
           <!-- Персонаж -->
           <div :class="['absolute flex justify-center items-center w-45 h-45', isPopping ? 'animate-pop' : '',tutorialStep === 3 ? 'animate-quick-pulse' : '']">
             <PetHeadwear/>

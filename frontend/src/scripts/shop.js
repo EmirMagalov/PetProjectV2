@@ -87,18 +87,21 @@ export function isUnlocked(itemId) {
 
 // Универсальная логика клика по кнопке товара
 export async function handleItemClick(item) {
-    if (activeTab.value !== 'clothes' && getItemQuantity(item) >= 10) {
+    // Проверяем лимиты для расходников (еда, лаборатория, баня)
+    const isConsumable = activeTab.value === 'food' || activeTab.value === 'laboratory' || activeTab.value === 'bath' || item.category === 'laboratory' || item.category === 'ingredients';
+
+    if (isConsumable && getItemQuantity(item) >= 10) {
         alert("Максимальное количество этого товара — 10 штук!");
         return;
     }
     if (isItemLocked(item)) return
 
-    // Получаем динамическую цену предметов
     const itemCost = getItemCost(item)
 
-    if (activeTab.value === 'food' || activeTab.value === 'laboratory' || activeTab.value === 'bath') {
+    // 🛒 ЛОГИКА ДЛЯ РАСХОДНИКОВ (Еда, Лаборатория, Баня, Ингредиенты)
+    if (isConsumable) {
         if (gameData.coins >= itemCost) {
-            gameData.coins -= itemCost // 👈 Списываем с учетом уровня
+            gameData.coins -= itemCost
             addToCart(item.id)
 
             const currentQty = gameData.cart[item.id] || 1
@@ -106,31 +109,31 @@ export async function handleItemClick(item) {
         } else {
             alert("Не хватает монет!")
         }
-    } else {
-        if (isUnlocked(item.id)) {
-            if (wardrobeTab.value === 'clothes') {
-                selectClothes(item.id)
-            } else {
-                selectHeadwear(item.id)
-            }
+        return; // Обязательно прерываем выполнение, чтобы не уйти в гардероб!
+    }
+
+    // 👗 ЛОГИКА ДЛЯ ГАРДЕРОБА (Одежда и Шляпы)
+    if (isUnlocked(item.id)) {
+        if (wardrobeTab.value === 'clothes') {
+            selectClothes(item.id)
         } else {
-            if (gameData.coins >= itemCost) {
-                gameData.coins -= itemCost // 👈 Списываем с учетом уровня
+            selectHeadwear(item.id)
+        }
+    } else {
+        if (gameData.coins >= itemCost) {
+            gameData.coins -= itemCost
 
-                if (wardrobeTab.value === 'clothes') {
-                    if (!gameData.unlockedClothes) gameData.unlockedClothes = []
-                    buyClothes(item.id)
-                    await syncToBackend()
-                } else {
-                    buyHeadwear(item.id)
-                    await syncToBackend()
-                }
-
-
-                showNotification(item, 1)
+            if (wardrobeTab.value === 'clothes') {
+                if (!gameData.unlockedClothes) gameData.unlockedClothes = []
+                buyClothes(item.id)
             } else {
-                alert("Не хватает монет!")
+                buyHeadwear(item.id)
             }
+
+            showNotification(item, 1)
+            await syncToBackend()
+        } else {
+            alert("Не хватает монет!")
         }
     }
 }
