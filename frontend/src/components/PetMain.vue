@@ -203,9 +203,9 @@ onUnmounted(() => {
         <!-- Фон локации -->
         <div class="absolute inset-0  pointer-events-none transition-all duration-1000 ease-in-out "
              :class="gameData.sleep ? 'brightness-30' : 'brightness-100'">
-        <div>
+        <div v-show="location==='home' || location === 'food'">
           <img
-              v-show="location==='home' || location === 'food'"
+
               :src="`/location/home.webp?v=${APP_VERSION}`"
               fetchpriority="high"
               decoding="sync"
