@@ -1,7 +1,6 @@
 from urllib.parse import quote
-from aiogram import Router, types, F, Bot
+from aiogram import F
 import time
-from tortoise.expressions import F as db_f
 from aiogram import Router, types, Bot
 from aiogram.filters import Command, CommandObject
 from common.config import settings
