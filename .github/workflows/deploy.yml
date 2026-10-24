@@ -1,0 +1,21 @@
+name: Docker Auto Pull & Restart
+
+on:
+  push:
+    branches: [ main ] # Если у тебя ветка master, укажи master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Execute remote SSH commands
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_IP }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /root/PetProjectV2 # 👈 Укажи реальный путь к папке с игрой на сервере
+          git pull origin main
+          docker compose up -d --build nginx

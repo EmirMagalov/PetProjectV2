@@ -237,7 +237,6 @@ export async function finishGame(type) {
         addCoin(currentBet.value);
         addExp(5)
     }
-    gameData.energy-=3
     await syncToBackend();
 }
 

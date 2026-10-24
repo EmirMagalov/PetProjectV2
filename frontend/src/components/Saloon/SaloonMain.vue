@@ -20,33 +20,33 @@ import {APP_VERSION} from "@/scripts/imageVersion.js";
 // СОСТОЯНИЕ ЗАГРУЗКИ (LOADER)
 // =====================================================
 const isLoading = ref(true);
-const MIN_ENERGY_REQUIRED = 3;
-const MIN_FOOD_REQUIRED = 3;
+// const MIN_ENERGY_REQUIRED = 3;
+// const MIN_FOOD_REQUIRED = 3;
+//
+// watch(gameFinished, (isFinished) => {
+//   if (isFinished) {
+//     const isOutOfEnergy = gameData.energy < MIN_ENERGY_REQUIRED;
+//     const isOutOfFood = gameData.foodLevel < MIN_FOOD_REQUIRED; // Проверьте имя свойства (foodLevel или food)
+//
+//     if (isOutOfEnergy || isOutOfFood) {
+//       // Задержка 1.5 сек, чтобы игрок увидел результат партии и анимацию монет
+//       setTimeout(() => {
+//         if (isOutOfEnergy && isOutOfFood) {
+//           alert("У вас закончились и энергия, и сытость! Вы покинули Jackpot.");
+//         } else if (isOutOfEnergy) {
+//           alert("У вас закончилась энергия! Вы покинули Jackpot.");
+//         } else {
+//           alert("Персонаж слишком голоден для игры! Вы покинули Jackpot.");
+//         }
+//
+//         // Перенаправление на главную/другую локацию
+//         router.push('/');
+//       }, 800);
+//     }
+//   }
+// });
 
-watch(gameFinished, (isFinished) => {
-  if (isFinished) {
-    const isOutOfEnergy = gameData.energy < MIN_ENERGY_REQUIRED;
-    const isOutOfFood = gameData.foodLevel < MIN_FOOD_REQUIRED; // Проверьте имя свойства (foodLevel или food)
-
-    if (isOutOfEnergy || isOutOfFood) {
-      // Задержка 1.5 сек, чтобы игрок увидел результат партии и анимацию монет
-      setTimeout(() => {
-        if (isOutOfEnergy && isOutOfFood) {
-          alert("У вас закончились и энергия, и сытость! Вы покинули Jackpot.");
-        } else if (isOutOfEnergy) {
-          alert("У вас закончилась энергия! Вы покинули Jackpot.");
-        } else {
-          alert("Персонаж слишком голоден для игры! Вы покинули Jackpot.");
-        }
-
-        // Перенаправление на главную/другую локацию
-        router.push('/');
-      }, 800);
-    }
-  }
-});
-
-const router = useRouter();
+// const router = useRouter();
 
 
 
