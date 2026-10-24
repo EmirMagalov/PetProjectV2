@@ -1,6 +1,5 @@
 import random
 import time
-
 from backend.models.pet import Pet as PetModel
 
 # 24 часа в секундах
