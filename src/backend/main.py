@@ -6,7 +6,6 @@ from backend.routers.pet import pet_router
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from backend.services.pet import pet_tick_job
 from bot.workers.pet import check_pet_notifications_job
-
 from common.config import settings
 
 
