@@ -4,6 +4,7 @@ import {foodList} from "@/scripts/objectItems.js";
 import {clothesItems} from "@/scripts/clothesItems.js";
 import {headItems} from "@/scripts/headwearItems.js";
 import {addToCart, buyClothes, buyHeadwear} from "@/scripts/basket.js";
+import {syncToBackend} from "@/scripts/api.js";
 
 export const wardrobeTab = ref('hats')
 export const lastBought = ref(null)
@@ -45,7 +46,6 @@ export function getItemQuantity(item) {
 }
 
 // Универсальная проверка блокировки товара по уровню
-// Универсальная проверка блокировки товара по уровню
 export function isItemLocked(item) {
     // Если предмет уже куплен, он никогда не должен быть заблокирован
     if (activeTab.value === 'clothes' && isUnlocked(item.id)) {
@@ -86,7 +86,7 @@ export function isUnlocked(itemId) {
 }
 
 // Универсальная логика клика по кнопке товара
-export function handleItemClick(item) {
+export async function handleItemClick(item) {
     if (activeTab.value !== 'clothes' && getItemQuantity(item) >= 10) {
         alert("Максимальное количество этого товара — 10 штук!");
         return;
@@ -120,9 +120,12 @@ export function handleItemClick(item) {
                 if (wardrobeTab.value === 'clothes') {
                     if (!gameData.unlockedClothes) gameData.unlockedClothes = []
                     buyClothes(item.id)
+                    await syncToBackend()
                 } else {
                     buyHeadwear(item.id)
+                    await syncToBackend()
                 }
+
 
                 showNotification(item, 1)
             } else {

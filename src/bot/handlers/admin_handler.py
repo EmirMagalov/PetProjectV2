@@ -36,6 +36,9 @@ async def static_text(page: int, per_page: int = 5, bot=None):
         click_counter = pet.click_counter
         level = pet.level
         coins = pet.coins
+        lives = pet.lives
+        unlocked_heads = " ,".join(pet.unlocked_heads)
+        unlocked_clothes = " ,".join(pet.unlocked_clothes)
         deaths_count = pet.deaths_count
         last_interaction = datetime.datetime.fromtimestamp(pet.last_interaction,tz)
         try:
@@ -45,7 +48,7 @@ async def static_text(page: int, per_page: int = 5, bot=None):
         except Exception:
             user_name = "Неизвестен"
             first_name = "Неизвестен"
-        statistics += f"Пользователь: {user_name}({first_name})\nИмя питомца: {name}\nКликов: {click_counter}\nУровень: {level}\nМонет: {coins}\nСмертей: {deaths_count}\nПоследнее действие: {last_interaction}\n---------\n"
+        statistics += f"Пользователь: {user_name}({first_name})\nИмя питомца: {name}\nКликов: {click_counter}\nУровень: {level}\nМонет: {coins}\nСмертей: {deaths_count}\nЖизней: {lives}\nГоловные уборы: {unlocked_heads}\nОдежда: {unlocked_clothes}\nПоследнее действие: {last_interaction}\n---------\n"
 
     return (
         f"📊 <b>Всего пользователей:</b> {total_count} (Стр. {page})\n\n{statistics}",
