@@ -213,7 +213,7 @@ onUnmounted(() => {
 
           />
 
-          <img :src="`/location/${gameData.season}.webp`" id="season-bg" alt="Season background" class="absolute top-0 z-0 w-[320px] h-[270px]">
+          <img :src="`/location/${gameData.season}.webp?v=${APP_VERSION}`" id="season-bg" alt="Season background" class="absolute top-0 z-0 w-[320px] h-[270px]">
         </div>
 
           <img
