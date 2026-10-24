@@ -169,6 +169,7 @@ onMounted(async () => {
     }
 
   }
+
 })
 
 onUnmounted(() => {
@@ -202,15 +203,19 @@ onUnmounted(() => {
         <!-- Фон локации -->
         <div class="absolute inset-0  pointer-events-none transition-all duration-1000 ease-in-out "
              :class="gameData.sleep ? 'brightness-30' : 'brightness-100'">
-
+        <div>
           <img
               v-show="location==='home' || location === 'food'"
               :src="`/location/home.webp?v=${APP_VERSION}`"
               fetchpriority="high"
               decoding="sync"
-              class="w-[320px] h-[270px] "
+              class="w-[320px] h-[270px] relative z-5"
 
           />
+
+          <img :src="`/location/${gameData.season}.webp`" id="season-bg" alt="Season background" class="absolute top-0 z-0 w-[320px] h-[270px]">
+        </div>
+
           <img
               v-show="location==='bath'"
               :src="`/location/bath.webp?v=${APP_VERSION}`"

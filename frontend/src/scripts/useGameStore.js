@@ -105,6 +105,7 @@ export const defaultGameData = {
     unlockedClothes: [],
     tutorialCompleted: false,
     referredBy:false,
+    season:'summer',
     cart: {},
     daily_tasks: {
         feed: { progress: 0, claimed: false },

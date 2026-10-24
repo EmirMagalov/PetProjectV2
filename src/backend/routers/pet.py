@@ -20,7 +20,8 @@ def check_and_reset_tasks(pet) -> bool:
         pet.daily_tasks_notified = False
         return True
     return False
-
+SEASONS = ['summer', 'autumn', 'winter', 'spring']
+FIVE_DAYS_SECONDS = 5 * 24 * 60 * 60
 @pet_router.get("/{tg_id}")
 async def get_pet(tg_id: int,device_id: str = Query(None)):
     pet = await PetModel.filter(tg_id=tg_id).first()
@@ -62,7 +63,14 @@ async def get_pet(tg_id: int,device_id: str = Query(None)):
             updated_fields.extend(["tasks_reset_date", "daily_tasks"])
 
         await pet.save(update_fields=updated_fields)
-    return pet
+    interval_index = int(current_time // FIVE_DAYS_SECONDS)
+    print(interval_index)
+    current_season = SEASONS[interval_index % len(SEASONS)]
+
+    # 3. Преобразуем модель в dict и добавляем поле season
+    pet_dict = dict(pet.__dict__)
+    pet_dict["season"] = current_season
+    return pet_dict
 
 
 @pet_router.post("/update")

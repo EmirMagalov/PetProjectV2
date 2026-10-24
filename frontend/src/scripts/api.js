@@ -133,6 +133,7 @@ export async function initGameData() {
             gameData.coins = serverData.coins
             gameData.lives = serverData.lives
             gameData.deathsCount = serverData.deaths_count
+            gameData.season = serverData.season || 'summer'
             gameData.fatCount = serverData.fat_count
             gameData.foodLevel = serverData.food_level
             gameData.energy = serverData.energy
@@ -161,7 +162,6 @@ export async function initGameData() {
             gameData.referredBy = serverData.referred_by || false
             // 👈 ДОБАВЛЯЕМ ЭТУ ПРОВЕРКУ:
             const localTutorialDone = localStorage.getItem('tutorial_completed') === 'true'
-
             if (localTutorialDone) {
                 gameData.tutorialCompleted = true
                 tutorialStep.value = 0
