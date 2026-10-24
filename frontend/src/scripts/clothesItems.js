@@ -49,7 +49,7 @@ export const clothesItems = [
 
     {
         id: 'pink_dresses',
-        name: 'Розовое плате',
+        name: 'Розовое платье',
         preview:`/clothes/dresses/preview_pink_dresses.webp?v=${APP_VERSION}`,
         image_normal: `/clothes/dresses/normal_pink_dresses.webp?v=${APP_VERSION}`,
         image_fat: `/clothes/dresses/fat_pink_dresses.webp?v=${APP_VERSION}`,
@@ -60,7 +60,7 @@ export const clothesItems = [
     },
     {
         id: 'blue_dresses',
-        name: 'Голубое плате',
+        name: 'Голубое платье',
         preview:`/clothes/dresses/preview_blue_dresses.webp?v=${APP_VERSION}`,
         image_normal: `/clothes/dresses/normal_blue_dresses.webp?v=${APP_VERSION}`,
         image_fat: `/clothes/dresses/fat_blue_dresses.webp?v=${APP_VERSION}`,
