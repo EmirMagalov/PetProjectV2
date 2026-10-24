@@ -40,7 +40,7 @@ class Pet(models.Model):
     # ==========================================
     sleep = fields.BooleanField(default=False)  # Спит ли питомец сейчас
     sleep_end_time = fields.FloatField(default=0.0)  # Timestamp окончания сна
-
+    active_device_id = fields.CharField(max_length=255, null=True, default=None)
     stinky = fields.BooleanField(default=False)  # Грязный / Вонючий
     is_pooped = fields.BooleanField(default=False)  # Накакал (требуется уборка)
     sick = fields.BooleanField(default=False)  # Болен

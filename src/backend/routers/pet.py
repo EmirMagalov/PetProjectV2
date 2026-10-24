@@ -1,7 +1,7 @@
 import random
 import time
 from datetime import date
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from backend.models.pet import Pet as PetModel, get_fresh_daily_tasks, TASKS_CONFIG
 from bot.workers.pet import check_pet_notifications_job
 
@@ -22,9 +22,9 @@ def check_and_reset_tasks(pet) -> bool:
     return False
 
 @pet_router.get("/{tg_id}")
-async def get_pet(tg_id: int):
+async def get_pet(tg_id: int,device_id: str = Query(None)):
     pet = await PetModel.filter(tg_id=tg_id).first()
-
+    current_time = time.time()
     if not pet:
         pet, created = await PetModel.get_or_create(
             tg_id=tg_id,
@@ -41,11 +41,23 @@ async def get_pet(tg_id: int):
                 "last_interaction": int(time.time()),
                 "last_fortune_spin": 0,
                 "paid_spin_count": 0,
+                "active_device_id": device_id,
             },
         )
     else:
-        pet.last_interaction = int(time.time())
-        updated_fields = ["last_interaction"]
+        if pet.active_device_id and pet.active_device_id != device_id:
+            # Если устройство другое, проверяем сколько секунд назад была активность
+            time_diff = current_time - pet.last_interaction
+            if time_diff < 10:
+                # 🛑 Если прошло меньше 15 секунд — кидаем ошибку 403 (игра открыта где-то еще)
+                raise HTTPException(
+                    status_code=403,
+                    detail="ALREADY_OPEN_ON_ANOTHER_DEVICE"
+                )
+        pet.active_device_id = device_id
+        pet.last_interaction = int(current_time)
+        updated_fields = ["last_interaction", "active_device_id"]
+
         if check_and_reset_tasks(pet):
             updated_fields.extend(["tasks_reset_date", "daily_tasks"])
 

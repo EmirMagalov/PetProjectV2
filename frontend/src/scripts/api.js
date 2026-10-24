@@ -2,16 +2,28 @@ import axios from 'axios'
 import {gameData, tutorialStep} from './useGameStore.js'
 import {ref} from "vue";
 import {syncFortuneTime} from "@/scripts/fortune.js";
-
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
 export let tgId = import.meta.env.VITE_USER_ID || null
-// --- 1. СИСТЕМА ЖЕСТКОЙ БЛОКИРОВКИ ДУБЛИКАТОВ ВКЛАДОК ---
-const TAB_ID = Math.random().toString(36).substring(2)
+export const isApiError = ref(false) // 👈 Флаг ошибки бэкенда
+export const errorMessage = ref('')  // 👈 Текст ошибки
+export const isLoading = ref(true)
+
 let isMaster = true
 let isDuplicate = false
+let isDataLoaded = false
+let isSyncLocked = false // Блокировщик сохранения при фокусе/возвращении
 
+const TAB_ID = Math.random().toString(36).substring(2)
+const currentSessionKey = window.Telegram?.WebApp?.initData || 'web_debug_mode'
+const savedSessionKey = sessionStorage.getItem('tg_session_signature')
 const channel = new BroadcastChannel('game_master_channel')
+let deviceId = localStorage.getItem('game_device_id')
 
+
+if (!deviceId) {
+    deviceId = Math.random().toString(36).substring(2) + Date.now().toString(36)
+    localStorage.setItem('game_device_id', deviceId)
+}
 // Слушаем другие вкладки
 channel.onmessage = (event) => {
     if (event.data.type === 'WHO_IS_MASTER') {
@@ -54,14 +66,7 @@ setInterval(() => {
 }, 2000)
 
 // --- 2. ФЛАГИ СОСТОЯНИЯ ---
-export const isLoading = ref(true)
-let isDataLoaded = false
-let isSyncLocked = false // Блокировщик сохранения при фокусе/возвращении
-export const isApiError = ref(false) // 👈 Флаг ошибки бэкенда
-export const errorMessage = ref('')  // 👈 Текст ошибки
-// --- 3. ЗАЩИТА ОТ СТАРЫХ СЕССИЙ БОТА ---
-const currentSessionKey = window.Telegram?.WebApp?.initData || 'web_debug_mode'
-const savedSessionKey = sessionStorage.getItem('tg_session_signature')
+
 
 if (savedSessionKey && savedSessionKey !== currentSessionKey) {
     console.warn("🔄 Обнаружен новый вход через бота! Принудительно перезагружаем страницу...")
@@ -108,7 +113,12 @@ export async function initGameData() {
         try {
             const minDelay = new Promise(resolve => setTimeout(resolve, 800))
             const [response] = await Promise.all([
-                axios.get(`${API_URL}/${tgId}?_t=${Date.now()}`),
+                axios.get(`${API_URL}/${tgId}`, {
+                    params: {
+                        device_id: deviceId, // 👈 Передаем ID текущего устройства
+                        _t: Date.now()
+                    }
+                }),
                 minDelay
             ])
 
@@ -178,6 +188,21 @@ export async function initGameData() {
             return; // Выходим из функции при успехе
 
         } catch (e) {
+            // 🛑 ЕСЛИ ИГРА УЖЕ ОТКРЫТА НА ДРУГОМ УСТРОЙСТВЕ
+            if (e.response && e.response.status === 403) {
+                isLoading.value = false
+                isApiError.value = true
+
+                document.body.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #1a1a1a; color: #fff; font-family: sans-serif; text-align: center; padding: 20px;">
+                <h2 style="color: #ff4757;">⚠️ Игра запущена на другом устройстве</h2>
+                <p style="color: #aaa; margin-top: 10px;">Закройте игру там и подожд, чтобы продолжить здесь.</p>
+            </div>
+        `
+                return;
+            }
+
+
             console.warn(`⚠️ Попытка ${attempt} из ${maxRetries} не удалась...`, e)
 
             if (attempt === maxRetries) {
@@ -210,6 +235,7 @@ function getPayload() {
 
     return {
         tg_id: tgId,
+        device_id: deviceId,
         name: gameData.name,
         level: gameData.level,
         exp: gameData.exp,
