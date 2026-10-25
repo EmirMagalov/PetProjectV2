@@ -283,8 +283,8 @@ const updateGame = (dt = 1) => {
           player.vRot = 0
 
           if (player.bounceForce < player.maxBounceForce) {
-            if (reachedHalf) {
-              player.bounceForce += 0.35
+            if (completedFlips.value>0) {
+              player.bounceForce += 0.6
             } else {
               player.bounceForce += 0.2
             }
