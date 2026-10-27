@@ -59,7 +59,7 @@ async def pet_tick_job():
             if pet.poop_bad_minutes >= 60:
                 pet.stinky = True
                 pet.poop_bad_minutes = 0
-        elif not pet.is_pooped:
+        else:
             pet.poop_bad_minutes = 0
             # washed_time = pet.last_washed_time if pet.last_washed_time > 0 else pet.last_interaction
             # time_since_washed = NOW - washed_time
@@ -77,7 +77,7 @@ async def pet_tick_job():
             if pet.stinky_bad_minutes >= 120:
                 pet.sick = True
                 pet.stinky_bad_minutes = 0
-        elif not pet.is_pooped and not pet.stinky:
+        else:
             pet.stinky_bad_minutes= 0
 
         # --- 5. НАКАЗАНИЕ ЗА 0 ЕДЫ ИЛИ 0 ЭНЕРГИИ (12 часов = 720 мин) ---
