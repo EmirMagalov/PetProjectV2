@@ -395,6 +395,9 @@ const currentBathImage = computed(() => {
               tutorialStep === 6 && bathCartList.length > 0 && !foamDrag.isDragging.value ? 'animate-pulse ' : ''
               ]"
         >
+          <div v-show="gameData.sick && !statusFoam && bathCartList.length > 0" class="absolute -left-2 pointer-events-none w-12  opacity-70 animate-pulse">
+            <img :src="`/gamePlay/thermometer.webp?v=${APP_VERSION}`" alt="">
+          </div>
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
           <!-- 1. Если список банных принадлежностей пуст -->

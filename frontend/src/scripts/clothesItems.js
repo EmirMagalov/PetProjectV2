@@ -69,4 +69,15 @@ export const clothesItems = [
         price: 10000,
         level:20
     },
+    {
+        id: 'green_dresses',
+        name: 'Зелёное платье',
+        preview:`/clothes/dresses/preview_green_dresses.webp?v=${APP_VERSION}`,
+        image_normal: `/clothes/dresses/normal_green_dresses.webp?v=${APP_VERSION}`,
+        image_fat: `/clothes/dresses/fat_green_dresses.webp?v=${APP_VERSION}`,
+        image_skinny: `/clothes/dresses/skinny_green_dresses.webp?v=${APP_VERSION}`,
+        category:"costumes",
+        price: 10000,
+        level:20
+    },
 ]
