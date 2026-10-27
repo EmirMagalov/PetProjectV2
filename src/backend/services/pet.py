@@ -108,6 +108,7 @@ async def pet_tick_job():
             "sleep_end_time",
             "bad_stats_minutes",
             "poop_bad_minutes",
+            "stinky_bad_minutes",
             "last_washed_time",
             "last_poop_cleaned_time",
         ],
