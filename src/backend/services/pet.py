@@ -37,18 +37,7 @@ async def pet_tick_job():
             energy_rate = ENERGY_PER_MIN_SICK if pet.sick else ENERGY_PER_MIN_HEALTHY
             pet.energy = max(0.0, pet.energy - energy_rate)
 
-        # --- ПРОВЕРКА ГРЯЗИ (STINKY) ---
-        if not pet.stinky:
-            washed_time = pet.last_washed_time if pet.last_washed_time > 0 else pet.last_interaction
-            time_since_washed = NOW - washed_time
 
-            if time_since_washed >= 18000:
-                # Через 5 часа — гарантированная грязь
-                pet.stinky = True
-            elif time_since_washed >= 14400:
-                # Через 4 часа — шанс испачкаться
-                if random.random() < (1 / 180):
-                    pet.stinky = True
 
         # --- ПРОВЕРКА КАКАХИ (IS_POOPED) ---
         if not pet.is_pooped:
@@ -64,19 +53,37 @@ async def pet_tick_job():
                 if random.random() < (1 / 180):
                     pet.is_pooped = True
 
-        # --- 4. НАКОПЛЕНИЕ ГРЯЗИ И БОЛЕЗНЬ ---
-        if (pet.is_pooped or pet.stinky) and not pet.sick:
-            pet.poop_bad_minutes += 1
-            if pet.poop_bad_minutes >= 120:
-                pet.sick = True
+        # --- ПРОВЕРКА ГРЯЗИ (STINKY) ---
+        if not pet.stinky and pet.is_pooped:
+            pet.poop_bad_minutes+=1
+            if pet.poop_bad_minutes >= 60:
+                pet.stinky = True
                 pet.poop_bad_minutes = 0
-        elif not pet.is_pooped and not pet.stinky:
+        elif not pet.is_pooped:
             pet.poop_bad_minutes = 0
+            # washed_time = pet.last_washed_time if pet.last_washed_time > 0 else pet.last_interaction
+            # time_since_washed = NOW - washed_time
+            #
+            # if time_since_washed >= 18000:
+            #     # Через 5 часа — гарантированная грязь
+            #     pet.stinky = True
+            # elif time_since_washed >= 14400:
+            #     # Через 4 часа — шанс испачкаться
+            #     if random.random() < (1 / 180):
+            #         pet.stinky = True
+        # --- 4. НАКОПЛЕНИЕ ГРЯЗИ И БОЛЕЗНЬ ---
+        if pet.stinky and not pet.sick:
+            pet.stinky_bad_minutes += 1
+            if pet.stinky_bad_minutes >= 120:
+                pet.sick = True
+                pet.stinky_bad_minutes = 0
+        elif not pet.is_pooped and not pet.stinky:
+            pet.stinky_bad_minutes= 0
 
-        # --- 5. НАКАЗАНИЕ ЗА 0 ЕДЫ ИЛИ 0 ЭНЕРГИИ (8 часов = 480 мин) ---
+        # --- 5. НАКАЗАНИЕ ЗА 0 ЕДЫ ИЛИ 0 ЭНЕРГИИ (12 часов = 720 мин) ---
         if pet.food_level == 0.0 or pet.energy == 0.0:
             pet.bad_stats_minutes += 1
-            if pet.bad_stats_minutes >= 480:
+            if pet.bad_stats_minutes >= 720:
                 pet.lives = max(0, pet.lives - 1)
                 if pet.lives == 0:
                     pet.deaths_count += 1
