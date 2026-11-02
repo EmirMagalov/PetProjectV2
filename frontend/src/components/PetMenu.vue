@@ -196,7 +196,7 @@ const currentBathImage = computed(() => {
           class="bg-[#fff6ef] justify-center flex flex-col h-25   items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
           style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
 
-        <button class="text-md font-bold text-gray-600 pointer-events-none">Начать заново</button>
+        <button class="text-md font-bold text-gray-600 pointer-events-none">{{$t('store.start_again')}}</button>
       </div>
     </div>
     <div v-else>

@@ -161,6 +161,7 @@ export default {
         close_other_device: 'Закройте игру там, чтобы продолжить играть здесь.',
         backend_unavailable: 'Сервер недоступен. Проверьте интернет-соединение.',
         telegram_user_not_found: 'Не удалось определить пользователя Telegram.',
+        server_unavailable: "Сервер недоступен. Проверьте интернет-соединение."
     },
     jackpot: {
         not_enough_coins_for_game: "Недостаточно монет для начала игры! Минимальная ставка: 50",

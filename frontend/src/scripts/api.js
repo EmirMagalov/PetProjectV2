@@ -220,7 +220,7 @@ export async function initGameData() {
                 // 🛑 Все попытки исчерпаны: фиксируем ошибку и НЕ выключаем isLoading
                 console.error("❌ Не удалось подключиться к бэкенду после всех попыток.")
                 isApiError.value = true
-                errorMessage.value = "Сервер недоступен. Проверьте интернет-соединение."
+                errorMessage.value = i18n.global.t('store.server_unavailable')
             } else {
                 await new Promise(resolve => setTimeout(resolve, 2000))
             }
