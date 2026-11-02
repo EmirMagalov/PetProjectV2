@@ -2,6 +2,9 @@ import axios from 'axios'
 import {gameData, tutorialStep} from './useGameStore.js'
 import {ref} from "vue";
 import {syncFortuneTime} from "@/scripts/fortune.js";
+import i18n from "@/scripts/locales/i18n.js";
+
+
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
 export let tgId = import.meta.env.VITE_USER_ID || null
 export const isApiError = ref(false) // 👈 Флаг ошибки бэкенда
@@ -28,7 +31,7 @@ if (!deviceId) {
 channel.onmessage = (event) => {
     if (event.data.type === 'WHO_IS_MASTER') {
         if (isMaster && !isDuplicate) {
-            channel.postMessage({ type: 'I_AM_MASTER', id: TAB_ID })
+            channel.postMessage({type: 'I_AM_MASTER', id: TAB_ID})
         }
     } else if (event.data.type === 'I_AM_MASTER') {
         if (event.data.id !== TAB_ID) {
@@ -38,7 +41,7 @@ channel.onmessage = (event) => {
             // 🛑 БЛОКИРУЕМ НОВУЮ ВКЛАДКУ ПРИНУДИТЕЛЬНО
             document.body.innerHTML = `
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #1a1a1a; color: #fff; font-family: sans-serif; text-align: center; padding: 20px;">
-                    <h2 style="color: #ff4757;">⚠️ Игра уже открыта в другой вкладке!</h2>
+                    <h2 style="color: #ff4757;">${i18n.global.t('store.already_open_device')}</h2>
                 </div>
             `
         }
@@ -46,7 +49,7 @@ channel.onmessage = (event) => {
 }
 
 // При старте спрашиваем, есть ли уже открытая игра
-channel.postMessage({ type: 'WHO_IS_MASTER' })
+channel.postMessage({type: 'WHO_IS_MASTER'})
 
 // Функция проверки "мы мастер"
 function isMasterTab() {
@@ -61,7 +64,7 @@ function isCurrentTabActive() {
 // Периодически пингуем
 setInterval(() => {
     if (isMaster && !isDuplicate) {
-        channel.postMessage({ type: 'I_AM_MASTER', id: TAB_ID })
+        channel.postMessage({type: 'I_AM_MASTER', id: TAB_ID})
     }
 }, 2000)
 
@@ -149,9 +152,9 @@ export async function initGameData() {
             gameData.addictionStreak = serverData.addiction_streak
             gameData.cart = serverData.cart || {}
             gameData.daily_tasks = serverData.daily_tasks || {
-                feed: { progress: 0, claimed: false },
-                wash: { progress: 0, claimed: false },
-                click: { progress: 0, claimed: false }
+                feed: {progress: 0, claimed: false},
+                wash: {progress: 0, claimed: false},
+                click: {progress: 0, claimed: false}
             }
             gameData.unlockedHeads = serverData.unlocked_heads || []
             gameData.unlockedHeads = serverData.unlocked_heads || []
@@ -202,8 +205,8 @@ export async function initGameData() {
 
                 document.body.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #1a1a1a; color: #fff; font-family: sans-serif; text-align: center; padding: 20px;">
-                <h2 style="color: #ff4757;">⚠️ Игра запущена на другом устройстве</h2>
-                <p style="color: #aaa; margin-top: 10px;">Закройте игру там, чтобы продолжить играть здесь.</p>
+                <h2 style="color: #ff4757;">${i18n.global.t('store.device_already_open')}</h2>
+                <p style="color: #aaa; margin-top: 10px;">${i18n.global.t('store.close_other_device')}</p>
             </div>
         `
                 return;
@@ -274,12 +277,10 @@ function getPayload() {
 }
 
 
-
 export async function syncToBackend() {
     if (!isCurrentTabActive() || !isDataLoaded || isSyncLocked) {
         return
     }
-
 
 
     try {
@@ -299,7 +300,7 @@ function sendBeaconUpdate() {
 
     const payload = JSON.stringify(getPayload())
 
-    const blob = new Blob([payload], { type: 'application/json' })
+    const blob = new Blob([payload], {type: 'application/json'})
     navigator.sendBeacon(`${API_URL}/update`, blob)
 }
 

@@ -155,6 +155,8 @@ export default {
         yummy: 'Ням-ням!',
         max_limit: 'MAX!',
         already_open_device: '⚠️ Игра уже открыта в другой вкладке!',
+        device_already_open: '⚠️ Игра запущена на другом устройстве',
+        close_other_device: 'Закройте игру там, чтобы продолжить играть здесь.',
         backend_unavailable: 'Сервер недоступен. Проверьте интернет-соединение.',
         telegram_user_not_found: 'Не удалось определить пользователя Telegram.',
     },

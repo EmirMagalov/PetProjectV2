@@ -158,6 +158,8 @@ export default {
         yummy: 'Yummy!',
         max_limit: 'MAX!',
         already_open_device: '⚠️ Game is already open in another tab!',
+        device_already_open: '⚠️ Game is running on another device',
+        close_other_device: 'Close the game there to continue playing here.',
         backend_unavailable: 'Server is unavailable. Check your internet connection.',
         telegram_user_not_found: 'Could not determine Telegram user.',
     },
