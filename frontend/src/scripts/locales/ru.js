@@ -76,7 +76,7 @@ export default {
 
     heads: {
         incognito_hat: 'Инкогнито кепка',
-        halloween_pumpkin_hat:"Хэллоуинская тыква",
+        halloween_pumpkin_hat:"Хэллоуинская тыква шляпа",
         cowboy_hat: 'Ковбойская шляпа',
         pillbox: 'Шляпа-таблетка',
         pirate_hat: 'Пиратская шляпа',
