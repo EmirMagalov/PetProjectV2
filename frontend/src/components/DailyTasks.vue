@@ -39,7 +39,7 @@ const sortedTasks = computed(() => {
   <div class="p-4 max-w-md w-full mx-auto">
     <!-- Шапка -->
     <div class="flex justify-center items-center mb-4">
-      <span class="text-md font-bold">Ежедневные задания</span>
+      <span class="text-md font-bold">{{ $t(`daily_tasks`) }}</span>
     </div>
 
     <!-- Список заданий -->
@@ -73,7 +73,7 @@ const sortedTasks = computed(() => {
         <div class="flex flex-col items-center gap-2 mt-1">
           <!-- Награда -->
           <div class="flex items-center  flex-col">
-            <span class="text-xs text-gray-700">Награда</span>
+            <span class="text-xs text-gray-700">{{ $t(`reward`) }}</span>
             <div
                 class="flex flex-col items-center justify-center gap-0.5  text-xs font-bold bg-yellow-100 px-3 py-1 rounded-lg border border-yellow-400/20">
               <div  class="flex items-center justify-center gap-1">
@@ -95,7 +95,7 @@ const sortedTasks = computed(() => {
               :disabled="loadingKey === key"
               class="text-xs px-2 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-green-600 animate-pulse text-white font-bold shadow-md flex items-center gap-1"
           >
-            <span v-show="loadingKey !== key">Забрать награду</span>
+            <span v-show="loadingKey !== key">{{ $t(`claim_reward`) }}</span>
           </button>
 
           <!-- Награда уже зафиксирована -->
@@ -103,7 +103,7 @@ const sortedTasks = computed(() => {
               v-else-if="isTaskClaimed(key)"
               class="text-xs px-2.5 py-1 text-green-400 font-bold text-shadow-2xs text-shadow-black flex items-center gap-1  rounded-lg "
           >
-            ✓ Получено
+            ✓ {{ $t(`received`) }}
           </span>
         </div>
       </div>

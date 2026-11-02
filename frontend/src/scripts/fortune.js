@@ -3,6 +3,7 @@ import axios from 'axios'
 import {gameData} from "@/scripts/useGameStore.js"
 import {API_URL, tgId} from "@/scripts/api.js"
 import {APP_VERSION} from "@/scripts/imageVersion.js"
+import i18n from "@/scripts/locales/i18n.js";
 
 export const isFortuneOpen = ref(false)
 export const isSpinning = ref(false)
@@ -95,7 +96,7 @@ export async function spinWheel() {
     const SPIN_PRICE = canSpin.value ? 0 : currentSpinPrice.value
 
     if (!canSpin.value && gameData.coins < SPIN_PRICE) {
-        alert(`Недостаточно монет! Нужно ${SPIN_PRICE} монет.`)
+        alert(i18n.global.t('fortune.not_enough_coins_for_spin', { price: SPIN_PRICE }))
         return
     }
 
@@ -113,7 +114,6 @@ export async function spinWheel() {
         const response = await axios.post(`${API_URL}/pet/spin-fortune/${tgId}`)
 
         if (!response.data.success) {
-            alert(response.data.message)
             isSpinning.value = false
             if (isPaidSpin) {
                 gameData.coins += SPIN_PRICE // Возвращаем монеты при ошибке
@@ -179,9 +179,9 @@ export async function spinWheel() {
 
             // 4. Показываем уведомление о выигрыше
             if (reward.type === 'nothing') {
-                alert(`😢 К сожалению, в этот раз ничего не выпало...`)
+                alert(i18n.global.t('fortune.nothing_won'))
             } else {
-                alert(`🎉 Приз: ${reward.name}!`)
+                alert(i18n.global.t('fortune.prize_won', { name: reward.name }))
             }
         }, 3500)
 

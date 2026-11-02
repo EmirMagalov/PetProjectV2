@@ -61,7 +61,7 @@ const removeSerum = (index) => {
 
         <!-- Текст загрузки -->
         <span class="text-[#D18900] font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
-          Входим в Лабораторию...
+          {{ $t('enter_the_laboratory') }}
         </span>
 
         <!-- Спиннер -->
@@ -84,9 +84,9 @@ const removeSerum = (index) => {
       </span>
           </div>
           <div class="text-center">
-            <p class="text-[10px] text-white font-medium">Успешный синтез!</p>
+            <p class="text-[10px] text-white font-medium">{{ $t('successful_synthesis') }}</p>
             <p class="text-xs text-amber-300 font-bold">
-              {{ lastCrafted.name }}
+              {{ $t(`serums.${lastCrafted.id}`) }}
             </p>
           </div>
         </div>

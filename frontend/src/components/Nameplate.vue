@@ -7,12 +7,15 @@ import {location} from "@/scripts/useGameStore.js";
 const inputRef = ref(null)
 
 function startEditing() {
+  if (gameData.name === 'store.pet_name_placeholder') {
+    gameData.name = ''
+  }
   isEditing.value = true
 }
 
 // 1. Принудительно обрезаем имя до 15 символов при любых изменениях (вставка, T9, быстрый ввод)
 watch(() => gameData.name, (newVal) => {
-  if (newVal && newVal.length > 15) {
+  if (gameData.name!=='store.pet_name_placeholder' && newVal && newVal.length > 15) {
     gameData.name = newVal.slice(0, 15)
   }
 }, { immediate: true })
@@ -41,7 +44,7 @@ watch(isEditing, async (newVal) => {
           @click="startEditing"
           class="absolute scale-80 py-1 px-2 inset-0 text-white text-shadow-2xs text-shadow-black w-full min-w-0 flex font-bold items-start justify-center text-[12px] leading-tight break-all cursor-pointer select-none"
       >
-        {{ gameData.name }}
+        {{ $t(gameData.name) }}
       </div>
 
       <!-- Редактирование -->
@@ -54,7 +57,7 @@ watch(isEditing, async (newVal) => {
             @blur="finishEditing"
             @keydown.enter="finishEditing"
             @pointerdown.stop
-            class="w-full bg-transparent text-center font-bold text-[10px] text-black outline-none"
+            class="w-full bg-transparent text-center font-bold text-[10px] text-white text-shadow-2xs text-shadow-red-500 outline-none"
         />
       </div>
     </div>

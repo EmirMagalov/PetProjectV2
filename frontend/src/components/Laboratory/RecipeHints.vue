@@ -37,7 +37,7 @@ const isClosed = (recipeId) => {
         >
           <!-- Верхняя часть: картинка и название сыворотки + кнопка крафта -->
           <div class="flex flex-col items-center relative">
-            <span class="text-xs font-bold text-white leading-tight">{{ recipe.name }}</span>
+            <span class="text-xs font-bold text-white leading-tight">{{ $t(`serums.${recipe.id}`) }}</span>
           </div>
 
           <!-- Нижняя часть: ВСЕ требуемые ингредиенты -->

@@ -1,7 +1,7 @@
 import {ref, reactive, watch, computed} from 'vue'
 import {initGameData, isLoading, resetPet, syncToBackend} from "@/scripts/api.js";
 import {foodList} from "@/scripts/objectItems.js";
-
+import i18n from "@/scripts/locales/i18n.js";
 export const mouth = ref('/character/happy_mouth.webp')
 export const sleepTimeRemaining = ref("")
 export const isShopOpen = ref(false)
@@ -28,6 +28,7 @@ export const warning = ref(false)
 export const isPopping = ref(false)
 export const isCoinPopping = ref(false)
 export const isExpPopping = ref(false)
+export const clickLimit = 200;
 export const fruitStreak = ref(
     Number(localStorage.getItem('pet_fruitStreak')) || 0
 )
@@ -76,7 +77,7 @@ export const bodyType = ref('normal')
 export const isGameOver = ref(false)
 
 export const defaultGameData = {
-    name: 'Имя:',
+    name: '',
     level: 1,
     exp: 0,
     coins: 50,
@@ -106,6 +107,7 @@ export const defaultGameData = {
     tutorialCompleted: false,
     referredBy:false,
     season:'summer',
+    language: localStorage.getItem('pet_language') || 'en',
     cart: {},
     daily_tasks: {
         feed: { progress: 0, claimed: false },
@@ -262,7 +264,7 @@ export const activeStatus = computed(() => {
     if (isGameOver.value || currentStatus.value?.type === 'gameOver') {
         return {
             show: true,
-            text: "Питомец погиб!",
+            text: i18n.global.t('store.pet_died'),
             image: "/gamePlay/grave.webp",
             bgColor: "bg-[#808080]"
         }
@@ -275,7 +277,7 @@ export const activeStatus = computed(() => {
     if (type === 'levelUp') {
         return {
             show: true,
-            text: "Уровень повышен",
+            text: i18n.global.t('store.level_up'),
             additional: gameData.level,
             image: null
         }
@@ -285,7 +287,7 @@ export const activeStatus = computed(() => {
     if (type === 'losingLife') {
         return {
             show: true,
-            text: "- 1 жизнь!",
+            text: i18n.global.t('store.loss_life'),
             image: "/gamePlay/heart_broken.webp",
             bgColor: "bg-[#CC0000]/40"
         }
@@ -295,7 +297,7 @@ export const activeStatus = computed(() => {
     if (type === 'lifeGain') {
         return {
             show: true,
-            text: "+ 1 жизнь!",
+            text: i18n.global.t('store.gain_life'),
             image: "/gamePlay/heart.webp",
             bgColor: "bg-[#FF0000]/40"
         }
@@ -316,7 +318,7 @@ export const activeStatus = computed(() => {
 
         return {
             show: true,
-            text: "Ням-ням!",
+            text: i18n.global.t('store.yummy'),
             image: "/gamePlay/hunger.webp",
             additional: actualGain > 0 ? `+${actualGain}` : 'MAX!',
 
@@ -330,7 +332,7 @@ export const activeStatus = computed(() => {
 
     return {show: false}
 })
-export const clickLimit = 200;
+
 export const isBothStatsZero = computed(()=>{
     return gameData.foodLevel <= 0 && gameData.energy <= 0;
 })

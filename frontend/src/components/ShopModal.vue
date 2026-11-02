@@ -40,7 +40,7 @@ defineEmits(['close'])
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <div class="flex gap-1 items-center">
             <img :src="`/gamePlay/cart_icon.webp?v=${APP_VERSION}`" class="w-6 h-6" alt="">
-            <p class="text-lg">Магазин</p>
+            <p class="text-lg">{{ $t(`shop`) }}</p>
           </div>
         </h2>
 
@@ -61,7 +61,7 @@ defineEmits(['close'])
         >
           <div class="flex items-center justify-center gap-1.5">
             <img class="w-5 h-5 object-contain shrink-0" src="/food/burger.webp" alt="">
-            <span class="whitespace-nowrap">Еда</span>
+            <span class="whitespace-nowrap">{{ $t(`food`) }}</span>
           </div>
         </button>
 
@@ -81,7 +81,7 @@ defineEmits(['close'])
         >
           <div class="flex items-center justify-center gap-1.5">
             <img class="w-5 h-5 object-contain shrink-0" src="/Bath/shampoo_icon.webp" alt="">
-            <span class="whitespace-nowrap">Баня</span>
+            <span class="whitespace-nowrap">{{ $t(`bath`) }}</span>
           </div>
         </button>
 
@@ -91,7 +91,7 @@ defineEmits(['close'])
         >
           <div class="flex items-center justify-center gap-1.5">
             <img class="w-5 h-5 object-contain shrink-0" src="/other/hanger_icon.webp" alt="">
-            <span class="whitespace-nowrap">Гардероб</span>
+            <span class="whitespace-nowrap">{{ $t(`wardrobe`) }}</span>
           </div>
         </button>
       </div>
@@ -103,7 +103,7 @@ defineEmits(['close'])
             @click="foodTab = 'all'"
             :class="['flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap', foodTab === 'all' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-white']"
         >
-          Все
+          {{ $t(`all`) }}
         </button>
         <button
             @click="foodTab = 'fastfood'"
@@ -111,7 +111,7 @@ defineEmits(['close'])
         >
           <div class="flex items-center justify-center gap-1.5">
             <img class="w-5 h-5 object-contain shrink-0" src="/food/burger.webp" alt="">
-            <span class="whitespace-nowrap">Фастфуд</span>
+            <span class="whitespace-nowrap">{{ $t(`fast_food`) }}</span>
           </div>
         </button>
         <button
@@ -120,7 +120,7 @@ defineEmits(['close'])
         >
           <div class="flex items-center justify-center gap-1.5">
             <img class="w-5 h-5 object-contain shrink-0" src="/food/banana.webp" alt="">
-            <span class="whitespace-nowrap">Фрукты</span>
+            <span class="whitespace-nowrap">{{ $t(`fruits`) }}</span>
           </div>
         </button>
         <button
@@ -129,7 +129,7 @@ defineEmits(['close'])
         >
           <div class="flex items-center justify-center gap-1.5">
             <img class="w-5 h-5 object-contain shrink-0" src="/food/ebi_nigiri.webp" alt="">
-            <span class="whitespace-nowrap">Суши</span>
+            <span class="whitespace-nowrap">{{ $t(`sushi`) }}</span>
           </div>
         </button>
       </div>
@@ -142,7 +142,7 @@ defineEmits(['close'])
         >
           <div class="flex items-center justify-center gap-1">
             <img :src="`/headwear/piratehat.webp?v=${APP_VERSION}`" class="w-5" alt="">
-            <p>Головные уборы</p>
+            <p>{{ $t(`headwear`) }}</p>
           </div>
         </button>
         <button
@@ -151,7 +151,7 @@ defineEmits(['close'])
         >
           <div class="flex items-center justify-center gap-1">
             <img :src="`/clothes/costumes/costume_icon.webp?v=${APP_VERSION}`" class="w-5" alt="">
-            <p>Одежда</p>
+            <p>{{ $t(`cloth`) }}</p>
           </div>
         </button>
       </div>
@@ -170,7 +170,7 @@ defineEmits(['close'])
               class="absolute inset-0 z-20 bg-slate-950/70 flex items-center justify-center rounded-xl"
           >
             <span class="text-amber-400 font-bold text-sm tracking-wide px-3 py-1">
-              🔒 Требуется {{ item.level }} уровень
+              🔒 {{ item.level }} {{ $t(`level`) }}
             </span>
           </div>
 
@@ -227,7 +227,7 @@ defineEmits(['close'])
           >
             <!-- 1. Если одежда уже куплена -->
             <template v-if="activeTab === 'clothes' && isUnlocked(item.id)">
-              {{ isEquipped(item.id) ? 'Снять' : 'Выбрать' }}
+              {{ isEquipped(item.id) ? $t('unequip') : $t('select') }}
             </template>
 
             <!-- 2. ЕСЛИ ПРЕДМЕТ ЗАБЛОКИРОВАН ПО УРОВНЮ: цены НЕТ, пишем уровень -->
@@ -237,7 +237,7 @@ defineEmits(['close'])
 
             <!-- 3. Если достигнут лимит (макс. 10 штук) -->
             <template v-else-if="activeTab !== 'clothes' && getItemQuantity(item) >= 10">
-              <span>Макс</span>
+              <span>Max</span>
             </template>
 
             <!-- 4. Обычная покупка: вот здесь отображается цена и монетки (но сюда дойдет только если предмет НЕ залочен) -->
@@ -253,7 +253,7 @@ defineEmits(['close'])
 
       <!-- Подвал модалки (баланс) -->
       <div class="px-6 py-4 border-t border-slate-800 bg-slate-900/80 flex items-center justify-between shrink-0">
-        <span class="text-slate-400 text-sm">Баланс:</span>
+        <span class="text-slate-400 text-sm">{{ $t(`balance`) }}</span>
         <span class="text-amber-400 font-bold text-lg flex items-center gap-1 tabular-nums">
           <img class="w-5" src="/gamePlay/coin.webp" alt=""> {{ gameData.coins }}
         </span>
@@ -275,7 +275,7 @@ defineEmits(['close'])
           </span>
         </div>
         <div>
-          <p class="text-xs text-white font-medium">Успешное приобретение!</p>
+          <p class="text-xs text-white font-medium">{{ $t(`successful_purchase`) }}</p>
           <p class="text-sm text-amber-500 font-bold">
             {{ lastBought.name }}
           </p>

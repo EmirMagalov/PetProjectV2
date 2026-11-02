@@ -49,7 +49,7 @@ function getIngredient(id) {
           class="flex flex-col items-center justify-between h-[120px] bg-white/30 p-2 rounded-2xl border border-white/40 shadow-sm relative"
       >
         <p class="absolute inset-0 flex text-blue-800/75 items-center  justify-center text-center text-[11px] pointer-events-none">
-          {{ item.name }}
+          {{ $t(`ingredients.${item.id}`) }}
         </p>
 
         <div v-if="getPurchasedItem(item.id)" class="w-full flex flex-col items-center relative">
@@ -80,7 +80,7 @@ function getIngredient(id) {
             ]"
         >
           <template v-if="getTotalIngredientCount(item.id) >= 10">
-            <span>Макс</span>
+            <span>Max</span>
           </template>
           <template v-else>
             <span class="w-4 h-4 shrink-0 flex items-center justify-center">
@@ -106,9 +106,9 @@ function getIngredient(id) {
           </span>
         </div>
         <div>
-          <p class="text-[10px] text-white font-medium">Успешное приобретение!</p>
+          <p class="text-[10px] text-white font-medium">{{$t('successful_purchase')}}</p>
           <p class="text-xs text-amber-300 font-bold">
-            {{ lastBought.name }}
+            {{ $t(`ingredients.${lastBought.id}`) }}
           </p>
         </div>
       </div>
@@ -129,7 +129,7 @@ function getIngredient(id) {
         <div v-for="serum in serumRecipes" :key="serum.id" class="flex justify-between items-center bg-white/60 p-2 rounded-2xl border border-[#f7c9a5]/40">
 
           <div class="flex flex-col gap-2 items-center w-full">
-            <p class="text-sm">{{ serum.name }}</p>
+            <p class="text-sm">{{ $t(`serums.${serum.id}`) }}</p>
 
             <!-- Общий контейнер со стабильным gap и выравниванием по центру -->
             <div class="flex items-center gap-2 ">
@@ -173,7 +173,7 @@ function getIngredient(id) {
           @click="showRecipeModal = false"
           class="mt-1 bg-[#99FFCC]  text-gray-800 font-bold py-2 rounded-2xl border border-[#99FFFF] transition-colors active:scale-95"
       >
-        Закрыть
+        {{ $t(`close`) }}
       </button>
     </div>
   </div>

@@ -15,6 +15,7 @@ import Poop from "@/components/Poop.vue";
 import Nameplate from "@/components/Nameplate.vue";
 import PetSideMenu from "@/components/PetSideMenu.vue";
 import TutorialOverlay from "@/components/TutorialOverlay.vue";
+import i18n from "@/scripts/locales/i18n.js";
 
 import {
   mouth,
@@ -151,6 +152,18 @@ onMounted(async () => {
     if (typeof tg.disableVerticalSwipes === 'function') {
       tg.disableVerticalSwipes()
     }
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlLang = urlParams.get('lang');
+  if (urlLang && (urlLang === 'ru' || urlLang === 'en')) {
+    // Устанавливаем язык из URL
+    i18n.global.locale.value = urlLang;
+    localStorage.setItem('user_language', urlLang);
+  } else {
+    // Иначе берем из localStorage или дефолтный 'en'
+    const savedLang = localStorage.getItem('user_language') || 'en';
+    i18n.global.locale.value = savedLang;
   }
   // localStorage.removeItem('pet_nextSpinAt')
   document.addEventListener('visibilitychange', handleVisibilityChange)

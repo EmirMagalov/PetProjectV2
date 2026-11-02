@@ -18,7 +18,7 @@ import {
 } from "@/scripts/saloonScripts/twentyOneGame.js";
 import {gameData} from "@/scripts/useGameStore.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
-
+import i18n from "@/scripts/locales/i18n.js";
 // Безопасный расчет монет
 const userCoins = computed(() => {
   if (!gameData) return 0;
@@ -52,7 +52,7 @@ function resetGameState() {
 
 async function handleStartGame() {
   if (userCoins.value < 50) {
-    alert("Недостаточно монет для начала игры! Минимальная ставка: 50");
+    alert(i18n.global.t('saloon.not_enough_coins_for_game'));
     return;
   }
 
@@ -107,7 +107,7 @@ async function handleStand() {
 
 function handleRestart() {
   if (userCoins.value < 50) {
-    alert("Недостаточно монет для начала игры!");
+    alert(i18n.global.t('saloon.not_enough_coins_generic'));
     return;
   }
 
@@ -145,7 +145,7 @@ function handleRestart() {
     <!-- Текст ставки -->
     <div class="w-full flex justify-center items-center px-2 text-sm font-bold text-amber-900 z-20">
       <div v-if="gameStarted && currentBet" class="bg-amber-100 px-3 py-1 rounded-full border border-amber-300">
-        Ставка: {{ currentBet }}
+        {{ $t('jackpot.bet_label', {bet: currentBet}) }}
       </div>
     </div>
 
@@ -156,7 +156,7 @@ function handleRestart() {
            class="px-3 py-1 rounded-full text-xs font-bold shadow-sm transition-all"
            :class="typeof playerScoreText === 'string' ? 'bg-amber-950 text-amber-300 border border-amber-400' : 'bg-black/80 text-white'"
        >
-  {{ playerScoreText }}
+    {{ $t(playerScoreText) }}
 </span>
       </div>
 
@@ -211,7 +211,7 @@ function handleRestart() {
           : 'bg-emerald-500 hover:bg-emerald-400 active:scale-95 cursor-pointer'
       ]"
       >
-        Поставить
+        {{ $t('jackpot.place_bet_btn') }}
       </button>
     </div>
 
@@ -224,7 +224,7 @@ function handleRestart() {
           :disabled="isDealing"
           class=" w-25 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
       >
-        Ещё
+        {{ $t('jackpot.hit_btn') }}
       </button>
 
       <button
@@ -232,7 +232,7 @@ function handleRestart() {
           :disabled="isDealing"
           class="w-25 px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
       >
-        Хватит
+        {{ $t('jackpot.stand_btn') }}
       </button>
     </div>
 
@@ -248,7 +248,7 @@ function handleRestart() {
             : 'bg-yellow-400 hover:bg-yellow-300 active:scale-95 cursor-pointer'
         ]"
     >
-      {{ userCoins >= 50 ? 'Ещё раз' : 'Минимальная ставка 50' }}
+      {{ userCoins >= 50 ? $t('jackpot.play_again_btn') : $t('jackpot.min_bet_50') }}
     </button>
 
     <button
@@ -263,7 +263,7 @@ function handleRestart() {
         ]"
         style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
     >
-      {{ userCoins >= 50 ? 'Играть' : 'Минимальная ставка 50' }}
+      {{ userCoins >= 50 ? $t('jackpot.play_btn') : $t('jackpot.min_bet_50') }}
     </button>
   </div>
 </template>

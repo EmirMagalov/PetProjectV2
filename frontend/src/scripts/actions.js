@@ -16,6 +16,7 @@ import {addExp} from "@/scripts/level.js";
 import {toggleSleep} from "@/scripts/stats.js";
 import {ref} from "vue";
 import {incrementTaskProgress} from "@/scripts/dealyTasks.js";
+import i18n from "@/scripts/locales/i18n.js";
 
 export const comboClicks = ref(0)     // Счетчик кликов подряд
 export const comboMultiplier = ref(1) // Текущий множитель (1, 5, 10, 20)
@@ -387,10 +388,11 @@ export function spawnHeart(x = 160, y = 135) {
     }
     if (isBothStatsZero.value) {
         ZeroPlayCount.value++
-
+        console.log(clickLimit - ZeroPlayCount.value)
+        if((clickLimit - ZeroPlayCount.value) === 10){
+            alert(i18n.global.t('pet_in_danger'))
+        }
         // Лимит кликов, когда оба показателя на 0
-
-        // При достижении 50 кликов списываем жизнь
         if (ZeroPlayCount.value >= clickLimit) {
             isLosingLife();
             ZeroPlayCount.value = 0; // Сбрасываем счётчик для следующей жизни
@@ -418,6 +420,8 @@ export function spawnHeart(x = 160, y = 135) {
 
 
     comboTimer = setTimeout(() => {
+        const expAmount = comboMultiplier.value >= 2 ? 5 * comboMultiplier.value : 2
+        addExp(expAmount)
         comboClicks.value = 0
         comboMultiplier.value = 1
     }, 900)
@@ -428,8 +432,8 @@ export function spawnHeart(x = 160, y = 135) {
 
     // 3. Передаем координаты в addCoin
 
-    const expAmount = comboMultiplier.value > 2 ? 1 * comboMultiplier.value : 1
-    if (!isBothStatsZero.value) addExp(expAmount, x, y)
+
+    // if (!isBothStatsZero.value) addExp(expAmount, x, y)
 
     const cost = isBadMood.value ? 0.02 : 0.01
     gameData.energy = Math.max(0, gameData.energy - cost)

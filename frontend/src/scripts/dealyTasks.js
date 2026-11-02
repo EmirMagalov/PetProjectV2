@@ -4,6 +4,7 @@ import {API_URL, syncToBackend, tgId} from "@/scripts/api.js";
 import {gameData} from "@/scripts/useGameStore.js";
 import {addCoin} from "@/scripts/actions.js";
 import {addExp} from "@/scripts/level.js";
+import i18n from "@/scripts/locales/i18n.js";
 
 export const loadingKey = ref(null)
 let saveTimeout = null
@@ -28,7 +29,6 @@ export async function incrementTaskProgress(taskKey, amount = 1) {
         currentTask.progress = Math.min(target, currentTask.progress + amount)
         gameData.daily_tasks[taskKey] = currentTask
 
-        // 🟢 Для кормления и мойки сохраняем сразу (их мало)
         if (taskKey !== 'click') {
             try {
                 await syncToBackend()
@@ -38,8 +38,6 @@ export async function incrementTaskProgress(taskKey, amount = 1) {
             return
         }
 
-        // 🟡 Для КЛИКОВ делаем Debounce (отложенное сохранение)
-        // Запрос уйдет только через 2 секунды после того, как игрок перестал кликать
         if (saveTimeout) clearTimeout(saveTimeout)
 
         saveTimeout = setTimeout(async () => {
@@ -52,13 +50,35 @@ export async function incrementTaskProgress(taskKey, amount = 1) {
     }
 }
 
-// Конфиг заданий
-export const TASKS_CONFIG = {
-    feed: { target: 5, reward: 50, exp: 40, title: 'Покормить питомца' },
-    wash: { target: 2, reward: 30, exp: 30, title: 'Искупать питомца' },
-    click: { target: 500, reward: 100, exp: 50, title: 'Кликнуть по питомцу' },
-    serum: { target: 2, reward: 100, exp: 80, title: 'Создать зелье' }
-}
+// 🟢 Делаем конфигурацию динамической функцией, которая реагирует на смену языка через i18n.global.locale.value
+export const getTasksConfig = () => {
+    // Обращаемся к i18n.global.locale.value, чтобы Vue видел зависимость и обновлялся при смене языка
+    const currentLocale = i18n.global.locale.value;
+
+    return {
+        feed: { target: 5, reward: 50, exp: 40, title: i18n.global.t('feed_the_pet')},
+        wash: { target: 2, reward: 30, exp: 30, title: i18n.global.t('bathe_the_pet') },
+        click: { target: 500, reward: 100, exp: 50, title: i18n.global.t('click_on_the_pet') },
+        serum: { target: 2, reward: 100, exp: 80, title: i18n.global.t('create_a_serum') }
+    };
+};
+
+// Для обратной совместимости со старым кодом, если где-то еще импортируется TASKS_CONFIG напрямую:
+export const TASKS_CONFIG = new Proxy({}, {
+    get(_, prop) {
+        return getTasksConfig()[prop];
+    },
+    ownKeys() {
+        return Object.keys(getTasksConfig());
+    },
+    getOwnPropertyDescriptor(_, prop) {
+        return {
+            enumerable: true,
+            configurable: true,
+            value: getTasksConfig()[prop]
+        };
+    }
+});
 
 // Получить текущий прогресс напрямую из gameData
 export const getTaskProgress = (key) => {
@@ -104,9 +124,11 @@ export const claimReward = async (taskKey) => {
         loadingKey.value = null
     }
 }
+
 export const hasAvailableRewards = computed(() => {
-    return Object.keys(TASKS_CONFIG).some(key => {
-        const target = TASKS_CONFIG[key].target
+    const config = getTasksConfig();
+    return Object.keys(config).some(key => {
+        const target = config[key].target
         const completed = getTaskProgress(key) >= target
         const claimed = isTaskClaimed(key)
 

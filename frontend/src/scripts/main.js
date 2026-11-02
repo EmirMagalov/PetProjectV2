@@ -8,6 +8,8 @@ import '../assets/main.css'
 import LaboratoryMain from "@/components/Laboratory/LaboratoryMain.vue";
 import CatchTheFoodGame from "@/components/CatchTheFood/CatchTheFoodGame.vue";
 import HopHopGame from "@/components/HopHop/hopHopGame.vue";
+import i18n from "@/scripts/locales/i18n.js";
+
 // 1. Принудительный сброс кэша для iOS Safari / Telegram WebApp
 const APP_VERSION = '1.0.2'; // Меняй версию при каждом обновлении
 const currentVersion = localStorage.getItem('app_version');
@@ -69,4 +71,5 @@ export const router = createRouter({
 
 const app = createApp(App);
 app.use(router);
+app.use(i18n)
 app.mount('#app');

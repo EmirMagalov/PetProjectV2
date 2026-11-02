@@ -56,7 +56,7 @@ async def pet_tick_job():
         # --- ПРОВЕРКА ГРЯЗИ (STINKY) ---
         if not pet.stinky and pet.is_pooped:
             pet.poop_bad_minutes+=1
-            if pet.poop_bad_minutes >= 60:
+            if pet.poop_bad_minutes >= 120:
                 pet.stinky = True
                 pet.poop_bad_minutes = 0
         else:
@@ -81,16 +81,18 @@ async def pet_tick_job():
             pet.stinky_bad_minutes= 0
 
         # --- 5. НАКАЗАНИЕ ЗА 0 ЕДЫ ИЛИ 0 ЭНЕРГИИ (12 часов = 720 мин) ---
-        if pet.food_level == 0.0 or pet.energy == 0.0:
-            pet.bad_stats_minutes += 1
-            if pet.bad_stats_minutes >= 720:
-                pet.lives = max(0, pet.lives - 1)
-                if pet.lives == 0:
-                    pet.deaths_count += 1
-                pet.bad_stats_minutes = 0
-        else:
-            pet.bad_stats_minutes = 0
+        if pet.lives > 0:
+            if pet.food_level == 0.0 or pet.energy == 0.0:
+                pet.bad_stats_minutes += 1
+                if pet.bad_stats_minutes >= 720:
+                    pet.lives = max(0, pet.lives - 1)
 
+                    if pet.lives == 0:
+                        pet.deaths_count += 1  # Сработает ровно один раз в жизни питомца
+
+                    pet.bad_stats_minutes = 0
+            else:
+                pet.bad_stats_minutes = 0
         pet.clean_up_stats()
 
     # --- 6. МАССОВОЕ ОБНОВЛЕНИЕ ---

@@ -1,0 +1,225 @@
+export default {
+    loading: "Загрузка",
+    connection_error: "Ошибка подключения",
+    retry: "Повторить попытку",
+    enter_the_laboratory:"Входим в Лабораторию...",
+    pet_in_danger: "Внимание! Питомец истощен и может погибнуть!",
+
+
+
+    fridge_empty: "Холодильник пуст",
+    close:"Закрыть",
+    back:"Назад",
+    claim_reward: "Забрать награду",
+    received: "Получено",
+    prize:"Награда",
+    feed:"Кормить",
+    wash:"Мыть",
+    sleep:"Спать",
+    wake_up:"Проснуться",
+    laboratory:"Лаборатория",
+
+    shop:"Магазин",
+    food:"Еда",
+    bath:"Баня",
+    wardrobe:"Гардероб",
+
+    shower:"Душ",
+    empty_shelf:"Полка пустая",
+
+
+    all:"Все",
+    fast_food:"Фастфуд",
+    fruits:"Фрукты",
+    sushi:"Суши",
+    headwear:"Головные уборы",
+    cloth:"Одежда",
+    balance:"Баланс:",
+
+    intelligence:"Сведения",
+    level: "Уровень",
+    exp: "Опыт",
+    coins: "Монеты",
+    total_clicks: "Всего кликов",
+    total_deaths: "Всего смертей",
+    satiety: "Сытость",
+    energy: "Энергия",
+    unequip: "Снять",
+    select: "Выбрать",
+    tasks:'Задания',
+    daily_tasks:"Ежедневные задания",
+    feed_the_pet:"Покормить питомца",
+    bathe_the_pet:"Помыть питомца",
+    click_on_the_pet:"Кликнуть по питомцу",
+    create_a_serum:"Создать сыворотку",
+
+    wheel_of_fortune:"Колесо Фортуны",
+    spin_and_win:"Крути каждый день и получай призы",
+    spin_for:"Прокрутить за",
+    free_in:"Бесплатно через:",
+    spinning: "Крутим...",
+    free_spin: "Бесплатный спин!",
+    nothing_came_out_this_time:"К сожалению, в этот раз ничего не выпало...",
+
+    the_maximum_quantity_for_this_item:"Максимальное количество этого товара — 10 штук!",
+
+    successful_purchase: "Успешное приобретение!",
+    successful_synthesis: "Успешный синтез!",
+
+
+
+    not_enough_coins_to_start_the_game:"Недостаточно монет для начала игры!",
+    not_enough_coins:"Недостаточно монет!",
+    you_need_to_be_well_fed:"Нужно быть сытым!",
+    you_need_to_be_alert:"Нужно быть бодрым",
+
+
+    heads: {
+        incognito_hat: 'Инкогнито кепка',
+        cowboy_hat: 'Ковбойская шляпа',
+        pillbox: 'Шляпа-таблетка',
+        pirate_hat: 'Пиратская шляпа',
+        mafia_hat: 'Розовая шляпа',
+        bowler_hat: 'Шляпа котелок',
+        cloche_hat: 'Шляпа - клош',
+        beach_hat: 'Пляжная шляпа',
+        sombrero_hat: 'Сомбреро',
+        flat_hat: 'Хулиганка',
+        cylinder_hat: 'Цилиндр',
+        velvet_hat: 'Бархатная шляпа',
+        native_hat: 'Шляпа в индейском стиле',
+        conical_hat: 'Азиатская конусная шляпа',
+        yellow_hat: 'Жёлтая шляпа',
+        ancient_hat: 'Древняя шляпа',
+    },
+
+    clothes: {
+        orange_tuxedo: 'Оранжевый смокинг',
+        blue_tuxedo: 'Синий смокинг',
+        pink_tuxedo: 'Розовый смокинг',
+        black_tuxedo: 'Черный смокинг',
+        pink_dresses: 'Розовое платье',
+        blue_dresses: 'Голубое платье',
+        green_dresses: 'Зелёное платье',
+    },
+
+    ingredients: {
+        health_spores: 'Лечебные споры',
+        nutrient_bio_gel: 'Питательный био-гель',
+        stimulating_crystalloid: 'Стимулирующий кристаллоид',
+        saline: 'Физраствор',
+    },
+
+    serums: {
+        life_serum: 'Сыворотка жизни',
+        health_serum: 'Сыворотка здоровья',
+        energy_serum: 'Сыворотка энергии',
+    },
+
+    items: {
+        french_fries: 'Картошка фри',
+        pizza: 'Пицца',
+        hotdog: 'Хотдог',
+        burger: 'Бургер',
+        tako: 'Тако',
+        lasagna: 'Лазанья',
+
+        banana: 'Банан',
+        kiwi: 'Киви',
+        grape: 'Виноград',
+        pineapple: 'Ананас',
+        peach: 'Персик',
+        pomegranate: 'Гранат',
+
+        salmon_roll: 'Ролл из лосося',
+        sake_nigir: 'Нигири с лососем',
+        ebi_nigiri: 'Нигири с креветкой',
+        california_roll: 'Ролл «Калифорния»',
+
+        // Сыворотки (если дублируются с рецептами, можно использовать общую секцию)
+        energy_serum: 'Сыворотка энергии',
+        life_serum: 'Сыворотка жизни',
+        health_serum: 'Сыворотка здоровья',
+
+        shampoo: 'Шампунь',
+        shampoo_green: 'Шампунь (Зеленый)',
+        shampoo_blue: 'Шампунь (Синий)',
+        shampoo_violet_green: 'Шампунь (Фиолетовый)',
+    },
+    store: {
+        pet_name_placeholder: 'Имя:',
+        pet_died: 'Питомец погиб!',
+        level_up: 'Уровень повышен',
+        loss_life: '- 1 жизнь!',
+        gain_life: '+ 1 жизнь!',
+        yummy: 'Ням-ням!',
+        max_limit: 'MAX!',
+        already_open_device: '⚠️ Игра уже открыта в другой вкладке!',
+        backend_unavailable: 'Сервер недоступен. Проверьте интернет-соединение.',
+        telegram_user_not_found: 'Не удалось определить пользователя Telegram.',
+    },
+    jackpot: {
+        not_enough_coins_for_game: "Недостаточно монет для начала игры! Минимальная ставка: 50",
+        not_enough_coins_generic: "Недостаточно монет для начала игры!",
+        bet_label: "Ставка: {bet}",
+        points_21: "21 Очко",
+        cards_count: "36 карт",
+        dealer: "Дилер",
+        place_bet_btn: "Поставить",
+        hit_btn: "Ещё",
+        stand_btn: "Хватит",
+        play_again_btn: "Ещё раз",
+        min_bet_50: "Минимальная ставка 50",
+        play_btn: "Играть",
+        entering_jackpot: "Входим в Jackpot...",
+        golden_card: "Золотое очко",
+        result_bust: "Перебор! Ты проиграл",
+        result_dealer_win: "Дилер выиграл!",
+        result_player_win: "Поздравляю! Ты выиграл!",
+        result_push: "Ничья!",
+        make_bet_prompt: "Сделайте ставку!",
+        start_game_prompt: "Начнем игру?"
+    },
+    food_catch: {
+        loading: "Идем ловить еду...",
+        score: "Очки",
+        miss: "ПРОМАХ!",
+        menu_title: "Поймай еду",
+        menu_subtitle: "Лови падающую еду в тележку!",
+        highscore: "Рекорд:",
+        play_btn: "Играть",
+        game_over: "Игра окончена!",
+        earned_coins: "Заработано монет:",
+        try_again: "Попробовать снова"
+    },
+    jumping_game: {
+        loading: "Прыг-Скок...",
+        hit_head: "Ударился головой!",
+        passing_success: "В булочку! Отлично!",
+        highscore: "Рекорд:",
+        level: "Уровень",
+        flips: "Сальто:",
+        menu_title: "Бунт Сосиски",
+        menu_subtitle: "Лови монетки в прыжке, делай сальто на ножки и запрыгивай в булочку!",
+        levels_suffix: "уровней",
+        play_btn: "Играть",
+        earned_coins: "Заработано монет:",
+        levels_passed: "Пройдено уровней:",
+        try_again: "Ещё раз"
+    },
+    fortune: {
+        not_enough_coins_for_spin: "Недостаточно монет! Нужно {price} монет.",
+        nothing_won: "😢 К сожалению, в этот раз ничего не выпало...",
+        prize_won: "🎉 Приз: {name}!",
+        spin_error: "Ошибка при вращении колеса:"
+    },
+    minigames_access: {
+        jackpot_min_coins: "Нужно минимум 50 монет, чтобы зайти в «Jackpot»!",
+        jackpot_fed: "Чтобы зайти в «Jackpot» нужно быть сытым!",
+        jackpot_energy: "Чтобы зайти в «Jackpot» нужно быть бодрым!",
+        food_catch_fed: "Чтобы зайти в «Поймай еду» нужно быть сытым!",
+        food_catch_energy: "Чтобы зайти в «Поймай еду» нужно быть бодрым!",
+        hop_hop_fed: "Чтобы зайти в «Прыг-Скок» нужно быть сытым!",
+        hop_hop_energy: "Чтобы зайти в «Прыг-Скок» нужно быть бодрым!"
+    }
+}

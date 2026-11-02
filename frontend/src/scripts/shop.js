@@ -5,6 +5,7 @@ import {clothesItems} from "@/scripts/clothesItems.js";
 import {headItems} from "@/scripts/headwearItems.js";
 import {addToCart, buyClothes, buyHeadwear} from "@/scripts/basket.js";
 import {syncToBackend} from "@/scripts/api.js";
+import i18n from "@/scripts/locales/i18n.js";
 
 export const wardrobeTab = ref('hats')
 export const lastBought = ref(null)
@@ -13,29 +14,53 @@ let notificationTimer = null
 // Подкатегории для Еды: 'all', 'fastfood', 'fruits', 'sushi'
 export const foodTab = ref('all')
 
-// Динамический список товаров в зависимости от выбранной вкладки и подкатегории
+// Хелпер для получения локализованного названия любого предмета по его категории/типу
+export function getItemName(item) {
+    if (!item) return ''
+
+    // Определяем секцию локализации по категории или активной вкладке
+    if (activeTab.value === 'food' || item.category === 'food' || item.category === 'bath accessories') {
+        return i18n.global.t(`items.${item.id}`)
+    } else if (activeTab.value === 'laboratory' || item.category === 'laboratory' || item.subcategory === 'ingredients') {
+        return i18n.global.t(`ingredients.${item.id}`, i18n.global.t(`serums.${item.id}`))
+    } else if (wardrobeTab.value === 'clothes' || item.category === 'costumes') {
+        return i18n.global.t(`clothes.${item.id}`)
+    } else {
+        return i18n.global.t(`heads.${item.id}`)
+    }
+}
+
+// Динамический список товаров с автоматическим переводом поля name
 export const currentList = computed(() => {
+    let list = []
+
     if (activeTab.value === 'food') {
-        const list = foodList.filter(item => item.category === 'food')
-        if (foodTab.value === 'all') return list
-        return list.filter(item => item.subcategory === foodTab.value)
+        const fullList = foodList.filter(item => item.category === 'food')
+        list = foodTab.value === 'all'
+            ? fullList
+            : fullList.filter(item => item.subcategory === foodTab.value)
     } else if (activeTab.value === 'laboratory') {
-        return foodList.filter(item => item.category === 'laboratory')
+        list = foodList.filter(item => item.category === 'laboratory')
     } else if (activeTab.value === 'bath') {
-        return foodList.filter(item => item.category === 'bath accessories')
+        list = foodList.filter(item => item.category === 'bath accessories')
     } else {
         // Активен Гардероб
         if (wardrobeTab.value === 'clothes') {
-            return clothesItems.map(item => ({
+            list = clothesItems.map(item => ({
                 ...item,
                 image: item.preview || item.image_normal
             }))
+        } else {
+            list = headItems
         }
-        return headItems
     }
+
+    // Подставляем переведенное имя для каждого предмета
+    return list.map(item => ({
+        ...item,
+        name: getItemName(item)
+    }))
 })
-
-
 
 // Функция определения количества товара в инвентаре
 export function getItemQuantity(item) {
@@ -47,7 +72,6 @@ export function getItemQuantity(item) {
 
 // Универсальная проверка блокировки товара по уровню
 export function isItemLocked(item) {
-    // Если предмет уже куплен, он никогда не должен быть заблокирован
     if (activeTab.value === 'clothes' && isUnlocked(item.id)) {
         return false
     }
@@ -87,18 +111,17 @@ export function isUnlocked(itemId) {
 
 // Универсальная логика клика по кнопке товара
 export async function handleItemClick(item) {
-    // Проверяем лимиты для расходников (еда, лаборатория, баня)
     const isConsumable = activeTab.value === 'food' || activeTab.value === 'laboratory' || activeTab.value === 'bath' || item.category === 'laboratory' || item.category === 'ingredients';
 
     if (isConsumable && getItemQuantity(item) >= 10) {
-        alert("Максимальное количество этого товара — 10 штук!");
+        alert(i18n.global.t('the_maximum_quantity_for_this_item'))
         return;
     }
     if (isItemLocked(item)) return
 
     const itemCost = getItemCost(item)
 
-    // 🛒 ЛОГИКА ДЛЯ РАСХОДНИКОВ (Еда, Лаборатория, Баня, Ингредиенты)
+    // 🛒 ЛОГИКА ДЛЯ РАСХОДНИКОВ
     if (isConsumable) {
         if (gameData.coins >= itemCost) {
             gameData.coins -= itemCost
@@ -107,12 +130,12 @@ export async function handleItemClick(item) {
             const currentQty = gameData.cart[item.id] || 1
             showNotification(item, currentQty)
         } else {
-            alert("Не хватает монет!")
+            alert(i18n.global.t('not_enough_coins'))
         }
-        return; // Обязательно прерываем выполнение, чтобы не уйти в гардероб!
+        return;
     }
 
-    // 👗 ЛОГИКА ДЛЯ ГАРДЕРОБА (Одежда и Шляпы)
+    // 👗 ЛОГИКА ДЛЯ ГАРДЕРОБА
     if (isUnlocked(item.id)) {
         if (wardrobeTab.value === 'clothes') {
             selectClothes(item.id)
@@ -133,7 +156,7 @@ export async function handleItemClick(item) {
             showNotification(item, 1)
             await syncToBackend()
         } else {
-            alert("Не хватает монет!")
+            alert(i18n.global.t('not_enough_coins'))
         }
     }
 }
@@ -155,7 +178,10 @@ function selectClothes(clothesId) {
 }
 
 function showNotification(item, quantity = 1) {
-    lastBought.value = item
+    lastBought.value = {
+        ...item,
+        name: getItemName(item)
+    }
     lastBoughtQuantity.value = quantity
     if (notificationTimer) clearTimeout(notificationTimer)
     notificationTimer = setTimeout(() => {
@@ -163,14 +189,14 @@ function showNotification(item, quantity = 1) {
     }, 2500)
 }
 
+// Локализованные бонусы предметов
 export const getItemBonuses = (item) => {
     const bonuses = []
 
-    if (item.foodGain) bonuses.push({text: `+ ${item.foodGain} сытости`, color: 'text-amber-400'})
-    if (item.energyGain) bonuses.push({text: `+ ${item.energyGain} энергии`, color: 'text-blue-400'})
-    if (item.life) bonuses.push({text: `+ ${item.life} жизнь`, color: 'text-red-400'})
-    if (item.health) bonuses.push({text: `Восстановление здоровья`, color: 'text-emerald-400'})
-    // if (item.subcategory === 'fruits') bonuses.push({text: `+ здоровье`, color: 'text-green-400'})
+    if (item.foodGain) bonuses.push({text: `+ ${item.foodGain} ${i18n.global.t('satiety')}`, color: 'text-amber-400'})
+    if (item.energyGain) bonuses.push({text: `+ ${item.energyGain} ${i18n.global.t('energy')}`, color: 'text-blue-400'})
+    if (item.life) bonuses.push({text: `+ ${item.life} ${i18n.global.t('prize')}`, color: 'text-red-400'})
+    if (item.health) bonuses.push({text: i18n.global.t('store.gain_life'), color: 'text-emerald-400'})
     return bonuses
 }
 
@@ -178,16 +204,11 @@ export function getItemCost(item) {
     if (!item) return 0
     const baseCost = item.baseCost ?? item.price ?? 0
 
-    // Повышаем цену на (level * 2) ТОЛЬКО для товаров категории 'food'
     if (item.category === 'food' ) {
         const rawLevel = gameData.level || 1
-
-        // Ограничиваем уровень максимумом в 50
         const effectiveLevel = Math.min(rawLevel, 50)
-
         return baseCost + (effectiveLevel)
     }
 
-    // Для всех остальных предметов возвращаем исходную цену
     return baseCost
 }

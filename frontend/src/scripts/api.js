@@ -127,7 +127,8 @@ export async function initGameData() {
                 syncFortuneTime(serverData.last_fortune_spin, serverData.paid_spin_count);
             }
             // ... (твой существующий маппинг gameData.name, level, coins и т.д.) ...
-            gameData.name = serverData.name && serverData.name.trim() ? serverData.name : 'Имя:'
+            gameData.name = serverData.name && serverData.name.trim() ? serverData.name : 'store.pet_name_placeholder'
+            console.log(gameData.name)
             gameData.level = serverData.level
             gameData.exp = serverData.exp
             gameData.coins = serverData.coins
@@ -160,6 +161,12 @@ export async function initGameData() {
             gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
             gameData.tutorialCompleted = serverData.tutorial_completed || false
             gameData.referredBy = serverData.referred_by || false
+
+            if (serverData.language) {
+                gameData.language = serverData.language
+                // localStorage.setItem('user-locale', serverData.language)
+            }
+
             // 👈 ДОБАВЛЯЕМ ЭТУ ПРОВЕРКУ:
             const localTutorialDone = localStorage.getItem('tutorial_completed') === 'true'
             if (localTutorialDone) {
@@ -261,6 +268,7 @@ function getPayload() {
         addiction_streak: gameData.addictionStreak,
         tutorial_completed: gameData.tutorialCompleted,
         daily_tasks: gameData.daily_tasks,
+        language: gameData.language,
         last_update: Math.floor(Date.now() / 1000)
     }
 }

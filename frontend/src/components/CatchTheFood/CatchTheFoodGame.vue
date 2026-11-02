@@ -3,6 +3,8 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import { addCoin } from "@/scripts/actions.js";
 import { APP_VERSION } from "@/scripts/imageVersion.js";
+import i18n from "@/scripts/locales/i18n.js";
+import {addExp} from "@/scripts/level.js";
 
 const isLoading = ref(true);
 
@@ -306,6 +308,7 @@ const updateGame = (timestamp) => {
         }
 
         gameState.value = 'GAMEOVER'
+        addExp(Math.trunc(score.value / 100))
         stopLoop()
       }
     }
@@ -508,7 +511,7 @@ onUnmounted(() => {
           </div>
         </div>
         <span class="text-[#D18900] font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
-          Идем ловить еду...
+          {{ $t('food_catch.loading') }}
         </span>
         <div class="mt-4 w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></div>
       </div>
@@ -544,7 +547,7 @@ onUnmounted(() => {
             COMBO x{{ combo }}
           </div>
           <p v-if="popupType === 'miss'" class="text-4xl text-shadow-md text-shadow-black font-extrabold text-red-500 whitespace-nowrap drop-shadow-sm">
-            {{ popupTitle }}
+            {{ $t('food_catch.miss') }}
           </p>
           <div v-else class="flex items-center justify-center gap-2 whitespace-nowrap">
             <span class="text-4xl text-shadow-md text-shadow-black font-extrabold" :class="combo > 1 ? 'text-amber-500' : 'text-blue-400'">
@@ -564,7 +567,7 @@ onUnmounted(() => {
       <div class="flex justify-between items-center">
         <div class="flex gap-1 flex-col">
           <div class="bg-white/85 backdrop-blur-sm px-3.5 py-1.5 rounded-xl flex flex-col shadow-sm">
-            <span class="text-[11px] text-slate-600 font-semibold uppercase">Очки</span>
+            <span class="text-[11px] text-slate-600 font-semibold uppercase">{{ $t('food_catch.score') }}</span>
             <span class="text-xl font-extrabold text-slate-900">{{ score }}</span>
 
           </div>
@@ -591,15 +594,15 @@ onUnmounted(() => {
     <!-- МЕНЮ СТАРТА -->
     <div v-if="gameState === 'MENU'" class="absolute inset-0 bg-black/45 backdrop-blur-md z-40 flex items-center justify-center p-5">
       <div class="bg-white w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
-        <h1 class="text-[26px] font-extrabold text-slate-900 m-0">Поймай еду</h1>
-        <p class="text-sm text-slate-500 m-0">Лови падающую еду в тележку!</p>
+        <h1 class="text-[26px] font-extrabold text-slate-900 m-0">{{ $t('food_catch.menu_subtitle') }}</h1>
+        <p class="text-sm text-slate-500 m-0">{{ $t('food_catch.menu_subtitle') }}</p>
 
         <div v-if="highScore > 0" class="text-[15px] font-semibold text-slate-700 bg-slate-100 py-2 px-3 rounded-xl">
-          Рекорд: <span class="text-amber-400  font-extrabold">{{ highScore }}</span>
+          {{ $t('food_catch.highscore') }} <span class="text-amber-400  font-extrabold">{{ highScore }}</span>
         </div>
 
         <button class="bg-gradient-to-r from-blue-500 to-blue-700 text-white text-base font-bold border-none py-3 px-5 rounded-2xl cursor-pointer shadow-lg shadow-blue-500/35 active:scale-95 transition-transform" @click="startGame">
-          Играть
+          {{ $t('food_catch.play_btn') }}
         </button>
 
         <RouterLink to="/" class="absolute -left-4 top-1/2 -translate-y-1/2 z-30 pointer-events-auto">
@@ -613,28 +616,28 @@ onUnmounted(() => {
     <!-- ЭКРАН ПРОИГРЫША -->
     <div v-if="gameState === 'GAMEOVER'" class="absolute inset-0 bg-black/45 backdrop-blur-md z-40 flex items-center justify-center p-5">
       <div class="bg-white w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
-        <h2 class="text-2xl font-extrabold text-red-600 m-0">Игра окончена!</h2>
+        <h2 class="text-2xl font-extrabold text-red-600 m-0">{{ $t('food_catch.game_over') }}</h2>
 
         <div class="flex flex-col gap-2 bg-slate-50 p-3 rounded-xl">
           <div class="flex justify-between items-center text-[15px] text-slate-600">
-            <span>Счёт:</span>
+            <span>{{ $t('food_catch.score') }}:</span>
             <strong>{{ score }}</strong>
           </div>
           <div class="flex justify-between items-center text-[15px] text-slate-600">
-            <span>Заработано монет:</span>
+            <span>{{ $t('food_catch.earned_coins') }}</span>
             <div class="flex items-center gap-1">
               <img src="/gamePlay/coin.webp" alt="coin" class="w-4 h-4 object-contain" />
               <strong class="text-amber-600">{{ coinsEarned }}</strong>
             </div>
           </div>
           <div class="flex justify-between items-center text-[15px] text-slate-600">
-            <span>Рекорд:</span>
+            <span>{{ $t('food_catch.highscore') }}</span>
             <strong>{{ highScore }}</strong>
           </div>
         </div>
 
         <button class="bg-gradient-to-r from-blue-500 to-blue-700 text-white text-base font-bold border-none py-3 px-5 rounded-2xl cursor-pointer shadow-lg shadow-blue-500/35 active:scale-95 transition-transform" @click="startGame">
-          Попробовать снова
+          {{ $t('food_catch.try_again') }}
         </button>
 
         <RouterLink to="/" class="absolute -left-4 top-1/2 -translate-y-1/2 z-30 pointer-events-auto">

@@ -13,7 +13,7 @@ import {
 } from "@/scripts/saloonScripts/twentyOneGame.js";
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import {activeCoins, activeExp} from "@/scripts/actions.js";
-import {useRouter} from "vue-router";
+import i18n from "@/scripts/locales/i18n.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 // =====================================================
@@ -114,7 +114,7 @@ function animateFlyTo({ targetEl, isDealer = false }) {
 }
 
 onMounted(() => {
-  result.value = "Начнем игру?";
+  result.value = 'jackpot.start_game_prompt';
   startRandomLooking();
 
   // Имитируем загрузку на 1.8 секунды для плавности
@@ -153,7 +153,7 @@ onUnmounted(() => {
 
         <!-- Текст загрузки -->
         <span class="text-[#D18900] font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
-          Входим в Jackpot...
+         {{ $t('jackpot.entering_jackpot') }}
         </span>
 
         <!-- Спиннер -->
@@ -197,14 +197,14 @@ onUnmounted(() => {
         <div class="absolute inset-x-0 top-0 z-30 p-2.5 flex flex-col items-center gap-1.5 pointer-events-auto">
           <span
               class="text-[11px] font-semibold text-amber-200 bg-black/80 px-2.5 py-0.5 rounded-full shadow-sm">
-            Дилер<template v-if="gameFinished"> · {{ dealerScore }}</template>
+            {{ $t('jackpot.dealer') }}<template v-if="gameFinished"> · {{ dealerScore }}</template>
           </span>
 
           <!-- КОЛОДА КАРТ -->
           <div class="absolute top-28 left-3 flex flex-col items-center gap-2">
             <div>
               <p class="text-white font-bold text-[11px]  bg-black/80 px-2.5 py-0.5 rounded-full shadow-sm">
-                21 Очко
+                {{ $t('jackpot.points_21') }}
               </p>
             </div>
 
@@ -222,7 +222,7 @@ onUnmounted(() => {
               </div>
             </div>
             <p class="text-white font-bold text-[8px]  bg-black/80 px-2.5 py-0.5 rounded-full shadow-sm">
-              36 карт
+              {{ $t('jackpot.cards_count') }}
             </p>
           </div>
 
@@ -257,7 +257,7 @@ onUnmounted(() => {
               v-if="result"
               class="mt-1 bg-black/85 backdrop-blur-md text-amber-300 border border-amber-400/30 px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-bounce z-40"
           >
-            {{ result }}
+            {{ $t(result) }}
           </div>
         </div>
       </div>

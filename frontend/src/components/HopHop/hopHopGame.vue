@@ -4,7 +4,8 @@ import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import {addCoin} from "@/scripts/actions.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {isAdmin} from "@/scripts/useGameStore.js";
-
+import i18n from "@/scripts/locales/i18n.js";
+import {addExp} from "@/scripts/level.js";
 const isLoading = ref(true);
 
 // --- НАСТРОЙКИ ПОЗИЦИЙ ---
@@ -98,7 +99,7 @@ const player = {
   rotation: 0,
   vRot: 0,
   bounceForce: 3.5,
-  maxBounceForce: 5.5
+  maxBounceForce: 5
 }
 
 let shelfY = LOGICAL_HEIGHT - config.shelfOffsetFromBottom;
@@ -252,7 +253,7 @@ const updateGame = (dt = 1) => {
       if (isOnTrampoline) {
         if (isHeadLanding || isLeftSideLanding) {
           player.y = trampolineSurfaceY - player.height / 2
-          triggerGameOver('Ударился головой!')
+          triggerGameOver('jumping_game.hit_head')
           return
         }
 
@@ -266,6 +267,7 @@ const updateGame = (dt = 1) => {
           passTimer = 160
           createTrampolineShards(centerX, trampolineSurfaceY)
           player.vy = -6.2
+          addExp(10)
         } else {
           trampolineBounceAnim = 1
           player.y = trampolineSurfaceY - player.height / 2
@@ -294,7 +296,7 @@ const updateGame = (dt = 1) => {
         }
       } else {
         player.y = trampolineSurfaceY - player.height / 2
-        triggerGameOver('Промазал мимо батута!')
+        // triggerGameOver('Промазал мимо батута!')
       }
     }
   }
@@ -345,7 +347,7 @@ const updateGame = (dt = 1) => {
   }
 }
 
-const triggerGameOver = (reason = 'Не справился!') => {
+const triggerGameOver = (reason = 'jumping_game.default_fail') => {
   if (gameState.value === 'GAMEOVER') return
   gameState.value = 'GAMEOVER'
   gameOverReason.value = reason
@@ -552,7 +554,7 @@ onUnmounted(() => {
           </div>
         </div>
         <span class="text-[#D18900] font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
-          Прыг-Скок...
+         {{ $t('jumping_game.loading') }}
         </span>
         <div class="mt-4 w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></div>
       </div>
@@ -569,7 +571,7 @@ onUnmounted(() => {
 
     <div v-if="gameState === 'PASSING'" class="absolute inset-x-0 top-32 z-30 flex justify-center pointer-events-none">
       <div class="bg-emerald-500/90 text-white font-black text-xl px-5 py-2 rounded-2xl shadow-xl animate-bounce border-2 border-emerald-300">
-        В булочку! Отлично!
+        {{ $t('jumping_game.passing_success') }}
       </div>
     </div>
 
@@ -581,18 +583,18 @@ onUnmounted(() => {
         <img class="relative" :src="`/jumpGame/jumping_game_menu_background.webp?v=${APP_VERSION}`" alt="">
         <div class="absolute flex flex-col gap-1 mt-2 items-center top-10 right-10">
           <div>
-            <span>Рекорд:</span>
+            <span>{{ $t('jumping_game.highscore') }}</span>
             <span class="text-amber-400">{{ highScore }}</span>
           </div>
 
           <div class="flex flex-col gap-1 items-center justify-center">
             <div class="text-xs font-black text-amber-400 uppercase tracking-widest">
-              Уровень {{ gameState === 'PLAYING' ? level : level - 1 }}
+              {{ $t('jumping_game.level') }} {{ gameState === 'PLAYING' ? level : level - 1 }}
             </div>
             <div class="text-xs p-1 rounded-2xl bg-slate-800/90 backdrop-blur-md font-extrabold transition-colors duration-150"
                  :class="isLevelGoalReached ? 'text-emerald-400 animate-pulse' : 'text-slate-200'"
             >
-              Сальто: {{ completedFlips }} / {{ gameState === 'PLAYING' ? level : level - 1 }}
+              {{ $t('jumping_game.flips') }} {{ completedFlips }} / {{ gameState === 'PLAYING' ? level : level - 1 }}
             </div>
           </div>
         </div>
@@ -626,17 +628,17 @@ onUnmounted(() => {
     <div v-if="gameState === 'MENU'"
          class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-center justify-center p-5 pointer-events-auto">
       <div class="bg-white border w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
-        <h1 class="text-2xl font-extrabold text-slate-900 m-0">Бунт Сосиски</h1>
-        <p class="text-sm text-slate-500 m-0">Лови монетки в прыжке, делай сальто на ножки и запрыгивай в булочку!</p>
+        <h1 class="text-2xl font-extrabold text-slate-900 m-0">{{ $t('jumping_game.menu_title') }}</h1>
+        <p class="text-sm text-slate-500 m-0">{{ $t('jumping_game.menu_subtitle') }}</p>
 
         <div v-if="highScore > 0" class="text-sm font-semibold text-slate-700 bg-slate-100 py-2 px-3 rounded-xl">
-          Рекорд: <span class="text-amber-400 font-extrabold">{{ highScore }} уровней</span>
+          {{ $t('jumping_game.highscore') }} <span class="text-amber-400 font-extrabold">{{ highScore }} {{ $t('jumping_game.levels_suffix') }}</span>
         </div>
 
         <button type="button"
                 class="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-base font-bold py-3 px-5 rounded-2xl shadow-lg shadow-orange-500/30 active:scale-95 transition-transform cursor-pointer pointer-events-auto z-50"
                 @click="startGame">
-          Играть
+          {{ $t('jumping_game.play_btn') }}
         </button>
 
         <RouterLink to="/" class="absolute -left-4 top-1/2 -translate-y-1/2 z-50 pointer-events-auto">
@@ -652,15 +654,15 @@ onUnmounted(() => {
     <div v-if="gameState === 'GAMEOVER'"
          class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-center justify-center p-5 pointer-events-auto">
       <div class="bg-white border w-full max-w-[300px] p-7 rounded-3xl text-center shadow-2xl flex flex-col gap-4 relative">
-        <h2 class="text-2xl font-extrabold text-red-500 m-0">{{ gameOverReason }}</h2>
+        <h2 class="text-2xl font-extrabold text-red-500 m-0">{{ $t(gameOverReason) }}</h2>
 
         <div class="flex flex-col gap-2 bg-slate-50 p-3 rounded-xl text-slate-300 text-sm">
           <div class="flex justify-between text-slate-600 items-center">
-            <span>Пройдено уровней:</span>
+            <span>{{ $t('jumping_game.levels_passed') }}</span>
             <strong class="text-lg">{{ score }}</strong>
           </div>
           <div class="flex justify-between items-center text-slate-600">
-            <span>Заработано монет:</span>
+            <span>{{ $t('jumping_game.earned_coins') }}</span>
             <div class="flex items-center gap-1">
               <img src="/gamePlay/coin.webp" alt="coin" class="w-4 h-4 object-contain" />
               <strong class="text-amber-600 text-lg">{{ coinsEarned }}</strong>
@@ -671,7 +673,7 @@ onUnmounted(() => {
         <button type="button"
                 class="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-base font-bold py-3 px-5 rounded-2xl shadow-lg shadow-orange-500/30 active:scale-95 transition-transform cursor-pointer pointer-events-auto z-50"
                 @click="startGame">
-          Ещё раз
+          {{ $t('jumping_game.try_again') }}
         </button>
 
         <RouterLink to="/" class="absolute -left-4 top-1/2 -translate-y-1/2 z-50 pointer-events-auto">

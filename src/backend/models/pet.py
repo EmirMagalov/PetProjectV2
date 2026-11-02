@@ -18,7 +18,7 @@ class Pet(models.Model):
     # ==========================================
     tg_id = fields.BigIntField(pk=True)  # Telegram ID пользователя (PK)
     name = fields.CharField(max_length=15, null=True, default=None)  # Имя питомца
-
+    language = fields.CharField(max_length=10, default="en")
     # ==========================================
     # 2. ПРОГРЕСС И ЭКОНОМИКА
     # ==========================================
@@ -126,6 +126,8 @@ class Pet(models.Model):
     daily_tasks = fields.JSONField(default=get_fresh_daily_tasks, null=True)  # 👈 Добавили null=True
     tasks_reset_date = fields.CharField(max_length=20, default="", null=True)
 
+    #Прочее
+    season = fields.CharField(max_length=20, default="summer")
 
 
     # МЕТОДЫ МОДЕЛИ

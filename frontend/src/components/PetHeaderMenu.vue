@@ -15,6 +15,8 @@ import { comboClicks } from "@/scripts/actions.js";
 import { APP_VERSION } from "@/scripts/imageVersion.js";
 import DailyTasksModal from "@/components/DailyTasks.vue";
 import {hasAvailableRewards} from "@/scripts/dealyTasks.js";
+import i18n from "@/scripts/locales/i18n.js";
+import {syncToBackend} from "@/scripts/api.js";
 
 // Локальный сглаженный счетчик для плавной анимации спада
 const animatedComboClicks = ref(0);
@@ -26,6 +28,16 @@ let clickTimeout = null;
 
 // 🎯 Делаем вкладку "Задания" первой по умолчанию
 const activeTab = ref('tasks');
+
+// 🌐 Функция переключения языка
+const changeLanguage = async(lang) => {
+  i18n.global.locale.value = lang;
+  localStorage.setItem('user_language', lang);
+  if (gameData) {
+    gameData.language = lang;
+  }
+  await syncToBackend()
+};
 
 watch(comboClicks, (newVal) => {
   if (newVal > animatedComboClicks.value) {
@@ -87,9 +99,6 @@ const getClipInset = (progress) => {
   const insetValue = 100 - (progress * (100 - maxFill) / 100);
   return `${insetValue}% 0 0 0`;
 };
-
-
-
 </script>
 
 <template>
@@ -99,22 +108,17 @@ const getClipInset = (progress) => {
         @click="showStatsModal = true"
         class="relative shadow-2xl rounded-2xl bg-white/20 backdrop-blur-md cursor-pointer active:scale-[0.99] transition-transform"
     >
-
-
-      <div v-show="hasAvailableRewards" class="absolute rounded-full  animate-pulse p-0.5 w-8 h-8 left-0 -bottom-6  z-5">
+      <div v-show="hasAvailableRewards" class="absolute rounded-full animate-pulse p-0.5 w-8 h-8 left-0 -bottom-6 z-5">
         <img class="relative" src="/gamePlay/calendar.webp" alt="">
-
       </div>
 
-
       <div class="flex justify-between gap-2 p-2">
-        <div class="flex flex-col gap-1" >
+        <div class="flex flex-col gap-1">
           <ProgressBar :class="gameData.foodLevel<=0?'animate-custom-pulse ':''" :image="`/gamePlay/hunger.webp?v=${APP_VERSION}`" name="Сытость" :value="gameData.foodLevel" color="#FFF700"/>
           <ProgressBar :class="gameData.energy<=0?'animate-custom-pulse ':''" :image="`/gamePlay/energy.webp?v=${APP_VERSION}`" name="Энергия" :value="gameData.energy" color="#50A2FF"/>
         </div>
 
         <div class="grid grid-cols-2 gap-1 left-0.5">
-
           <!-- Уровень -->
           <div
               class="relative h-8 overflow-hidden flex items-center justify-center shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border border-white/10"
@@ -166,7 +170,7 @@ const getClipInset = (progress) => {
         </div>
       </div>
 
-      <div class="absolute bottom-0 left-5 flex items-center gap-2 w-full" >
+      <div class="absolute bottom-0 left-5 flex items-center gap-2 w-full">
         <div class="flex justify-center items-center gap-1.5 pb-1">
           <img
               v-for="i in 3"
@@ -245,47 +249,71 @@ const getClipInset = (progress) => {
       >
         <div class="bg-[#fff6ef] border-2 border-[#3399FF] rounded-3xl p-5 w-full max-w-xs h-130 shadow-2xl relative flex flex-col justify-between">
 
-          <!-- Верхняя часть: переключатель вкладок (Задания теперь первые) -->
-          <div class="flex bg-[#98E5FE]/60 p-1 rounded-2xl border border-[#3399FF] shrink-0">
-            <button
-                @click="activeTab = 'tasks'"
-                class="flex-1 py-1.5 text-xs font-bold rounded-xl transition-all"
-                :class="activeTab === 'tasks' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-600 hover:text-gray-800'"
-            >
+          <!-- Шапка: Переключатель вкладок + Кнопки смены языка -->
+          <div class="flex flex-col gap-2 shrink-0">
+            <div class="flex justify-end items-center px-1">
+              <div class="flex gap-1">
+                <button
+                    @click="changeLanguage('en')"
+                    class="px-2 py-0.5 text-[11px] font-bold rounded-lg border transition-all"
+                    :class="$i18n.locale === 'en' ? 'bg-[#3399FF] text-white border-[#3399FF]' : 'bg-white/60 text-gray-600 border-gray-300'"
+                >
+                  EN
+                </button>
+                <button
+                    @click="changeLanguage('ru')"
+                    class="px-2 py-0.5 text-[11px] font-bold rounded-lg border transition-all"
+                    :class="$i18n.locale === 'ru' ? 'bg-[#3399FF] text-white border-[#3399FF]' : 'bg-white/60 text-gray-600 border-gray-300'"
+                >
+                  RU
+                </button>
 
-              <span class="flex items-center justify-center">
+              </div>
+            </div>
 
-                <img src="/gamePlay/calendar.webp" class="w-5" alt=""> Задания
-              </span>
-            </button>
-            <button
-                @click="activeTab = 'stats'"
-                class="flex-1 py-1.5 text-xs font-bold rounded-xl transition-all"
-                :class="activeTab === 'stats' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-600 hover:text-gray-800'"
-            >
-              <span class="flex items-center justify-center">  <img src="/gamePlay/statistics.webp" class="w-5" alt=""> Сведения</span>
-            </button>
+            <!-- Переключатель вкладок -->
+            <div class="flex bg-[#98E5FE]/60 p-1 rounded-2xl border border-[#3399FF]">
+              <button
+                  @click="activeTab = 'tasks'"
+                  class="flex-1 py-1.5 text-xs font-bold rounded-xl transition-all"
+                  :class="activeTab === 'tasks' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-600 hover:text-gray-800'"
+              >
+                <span class="flex items-center justify-center gap-1">
+                  <img src="/gamePlay/calendar.webp" class="w-4" alt="">
+                  {{ $t(`tasks`) }}
+                </span>
+              </button>
+              <button
+                  @click="activeTab = 'stats'"
+                  class="flex-1 py-1.5 text-xs font-bold rounded-xl transition-all"
+                  :class="activeTab === 'stats' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-600 hover:text-gray-800'"
+              >
+                <span class="flex items-center justify-center gap-1">
+                  <img src="/gamePlay/statistics.webp" class="w-4" alt="">
+                  {{ $t(`intelligence`) }}
+                </span>
+              </button>
+            </div>
           </div>
 
           <!-- Центральный блок с контентом и скроллом -->
           <div class="flex-1 overflow-y-auto my-2 pr-1 custom-scroll">
-
-            <!-- Вкладка "Задания" (теперь отображается первой) -->
+            <!-- Вкладка "Задания" -->
             <div v-if="activeTab === 'tasks'">
               <DailyTasksModal />
             </div>
 
             <!-- Вкладка "Сведения" -->
-            <div v-else-if="activeTab === 'stats'" class="flex flex-col gap-2 text-sm mt-10">
+            <div v-else-if="activeTab === 'stats'" class="flex flex-col gap-2 text-sm mt-2">
               <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
-                <span class="font-semibold text-gray-600">Уровень:</span>
-                <span class="font-bold text-gray-800">{{ gameData.level }} (Опыт: {{gameData.exp}}/{{Number(gameData.level) * 100}})</span>
+                <span class="font-semibold text-gray-600">{{ $t(`level`) }}:</span>
+                <span class="font-bold text-gray-800">{{ gameData.level }} ({{ $t(`exp`) }}: {{gameData.exp}}/{{Number(gameData.level) * 100}})</span>
               </div>
 
               <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
                 <div class="flex items-center gap-1.5">
                   <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="Монеты" width="18">
-                  <span class="font-semibold text-gray-600">Монеты:</span>
+                  <span class="font-semibold text-gray-600">{{ $t(`coins`) }}</span>
                 </div>
                 <span class="font-bold text-amber-600">{{ formatFullNumber(gameData.coins) }}</span>
               </div>
@@ -293,7 +321,7 @@ const getClipInset = (progress) => {
               <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
                 <div class="flex items-center gap-1.5">
                   <img :src="`/gamePlay/click_icon.webp?v=${APP_VERSION}`" alt="Клики" width="20">
-                  <span class="font-semibold text-gray-600">Всего кликов:</span>
+                  <span class="font-semibold text-gray-600">{{ $t(`total_clicks`) }}</span>
                 </div>
                 <span class="font-bold text-gray-800">{{ formatFullNumber(gameData.clickCounter) }}</span>
               </div>
@@ -301,7 +329,7 @@ const getClipInset = (progress) => {
               <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
                 <div class="flex items-center gap-1.5">
                   <img :src="`/gamePlay/scull_icon.webp?v=${APP_VERSION}`" alt="Смерти" width="20">
-                  <span class="font-semibold text-gray-600">Всего смертей:</span>
+                  <span class="font-semibold text-gray-600">{{ $t(`total_deaths`) }}:</span>
                 </div>
                 <span class="font-bold text-gray-800">{{ formatFullNumber(gameData.deathsCount) }}</span>
               </div>
@@ -309,7 +337,7 @@ const getClipInset = (progress) => {
               <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
                 <div class="flex items-center gap-1.5">
                   <img :src="`/gamePlay/hunger.webp?v=${APP_VERSION}`" alt="Сытость" width="18">
-                  <span class="font-semibold text-gray-600">Сытость:</span>
+                  <span class="font-semibold text-gray-600">{{ $t(`satiety`) }}</span>
                 </div>
                 <span class="font-bold text-gray-800">{{ Math.trunc(gameData.foodLevel) }}%</span>
               </div>
@@ -317,7 +345,7 @@ const getClipInset = (progress) => {
               <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
                 <div class="flex items-center gap-1.5">
                   <img :src="`/gamePlay/energy.webp?v=${APP_VERSION}`" alt="Энергия" width="18">
-                  <span class="font-semibold text-gray-600">Энергия:</span>
+                  <span class="font-semibold text-gray-600">{{ $t(`energy`) }}</span>
                 </div>
                 <span class="font-bold text-gray-800">{{ Math.trunc(gameData.energy) }}%</span>
               </div>
@@ -329,7 +357,7 @@ const getClipInset = (progress) => {
               @click="showStatsModal = false"
               class="w-full bg-[#98E5FE] hover:bg-[#f3b584] text-gray-800 font-bold py-2 rounded-2xl border border-[#3399FF] transition-colors active:scale-95 shrink-0"
           >
-            Закрыть
+            {{ $t(`close`) }}
           </button>
         </div>
       </div>

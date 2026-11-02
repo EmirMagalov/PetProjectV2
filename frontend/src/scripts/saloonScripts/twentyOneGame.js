@@ -3,6 +3,7 @@ import { gameData } from "@/scripts/useGameStore.js";
 import { syncToBackend } from "@/scripts/api.js";
 import {addExp} from "@/scripts/level.js";
 import {addCoin} from "@/scripts/actions.js";
+import i18n from "@/scripts/locales/i18n.js";
 
 export const pupilOffset = ref({ x: 0, y: 0 });
 export const isDealing = ref(false);
@@ -151,7 +152,7 @@ export const playerScoreText = computed(() => {
 
     // Если ровно 2 туза и 2 карты — возвращаем текст вместо 21
     if (aces === 2 && cards.length === 2) {
-        return "Золотое очко";
+        return 'jackpot.golden_card';
     }
 
     return playerScore.value;
@@ -223,17 +224,17 @@ export async function finishGame(type) {
 
 
     if (type === "bust") {
-        result.value = "Перебор! Ты проиграл";
+        result.value = 'jackpot.result_bust';
         addExp(1)
     } else if (type === "lose") {
-        result.value = "Дилер выиграл!";
+        result.value ='jackpot.result_dealer_win';
         addExp(1)
     } else if (type === "win") {
-        result.value = "Поздравляю! Ты выиграл!";
+        result.value = 'jackpot.result_player_win';
         addCoin(currentBet.value * 2) ;
         addExp(20)
     } else if (type === "push") {
-        result.value = "Ничья!";
+        result.value = 'jackpot.result_push';
         addCoin(currentBet.value);
         addExp(5)
     }
@@ -258,7 +259,7 @@ watch(
     [gameStarted, bettingPhase],
     ([started, betting]) => {
         if (started && betting && !gameFinished.value) {
-            result.value = "Сделайте ставку!";
+            result.value = 'jackpot.make_bet_prompt';
         }
     }
 );

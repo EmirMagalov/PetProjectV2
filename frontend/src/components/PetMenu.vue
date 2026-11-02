@@ -28,6 +28,8 @@ import {
   foamEl, foodConsumedByPipe
 } from "@/scripts/dragAndDrop.js";
 import {computed} from "vue";
+import i18n from "@/scripts/locales/i18n.js";
+
 
 const shouldPulse = computed(() => {
   const list = cartItemsList.value || cartItemsList;
@@ -53,15 +55,15 @@ function goToSaloon() {
   const coins = Number(gameData?.value?.coins ?? gameData?.coins) || 0;
 
   if (coins < 50 && !currentBet.value) {
-    alert('Нужно минимум 50 монет, чтобы зайти в «Jackpot»!');
+    alert(i18n.global.t('minigames_access.jackpot_min_coins'));
     return;
   }
   if (gameData.foodLevel < 3) {
-    alert('Чтобы зайти в «Jackpot» нужно быть сытым!');
+    alert(i18n.global.t('minigames_access.jackpot_fed'));
     return;
   }
   if (gameData.energy < 3) {
-    alert('Чтобы зайти в «Jackpot» нужно быть бодрым!');
+    alert(i18n.global.t('minigames_access.jackpot_energy'));
     return;
   }
 
@@ -84,18 +86,13 @@ function goToSaloon() {
 
 function goToCatchTheFood() {
   // Безопасный расчет монет (поддерживает ref и обычный объект)
-  const coins = Number(gameData?.value?.coins ?? gameData?.coins) || 0;
 
-  if (coins < 50 && !currentBet.value) {
-    alert('Нужно минимум 50 монет, чтобы зайти в «Поймай еду»!');
-    return;
-  }
   if (gameData.foodLevel < 3) {
-    alert('Чтобы зайти в «Поймай еду» нужно быть сытым!');
+    alert(i18n.global.t('minigames_access.food_catch_fed'));
     return;
   }
   if (gameData.energy < 3) {
-    alert('Чтобы зайти в «Поймай еду» нужно быть бодрым!');
+    alert(i18n.global.t('minigames_access.food_catch_energy'));
     return;
   }
 
@@ -117,14 +114,9 @@ function goToCatchTheFood() {
 
 function goToHopHopGame() {
   // Безопасный расчет монет (поддерживает ref и обычный объект)
-  const coins = Number(gameData?.value?.coins ?? gameData?.coins) || 0;
 
-  if (coins < 50 && !currentBet.value) {
-    alert('Нужно минимум 50 монет, чтобы зайти в «Прыг-Скок»!');
-    return;
-  }
   if (gameData.foodLevel < 3) {
-    alert('Чтобы зайти в «Прыг-Скок» нужно быть сытым!');
+    alert(i18n.global.t('minigames_access.hop_hop_fed'));
     return;
   }
   if (gameData.energy < 3) {
@@ -289,7 +281,7 @@ const currentBathImage = computed(() => {
           <div class="w-[80px] h-[80px] bg-contain bg-no-repeat bg-center cursor-pointer"
                :style="{backgroundImage: `url('/gamePlay/fridge.webp?v=${APP_VERSION}')`}">
           </div>
-          <button class="text-md font-bold text-gray-600">Кормить</button>
+          <button class="text-md font-bold text-gray-600">{{ $t('feed') }}</button>
         </div>
         <div
             @click="location = 'bath',nextTutorialStep()"
@@ -300,7 +292,7 @@ const currentBathImage = computed(() => {
           <div class="w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
                :style="{backgroundImage: `url('/gamePlay/bath_icon.webp?v=${APP_VERSION}')`}">
           </div>
-          <button class="text-md font-bold text-gray-600 pointer-events-none">Мыть</button>
+          <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('wash') }}</button>
         </div>
         <div
             @click="goSleep()"
@@ -316,7 +308,7 @@ const currentBathImage = computed(() => {
             <p>{{ sleepTimeRemaining }}</p>
           </div>
           <button class="text-md font-bold text-gray-600">
-            {{ gameData.sleep ? 'Проснуться' : 'Спать' }}
+            {{ gameData.sleep ? $t('wake_up')  :  $t('sleep')  }}
           </button>
 
         </div>
@@ -337,7 +329,7 @@ const currentBathImage = computed(() => {
                 class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
                 :style="{backgroundImage: `url('/gamePlay/laboratory_icon.webp?v=${APP_VERSION}')`}"
             ></div>
-            <button class="text-xs font-bold text-gray-600 pointer-events-none">Лаборатория</button>
+            <button class="text-xs font-bold text-gray-600 pointer-events-none">{{ $t('laboratory') }}</button>
           </div>
 
 
@@ -382,7 +374,7 @@ const currentBathImage = computed(() => {
 
           </div>
 
-          <button class="absolute text-xs font-bold bottom-0 text-gray-600">Душ</button>
+          <button class="absolute text-xs font-bold bottom-0 text-gray-600">{{ $t('shower') }}</button>
 
         </div>
 
@@ -441,8 +433,8 @@ const currentBathImage = computed(() => {
           <p class="absolute bottom-0 font-bold text-center text-gray-600 pointer-events-none break-words" :class="bathCartList[currentBathIndex]?.name.length<15?'text-[10px]':'text-[7px]'" >
             {{
               bathCartList.length > 0 && bathCartList[currentBathIndex]
-                  ? `${bathCartList[currentBathIndex].name} `
-                  : 'Полка пустая'
+                  ? $t(`items.${bathCartList[currentBathIndex].id}`)
+                  : $t('empty_shelf')
             }}
           </p>
         </div>
@@ -454,7 +446,7 @@ const currentBathImage = computed(() => {
           <div class="w-20 h-20 bg-contain bg-no-repeat bg-center"
                :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}">
           </div>
-          <button class="text-lg font-bold text-gray-600 pointer-events-none">Назад</button>
+          <button class="text-lg font-bold text-gray-600 pointer-events-none">{{ $t('back') }}</button>
         </div>
         <div
             @click="isShopOpen = true;activeTab='bath'"
@@ -463,7 +455,7 @@ const currentBathImage = computed(() => {
           <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
                :style="{backgroundImage: `url('/gamePlay/market.webp?v=${APP_VERSION}')`}">
           </div>
-          <button class="text-md font-bold text-gray-600 pointer-events-none">Магазин</button>
+          <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('shop') }}</button>
         </div>
       </div>
 
@@ -534,8 +526,8 @@ const currentBathImage = computed(() => {
           <p class="absolute bottom-0 font-bold text-gray-600 pointer-events-none " :class="foodCartList[currentIndex]?.name.length < 15?'text-[10px]':'text-[7px]'">
             {{
               foodCartList.length > 0 && foodCartList[currentIndex]
-                  ? `${foodCartList[currentIndex].name}`
-                  : 'Холодильник пуст'
+                  ? $t(`items.${foodCartList[currentIndex].id}`)
+                  :  $t('fridge_empty')
             }}
           </p>
 
@@ -548,7 +540,7 @@ const currentBathImage = computed(() => {
           <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
                :style="{backgroundImage: `url('/gamePlay/market.webp?v=${APP_VERSION}')`}">
           </div>
-          <button class="text-md font-bold text-gray-600 pointer-events-none">Магазин</button>
+          <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('shop') }}</button>
         </div>
 
         <div
@@ -559,7 +551,7 @@ const currentBathImage = computed(() => {
           <div class="w-20 h-20 bg-contain bg-no-repeat bg-center"
                :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}">
           </div>
-          <button class="text-md font-bold text-gray-600 pointer-events-none">Назад</button>
+          <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('back') }}</button>
         </div>
       </div>
     </div>

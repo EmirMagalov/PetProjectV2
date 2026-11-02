@@ -36,8 +36,8 @@ watch(canSpin, (newValue) => {
         X
       </button>
 
-      <h2 class="title">Колесо Фортуны</h2>
-      <p class="subtitle">Крути каждый день и получай призы!</p>
+      <h2 class="title">{{ $t(`wheel_of_fortune`) }}</h2>
+      <p class="subtitle">{{ $t(`spin_and_win`)}}</p>
 
       <!-- Стрелка-указатель -->
       <div class="pointer-wrapper">
@@ -76,20 +76,20 @@ watch(canSpin, (newValue) => {
           :disabled="(!canSpin && gameData.coins < currentSpinPrice) || isSpinning"
           @click="spinWheel"
       >
-        <span v-if="isSpinning">Крутим...</span>
-        <span v-else-if="canSpin">Бесплатный спин!</span>
+        <span v-if="isSpinning">{{ $t('spinning') }}</span>
+        <span v-else-if="canSpin">{{ $t('free_spin') }}</span>
         <div class="flex gap-1 justify-center items-center" v-else-if="gameData.coins >= currentSpinPrice">
           <img src="/gamePlay/coin.webp" class="w-5 h-5" alt="">
-          <p>Покрутить за {{ currentSpinPrice }} монет</p>
+          <p>{{ currentSpinPrice }} {{ $t(`coins`) }}</p>
         </div>
         <div class="flex gap-1 justify-center items-center" v-else>
           <img src="/gamePlay/coin.webp" class="w-5 h-5" alt="">
-          <p>{{ currentSpinPrice }} монет</p>
+          <p>{{ currentSpinPrice }} {{ $t(`coins`) }}</p>
         </div>
       </button>
-      <p v-show="!canSpin">Бесплатно через: {{ formattedCooldown }}</p>
+      <p v-show="!canSpin">{{ $t(`free_in`) }} {{ formattedCooldown }}</p>
       <div class=" py-2  flex items-center gap-1 justify-end ">
-        <span class="text-slate-400 text-sm">Баланс:</span>
+        <span class="text-slate-400 text-sm">{{ $t(`balance`) }}</span>
         <span class="text-amber-400 font-bold text-xs flex items-center gap-1 tabular-nums">
           <img class="w-5" src="/gamePlay/coin.webp" alt=""> {{ gameData.coins }}
         </span>

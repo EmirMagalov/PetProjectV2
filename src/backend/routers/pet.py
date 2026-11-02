@@ -1,14 +1,53 @@
 import random
 import time
-from datetime import date
+from datetime import date, datetime
 from fastapi import APIRouter, HTTPException, Query
 from backend.models.pet import Pet as PetModel, get_fresh_daily_tasks, TASKS_CONFIG
 from bot.workers.pet import check_pet_notifications_job
 
 pet_router = APIRouter(prefix="/api", tags=["api"])
 
-SEASONS = ['summer', 'autumn', 'winter', 'spring']
-DAYS_SECONDS = 7 * 24 * 60 * 60
+
+# Словарь локализации для эндпоинтов питомца
+MESSAGES = {
+    "en": {
+        "already_open": "ALREADY_OPEN_ON_ANOTHER_DEVICE",
+        "tg_id_required": "tg_id is required",
+        "pet_not_found": "Pet not found",
+        "not_enough_coins": "Not enough coins! Paid spin costs {price} coins.",
+        "invalid_task": "Invalid task key",
+        "task_not_completed": "Task not completed yet",
+        "reward_claimed": "Reward already claimed",
+        "test_notification_ok": "Check initiated, please check Telegram",
+
+        "reward_coins": "{amount} Coins",
+        "reward_serum": "Health Serum",
+        "reward_burger": "Burger",
+        "reward_nothing": "Nothing",
+    },
+    "ru": {
+        "already_open": "ALREADY_OPEN_ON_ANOTHER_DEVICE",
+        "tg_id_required": "tg_id is required",
+        "pet_not_found": "Питомец не найден",
+        "not_enough_coins": "Недостаточно монет! Платный спин стоит {price} монет.",
+        "invalid_task": "Неверный ключ задачи",
+        "task_not_completed": "Задание еще не выполнено",
+        "reward_claimed": "Награда уже получена",
+        "test_notification_ok": "Проверка запущена, проверьте Telegram",
+        "reward_coins": "{amount} Монет",
+        "reward_serum": "Сыворотка здоровья",
+        "reward_burger": "Бургер",
+        "reward_nothing": "Ничего",
+    }
+}
+
+
+def get_pet_lang(pet) -> str:
+    """Определяем язык питомца (по умолчанию 'en')"""
+    if pet and hasattr(pet, "language") and pet.language in MESSAGES:
+        return pet.language
+    return "en"
+
 
 def check_and_reset_tasks(pet) -> bool:
     """
@@ -24,8 +63,21 @@ def check_and_reset_tasks(pet) -> bool:
     return False
 
 
+def get_current_season():
+    month = datetime.now().month
+
+    if month in [12, 1, 2]:
+        return 'winter'
+    elif month in [3, 4, 5]:
+        return 'spring'
+    elif month in [6, 7, 8]:
+        return 'summer'
+    elif month in [9, 10, 11]:
+        return 'autumn'
+
+    return 'summer'
 @pet_router.get("/{tg_id}")
-async def get_pet(tg_id: int,device_id: str = Query(None)):
+async def get_pet(tg_id: int, device_id: str = Query(None)):
     pet = await PetModel.filter(tg_id=tg_id).first()
     current_time = time.time()
     if not pet:
@@ -39,6 +91,7 @@ async def get_pet(tg_id: int,device_id: str = Query(None)):
                 "feed_count": 9,
                 "bad_stats_minutes": 0,
                 "poop_bad_minutes": 0,
+                "language": "en",
                 "cart": {"burger": 1, "shampoo": 1},
                 "last_update": time.time(),
                 "last_interaction": int(time.time()),
@@ -48,14 +101,13 @@ async def get_pet(tg_id: int,device_id: str = Query(None)):
             },
         )
     else:
+        lang = get_pet_lang(pet)
         if pet.active_device_id and pet.active_device_id != device_id:
-            # Если устройство другое, проверяем сколько секунд назад была активность
             time_diff = current_time - pet.last_interaction
             if time_diff < 10:
-                # 🛑 Если прошло меньше 10 секунд — кидаем ошибку 403 (игра открыта где-то еще)
                 raise HTTPException(
                     status_code=403,
-                    detail="ALREADY_OPEN_ON_ANOTHER_DEVICE"
+                    detail=MESSAGES[lang]["already_open"]
                 )
         pet.active_device_id = device_id
         pet.last_interaction = int(current_time)
@@ -65,13 +117,8 @@ async def get_pet(tg_id: int,device_id: str = Query(None)):
             updated_fields.extend(["tasks_reset_date", "daily_tasks"])
 
         await pet.save(update_fields=updated_fields)
-    interval_index = int(current_time // DAYS_SECONDS)
-    current_season = SEASONS[interval_index % len(SEASONS)]
-
-    # 3. Преобразуем модель в dict и добавляем поле season
-    pet_dict = dict(pet.__dict__)
-    pet_dict["season"] = current_season
-    return pet_dict
+    pet.season = get_current_season()
+    return pet
 
 
 @pet_router.post("/update")
@@ -81,8 +128,9 @@ async def update_pet(data: dict):
         raise HTTPException(status_code=400, detail="tg_id is required")
 
     pet = await PetModel.get_or_none(tg_id=tg_id)
+    lang = get_pet_lang(pet)
     if not pet:
-        raise HTTPException(status_code=404, detail="Pet not found")
+        raise HTTPException(status_code=404, detail=MESSAGES[lang]["pet_not_found"])
 
     current_ts = int(time.time())
     updated_fields = {
@@ -92,7 +140,6 @@ async def update_pet(data: dict):
         "poop_bad_minutes",
     }
 
-    # 🔄 Общая проверка смены дня при обновлении
     if check_and_reset_tasks(pet):
         updated_fields.update(["tasks_reset_date", "daily_tasks"])
 
@@ -110,9 +157,6 @@ async def update_pet(data: dict):
 
     for key, value in data.items():
         if key in valid_fields and key != "tg_id":
-            # Защита: если прилетели старые задания от прошлого дня,
-            # мы их перезапишем свежими сброшенными (опционально,
-            # но безопаснее доверять фронту только если дата совпадает)
             setattr(pet, key, value)
             updated_fields.add(key)
 
@@ -131,8 +175,9 @@ async def reset_pet(data: dict):
         raise HTTPException(status_code=400, detail="tg_id is required")
 
     pet = await PetModel.get_or_none(tg_id=tg_id)
+    lang = get_pet_lang(pet)
     if not pet:
-        raise HTTPException(status_code=404, detail="Pet not found")
+        raise HTTPException(status_code=404, detail=MESSAGES[lang]["pet_not_found"])
 
     pet.name = None
     pet.level = 1
@@ -179,8 +224,9 @@ async def spin_fortune(tg_id: int):
     COOLDOWN = 86400  # 24 часа
 
     pet = await PetModel.get_or_none(tg_id=tg_id)
+    lang = get_pet_lang(pet)
     if not pet:
-        raise HTTPException(status_code=404, detail="Pet not found")
+        raise HTTPException(status_code=404, detail=MESSAGES[lang]["pet_not_found"])
 
     is_free_spin = (NOW - pet.last_fortune_spin) >= COOLDOWN
 
@@ -192,7 +238,7 @@ async def spin_fortune(tg_id: int):
             remaining_seconds = COOLDOWN - (NOW - pet.last_fortune_spin)
             return {
                 "success": False,
-                "message": f"Недостаточно монет! Платный спин стоит {current_spin_price} монет.",
+                "message": MESSAGES[lang]["not_enough_coins"].format(price=current_spin_price),
                 "retry_in": remaining_seconds,
             }
         pet.coins -= current_spin_price
@@ -206,17 +252,22 @@ async def spin_fortune(tg_id: int):
         updated_fields.extend(["last_fortune_spin", "fortune_notified"])
 
     rewards = [
-        {"id": 0, "type": "coins", "amount": 50, "name": "50 Монет", "weight": 35},
-        {"id": 1, "type": "coins", "amount": 100, "name": "100 Монет", "weight": 25},
-        {"id": 2, "type": "coins", "amount": 500, "name": "500 Монет", "weight": 10},
-        {"id": 3, "type": "coins", "amount": 1500, "name": "1500 Монет", "weight": 5},
-        {"id": 4, "type": "coins", "amount": 5000, "name": "5000 Монет", "weight": 1},
+        {"id": 0, "type": "coins", "amount": 50, "name": MESSAGES[lang]["reward_coins"].format(amount=50),
+         "weight": 35},
+        {"id": 1, "type": "coins", "amount": 100, "name": MESSAGES[lang]["reward_coins"].format(amount=100),
+         "weight": 25},
+        {"id": 2, "type": "coins", "amount": 500, "name": MESSAGES[lang]["reward_coins"].format(amount=500),
+         "weight": 10},
+        {"id": 3, "type": "coins", "amount": 1500, "name": MESSAGES[lang]["reward_coins"].format(amount=1500),
+         "weight": 5},
+        {"id": 4, "type": "coins", "amount": 5000, "name": MESSAGES[lang]["reward_coins"].format(amount=5000),
+         "weight": 1},
         {
             "id": 5,
             "type": "serum",
             "amount": 1,
             "item_id": "health_serum",
-            "name": "Сыворотка здоровья",
+            "name": MESSAGES[lang]["reward_serum"],
             "weight": 5,
         },
         {
@@ -224,10 +275,10 @@ async def spin_fortune(tg_id: int):
             "type": "food",
             "amount": 1,
             "item_id": "burger",
-            "name": "Бургер",
+            "name": MESSAGES[lang]["reward_burger"],
             "weight": 10,
         },
-        {"id": 7, "type": "nothing", "amount": 0, "name": "Ничего", "weight": 10},
+        {"id": 7, "type": "nothing", "amount": 0, "name": MESSAGES[lang]["reward_nothing"], "weight": 10},
     ]
 
     weights = [int(r["weight"]) for r in rewards]
@@ -248,7 +299,6 @@ async def spin_fortune(tg_id: int):
     await pet.save(update_fields=updated_fields)
 
     next_spin_at = pet.last_fortune_spin + COOLDOWN
-    # Считаем точную цену следующего спина прямо на сервере
     next_spin_price = get_spin_price(pet.paid_spin_count)
 
     return {
@@ -258,7 +308,7 @@ async def spin_fortune(tg_id: int):
         "coins_left": pet.coins,
         "next_spin_at": next_spin_at,
         "paid_spin_count": pet.paid_spin_count,
-        "next_spin_price": next_spin_price,  # 👈 Сервер сам говорит фронту цену
+        "next_spin_price": next_spin_price,
     }
 
 
@@ -266,12 +316,14 @@ async def spin_fortune(tg_id: int):
 async def claim_task(tg_id: int, data: dict):
     task_key = data.get("task_key")
 
-    if not task_key or task_key not in TASKS_CONFIG:
-        raise HTTPException(status_code=400, detail="Invalid task key")
-
     pet = await PetModel.get_or_none(tg_id=tg_id)
+    lang = get_pet_lang(pet)
+
     if not pet:
-        raise HTTPException(status_code=404, detail="Pet not found")
+        raise HTTPException(status_code=404, detail=MESSAGES[lang]["pet_not_found"])
+
+    if not task_key or task_key not in TASKS_CONFIG:
+        raise HTTPException(status_code=400, detail=MESSAGES[lang]["invalid_task"])
 
     tasks = dict(pet.daily_tasks) if pet.daily_tasks else {}
     task_data = tasks.get(task_key, {"progress": 0, "claimed": False})
@@ -279,13 +331,12 @@ async def claim_task(tg_id: int, data: dict):
     target = TASKS_CONFIG[task_key]["target"]
     reward = TASKS_CONFIG[task_key]["reward"]
     exp = TASKS_CONFIG[task_key]["exp"]
-    # Проверки безопасности
-    if task_data["progress"] < target:
-        raise HTTPException(status_code=400, detail="Task not completed yet")
-    if task_data.get("claimed"):
-        raise HTTPException(status_code=400, detail="Reward already claimed")
 
-    # Помечаем задание как «получено» и насыпаем монеты
+    if task_data["progress"] < target:
+        raise HTTPException(status_code=400, detail=MESSAGES[lang]["task_not_completed"])
+    if task_data.get("claimed"):
+        raise HTTPException(status_code=400, detail=MESSAGES[lang]["reward_claimed"])
+
     task_data["claimed"] = True
     tasks[task_key] = task_data
     pet.daily_tasks = tasks
@@ -294,23 +345,18 @@ async def claim_task(tg_id: int, data: dict):
 
     return {
         "success": True,
-        "reward":reward,
+        "reward": reward,
         "exp": exp,
         "daily_tasks": pet.daily_tasks
     }
 
 
-
-
-
-
-
-
 @pet_router.post("/test-notification/{tg_id}")
 async def test_notification(tg_id: int):
     pet = await PetModel.get_or_none(tg_id=tg_id)
+    lang = get_pet_lang(pet)
     if not pet:
-        raise HTTPException(status_code=404, detail="Pet not found")
+        raise HTTPException(status_code=404, detail=MESSAGES[lang]["pet_not_found"])
 
     pet.hungry_notified = False
     pet.food_level = 5.0
@@ -319,4 +365,4 @@ async def test_notification(tg_id: int):
 
     await check_pet_notifications_job()
 
-    return {"status": "ok", "message": "Проверка запущена, проверьте Telegram"}
+    return {"status": "ok", "message": MESSAGES[lang]["test_notification_ok"]}

@@ -1,8 +1,5 @@
 <script setup>
-import PetMain from "@/components/PetMain.vue";
-import Test from "@/components/Test.vue";
 import { onMounted } from "vue";
-// 1. Добавляем импорт isApiError и errorMessage
 import { initGameData, isLoading, isApiError, errorMessage } from "@/scripts/api.js";
 import {imagesToPreload, preloadImages} from "@/scripts/preloadImages.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
@@ -46,7 +43,7 @@ onMounted(() => {
       </div>
 
       <h2 class="text-xl font-extrabold text-red-400 mb-2 uppercase tracking-wide">
-        Ошибка подключения
+        {{ $t('connection_error') }}
       </h2>
 
       <p class="text-sm text-gray-300 mb-6 max-w-xs leading-relaxed">
@@ -58,7 +55,7 @@ onMounted(() => {
           @click="loadGame"
           class="px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 active:scale-95 text-black font-extrabold rounded-2xl shadow-lg transition-all"
       >
-        Повторить попытку
+        {{ $t('retry') }}
       </button>
     </div>
 
@@ -81,7 +78,7 @@ onMounted(() => {
 
       <!-- Текст загрузки -->
       <span class="text-[#D18900] font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
-        Загрузка...
+        {{ $t('loading') }}
       </span>
 
       <!-- Спиннер -->
