@@ -2,7 +2,7 @@ import {watch} from "vue";
 import {
     bodyType,
     cloudShow,
-    gameData, isBadMood, isGameOver,
+    gameData, isBadMood, isGameInitialized,
     lowEnergy,
     mouth,
     showHunger, showStatus, showTongue,
@@ -13,6 +13,7 @@ import {addExp} from "@/scripts/level.js";
 import {addCoin, sunAnimating} from "@/scripts/actions.js";
 import {batheStatus, isHovered} from "@/scripts/dragAndDrop.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
+import {syncToBackend} from "@/scripts/api.js";
 
 
 const FOOD_PER_HOUR_HEALTHY = 0.25;     // ~6.7 часа
@@ -166,16 +167,29 @@ watch(
 
 
 
-watch(() => gameData.lives, async (newLives) => {
-    // Если жизни кончились, и мы ЕЩЕ не в процессе сброса/перезагрузки
-    if (newLives <= 0 && !isGameOver.value) {
-        isGameOver.value = true
-        gameData.deathsCount+=1
-        showStatus('gameOver')
+watch(() => gameData.lives, async (newLives, oldLives) => {
+    // 1. Пока игра не инициализирована с сервера — молчим
+    if (!isGameInitialized.value) return;
 
+    // 2. Если жизни на нуле
+    if (newLives <= 0) {
+        // Проверяем: если игра ЕЩЕ НЕ была помечена как оконченная
+        // И старое значение было больше 0 (значит, он только что умер на экране, а не загрузился мертвым)
+        if (!gameData.isGameOver && oldLives > 0 && oldLives !== undefined) {
+            gameData.isGameOver = true;
+            gameData.deathsCount += 1; // 👈 Прибавляем ровно 1 раз во время игры
+            showStatus('gameOver');
 
+            // Сразу отправляем обновленные данные на бэкенд
+            await syncToBackend();
+        } else if (!gameData.isGameOver) {
+            // Если при перезагрузке он уже пришел мертвым, но флаг на фронте еще не стоял —
+            // просто включаем экран смерти БЕЗ инкремента счетчика!
+            gameData.isGameOver = true;
+            showStatus('gameOver');
+        }
     }
-})
+});
 
 
 watch(() => gameData.sick, (newSick) => {

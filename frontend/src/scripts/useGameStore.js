@@ -29,6 +29,7 @@ export const isPopping = ref(false)
 export const isCoinPopping = ref(false)
 export const isExpPopping = ref(false)
 export const clickLimit = 200;
+export const isGameInitialized = ref(false)
 export const fruitStreak = ref(
     Number(localStorage.getItem('pet_fruitStreak')) || 0
 )
@@ -74,7 +75,6 @@ watch(ZeroPlayCount, (newValue) => {
 // export const body = ref("/character/main_body.webp")
 export const bodyType = ref('normal')
 
-export const isGameOver = ref(false)
 
 export const defaultGameData = {
     name: '',
@@ -109,6 +109,7 @@ export const defaultGameData = {
     season:'summer',
     language: localStorage.getItem('pet_language') || 'en',
     cart: {},
+    isGameOver: false,
     daily_tasks: {
         feed: { progress: 0, claimed: false },
         wash: { progress: 0, claimed: false },
@@ -124,16 +125,26 @@ export const gameData = reactive({
 
 
 export async function handleRestart() {
-    isGameOver.value = false
-    currentStatus.value = null
     isLoading.value = true
-    fruitStreak.value = 0
-    await resetPet()
+    fruitStreak.value = '' // или 0, как у тебя было
+
+    // 1. Сначала ждем ответа от бэкенда, что питомец сброшен
+    const success = await resetPet()
+    if (!success) {
+        isLoading.value = false
+        return
+    }
+
+    // 2. Очищаем локальные данные под дефолт
     await resetLocal()
-    // Просто обновляем поля до дефолтных без дублирования портянки кода
+
+    // 3. И только теперь гарантированно убираем статус смерти и флаги
+    gameData.isGameOver = false
+    currentStatus.value = null
+
+    // 4. Загружаем свежие чистые данные
     await initGameData()
 }
-
 export async function resetLocal() {
     const savedCoins = gameData.coins
     const savedClicks = gameData.clickCounter
@@ -256,12 +267,12 @@ function processStatusQueue() {
 
 export const activeStatus = computed(() => {
     // Если ничего не происходит и игра не окончена
-    if (!currentStatus.value && !isGameOver.value) {
+    if (!currentStatus.value && !gameData.isGameOver) {
         return {show: false}
     }
 
     // Приоритет 1: Смерть питомца
-    if (isGameOver.value || currentStatus.value?.type === 'gameOver') {
+    if (gameData.isGameOver || currentStatus.value?.type === 'gameOver') {
         return {
             show: true,
             text: i18n.global.t('store.pet_died'),

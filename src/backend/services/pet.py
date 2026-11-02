@@ -5,7 +5,6 @@ from backend.models.pet import Pet as PetModel
 # 24 часа в секундах
 FORTUNE_COOLDOWN = 86400
 
-
 # === Настройки расхода (в минуту) ===
 FOOD_PER_MIN_HEALTHY = 0.2
 FOOD_PER_MIN_SICK = 0.3
@@ -37,8 +36,6 @@ async def pet_tick_job():
             energy_rate = ENERGY_PER_MIN_SICK if pet.sick else ENERGY_PER_MIN_HEALTHY
             pet.energy = max(0.0, pet.energy - energy_rate)
 
-
-
         # --- ПРОВЕРКА КАКАХИ (IS_POOPED) ---
         if not pet.is_pooped:
             poop_time = (
@@ -55,7 +52,7 @@ async def pet_tick_job():
 
         # --- ПРОВЕРКА ГРЯЗИ (STINKY) ---
         if not pet.stinky and pet.is_pooped:
-            pet.poop_bad_minutes+=1
+            pet.poop_bad_minutes += 1
             if pet.poop_bad_minutes >= 120:
                 pet.stinky = True
                 pet.poop_bad_minutes = 0
@@ -78,7 +75,7 @@ async def pet_tick_job():
                 pet.sick = True
                 pet.stinky_bad_minutes = 0
         else:
-            pet.stinky_bad_minutes= 0
+            pet.stinky_bad_minutes = 0
 
         # --- 5. НАКАЗАНИЕ ЗА 0 ЕДЫ ИЛИ 0 ЭНЕРГИИ (12 часов = 720 мин) ---
         if pet.lives > 0:
@@ -89,6 +86,7 @@ async def pet_tick_job():
 
                     if pet.lives == 0:
                         pet.deaths_count += 1  # Сработает ровно один раз в жизни питомца
+                        pet.is_game_over = True
 
                     pet.bad_stats_minutes = 0
             else:
@@ -106,6 +104,7 @@ async def pet_tick_job():
             "sick",
             "lives",
             "deaths_count",
+            "is_game_over",
             "sleep",
             "sleep_end_time",
             "bad_stats_minutes",

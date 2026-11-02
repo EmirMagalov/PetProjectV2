@@ -17,8 +17,9 @@ class Pet(models.Model):
     # 1. ОСНОВНАЯ ИНФОРМАЦИЯ И ИДЕНТИФИКАЦИЯ
     # ==========================================
     tg_id = fields.BigIntField(pk=True)  # Telegram ID пользователя (PK)
-    name = fields.CharField(max_length=15, null=True, default=None)  # Имя питомца
+    name = fields.CharField(max_length=50, null=True, default=None)  # Имя питомца
     language = fields.CharField(max_length=10, default="en")
+
     # ==========================================
     # 2. ПРОГРЕСС И ЭКОНОМИКА
     # ==========================================
@@ -46,7 +47,7 @@ class Pet(models.Model):
     sick = fields.BooleanField(default=False)  # Болен
     is_fat = fields.BooleanField(default=False)  # Толстый (переедание)
     is_drunk = fields.BooleanField(default=False)  # Пьян
-
+    is_game_over = fields.BooleanField(default=False)
     # ==========================================
     # 5. СЧЁТЧИКИ И СТРИКИ ДЕЙСТВИЙ (МЕХАНИКИ)
     # ==========================================

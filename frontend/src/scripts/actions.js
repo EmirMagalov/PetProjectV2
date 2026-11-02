@@ -5,7 +5,7 @@ import {
     isAnimating, isBadMood, isBothStatsZero, isCoinPopping,
     isVibrating,
     lastFedItem, nextTutorialStep, FatPlayCount, sameFoodCount,
-    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount, isGameOver
+    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount
 
 }
     from "@/scripts/useGameStore.js";
@@ -340,7 +340,7 @@ export function handleMultiTouch(event) {
 }
 
 export function spawnHeart(x = 160, y = 135) {
-    if (isGameOver.value){
+    if (gameData.isGameOver){
         return;
     }
     if (tutorialStep.value === 3) {

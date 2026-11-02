@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {gameData, tutorialStep} from './useGameStore.js'
+import {gameData, isGameInitialized, tutorialStep} from './useGameStore.js'
 import {ref} from "vue";
 import {syncFortuneTime} from "@/scripts/fortune.js";
 import i18n from "@/scripts/locales/i18n.js";
@@ -164,6 +164,7 @@ export async function initGameData() {
             gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
             gameData.tutorialCompleted = serverData.tutorial_completed || false
             gameData.referredBy = serverData.referred_by || false
+            gameData.isGameOver = serverData.is_game_over || false
 
             if (serverData.language) {
                 gameData.language = serverData.language
@@ -189,7 +190,7 @@ export async function initGameData() {
                 }
             }
             isDataLoaded = true
-
+            isGameInitialized.value = true
             // Если всё прошло успешно, выключаем экран загрузки
             setTimeout(() => {
                 isLoading.value = false;
@@ -272,6 +273,7 @@ function getPayload() {
         tutorial_completed: gameData.tutorialCompleted,
         daily_tasks: gameData.daily_tasks,
         language: gameData.language,
+        is_game_over:gameData.isGameOver,
         last_update: Math.floor(Date.now() / 1000)
     }
 }

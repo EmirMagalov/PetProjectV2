@@ -14,7 +14,7 @@ import {
   isShopOpen,
   showHunger,
   sleepTimeRemaining,
-  statusFoam, location, isGameOver, handleRestart, warning, lowEnergy, activeTab, tutorialStep, nextTutorialStep,
+  statusFoam, location, handleRestart, warning, lowEnergy, activeTab, tutorialStep, nextTutorialStep,
   isAdmin
 } from "@/scripts/useGameStore.js";
 import {goSleep} from "@/scripts/actions.js";
@@ -190,7 +190,7 @@ const currentBathImage = computed(() => {
   </div>
   <div
       class="rounded-4xl p-3 mx-5 bg-[#fff6ef] h-65 mt-1 border-2 border-[#f7c9a5] flex flex-col justify-center items-center">
-    <div v-if="isGameOver">
+    <div v-if="gameData.isGameOver">
       <div
           @click="handleRestart"
           class="bg-[#fff6ef] justify-center flex flex-col h-25   items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
