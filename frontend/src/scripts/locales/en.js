@@ -153,6 +153,7 @@ export default {
     store: {
         pet_name_placeholder: 'Name:',
         pet_died: 'Pet died!',
+        start_again: "Start Again",
         level_up: 'Level Up',
         loss_life: '- 1 Life!',
         gain_life: '+ 1 Life!',

@@ -150,6 +150,7 @@ export default {
     store: {
         pet_name_placeholder: 'Имя:',
         pet_died: 'Питомец погиб!',
+        start_again: "Начать заново",
         level_up: 'Уровень повышен',
         loss_life: '- 1 жизнь!',
         gain_life: '+ 1 жизнь!',
