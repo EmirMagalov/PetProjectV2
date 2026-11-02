@@ -10,6 +10,13 @@ export const headItems = [
         level:0
     },
     {
+        id: 'halloween_pumpkin_hat',
+        name: 'Хэллоуинская тыква',
+        image: `/headwear/halloweenpumpkinhat.webp?v=${APP_VERSION}`,
+        price: 3110,
+        level:0
+    },
+    {
         id: 'cowboy_hat',
         name: 'Ковбойская шляпа',
         image: `/headwear/cowboyhat.webp?v=${APP_VERSION}`,

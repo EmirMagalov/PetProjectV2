@@ -81,6 +81,7 @@ export default {
 
     heads: {
         incognito_hat: 'Incognito Cap',
+        halloween_pumpkin_hat:'Halloween pumpkin',
         cowboy_hat: 'Cowboy Hat',
         pillbox: 'Pillbox Hat',
         pirate_hat: 'Pirate Hat',

@@ -24,7 +24,7 @@ import {
   location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus, colorFoam, isTutorialCompleted, resetLocal
 } from "@/scripts/useGameStore.js";
 import {
-  activeCoins, activeExp,
+  activeCoins, activeExp, addCoin,
   comboMultiplier, handleMultiTouch,
   isComboAnimating, isUserLooking, pupilOffset, resetEyeLook,
   sunAnimating, updateEyeLook
@@ -191,8 +191,33 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', handleVisibilityChange)
   if (clockInterval) clearInterval(clockInterval);
 })
+const pumpkinAnimating = ref(false)
 
+const pumpkinAnimation = (event) => {
+  if (pumpkinAnimating.value) return
 
+  // Находим игровой холст, чтобы считать координаты относительно него
+  const gameCanvas = document.querySelector('.w-\\[320px\\]') || event.currentTarget;
+  const rect = gameCanvas.getBoundingClientRect();
+
+  // Получаем координаты с учетом touch или mouse события
+  const touch = (event.touches && event.touches.length > 0)
+      ? event.touches[0]
+      : (event.changedTouches && event.changedTouches.length > 0)
+          ? event.changedTouches[0]
+          : event;
+
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  // Передаем точные локальные координаты в addCoin
+  addCoin(5, x, y);
+
+  pumpkinAnimating.value = true
+  setTimeout(() => {
+    pumpkinAnimating.value = false
+  }, 200)
+}
 </script>
 
 <template>
@@ -213,10 +238,12 @@ onUnmounted(() => {
         <SunAndMoon/>
         <Clouds/>
         <rain/>
+
         <!-- Фон локации -->
         <div class="absolute inset-0  pointer-events-none transition-all duration-1000 ease-in-out "
              :class="gameData.sleep ? 'brightness-30' : 'brightness-100'">
         <div v-show="location==='home' || location === 'food'">
+
           <img
 
               :src="`/location/home.webp?v=${APP_VERSION}`"
@@ -237,6 +264,7 @@ onUnmounted(() => {
               class="w-[320px] h-[270px] "
 
           />
+
         </div>
 
 
@@ -247,6 +275,9 @@ onUnmounted(() => {
         >
           {{ currentTime }}
         </div>
+
+
+
 
         <div class="relative flex items-center justify-center p-12">
           <!-- Ореол света ночника -->
@@ -264,7 +295,43 @@ onUnmounted(() => {
         </div>
 
 
+        <!-- 🎃 ТЫКВА с замедленным и плавным ночным переходом (3 секунды) -->
+        <div
+            @click.stop="pumpkinAnimation($event)"
+            class="absolute left-2 z-30 bottom-15 w-20 cursor-pointer pointer-events-auto transition-transform duration-300"
+            :class="{ 'scale-108': pumpkinAnimating }"
+            v-if="location==='home'|| location === 'food'"
+        >
+          <!-- Ореол света (плавно появляется через opacity за 3 секунды) -->
+          <div
+              class="absolute inset-0 pointer-events-none flex items-center justify-center z-[-1]"
+              style="transition: opacity 1s ease-in-out;"
+              :class="gameData.sleep ? 'opacity-100' : 'opacity-0'"
+          >
+            <!-- Основной мягкий размытый свет -->
+            <div class="absolute -inset-6 bg-amber-400/40 blur-xl rounded-full pointer-events-none"></div>
+            <!-- Яркое ядро свечения за тыквой -->
+            <div class="absolute w-12 h-12 bg-yellow-200/20 blur-md rounded-full pointer-events-none"></div>
+          </div>
 
+          <!-- Дневная тыква (держит размеры контейнера, плавно исчезает) -->
+          <img
+              src="/other/halloween_pumpkin.webp"
+              alt="Pumpkin"
+              class="w-full h-auto block filter"
+              style="transition: opacity 0s ease-in-out, filter 0s ease-in-out;"
+              :class="gameData.sleep ? 'opacity-0 brightness-50' : 'opacity-100 brightness-100'"
+          >
+
+          <!-- Ночная тыква (накладывается поверх, плавно проявляется) -->
+          <img
+              src="/other/halloween_pumpkin_darkness.webp"
+              alt="Pumpkin Dark"
+              class="absolute inset-0 w-full h-auto filter"
+              style="transition: opacity 0s ease-in-out, filter 0s ease-in-out;"
+              :class="gameData.sleep ? 'opacity-100 brightness-80 drop-shadow-[0_0_10px_rgba(253,224,71,0.8)]' : 'opacity-0 brightness-100'"
+          >
+        </div>
 
 
 
@@ -304,6 +371,9 @@ onUnmounted(() => {
             <div class="absolute  text-[#00BFFF] font-bold text-sm z-2 left-4 -top-3 drop-shadow-md">z</div>
           </div>
           <!-- Табличка с именем -->
+
+          <!-- 🎃 ТЫКВА с объемным свечением в стиле ночника -->
+
 
           <Nameplate />
           <!-- Персонаж -->
