@@ -71,55 +71,55 @@ export const headItems = [
         name: 'Сомбреро',
         image: `/headwear/sombrerohat.webp?v=${APP_VERSION}`,
         price: 2000,
-        level:20
+        level:30
     },
     {
         id: 'flat_hat',
         name: 'Хулиганка',
         image: `/headwear/flathat.webp?v=${APP_VERSION}`,
         price: 950,
-        level:20
+        level:30
     },
     {
         id: 'cylinder_hat',
         name: 'Цилиндр',
         image: `/headwear/cylinder.webp?v=${APP_VERSION}`,
         price: 2500,
-        level:20
+        level:30
     },
     {
         id: 'velvet_hat',
         name: 'Бархатная шляпа',
         image: `/headwear/velvethat.webp?v=${APP_VERSION}`,
         price: 1800,
-        level:25
+        level:35
     },
     {
         id: 'native_hat',
         name: 'Шляпа в индейском стиле',
         image: `/headwear/nativeamericanhat.webp?v=${APP_VERSION}`,
         price: 2200,
-        level:25
+        level:35
     },
     {
         id: 'conical_hat',
         name: 'Азиатская конусная шляпа',
         image: `/headwear/conicalhat.webp?v=${APP_VERSION}`,
         price: 3500,
-        level:30
+        level:50
     },
     {
         id: 'yellow_hat',
         name: 'Жёлтая шляпа',
         image: `/headwear/yellowhat.webp?v=${APP_VERSION}`,
         price: 3500,
-        level:30
+        level:50
     },
     {
         id: 'ancient_hat',
         name: 'Древняя шляпа',
         image: `/headwear/ancienthat.webp?v=${APP_VERSION}`,
         price: 3500,
-        level:30
+        level:50
     },
 ]
