@@ -103,8 +103,8 @@ async def get_pet(tg_id: int, device_id: str = Query(None)):
     else:
         lang = get_pet_lang(pet)
         if pet.active_device_id and pet.active_device_id != device_id:
-            time_diff = current_time - pet.last_interaction
-            if time_diff < 10:
+            time_diff = current_time - pet.last_update
+            if time_diff < 20:
                 raise HTTPException(
                     status_code=403,
                     detail=MESSAGES[lang]["already_open"]
