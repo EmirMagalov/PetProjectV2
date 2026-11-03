@@ -164,7 +164,8 @@ export default {
         close_other_device: 'Close the game there to continue playing here.',
         backend_unavailable: 'Server is unavailable. Check your internet connection.',
         telegram_user_not_found: 'Could not determine Telegram user.',
-        server_unavailable: "Server is unavailable. Please check your internet connection."
+        server_unavailable: "Server is unavailable. Please check your internet connection.",
+        user_not_found: "Could not determine Telegram user."
     },
     jackpot: {
         not_enough_coins_for_game: "Not enough coins to start the game! Minimum bet: 50",

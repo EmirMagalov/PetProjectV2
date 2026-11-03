@@ -96,7 +96,7 @@ export async function initGameData() {
     if (!tgId) {
         console.error("❌ tgId так и не был найден!")
         isApiError.value = true
-        errorMessage.value = "Не удалось определить пользователя Telegram."
+        errorMessage.value = i18n.global.t('store.user_not_found')
         isLoading.value = false
         return
     }
