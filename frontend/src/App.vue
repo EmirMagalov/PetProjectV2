@@ -47,7 +47,7 @@ onMounted(() => {
       </h2>
 
       <p class="text-sm text-gray-300 mb-6 max-w-xs leading-relaxed">
-        {{ errorMessage || 'Не удалось получить данные с сервера. Проверьте интернет-соединение.' }}
+        {{ errorMessage || $t('store.server_error') }}
       </p>
 
       <!-- Кнопка перезапуска -->
