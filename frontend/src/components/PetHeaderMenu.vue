@@ -102,7 +102,7 @@ const getClipInset = (progress) => {
 </script>
 
 <template>
-  <div class="relative p-2 z-100">
+  <div class="relative  z-100">
     <!-- Клик по любому месту плашки откроет подробную статистику -->
     <div
         @click="showStatsModal = true"

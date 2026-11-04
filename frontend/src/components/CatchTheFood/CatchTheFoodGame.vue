@@ -517,7 +517,7 @@ onUnmounted(() => {
       </div>
     </Transition>
 
-    <PetHeaderMenu/>
+    <PetHeaderMenu class="mb-1" />
 
     <!-- Фон супермаркета -->
     <div class="absolute bottom-30 z-0 pointer-events-none">

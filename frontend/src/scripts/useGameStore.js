@@ -74,11 +74,12 @@ watch(ZeroPlayCount, (newValue) => {
 
 // export const body = ref("/character/main_body.webp")
 export const bodyType = ref('normal')
-
+const savedLevel = localStorage.getItem('match3_level') ? parseInt(localStorage.getItem('match3_level')) : 1
 
 export const defaultGameData = {
     name: '',
     level: 1,
+    match3_level:savedLevel,
     exp: 0,
     coins: 50,
     lives: 3,
@@ -117,12 +118,17 @@ export const defaultGameData = {
     }
 }
 
+
+
 // Создаем реактивный объект, используя дефолты
 export const gameData = reactive({
     ...defaultGameData,
     lastUpdate: Date.now()
 })
 
+watch(() => gameData.match3_level, (newLevel) => {
+    localStorage.setItem('match3_level', newLevel)
+})
 
 export async function handleRestart() {
     isLoading.value = true

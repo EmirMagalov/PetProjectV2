@@ -68,7 +68,7 @@ const removeSerum = (index) => {
         <div class="mt-4 w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></div>
       </div>
     </Transition>
-    <PetHeaderMenu/>
+    <PetHeaderMenu class="mb-1" />
 
     <!-- Лаборатория -->
     <div class="relative flex justify-center items-center w-full my-auto">

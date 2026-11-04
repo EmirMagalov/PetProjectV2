@@ -1,6 +1,10 @@
 <script setup>
-import {ref, computed, onMounted, nextTick} from 'vue'
+import {ref, computed, onMounted, onUnmounted, nextTick} from 'vue'
+import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
+import {gameData} from "@/scripts/useGameStore.js";
 
+const isLoading = ref(true);
 const MAX_SIZE = 8
 
 const CANDIES = [
@@ -19,7 +23,7 @@ const stoneImage = '/gamePlay/ice_cube.webp'
 
 let nextId = 1
 let calculatedMoves = 0
-const level = ref(80)
+const level = computed(() => gameData.match3_level)
 const score = ref(0)
 const moves = ref(10)
 const board = ref([])
@@ -27,7 +31,7 @@ const isProcessing = ref(false)
 const isLevelPassed = ref(false)
 const isShuffling = ref(false)
 
-// 📢 Система динамических плашек со своими цветами и тенями
+// 📢 Система динамических плашек
 const activeBadgeText = ref('')
 const activeBadgeColor = ref('text-pink-300')
 const activeBadgeShadow = ref('0 4px 15px rgba(236, 72, 153, 0.6)')
@@ -46,6 +50,39 @@ let startY = 0
 
 const gridRows = ref(8)
 const gridCols = ref(8)
+
+// ====================== АДАПТИВНЫЙ РАЗМЕР ПОЛЯ ======================
+const boardPixelSize = ref(360)
+
+// Берём максимальную сторону текущего уровня (6, 7 или 8)
+const maxDim = computed(() => Math.max(gridRows.value, gridCols.value, 1))
+
+const cellStep = computed(() => {
+  const usable = boardPixelSize.value - 20
+  // Чем меньше клеток — тем крупнее шаг
+  return Math.floor(usable / maxDim.value)
+})
+
+const cellSize = computed(() => Math.max(30, cellStep.value - 2))
+
+// Центрирование под текущий размер сетки
+const gridOffsetX = computed(() => {
+  const totalWidth = gridCols.value * cellStep.value
+  return Math.max(0, (boardPixelSize.value - 20 - totalWidth) / 2)
+})
+
+const gridOffsetY = computed(() => {
+  const totalHeight = gridRows.value * cellStep.value
+  return Math.max(0, (boardPixelSize.value - 20 - totalHeight) / 2)
+})
+
+function updateBoardSize() {
+  // На телефонах берём почти всю ширину, но ограничиваем сверху
+  const maxAllowed = Math.min(window.innerWidth - 24, 440)
+  const minAllowed = 280
+  boardPixelSize.value = Math.max(minAllowed, Math.floor(maxAllowed))
+}
+// =====================================================================
 
 const remainingObstacles = computed(() => {
   let count = 0
@@ -148,7 +185,13 @@ function isInsideShape(r, c, shape) {
 
   return true;
 }
-
+function triggerVictory() {
+  setTimeout(() => {
+    isLevelPassed.value = true
+    isProcessing.value = false
+    gameData.match3_level++
+  }, 1000) // Задержка 500 мс, чтобы игрок успел увидеть взрыв последней коробки
+}
 function initLevel() {
   isLevelPassed.value = false
   score.value = 0
@@ -173,7 +216,7 @@ function initLevel() {
         })
     )
 
-    if (level.value >= 10 && level.value % 10 !== 0) {
+    if (level.value >= 10 && level % 10 !== 0) {
       let spawnedStones = 0
       const minStones = 2
       const maxStonesLimit = 6
@@ -265,9 +308,7 @@ function initLevel() {
 }
 
 function nextLevelOrRestart() {
-  if (isLevelPassed.value) {
-    level.value++
-  }
+
   initLevel()
 }
 
@@ -313,7 +354,6 @@ function hasValidMoves(currentBoard) {
   return false
 }
 
-// 🔀 Стильное перемешивание фишек без темного оверлея
 async function shuffleBoardIfDeadlock() {
   let safetyCounter = 0
 
@@ -531,16 +571,15 @@ async function trySwap(r1, c1, r2, c2) {
 
   if (rainbowActivated) {
     moves.value--
-    showFloatingBadge("Сочный взрыв!", "text-cyan-300", "0 4px 15px rgba(6, 182, 212, 0.6)")
+    showFloatingBadge("Сочный взрыв!", "text-[#66FF66]", "0 4px 15px rgba(6, 182, 212, 0.6)")
     await processRainbowActivation(
         targetFruitType,
         cell1.isRainbow ? {r: r2, c: c2} : {r: r1, c: c1}
     )
 
     if (level.value > 1 && remainingObstacles.value === 0) {
-      isLevelPassed.value = true
-      isProcessing.value = false
-      return
+      triggerVictory()
+      return // Выходим из функции
     }
 
     applyGravityAndSpawn()
@@ -685,7 +724,6 @@ async function processMatchesAndDrop() {
   while (group.matches.length > 0 || group.fiveInRowMatches.length > 0) {
     score.value += (group.matches.length + group.fiveInRowMatches.length * 5) * 10
 
-    // Проверяем сочные комбо для плашек со своими цветами и тенями
     if (group.fiveInRowMatches.length > 0) {
       showFloatingBadge("Супер-фрукт!", "text-purple-400", "0 4px 15px rgba(168, 85, 247, 0.6)")
     } else if (group.matches.length >= 5) {
@@ -748,12 +786,12 @@ async function processMatchesAndDrop() {
     })
 
     if (level.value > 1 && remainingObstacles.value === 0) {
-      isLevelPassed.value = true
+      triggerVictory()
       break
     }
 
     if (level.value === 1 && moves.value <= 0) {
-      isLevelPassed.value = true
+      triggerVictory()
       break
     } else if (level.value > 1 && moves.value <= 0) {
       showFloatingBadge("Кончились ходы!", "text-red-400", "0 4px 15px rgba(239, 68, 68, 0.6)")
@@ -767,13 +805,13 @@ async function processMatchesAndDrop() {
   }
 
   if (level.value > 1 && remainingObstacles.value === 0) {
-    isLevelPassed.value = true
+    triggerVictory()
   }
 
   shuffleBoardIfDeadlock()
 
   if (level.value === 1 && moves.value <= 0) {
-    isLevelPassed.value = true
+    triggerVictory()
   }
 }
 
@@ -781,157 +819,224 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-onMounted(() => {
+function restartLevel(){
+  if(gameData.coins < 50){
+    return
+  }
+  gameData.coins -= 50
   initLevel()
+}
+
+onMounted(() => {
+  updateBoardSize()
+  window.addEventListener('resize', updateBoardSize)
+
+  initLevel()
+  setTimeout(() => {
+    isLoading.value = false
+  }, 800)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateBoardSize)
 })
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-white p-4 select-none">
-    <!-- Шапка игры -->
-    <div class="flex bg-gray-900 justify-between w-full max-w-sm mb-2 px-2 text-lg font-bold">
-      <div>Уровень: <span class="text-pink-400">{{ level }}</span></div>
-      <div>Очки: <span class="text-yellow-400">{{ score }}</span></div>
-      <div>Ходы: <span class="text-red-400">{{ moves }}</span></div>
-    </div>
+  <div class="bg-green-300 min-h-screen">
 
-    <!-- Цель уровня -->
-    <div class="text-sm bg-gray-900 text-gray-400 mb-4 px-2">
-      <span v-if="level === 1">Цель: Сделать 10 ходов и заработать очки</span>
-      <span v-else>Цель: Разбить все коробки (Осталось: <span class="text-cyan-400 font-bold">{{ remainingObstacles }}</span>)</span>
-    </div>
+    <Transition name="fade">
+      <div v-if="isLoading" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#ABD7DD] via-[#ABD7DD] to-blue-300 text-[#D18900]">
+        <div class="relative flex items-center justify-center mb-4">
+          <div class="absolute w-24 h-24 rounded-full bg-amber-500/20 animate-ping"></div>
+          <div class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
+            <div class="w-full h-full bg-[#FADCCC] rounded-full flex items-center justify-center border border-amber-300/40">
+              <img :src="`/gamePlay/logo_icons.webp?v=${APP_VERSION}`" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
+            </div>
+          </div>
+        </div>
+        <span class="text-[#D18900] font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
+          {{ $t('loading') }}
+        </span>
+        <div class="mt-4 w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></div>
+      </div>
+    </Transition>
 
-    <!-- Игровое поле -->
-    <div class="relative bg-[#D3E9F0] p-3 rounded-xl shadow-2xl border-4 border-gray-700 overflow-hidden flex items-center justify-center"
-         style="width: 480px; height: 480px; background-image: url('/gamePlay/match3_game_background.webp'); background-size: 500px; background-position: bottom;background-repeat: no-repeat;">
+    <PetHeaderMenu/>
 
-      <!-- Слой 1: Статичная сетка подложек (исправлена) -->
-      <div class="absolute inset-0 pointer-events-none p-3">
-        <template v-for="(row, r) in board" :key="'bg-row-' + r">
-          <template v-for="(cell, c) in row" :key="'bg-' + r + '-' + c">
-            <div
-                v-if="cell !== null && cell !== undefined && r < gridRows && c < gridCols"
-                class="absolute rounded-xl bg-blue-300/80 border border-white/10"
-                :style="{
-                width: '44px',
-                height: '44px',
-                left: `${c * 46 + Math.max(0, (456 - gridCols * 44) / 2)}px`,
-                top: `${r * 46 + Math.max(0, (456 - gridRows * 44) / 2)}px`
-              }"
-            ></div>
-          </template>
-        </template>
+    <div class="flex flex-col items-center justify-center text-white select-none px-2">
+      <RouterLink to="/" class="absolute z-20 left-2 top-28 opacity-80">
+        <div class="bg-[#fff6ef] h-12 w-12 flex flex-col items-center justify-center p-0.5 rounded-xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer shadow-inner">
+          <div class="w-8 h-8 bg-contain bg-no-repeat bg-center"
+               :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"></div>
+        </div>
+      </RouterLink>
+
+      <!-- Шапка игры -->
+      <div class="w-full flex justify-end">
+        <div class="bg-linear-65 from-pink-300 to-pink-400 rounded-bl-4xl p-3 mb-1 flex flex-col items-end w-fit text-lg font-bold px-4">
+          <div class="flex gap-1 flex-wrap justify-end">
+            <div>Уровень: <span class="text-purple-400 text-shadow-sm text-shadow-black">{{ level }}</span></div>
+            <div>Очки: <span class="text-yellow-400 text-shadow-sm text-shadow-black">{{ score }}</span></div>
+            <div>Ходы: <span class="text-red-400 text-shadow-sm text-shadow-black">{{ moves }}</span></div>
+          </div>
+          <div class="text-right text-cyan-400 text-shadow-sm text-shadow-black text-sm">
+            <span v-if="level === 1">Сделай 10 ходов</span>
+            <span v-else>Разбей все коробки </span>
+          </div>
+        </div>
       </div>
 
-      <!-- Слой 2: Фрукты -->
-      <TransitionGroup
-          name="candy"
-          tag="div"
-          class="absolute inset-0 pointer-events-auto p-3"
+      <!-- Игровое поле (адаптивное) -->
+      <div
+          class="relative bg-[#D3E9F0] rounded-xl shadow-2xl border-4 border-gray-700 overflow-hidden flex items-center justify-center"
+          :style="{
+            width: boardPixelSize + 'px',
+            height: boardPixelSize + 'px',
+            backgroundImage: `url('/gamePlay/match3_game_background.webp')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }"
       >
-        <div
-            v-for="cell in flatBoard"
-            :key="cell.id"
-            @touchstart.prevent="onTouchStart($event, cell.r, cell.c)"
-            @touchmove.prevent="onTouchMove($event)"
-            @touchend.prevent="onTouchEnd($event)"
-            @mousedown="onMouseDown($event, cell.r, cell.c)"
-            class="flex items-center justify-center rounded-xl  cursor-grab active:cursor-grabbing absolute select-none z-10"
-            :class="{
-              'bg-yellow-300/10 z-30': activeCell?.r === cell.r && activeCell?.c === cell.c,
-              'animate-shake': isShuffling && !cell.obstacle && !cell.unbreakable && !cell.chained
-            }"
-            :style="{
-              width: '44px',
-              height: '44px',
-              left: `${cell.c * 46 + Math.max(0, (456 - gridCols * 44) / 2)}px`,
-              top: `${cell.r * 46 + Math.max(0, (456 - gridRows * 44) / 2)}px`
-            }"
-        >
-          <img
-              v-if="cell.unbreakable"
-              :src="stoneImage"
-              class="w-9 h-9 object-contain drop-shadow-md pointer-events-none opacity-90"
-              alt="unbreakable"
-          />
-          <img
-              v-else-if="cell.obstacle"
-              :src="obstacleImage"
-              class="w-11 h-11 p-0.5 object-contain drop-shadow-md pointer-events-none"
-              alt="obstacle"
-          />
-          <img
-              v-else-if="cell.isRainbow"
-              :src="rainbowImage"
-              class="w-10 h-10 animate-bounce brightness-200 object-contain drop-shadow-md pointer-events-none"
-              alt="rainbow"
-          />
-          <div v-else-if="cell.type" class="relative w-full h-full flex items-center justify-center">
-            <img
-                :src="cell.type"
-                class="w-11 h-11 object-contain drop-shadow-md pointer-events-none"
-                alt="candy"
-            />
-            <div v-if="cell.chained" class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl">
-              <span class="w-7"><img class="opacity-80" src="/gamePlay/lock.webp" alt=""></span>
-            </div>
-          </div>
+        <!-- Слой 1: Статичная сетка подложек -->
+        <div class="absolute inset-0 pointer-events-none" style="padding: 10px;">
+          <template v-for="(row, r) in board" :key="'bg-row-' + r">
+            <template v-for="(cell, c) in row" :key="'bg-' + r + '-' + c">
+              <div
+                  v-if="cell !== null && cell !== undefined && r < gridRows && c < gridCols"
+                  class="absolute rounded-xl bg-blue-300/80 border border-white/10"
+                  :style="{
+                    width: cellSize + 'px',
+                    height: cellSize + 'px',
+                    left: (c * cellStep + 10 + gridOffsetX) + 'px',
+                    top: (r * cellStep + 10 + gridOffsetY) + 'px'
+                  }"
+              ></div>
+            </template>
+          </template>
         </div>
-      </TransitionGroup>
 
-      <!-- 📢 Динамическая плашка со своими цветами и тенями -->
-      <transition name="badge-fade" :key="badgeKey">
-        <div
-            v-if="activeBadgeText"
-            class="absolute inset-0 z-40 pointer-events-none flex items-center justify-center overflow-hidden"
+        <!-- Слой 2: Фрукты -->
+        <TransitionGroup
+            name="candy"
+            tag="div"
+            class="absolute inset-0 pointer-events-auto"
+            style="padding: 10px;"
         >
           <div
-              class="floating-up text-shadow-md text-shadow-white font-black text-3xl uppercase px-5 py-3 flex items-center gap-2"
-              :class="activeBadgeColor"
-
+              v-for="cell in flatBoard"
+              :key="cell.id"
+              @touchstart.prevent="onTouchStart($event, cell.r, cell.c)"
+              @touchmove.prevent="onTouchMove($event)"
+              @touchend.prevent="onTouchEnd($event)"
+              @mousedown="onMouseDown($event, cell.r, cell.c)"
+              class="flex items-center justify-center rounded-xl cursor-grab active:cursor-grabbing absolute select-none z-10"
+              :class="{
+                'bg-yellow-300/10 z-30': activeCell?.r === cell.r && activeCell?.c === cell.c,
+                'animate-shake': isShuffling && !cell.obstacle && !cell.unbreakable && !cell.chained
+              }"
+              :style="{
+                width: cellSize + 'px',
+                height: cellSize + 'px',
+                left: (cell.c * cellStep + 10 + gridOffsetX) + 'px',
+                top: (cell.r * cellStep + 10 + gridOffsetY) + 'px'
+              }"
           >
-            <span>{{ activeBadgeText }}</span>
-          </div>
-        </div>
-      </transition>
-
-      <!-- 🏆 ПОБЕДНЫЙ ЭКРАН -->
-      <transition name="badge-fade">
-        <div
-            v-if="isLevelPassed"
-            class="absolute inset-0 z-50 bg-gray-900/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center"
-        >
-          <div class="text-2xl font-black text-yellow-400 mb-2 animate-bounce">Уровень пройден!</div>
-          <p class="text-gray-300 text-sm mb-6">Великолепная работа!</p>
-
-          <div class="bg-gray-800 border-2 border-gray-700 rounded-xl p-4 w-full max-w-xs mb-6 text-left space-y-2">
-            <div class="flex justify-between">
-              <span class="text-gray-400">Уровень:</span>
-              <span class="font-bold text-pink-400">{{ level }}</span>
+            <img
+                v-if="cell.unbreakable"
+                :src="stoneImage"
+                class="object-contain drop-shadow-md pointer-events-none opacity-90"
+                :style="{ width: (cellSize * 0.85) + 'px', height: (cellSize * 0.85) + 'px' }"
+                alt="unbreakable"
+            />
+            <img
+                v-else-if="cell.obstacle"
+                :src="obstacleImage"
+                class="object-contain drop-shadow-md pointer-events-none"
+                :style="{ width: (cellSize * 0.95) + 'px', height: (cellSize * 0.95) + 'px' }"
+                alt="obstacle"
+            />
+            <img
+                v-else-if="cell.isRainbow"
+                :src="rainbowImage"
+                class="animate-bounce brightness-200 object-contain drop-shadow-md pointer-events-none"
+                :style="{ width: (cellSize * 0.9) + 'px', height: (cellSize * 0.9) + 'px' }"
+                alt="rainbow"
+            />
+            <div v-else-if="cell.type" class="relative w-full h-full flex items-center justify-center">
+              <img
+                  :src="cell.type"
+                  class="object-contain drop-shadow-md pointer-events-none"
+                  :style="{ width: (cellSize * 0.92) + 'px', height: (cellSize * 0.92) + 'px' }"
+                  alt="candy"
+              />
+              <div v-if="cell.chained" class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl">
+                <img class="opacity-80" :style="{ width: (cellSize * 0.55) + 'px' }" src="/gamePlay/lock.webp" alt="">
+              </div>
             </div>
-            <div class="flex justify-between">
-              <span class="text-gray-400">Заработано очков:</span>
-              <span class="font-bold text-yellow-400">{{ score }}</span>
-            </div>
           </div>
+        </TransitionGroup>
 
-          <button
-              @click="nextLevelOrRestart"
-              class="px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-600 font-bold text-lg rounded-full shadow-2xl hover:opacity-90 active:scale-95 transition-all"
+        <!-- Плашка -->
+        <transition name="badge-fade" :key="badgeKey">
+          <div
+              v-if="activeBadgeText"
+              class="absolute inset-0 z-40 pointer-events-none flex items-center justify-center overflow-hidden"
           >
-            Следующий уровень
-          </button>
+            <div
+                class="floating-up text-shadow-md text-shadow-white font-black text-3xl sm:text-4xl uppercase px-5 py-3 flex items-center gap-2 whitespace-nowrap"
+                :class="activeBadgeColor"
+            >
+              <span>{{ activeBadgeText }}</span>
+            </div>
+          </div>
+        </transition>
+
+        <!-- Победный экран -->
+        <transition name="badge-fade">
+          <div
+              v-if="isLevelPassed"
+              class="absolute inset-0 z-50 bg-linear-to-l from-purple-800 to-purple-950 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center"
+          >
+            <div class="text-2xl font-black text-yellow-400 mb-2 animate-bounce">Уровень пройден!</div>
+            <p class="text-gray-300 text-sm mb-6">Великолепная работа!</p>
+
+            <div class="bg-pink-300 border-2 border-gray-700 rounded-xl p-4 w-full max-w-xs mb-6 text-left space-y-2">
+              <div class="flex justify-between">
+                <span class="text-white">Уровень:</span>
+                <span class="font-bold text-pink-400 text-shadow-md text-shadow-black">{{ level }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-white">Заработано очков:</span>
+                <span class="font-bold text-yellow-400 text-shadow-md text-shadow-black">{{ score }}</span>
+              </div>
+            </div>
+
+            <button
+                @click="nextLevelOrRestart"
+                class="px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-600 font-bold text-lg rounded-full shadow-2xl hover:opacity-90 active:scale-95 transition-all"
+            >
+              Следующий уровень
+            </button>
+          </div>
+        </transition>
+      </div>
+
+      <!-- Кнопка перезапуска -->
+      <button
+          @click="restartLevel"
+          :disabled="gameData.coins < 50"
+          class="mt-3 px-6 py-2.5 font-bold rounded-full shadow-lg transition-all flex items-center gap-2"
+          :class="gameData.coins < 50 ? 'bg-gray-800 text-gray-500 cursor-not-allowed opacity-60' : 'bg-red-300 text-shadow-sm text-shadow-pink-500 hover:bg-gray-600 text-white active:scale-95'"
+      >
+        <span>Перезапустить уровень</span>
+        <div class="flex items-center gap-1">
+          <span :class="gameData.coins < 50 ? 'text-red-400' : 'text-yellow-400'">50</span>
+          <img class="w-5" src="/gamePlay/coin.webp" alt="">
         </div>
-      </transition>
+      </button>
     </div>
-
-    <!-- Кнопка перезапуска под полем -->
-    <button
-        @click="initLevel"
-        class="mt-6 px-6 py-2 bg-gray-700 hover:bg-gray-600 font-bold rounded-full shadow-lg active:scale-95 transition-all text-sm"
-    >
-      Перезапустить уровень 🔄
-    </button>
   </div>
 </template>
 
@@ -949,7 +1054,6 @@ onMounted(() => {
   transform: scale(0);
 }
 
-/* Мягкое появление и исчезновение плашки */
 .badge-fade-enter-active {
   transition: opacity 0.2s ease;
 }
@@ -968,7 +1072,6 @@ onMounted(() => {
   opacity: 0.9;
 }
 
-/* Строго одноразовый плавный полет вверх до конца */
 .floating-up {
   animation: moveUp 1.8s cubic-bezier(0, 0.55, 0.45, 1) forwards;
 }
@@ -992,7 +1095,6 @@ onMounted(() => {
   }
 }
 
-/* Эффект дрожания фишек перед перемешиванием */
 @keyframes shake {
   0%, 100% { transform: translate(0, 0) rotate(0deg); }
   20% { transform: translate(-2px, 1px) rotate(-3deg); }

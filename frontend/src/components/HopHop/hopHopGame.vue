@@ -560,7 +560,7 @@ onUnmounted(() => {
       </div>
     </Transition>
 
-    <PetHeaderMenu/>
+    <PetHeaderMenu class="mb-1" />
 
     <RouterLink to="/" class="absolute z-20 left-2 top-28 opacity-80">
       <div class="bg-[#fff6ef] h-12 w-12 flex flex-col items-center justify-center p-0.5 rounded-xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer shadow-inner">

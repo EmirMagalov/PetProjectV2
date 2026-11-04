@@ -224,7 +224,7 @@ const pumpkinAnimation = (event) => {
   <div
       :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000 relative', gameData.sleep ? 'bg-linear-to-r from-blue-900 via-blue-800 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']">
 
-    <PetHeaderMenu/>
+    <PetHeaderMenu class="mb-1" />
 
     <!-- Холст -->
     <div class="relative flex justify-center w-full">

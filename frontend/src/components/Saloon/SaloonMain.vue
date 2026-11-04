@@ -161,7 +161,7 @@ onUnmounted(() => {
       </div>
     </Transition>
 
-    <PetHeaderMenu/>
+    <PetHeaderMenu class="mb-1" />
 
     <!-- САЛУН -->
     <div class="relative flex justify-center items-center w-full my-auto" >
