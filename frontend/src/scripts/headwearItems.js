@@ -7,35 +7,35 @@ export const headItems = [
         name: 'Инкогнито кепка',
         image: `/headwear/incognito.webp?v=${APP_VERSION}`,
         price: 0,
-        level:0
+        level:10
     },
     {
         id: 'halloween_pumpkin_hat',
         name: 'Хэллоуинская тыква',
         image: `/headwear/halloweenpumpkinhat.webp?v=${APP_VERSION}`,
         price: 3110,
-        level:0
+        level:10
     },
     {
         id: 'cowboy_hat',
         name: 'Ковбойская шляпа',
         image: `/headwear/cowboyhat.webp?v=${APP_VERSION}`,
         price: 1000,
-        level:5
+        level:10
     },
     {
         id: 'pillbox',
         name: 'Шляпа-таблетка',
         image: `/headwear/pillbox.webp?v=${APP_VERSION}`,
         price: 1200,
-        level:5
+        level:10
     },
     {
         id: 'pirate_hat',
         name: 'Пиратская шляпа',
         image: `/headwear/piratehat.webp?v=${APP_VERSION}`,
         price: 1500,
-        level:10
+        level:15
     },
     {
         id: 'mafia_hat',

@@ -199,7 +199,15 @@ const currentBathImage = computed(() => {
         <button class="text-md font-bold text-gray-600 pointer-events-none">{{$t('store.start_again')}}</button>
       </div>
     </div>
-    <div v-else>
+    <div v-else class="relative h-full w-full flex flex-col items-center justify-center">
+      <div
+          v-if="gameData.level === 1"
+          class="absolute inset-0   backdrop-blur-xs  rounded-3xl z-40 cursor-not-allowed flex items-center justify-center"
+      >
+        <span class="text-white font-bold text-xs bg-black/60 px-3 py-1.5 rounded-xl shadow flex items-center gap-1.5">
+          <img src="/gamePlay/lock.webp" class="w-15 h-15 object-contain" alt="">
+        </span>
+      </div>
       <div v-show="location==='home'" class="grid grid-cols-2 gap-8 relative  gap-y-1.5 w-65 place-self-center  ">
         <div
             @click="isShopOpen = true"
@@ -211,7 +219,7 @@ const currentBathImage = computed(() => {
           <!--          <button class="text-[5px] font-bold text-gray-600 pointer-events-none">Магазин</button>-->
         </div>
 
-        <div class="absolute gap-2 z-20 flex -top-10 left-1/2 -translate-x-1/2">
+        <div v-show="gameData.level>1" class="absolute gap-2 z-20 flex -top-10 left-1/2 -translate-x-1/2">
 
           <!-- 1. Кнопка Фортуны -->
           <div
@@ -224,14 +232,14 @@ const currentBathImage = computed(() => {
           </div>
 
           <!-- 2. Кнопка Салуна (с замком) -->
-          <div class="relative rounded-4xl overflow-hidden cursor-pointer" @click="gameData.level >= 5 && goToSaloon()">
+          <div class="relative rounded-4xl overflow-hidden cursor-pointer" @click="gameData.level >= 10 && goToSaloon()">
             <div
-                v-if="gameData.level < 5"
+                v-if="gameData.level < 10"
                 class="absolute inset-0 z-30 bg-slate-950/50 flex flex-col items-center justify-center text-center pointer-events-none"
             >
-      <span class="text-amber-400 font-bold text-[7px] tracking-wide leading-tight">
-        🔒 5 ур.
-      </span>
+              <span class="text-amber-400 font-bold text-[7px] tracking-wide leading-tight">
+                🔒 10 lvl
+              </span>
             </div>
             <div
                 class="bg-red-200 overflow-hidden rounded-4xl border-2 border-red-600 transition-transform duration-50"
@@ -275,7 +283,7 @@ const currentBathImage = computed(() => {
         <div
             @click="location = 'food',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95"
-            :class="[showHunger?'animate-pulse':'',tutorialStep === 1 ? 'z-205 animate-pulse': 'z-30']"
+            :class="[showHunger?'animate-pulse':'',tutorialStep === 2 ? 'z-205 animate-pulse': 'z-30']"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
 
           <div class="w-[80px] h-[80px] bg-contain bg-no-repeat bg-center cursor-pointer"
@@ -286,7 +294,7 @@ const currentBathImage = computed(() => {
         <div
             @click="location = 'bath',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center flex flex-col h-25   items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
-            :class=" tutorialStep === 5 ? 'z-205 animate-pulse' : ''"
+            :class=" tutorialStep === 6 ? 'z-205 animate-pulse' : ''"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
 
           <div class="w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
@@ -345,8 +353,8 @@ const currentBathImage = computed(() => {
         <div
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34"
             :class="[
-                tutorialStep === 7 ? 'z-205 bg-white' : '',
-                tutorialStep === 7 && !showerDrag.isDragging.value? 'animate-pulse' : ''
+                tutorialStep === 8 ? 'z-205 bg-white' : '',
+                tutorialStep === 8 && !showerDrag.isDragging.value? 'animate-pulse' : ''
                 ]"
         >
           <div v-show="gameData.sick && statusFoam" class="absolute pointer-events-none w-20 opacity-50 animate-pulse">
@@ -383,8 +391,8 @@ const currentBathImage = computed(() => {
             @click="nextBathItem()"
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 cursor-pointer"
             :class="[
-              tutorialStep === 6 && bathCartList.length > 0? 'z-205  bg-white' : '',
-              tutorialStep === 6 && bathCartList.length > 0 && !foamDrag.isDragging.value ? 'animate-pulse ' : ''
+              tutorialStep === 7 && bathCartList.length > 0? 'z-205  bg-white' : '',
+              tutorialStep === 7 && bathCartList.length > 0 && !foamDrag.isDragging.value ? 'animate-pulse ' : ''
               ]"
         >
           <div v-show="gameData.sick && !statusFoam && bathCartList.length > 0" class="absolute -left-2 pointer-events-none w-12  opacity-70 animate-pulse">
@@ -440,7 +448,7 @@ const currentBathImage = computed(() => {
         </div>
 
         <div
-            @click="location =  'home'"
+            @click="location =  'home';"
             class="bg-[#fff6ef] justify-center h-25  flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
             style="box-shadow: inset 0 -5px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-20 h-20 bg-contain bg-no-repeat bg-center"
@@ -468,8 +476,8 @@ const currentBathImage = computed(() => {
             @click="nextItem()"
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 overflow-hidden"
             :class="[
-              tutorialStep === 2 && foodCartList.length > 0 ? 'z-205 pointer-events-auto bg-white' : 'z-30',
-              tutorialStep === 2 && foodCartList.length > 0 && !foodDrag.isDragging.value ? 'animate-pulse' : ''
+              tutorialStep === 3 && foodCartList.length > 0 ? 'z-205 pointer-events-auto bg-white' : 'z-30',
+              tutorialStep === 3 && foodCartList.length > 0 && !foodDrag.isDragging.value ? 'animate-pulse' : ''
 ]"
 
         >
@@ -546,7 +554,7 @@ const currentBathImage = computed(() => {
         <div
             @click="location = 'home',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
-            :class=" tutorialStep === 4 ? 'z-205 animate-pulse' : ''"
+            :class=" tutorialStep === 5 ? 'z-205 animate-pulse' : ''"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-20 h-20 bg-contain bg-no-repeat bg-center"
                :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}">

@@ -4,7 +4,7 @@ import {addCoin, feedPet, isLosingLife, otherFeedPet, updateEyeLook, resetEyeLoo
 import {
     colorFoam,
     currentDraggedItem,
-    dropZoneRef, energyFull,
+    dropZoneRef, energyFull, foamOffset,
     gameData, nextTutorialStep, showTongue,
     statusFoam,
     statusShower
@@ -15,7 +15,7 @@ import {addExp} from "@/scripts/level.js";
 import {incrementTaskProgress} from "@/scripts/dealyTasks.js";
 
 export let actionTimer = null
-export let previousMouth = ''
+
 
 export const showerCount = ref(0)
 
@@ -31,7 +31,6 @@ export const batheStatus = ref(false)
 let lastBathTime = 0
 const BATH_COOLDOWN = 5000
 
-// Вспомогательная функция для чистки таймера
 function clearActionTimer() {
     if (actionTimer) {
         clearTimeout(actionTimer)
@@ -39,8 +38,8 @@ function clearActionTimer() {
     }
 }
 
-// Универсальная функция проверки зоны и открытия рта
-export function handleMove(event,itemType ,Item) {
+// Универсальная функция проверки зоны
+export function handleMove(event, itemType, Item) {
     if (itemType === 'food' && foodConsumedByPipe.value) {
         foodDrag.x.value = -9999
         foodDrag.y.value = -9999
@@ -48,61 +47,88 @@ export function handleMove(event,itemType ,Item) {
     }
     if (!dropZoneRef.value) return
     const dropRect = dropZoneRef.value.getBoundingClientRect()
-    const clientX = event.clientX
-    const clientY = event.clientY
+    const clientX = event.clientX || (event.touches && event.touches[0]?.clientX) || 0
+    const clientY = event.clientY || (event.touches && event.touches[0]?.clientY) || 0
 
-    const isInside = (
+    // Базовая проверка вхождения в общий холст
+    let isInside = (
         clientX >= dropRect.left &&
         clientX <= dropRect.right &&
         clientY >= dropRect.top &&
         clientY <= dropRect.bottom
     )
 
+    // 🔥 ДЛЯ ШАМПУНЯ И ДУША: сужаем зону строго до центрального квадрата (где персонаж)
+    if (isInside && (itemType === 'shower' || itemType === 'foam')) {
+        const centerX = dropRect.left + dropRect.width / 2
+        const centerY = dropRect.top + dropRect.height / 2
+        const radiusX = 80 // радиус зоны по горизонтали (пиксели)
+        const radiusY = 80 // радиус зоны по вертикали (пиксели)
+
+        isInside = (
+            clientX >= centerX - radiusX &&
+            clientX <= centerX + radiusX &&
+            clientY >= centerY - radiusY &&
+            clientY <= centerY + radiusY
+        )
+    }
+
     if (isInside) {
         isHovered.value = true
         gameData.sleep = false
+
         if (itemType === 'shower') {
             batheStatus.value = true
+
             if (statusFoam.value === true) {
                 statusShower.value = true
 
                 if (!actionTimer) {
-                    actionTimer = setTimeout(() => {
-                        // Если предмет всё ещё зажат и находится в зоне
+                    // Каждые 50мс немного опускаем пену вниз
+                    actionTimer = setInterval(() => {
                         if (isHovered.value && currentDraggedItem.value === 'shower') {
-                            const now = Date.now()
-                            if (gameData.sick) {
-                                isLosingLife()
-                            }
-                            if (now - lastBathTime < BATH_COOLDOWN) {
-                                gameData.sick = true
-                            }
-                            lastBathTime = now
+                            foamOffset.value += 1.5 // Пена постепенно сползает вниз
 
-                            // Мгновенно убираем пена/душ визуально
-                            statusShower.value = false
-                            statusFoam.value = false
+                            // Когда пена сместилась достаточно низко (например, на 60px) — считаем смыв завершенным
+                            if (foamOffset.value >= 60) {
+                                if (gameData.sick) {
+                                    isLosingLife()
+                                }
+                                const now = Date.now()
+                                if (now - lastBathTime < BATH_COOLDOWN) {
+                                    gameData.sick = true
+                                }
+                                lastBathTime = now
 
-                            showerCount.value += 1
-                            gameData.stinky = false
-                            nextTutorialStep()
-                            addCoin(2)
-                            addExp(25)
-                            incrementTaskProgress('wash', 1)
-                            gameData.feedCount = 0
+                                statusShower.value = false
+                                statusFoam.value = false
+                                foamOffset.value = 0 // Сбрасываем только когда пена ПОЛНОСТЬЮ смота
+                                localStorage.removeItem('pet_statusFoam')
+                                localStorage.removeItem('pet_foamOffset')
+                                localStorage.removeItem('pet_colorFoam')
+                                showerCount.value += 1
+                                gameData.stinky = false
+                                nextTutorialStep()
+                                addCoin(2)
+                                addExp(25)
+                                incrementTaskProgress('wash', 1)
+                                gameData.feedCount = 0
+                                clearActionTimer()
+                            }
                         } else {
                             statusShower.value = false
+                            clearActionTimer()
                         }
-                        clearActionTimer()
-                    }, 2000)
+                    }, 50)
                 }
+            } else {
+                statusShower.value = false
+                clearActionTimer()
             }
         } else if (itemType === 'foam') {
             batheStatus.value = true
-
         }
     } else {
-        // Если вышли за пределы зоны — СРАЗУ отменяем таймер и сбрасываем эффекты
         isHovered.value = false
         statusShower.value = false
         statusSmoke.value = false
@@ -114,7 +140,7 @@ export function handleMove(event,itemType ,Item) {
 export function handleEnd(itemType, Item) {
     clearActionTimer()
     statusShower.value = false
-    if (foodConsumedByPipe.value || Item.category=== 'pipe') {
+    if (foodConsumedByPipe.value || Item?.category === 'pipe') {
         statusSmoke.value = false
         foodConsumedByPipe.value = false
         isHovered.value = false
@@ -124,17 +150,17 @@ export function handleEnd(itemType, Item) {
 
     if (isHovered.value) {
         if (itemType === 'food') {
-            if (Item.category === 'food') {
+            if (Item?.category === 'food') {
                 feedPet(Item.id)
                 nextTutorialStep()
-            } else {
+            } else if (Item) {
                 const isFullLives = (Item.id === 'life_serum' && gameData.lives >= 3)
                 const isUnneededHealth = (Item.id === 'health_serum' && !gameData.sick)
-                const isUnneededEnergy = (Item.id === 'energy_serum' && gameData.energy >=80)
+                const isUnneededEnergy = (Item.id === 'energy_serum' && gameData.energy >= 80)
 
                 if (!isFullLives && !isUnneededHealth && !isUnneededEnergy) {
                     otherFeedPet(Item.id)
-                }else {
+                } else {
                     showTongue.value = true
                     setTimeout(() => {
                         showTongue.value = false
@@ -144,17 +170,15 @@ export function handleEnd(itemType, Item) {
         } else if (itemType === 'foam') {
             if (!statusFoam.value) {
                 statusFoam.value = true
-
-                colorFoam.value = Item.color
+                colorFoam.value = Item?.color || 'bg-white/70'
                 nextTutorialStep()
-                if (Item.id) {
+                if (Item?.id) {
                     removeFromCart(Item.id)
                 }
             }
         }
     }
 
-    // Мгновенный сброс всех состояний при отпускании
     batheStatus.value = false
     isHovered.value = false
     statusShower.value = false
@@ -181,12 +205,11 @@ export const foodDrag = useDraggable(foodEl, {
     },
     onMove: (pos, event) => {
         updateEyeLook(event)
-
-        const foodItem= currentFoodItem.value
+        const foodItem = currentFoodItem.value
         handleMove(event, 'food', foodItem)
     },
     onEnd: () => {
-        const foodItem= currentFoodItem.value
+        const foodItem = currentFoodItem.value
         handleEnd('food', foodItem)
         resetEyeLook(600)
     }

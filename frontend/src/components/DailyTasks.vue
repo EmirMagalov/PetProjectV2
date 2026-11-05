@@ -73,7 +73,7 @@ const sortedTasks = computed(() => {
         <div class="flex flex-col items-center gap-2 mt-1">
           <!-- Награда -->
           <div class="flex items-center  flex-col">
-            <span class="text-xs text-gray-700">{{ $t(`reward`) }}</span>
+            <span class="text-xs text-gray-700">{{ $t(`prize`) }}</span>
             <div
                 class="flex flex-col items-center justify-center gap-0.5  text-xs font-bold bg-yellow-100 px-3 py-1 rounded-lg border border-yellow-400/20">
               <div  class="flex items-center justify-center gap-1">

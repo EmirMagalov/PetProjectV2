@@ -21,6 +21,8 @@ async def pet_tick_job():
     NOW = int(time.time())
 
     for pet in pets:
+        if pet.level<=1 or pet.is_game_over: continue
+        # pet.last_washed_time = NOW
         # --- 1. ЕДА уменьшается ВСЕГДА ---
         food_rate = FOOD_PER_MIN_SICK if pet.sick else FOOD_PER_MIN_HEALTHY
         pet.food_level = max(0.0, pet.food_level - food_rate)

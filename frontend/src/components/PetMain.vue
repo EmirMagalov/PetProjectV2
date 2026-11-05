@@ -2,13 +2,13 @@
 import PetMenu from "@/components/PetMenu.vue";
 import PetFoam from "@/components/PetFoam.vue";
 import PetShower from "@/components/PetShower.vue";
-import {ref, onMounted, onUnmounted, watch} from "vue"
+import {ref, onMounted, onUnmounted, watch, computed} from "vue"
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import CloudMessage from "@/components/CloudMessage.vue";
 import PetStinky from "@/components/PetStinky.vue";
 import PetHeadwear from "@/components/PetHeadwear.vue";
 import Status from "@/components/Status.vue";
-import {statusSmoke} from "@/scripts/dragAndDrop.js";
+import {showerDrag, statusSmoke} from "@/scripts/dragAndDrop.js";
 import PetSmoke from "@/components/PetSmoke.vue";
 import {initGameData} from "@/scripts/api.js";
 import Poop from "@/components/Poop.vue";
@@ -21,10 +21,11 @@ import {
   mouth,
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
-  location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus, colorFoam, isTutorialCompleted, resetLocal
+  location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus, colorFoam, isTutorialCompleted, resetLocal,
+  characterPath
 } from "@/scripts/useGameStore.js";
 import {
-  activeCoins, activeExp, addCoin,
+  activeCoins, activeExp, addCoin, comboClicks,
   comboMultiplier, handleMultiTouch,
   isComboAnimating, isUserLooking, pupilOffset, resetEyeLook,
   sunAnimating, updateEyeLook
@@ -37,6 +38,7 @@ import Clouds from "@/components/Decorations/Clouds.vue";
 import CoinsAndXP from "@/components/Decorations/CoinsAndXP.vue";
 import Rain from "@/components/Decorations/Rain.vue";
 import {addToCart} from "@/scripts/basket.js";
+import {addExp} from "@/scripts/level.js";
 
 let blinkInterval = null
 let lookInterval = null
@@ -44,17 +46,24 @@ let isDragging = false
 
 
 function getHornAsset(level) {
-  if (level >= 50) return `/horns/50lvl.webp?v=${APP_VERSION}`
-  if (level >= 45) return `/horns/45lvl.webp?v=${APP_VERSION}`
-  if (level >= 40) return `/horns/40lvl.webp?v=${APP_VERSION}`
-  if (level >= 35) return `/horns/35lvl.webp?v=${APP_VERSION}`
-  if (level >= 30) return `/horns/30lvl.webp?v=${APP_VERSION}`
-  if (level >= 25) return `/horns/25lvl.webp?v=${APP_VERSION}`
-  if (level >= 20) return `/horns/20lvl.webp?v=${APP_VERSION}`
-  if (level >= 15) return `/horns/15lvl.webp?v=${APP_VERSION}`
-  if (level >= 10) return `/horns/10lvl.webp?v=${APP_VERSION}`
-  if (level >= 5) return `/horns/5lvl.webp?v=${APP_VERSION}`
-  return `/horns/1lvl.webp?v=${APP_VERSION}`
+  if (level >= 50) return `${characterPath.value}/horns/50lvl.webp?v=${APP_VERSION}`
+  if (level >= 45) return `${characterPath.value}/horns/45lvl.webp?v=${APP_VERSION}`
+  if (level >= 40) return `${characterPath.value}/horns/40lvl.webp?v=${APP_VERSION}`
+  if (level >= 35) return `${characterPath.value}/horns/35lvl.webp?v=${APP_VERSION}`
+  if (level >= 30) return `${characterPath.value}/horns/30lvl.webp?v=${APP_VERSION}`
+  if (level >= 25) return `${characterPath.value}/horns/25lvl.webp?v=${APP_VERSION}`
+  if (level >= 20) return `${characterPath.value}/horns/20lvl.webp?v=${APP_VERSION}`
+  if (level >= 15) return `${characterPath.value}/horns/15lvl.webp?v=${APP_VERSION}`
+  if (level >= 10) return `${characterPath.value}/horns/10lvl.webp?v=${APP_VERSION}`
+  if (level >= 5) return `${characterPath.value}/horns/5lvl.webp?v=${APP_VERSION}`
+  return `${characterPath.value}/horns/1lvl.webp?v=${APP_VERSION}`
+}
+
+function getEggsAsset() {
+  if (gameData.exp>=80) return `/character/egg_pahse_four.webp?v=${APP_VERSION}`
+  if (gameData.exp>=40) return `/character/egg_pahse_three.webp?v=${APP_VERSION}`
+  if (gameData.exp>=20) return `/character/egg_pahse_two.webp?v=${APP_VERSION}`
+  if (gameData.exp>=0) return `/character/egg_pahse_one.webp?v=${APP_VERSION}`
 }
 
 function getCombo() {
@@ -66,9 +75,9 @@ function getCombo() {
 
 watch(location, (newLocation) => {
   if (newLocation === 'home') {
-    if (statusFoam) {
-      statusFoam.value = false;
-    }
+    // if (statusFoam) {
+    //   statusFoam.value = false;
+    // }
     // locationUrl.value = `/location/home.webp?v=${APP_VERSION}`
 
   } else if (newLocation === 'bath') {
@@ -88,7 +97,6 @@ function triggerPop() {
 
 function handlePointerDown(event) {
   isDragging = true
-  triggerPop()
   handleMultiTouch(event)
   updateEyeLook(event)
 }
@@ -174,13 +182,30 @@ onMounted(async () => {
   updateClock();
   clockInterval = setInterval(updateClock, 1000);
 
-  if(!isTutorialCompleted.value){
-    if (gameData.level <2){
-      await resetLocal()
-      addToCart('burger')
-      addToCart('shampoo')
+  if (!isTutorialCompleted.value) {
+    // Если уровень уже 2-й (или выше, но обучение еще не завершено)
+    if (gameData.level>2){
+      tutorialStep.value = 0 // Исправлено: работаем через .value
+      localStorage.setItem('tutorial_completed', 'true')
+      gameData.tutorialCompleted = true
     }
-
+    if (gameData.level === 2) {
+      tutorialStep.value = 2;
+      gameData.cart = []
+      gameData.foodLevel = 50
+      gameData.energy = 50
+      gameData.exp = 0
+      addToCart('burger');
+      addToCart('shampoo');
+    }
+    // Если игрок совсем новый (1 уровень) — сбрасываем локал и даем стартовые вещи
+    else if (gameData.level < 2) {
+      await resetLocal();
+      gameData.level = 1;
+      tutorialStep.value = 1;
+      addToCart('burger');
+      addToCart('shampoo');
+    }
   }
 
 })
@@ -218,6 +243,48 @@ const pumpkinAnimation = (event) => {
     pumpkinAnimating.value = false
   }, 200)
 }
+
+const isFlips = ref(false)
+const isEggShaking = ref(false)
+
+function handleEggClick() {
+  // Начисляем опыт за один клик
+  addExp(0.2)
+  console.log(gameData.exp)
+  // Если сальто уже играет, игнорируем повторный клик
+  if (isFlips.value || isEggShaking.value) return
+
+  // Случайный выбор: сальто (25%) или короткая тряска (75%)
+  const randomChance = Math.random()
+  if (randomChance < 0.25) {
+    isFlips.value = true
+    setTimeout(() => {
+      isFlips.value = false
+    }, 750) // Длительность сальто строго по таймеру анимации
+  } else {
+    isEggShaking.value = true
+
+    // Короткая тряска длится 0.4 секунды и сама выключается
+    setTimeout(() => {
+      isEggShaking.value = false
+    }, 400)
+  }
+}
+
+function handleCharacterClick() {
+  isVibrating.value = true
+
+  setTimeout(() => {
+    isVibrating.value = false
+  }, 400)
+
+  triggerPop()
+
+  if (gameData.level > 1) {
+    comboClicks.value++
+  }
+}
+
 </script>
 
 <template>
@@ -338,9 +405,9 @@ const pumpkinAnimation = (event) => {
           <CloudMessage />
 
         <!-- Монетки / Опыт -->
-        <CoinsAndXP/>
+        <CoinsAndXP v-if="gameData.level>1" />
         <Status
-            :class="tutorialStep === 3 ? 'z-205' : ''"
+            :class="[1,3,4,7, 8].includes(tutorialStep)? 'z-210' : ''"
             v-if="activeStatus.show"
             :status="true"
             :text="activeStatus.text"
@@ -360,7 +427,7 @@ const pumpkinAnimation = (event) => {
              @pointerleave="handlePointerEnd"
              class="absolute inset-0 flex justify-center items-center cursor-pointer touch-none select-none transition-[filter,transform] duration-1000 ease-in-out"
              :class="[
-               gameData.sleep ? 'brightness-30' : 'brightness-100',[3, 6, 7].includes(tutorialStep) ? ' z-205 ' : ''
+               gameData.sleep ? 'brightness-30' : 'brightness-100',[1,3,4, 7, 8].includes(tutorialStep) ? ' z-205 ' : ''
 
              ]"
                 >
@@ -370,20 +437,25 @@ const pumpkinAnimation = (event) => {
             <div class="absolute text-[#00BFFF] font-extrabold text-xl z-1 drop-shadow-md">Z</div>
             <div class="absolute  text-[#00BFFF] font-bold text-sm z-2 left-4 -top-3 drop-shadow-md">z</div>
           </div>
+
           <!-- Табличка с именем -->
-
-          <!-- 🎃 ТЫКВА с объемным свечением в стиле ночника -->
-
-
           <Nameplate />
-          <!-- Персонаж -->
-          <div :class="['absolute flex justify-center items-center w-45 h-45', isPopping ? 'animate-pop' : '',tutorialStep === 3 ? 'animate-quick-pulse' : '']">
+
+          <!-- Персонаж (исходный контейнер w-45 h-45, ничего не сжимается) -->
+          <div v-if="gameData.level>1" class="absolute flex justify-center items-center w-45 h-45 pointer-events-none" :class="[isPopping ? 'animate-pop' : '']">
+
+            <!-- 🎯 Точечная кликабельная зона поверх персонажа (размер w-24 h-24, клик работает строго по центру) -->
+            <div
+                @click="handleCharacterClick"
+                class="absolute z-30 w-20 h-20  top-25 cursor-pointer pointer-events-auto"
+            ></div>
+
             <PetHeadwear/>
             <PetClothes/>
             <div class="absolute w-45 h-45 pointer-events-none">
               <!-- Худое тело -->
               <img
-                  :src="`/character/skinny_body.webp?v=${APP_VERSION}`"
+                  :src="`${characterPath}/skinny_body.webp?v=${APP_VERSION}`"
                   alt="skinny body"
                   class="absolute inset-0 w-full h-full object-contain body-fade"
                   :class="bodyType === 'skinny' ? 'opacity-100' : 'opacity-0'"
@@ -391,7 +463,7 @@ const pumpkinAnimation = (event) => {
 
               <!-- Нормальное тело -->
               <img
-                  :src="`/character/main_body.webp?v=${APP_VERSION}`"
+                  :src="`${characterPath}/main_body.webp?v=${APP_VERSION}`"
                   alt="normal body"
                   class="absolute inset-0 w-full h-full object-contain body-fade"
                   :class="bodyType === 'normal' ? 'opacity-100' : 'opacity-0'"
@@ -399,28 +471,27 @@ const pumpkinAnimation = (event) => {
 
               <!-- Толстое тело -->
               <img
-                  :src="`/character/fat_body.webp?v=${APP_VERSION}`"
+                  :src="`${characterPath}/fat_body.webp?v=${APP_VERSION}`"
                   alt="fat body"
                   class="absolute inset-0 w-full h-full object-contain body-fade"
                   :class="bodyType === 'fat' ? 'opacity-100' : 'opacity-0'"
               />
             </div>
-            <img :src="getHornAsset(gameData.level)" class="absolute w-45" alt="">
-            <img v-show="gameData.sick" src="/character/drunk.webp" class="absolute w-45" alt="">
-            <img v-show="gameData.sick && bodyType==='fat'" src="/character/sick_fat.webp" class="absolute w-45 z-10"
-                 alt="">
-            <img v-show="gameData.sick && bodyType!=='fat'" :src="`/character/sick.webp?v=${APP_VERSION}`" class="absolute w-45 z-10"
-                 alt="">
 
-            <div v-if="!blink && !gameData.sleep">
+            <img :src="getHornAsset(gameData.level)" class="absolute  w-45 pointer-events-none" alt="">
+            <img v-show="gameData.sick" :src="`${characterPath}/drunk.webp?v=${APP_VERSION}`" class="absolute w-45 pointer-events-none" alt="">
+            <img v-show="gameData.sick && bodyType==='fat'" :src="`${characterPath}/sick_fat.webp?v=${APP_VERSION}`" class="absolute w-45 z-10 pointer-events-none" alt="">
+            <img v-show="gameData.sick && bodyType!=='fat'" :src="`${characterPath}/sick.webp?v=${APP_VERSION}`" class="absolute w-45 z-10 pointer-events-none" alt="">
+
+            <div v-if="!blink && !gameData.sleep" class="pointer-events-none">
               <div v-show="lowEnergy" class="absolute inset-0 flex justify-center items-center z-10">
-                <img :src="`/character/bags_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
-                <img :src="`/character/bags_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
+                <img :src="`${characterPath}/bags_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
+                <img :src="`${characterPath}/bags_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
               </div>
 
               <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
-                <img :src="`/character/eye_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt="">
-                <img :src="`/character/eye_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt="">
+                <img :src="`${characterPath}/eye_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt="">
+                <img :src="`${characterPath}/eye_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt="">
               </div>
 
               <!-- Зрачки -->
@@ -429,16 +500,29 @@ const pumpkinAnimation = (event) => {
                     class="absolute inset-0 flex justify-center items-center pupils-look"
                     :style="{ transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)` }"
                 >
-                  <img :src="`/character/eye_pupils_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
-                  <img :src="`/character/eye_pupils_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
+                  <img :src="`${characterPath}/eye_pupils_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
+                  <img :src="`${characterPath}/eye_pupils_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
                 </div>
               </div>
             </div>
 
-            <img v-else src="/character/eye_close.webp" class="absolute w-45" alt="">
-            <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''" class="absolute w-45" alt="">
+            <img v-else :src="`${characterPath}/eye_close.webp?v=${APP_VERSION}`" class="absolute w-45 pointer-events-none" alt="">
+            <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''" class="absolute w-45 pointer-events-none" alt="">
           </div>
+          <!-- Яйцо: сальто всегда доигрывает до конца, тряска останавливается при отпускании -->
+          <div
+              v-else
+              @click="handleEggClick"
 
+              class="absolute flex justify-center items-center bottom-10 w-22 h-22 cursor-pointer transition-transform select-none touch-none"
+              :class="[
+                isFlips ? 'animate-pet-jump-flip' : '',
+                isEggShaking ? 'animate-cs-egg' : '',
+
+              ]"
+          >
+            <img :src="getEggsAsset()" alt="Egg" class="pointer-events-none">
+          </div>
           <!-- Оверлеи и элементы поверх персонажа -->
           <div class="absolute inset-0 w-full h-full pointer-events-none">
             <Transition name="combo-fade">
@@ -451,16 +535,16 @@ const pumpkinAnimation = (event) => {
                     'w-15': comboMultiplier >= 2,
                     'w-17': comboMultiplier >= 3,
                     'w-19': comboMultiplier >= 5,
-                    'z-205': tutorialStep === 3 || tutorialStep === 6 || tutorialStep === 7
+                    'z-205': tutorialStep === 4 || tutorialStep === 7 || tutorialStep === 8
                   }"
                   alt="">
             </Transition>
 
 
             <PetStinky/>
-            <PetFoam :status-foam="statusFoam" :bg-color="colorFoam"/>
+            <PetFoam :status-foam="statusFoam" :status-shower="statusShower" :bg-color="colorFoam"/>
             <PetSmoke :status-smoke="statusSmoke"/>
-            <PetShower :status-shower="statusShower"/>
+            <PetShower :status-shower="statusShower" :x="showerDrag.x.value" :y="showerDrag.y.value"/>
 
             <Poop
                 v-show="gameData.isPooped && (location==='home' || location==='food')"
@@ -648,5 +732,51 @@ const pumpkinAnimation = (event) => {
 .animate-quick-pulse {
   animation: quickPulse 0.6s ease-in-out infinite; /* В 2 раза быстрее стандартного pulse */
 }
+
+
+/* Анимация прыжка с сальто в воздухе */
+@keyframes petJumpFlip {
+  0% {
+    transform: translateY(0) scale(1, 1) rotate(0deg);
+  }
+  20% {
+    /* Легкое приседание перед прыжком (сжатие) */
+    transform: translateY(5px) scale(1.1, 0.9) rotate(0deg);
+  }
+  40% {
+    /* Взлет вверх и вытягивание в полете */
+    transform: translateY(-45px) scale(0.95, 1.05) rotate(180deg);
+  }
+  60% {
+    /* Пик полета (оборот) */
+    transform: translateY(-60px) scale(1, 1) rotate(270deg);
+  }
+
+  100% {
+    /* Мягкое приземление с легким упругим эффектом */
+    transform: translateY(0) scale(1, 1) rotate(360deg);
+  }
+}
+
+.animate-pet-jump-flip {
+  /* Плавный математический bezier-график для мягкого старта и торможения */
+  animation: petJumpFlip 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  will-change: transform;
+}
+
+/* Дерганье как яйцо в CS2 (ускоряющаяся тряска с наклонами) */
+@keyframes csEggShake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  20% { transform: translate(-4px, 3px) rotate(-5deg); }
+  40% { transform: translate(4px, -3px) rotate(5deg); }
+  60% { transform: translate(-5px, 2px) rotate(-5deg); }
+  80% { transform: translate(5px, -2px) rotate(5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.animate-cs-egg {
+  animation: csEggShake 0.25s ease-in-out infinite;
+}
+
 
 </style>

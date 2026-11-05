@@ -1,6 +1,6 @@
 import {watch} from "vue";
 import {
-    bodyType,
+    bodyType, characterPath,
     cloudShow,
     gameData, isBadMood, isGameInitialized,
     lowEnergy,
@@ -24,6 +24,7 @@ const ENERGY_PER_HOUR_SICK = 0.25;
 // ===================================================
 
 setInterval(() => {
+    if (gameData.level <= 1 || gameData.isGameOver) return;
     // Переводим часовой расход в минутный (потому что интервал = 1 минута)
     const foodPerMinute = (gameData.sick ? FOOD_PER_HOUR_SICK : FOOD_PER_HOUR_HEALTHY) ;
     const energyPerMinute = (gameData.sick ? ENERGY_PER_HOUR_SICK : ENERGY_PER_HOUR_HEALTHY) ;
@@ -125,7 +126,8 @@ watch(
         () => gameData.isFat,
         () => gameData.energy, // <--- Добавили энергию!
         () => gameData.sick,     // <--- Добавили болезнь!
-        () => gameData.lives
+        () => gameData.lives,
+        characterPath
     ],
     ([hovered, isBathe, isShowTongue, foodLevel, isFat, energy, sick,lives]) => {
         const isLowEnergy = energy < 20
@@ -145,13 +147,13 @@ watch(
             bodyType.value = 'normal'
         }
         if (isShowTongue) {
-            mouth.value = `/character/isPlayed_mouth.webp?v=${APP_VERSION}`
+            mouth.value = `${characterPath.value}/isPlayed_mouth.webp?v=${APP_VERSION}`
         } else if (hovered && !isBathe) {
-            mouth.value = `/character/open_mouth.webp?v=${APP_VERSION}`
+            mouth.value = `${characterPath.value}/open_mouth.webp?v=${APP_VERSION}`
         } else if (hasIssues) {
-            mouth.value = `/character/sad_mouth.webp?v=${APP_VERSION}`
+            mouth.value = `${characterPath.value}/sad_mouth.webp?v=${APP_VERSION}`
         } else {
-            mouth.value = `/character/happy_mouth.webp?v=${APP_VERSION}`
+            mouth.value = `${characterPath.value}/happy_mouth.webp?v=${APP_VERSION}`
         }
 
         // Обновляем флаги
@@ -159,8 +161,6 @@ watch(
         showHunger.value = isHungry
         cloudShow.value = isLowEnergy || isHungry
 
-        // Обновляем состояние плохого настроения!
-        isBadMood.value = hasIssues
     },
     {immediate: true}
 )

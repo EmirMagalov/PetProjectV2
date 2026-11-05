@@ -5,7 +5,7 @@ import {
     isAnimating, isBadMood, isBothStatsZero, isCoinPopping,
     isVibrating,
     lastFedItem, nextTutorialStep, FatPlayCount, sameFoodCount,
-    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount
+    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount, isTutorialCompleted
 
 }
     from "@/scripts/useGameStore.js";
@@ -99,6 +99,7 @@ export function feedPet(foodId) {
     if (!foodItem || gameData.cart[targetId] <= 0) return
     if (tutorialStep.value === 2) {
         gameData.stinky = true
+        nextTutorialStep()
     }
     // 1. Считаем, сколько раз это блюдо встречалось в последних приемах пищи
     const sameFoodCountInHistory = recentFedItems.value.filter(id => id === targetId).length
@@ -161,10 +162,11 @@ export function feedPet(foodId) {
         gameData.energy = Math.min(100, gameData.energy + foodItem.energyGain)
         actualEnergyGain = gameData.energy - oldEnergy
     }
-
-    gameData.coins += 1
     gameData.feedCount += 1
-    addCoin(1)
+    if (isTutorialCompleted.value){
+        addCoin(1)
+    }
+
     addExp(20)
     showStatus('feed', {fedItemId: foodId, actualGain, actualEnergyGain})
 
@@ -242,7 +244,7 @@ export function goSleep() {
 
 export function finishEditing() {
     if (!gameData.name || !gameData.name.trim()) {
-        gameData.name = 'Имя:';
+        gameData.name = '';
     }
     isEditing.value = false;
 }
@@ -340,10 +342,14 @@ export function handleMultiTouch(event) {
 }
 
 export function spawnHeart(x = 160, y = 135) {
+
     if (gameData.isGameOver){
         return;
     }
-    if (tutorialStep.value === 3) {
+    if (gameData.level<=1){
+        return;
+    }
+    if (tutorialStep.value === 4) {
         if (gameData.clickCounter > 10) nextTutorialStep()
     }
 
@@ -364,7 +370,7 @@ export function spawnHeart(x = 160, y = 135) {
     gameData.sleep = false
     gameData.clickCounter++
     if (vibrateTimer) clearTimeout(vibrateTimer)
-    isVibrating.value = true
+
     vibrateTimer = setTimeout(() => {
         isVibrating.value = false
     }, 150)
@@ -403,7 +409,7 @@ export function spawnHeart(x = 160, y = 135) {
         // Если хотя бы один показатель выше 0 — штрафной счётчик обнуляется
         ZeroPlayCount.value = 0;
     }
-    comboClicks.value++
+
     if (comboTimer) clearTimeout(comboTimer)
 
     if (comboClicks.value >= 150 && !isBothStatsZero.value) {

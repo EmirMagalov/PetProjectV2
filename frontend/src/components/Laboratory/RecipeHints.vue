@@ -66,7 +66,7 @@ const isClosed = (recipeId) => {
                 @click="craftSerum(recipe)"
                 class="bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold px-3 py-1 rounded-xl shadow cursor-pointer pointer-events-auto shrink-0"
             >
-              Синтезировать
+              {{ $t("synthesize") }}
             </button>
             <img :src="recipe.image" :alt="recipe.name" class="w-8 h-8 object-contain drop-shadow" />
           </div>

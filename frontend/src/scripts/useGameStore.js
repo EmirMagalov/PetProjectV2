@@ -2,7 +2,8 @@ import {ref, reactive, watch, computed} from 'vue'
 import {initGameData, isLoading, resetPet, syncToBackend} from "@/scripts/api.js";
 import {foodList} from "@/scripts/objectItems.js";
 import i18n from "@/scripts/locales/i18n.js";
-export const mouth = ref('/character/happy_mouth.webp')
+
+export const mouth = ref('')
 export const sleepTimeRemaining = ref("")
 export const isShopOpen = ref(false)
 export const lowEnergy = ref(false)
@@ -17,8 +18,6 @@ export const hearts = ref(false)
 export const showTongue = ref(false)
 export const dropZoneRef = ref()
 export const feedStatus = ref(false)
-export const statusFoam = ref(false)
-export const colorFoam = ref(false)
 export const statusShower = ref(false)
 export const currentDraggedItem = ref(null)
 export const blink = ref(false)
@@ -33,6 +32,26 @@ export const isGameInitialized = ref(false)
 export const fruitStreak = ref(
     Number(localStorage.getItem('pet_fruitStreak')) || 0
 )
+
+
+export const statusFoam = ref(localStorage.getItem('pet_statusFoam') === 'true')
+export const colorFoam = ref(localStorage.getItem('pet_colorFoam') || 'bg-white/70')
+export const foamOffset = ref(Number(localStorage.getItem('pet_foamOffset')) || 0)
+
+// Автоматически сохраняем при любом изменении
+watch(statusFoam, (newValue) => {
+    localStorage.setItem('pet_statusFoam', newValue)
+})
+
+watch(colorFoam, (newValue) => {
+    localStorage.setItem('pet_colorFoam', newValue)
+})
+
+watch(foamOffset, (newValue) => {
+    localStorage.setItem('pet_foamOffset', newValue)
+})
+
+
 const ADMIN_IDS = [
     '1059422557',
     '2101015196',
@@ -132,9 +151,9 @@ watch(() => gameData.match3_level, (newLevel) => {
 
 export async function handleRestart() {
     isLoading.value = true
-    fruitStreak.value = '' // или 0, как у тебя было
-
-    // 1. Сначала ждем ответа от бэкенда, что питомец сброшен
+    fruitStreak.value = 0
+    foamOffset.value = 0
+    // 1. Сбрасываем питомца на бэкенде
     const success = await resetPet()
     if (!success) {
         isLoading.value = false
@@ -144,17 +163,19 @@ export async function handleRestart() {
     // 2. Очищаем локальные данные под дефолт
     await resetLocal()
 
-    // 3. И только теперь гарантированно убираем статус смерти и флаги
+    // 3. Загружаем свежие чистые данные с сервера
+    await initGameData()
+
+    // 4. Гарантированно убираем статус смерти и скрываем плашку в самом конце
     gameData.isGameOver = false
     currentStatus.value = null
-
-    // 4. Загружаем свежие чистые данные
-    await initGameData()
+    isLoading.value = false
 }
 export async function resetLocal() {
     const savedCoins = gameData.coins
     const savedClicks = gameData.clickCounter
     const savedDeathsCount = gameData.deathsCount
+    const savedSeason = gameData.season
 
     const savedClothes = gameData.equippedClothes
     const savedHead = gameData.equippedHead
@@ -171,7 +192,7 @@ export async function resetLocal() {
     gameData.coins = savedCoins
     gameData.clickCounter = savedClicks
     gameData.deathsCount = savedDeathsCount
-
+    gameData.season =savedSeason
     gameData.equippedClothes = savedClothes
     gameData.equippedHead = savedHead
     gameData.unlockedClothes = savedUnlockedClothes
@@ -198,7 +219,7 @@ export const tutorialStep = ref(localStorage.getItem('tutorial_completed') ? 0 :
 export function nextTutorialStep() {
     if (tutorialStep.value > 0) {
         tutorialStep.value++
-        if (tutorialStep.value > 7) { // Всего 3 шага, например
+        if (tutorialStep.value > 8) { // Всего 3 шага, например
             tutorialStep.value = 0
             localStorage.setItem('tutorial_completed', 'true') // Чтобы больше не показывать
             gameData.tutorialCompleted = true
@@ -212,7 +233,7 @@ const STATUS_DURATIONS = {
     feed: 800,
     lifeGain: 800,
     losingLife: 800,
-    levelUp: 800,
+    levelUp: 1500,
     gameOver: 0 // Не сбрасываем
 }
 const STATUS_PRIORITIES = {
@@ -292,12 +313,23 @@ export const activeStatus = computed(() => {
 
     // Приоритет 2: Повышение уровня
     if (type === 'levelUp') {
-        return {
-            show: true,
-            text: i18n.global.t('store.level_up'),
-            additional: gameData.level,
-            image: null
+        if (gameData.level ===2){
+            return {
+                show: true,
+                text: i18n.global.t('store.happy_birthday'),
+                additional: gameData.level,
+                image: null,
+                bgColor: "bg-[#FFFF66]/40"
+            }
+        }else{
+            return {
+                show: true,
+                text: i18n.global.t('store.level_up'),
+                additional: gameData.level,
+                image: null
+            }
         }
+
     }
 
     // Приоритет 3: Потеря жизни (-1)
@@ -352,4 +384,9 @@ export const activeStatus = computed(() => {
 
 export const isBothStatsZero = computed(()=>{
     return gameData.foodLevel <= 0 && gameData.energy <= 0;
+})
+
+
+export const characterPath = computed(() => {
+    return gameData.level >= 10 ? '/character' : '/character/kid'
 })

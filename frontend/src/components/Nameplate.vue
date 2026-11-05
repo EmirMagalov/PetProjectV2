@@ -1,6 +1,6 @@
 <script setup>
 import { ref, nextTick, watch } from 'vue'
-import { gameData } from "@/scripts/useGameStore.js";
+import {gameData, isTutorialCompleted, tutorialStep} from "@/scripts/useGameStore.js";
 import { isEditing, finishEditing } from "@/scripts/actions.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {location} from "@/scripts/useGameStore.js";
@@ -31,7 +31,8 @@ watch(isEditing, async (newVal) => {
 
 <template>
   <div
-      class="absolute inset-0  pointer-events-auto transition-all duration-1000 ease-in-out"
+      class="absolute inset-0  pointer-events-auto "
+      :class="[1,3,4, 7, 8].includes(tutorialStep)?'brightness-40':''"
       v-show="(location === 'home' || location === 'food')"
   >
   <div class="absolute w-19 left-4 top-19 pointer-events-auto">
@@ -39,28 +40,31 @@ watch(isEditing, async (newVal) => {
       <img :src="`/gamePlay/nameplate_icons.webp?v=${APP_VERSION}`" alt="" class="w-20 h-auto">
 
       <!-- Отображение имени -->
-      <div
-          v-if="!isEditing"
-          @click="startEditing"
-          class="absolute scale-80 py-1 px-2 inset-0 text-white text-shadow-2xs text-shadow-black w-full min-w-0 flex font-bold items-start justify-center text-[12px] leading-tight break-all cursor-pointer select-none"
-      >
-        {{ $t(gameData.name) }}
+      <div v-show="gameData.level>1">
+        <div
+            v-if="!isEditing"
+            @click="startEditing"
+            class="absolute scale-80 py-1 px-2 inset-0 text-white text-shadow-2xs text-shadow-black w-full min-w-0 flex font-bold items-start justify-center text-[12px] leading-tight break-all cursor-pointer select-none"
+        >
+          {{ $t(gameData.name) }}
+        </div>
+
+        <!-- Редактирование -->
+        <div v-else class="absolute inset-0 w-full min-w-0 flex font-bold items-start justify-center ">
+          <input
+              ref="inputRef"
+              v-model="gameData.name"
+              type="text"
+              maxlength="15"
+              @blur="finishEditing"
+              @keydown.enter="finishEditing"
+              @pointerdown.stop
+              class="w-full bg-transparent text-center font-bold text-[10px] text-white text-shadow-2xs text-shadow-red-500 outline-none"
+          />
+        </div>
+      </div>
       </div>
 
-      <!-- Редактирование -->
-      <div v-else class="absolute inset-0 w-full min-w-0 flex font-bold items-start justify-center ">
-        <input
-            ref="inputRef"
-            v-model="gameData.name"
-            type="text"
-            maxlength="15"
-            @blur="finishEditing"
-            @keydown.enter="finishEditing"
-            @pointerdown.stop
-            class="w-full bg-transparent text-center font-bold text-[10px] text-white text-shadow-2xs text-shadow-red-500 outline-none"
-        />
-      </div>
-    </div>
   </div>
   </div>
 </template>

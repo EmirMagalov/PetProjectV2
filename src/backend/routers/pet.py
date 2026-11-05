@@ -143,10 +143,10 @@ async def update_pet(data: dict):
     if check_and_reset_tasks(pet):
         updated_fields.update(["tasks_reset_date", "daily_tasks"])
 
-    if "stinky" in data:
-        if pet.stinky and data["stinky"] is False:
-            pet.last_washed_time = current_ts
-            updated_fields.add("last_washed_time")
+    # if "stinky" in data:
+    #     if pet.stinky and data["stinky"] is False:
+    #         pet.last_washed_time = current_ts
+    #         updated_fields.add("last_washed_time")
 
     if "is_pooped" in data:
         if pet.is_pooped and data["is_pooped"] is False:

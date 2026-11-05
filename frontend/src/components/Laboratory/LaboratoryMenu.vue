@@ -123,7 +123,7 @@ function getIngredient(id) {
   >
     <div  class="bg-[#CCFFFF] border-2 border-[#99FFFF] rounded-3xl p-5 w-full max-w-xs shadow-2xl relative flex flex-col gap-3">
 
-      <h3 class="text-lg font-bold text-center text-gray-800">Синтез</h3>
+      <h3 class="text-lg font-bold text-center text-gray-800">{{ $t("synthesis") }}</h3>
 
       <div class="flex flex-col  gap-2 text-sm">
         <div v-for="serum in serumRecipes" :key="serum.id" class="flex justify-between items-center bg-white/60 p-2 rounded-2xl border border-[#f7c9a5]/40">

@@ -1,4 +1,4 @@
-import {gameData, isExpPopping, showStatus} from "@/scripts/useGameStore.js";
+import {gameData, isExpPopping, nextTutorialStep, showStatus, tutorialStep} from "@/scripts/useGameStore.js";
 import { computed } from "vue";
 import {addCoin, triggerExpAnimation} from "@/scripts/actions.js";
 
@@ -30,7 +30,11 @@ export function addExp(amount,x=180,y=130) {
         gameData.level += 1;
 
         showStatus('levelUp')
-
+        console.log(gameData.level)
+        console.log(tutorialStep.value)
+        if (tutorialStep.value === 1) {
+            if (gameData.level>1) nextTutorialStep()
+        }
         addCoin(50 + gameData.level)    // Бонусные монетки при повышении уровня
     }
 }

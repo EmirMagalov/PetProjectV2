@@ -8,7 +8,8 @@ export default {
     jump_jump: "Jump-jump",
     pet_in_danger: "Warning! The pet is exhausted and may die!",
 
-
+    synthesis:"Synthesis",
+    synthesize:"Synthesize",
 
     the_sausage_rebellion: "Sausage Rebellion",
     jump_game_description: "Catch coins while jumping, do flips and jump into the bun!",
@@ -159,6 +160,7 @@ export default {
         gain_life: '+ 1 Life!',
         yummy: 'Yummy!',
         max_limit: 'MAX!',
+        happy_birthday:"Happy birthday!",
         already_open_device: '⚠️ Game is already open in another tab!',
         device_already_open: '⚠️ Game is running on another device',
         close_other_device: 'Close the game there to continue playing here.',

@@ -5,7 +5,8 @@ export default {
     enter_the_laboratory:"Входим в Лабораторию...",
     pet_in_danger: "Внимание! Питомец истощен и может погибнуть!",
 
-
+    synthesis:"Синтез",
+    synthesize:"Синтезировать",
 
     fridge_empty: "Холодильник пуст",
     close:"Закрыть",
@@ -156,6 +157,7 @@ export default {
         gain_life: '+ 1 жизнь!',
         yummy: 'Ням-ням!',
         max_limit: 'MAX!',
+        happy_birthday:"С днем рождения!",
         already_open_device: '⚠️ Игра уже открыта в другой вкладке!',
         device_already_open: '⚠️ Игра запущена на другом устройстве',
         close_other_device: 'Закройте игру там, чтобы продолжить играть здесь.',

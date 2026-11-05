@@ -72,9 +72,7 @@ export function getItemQuantity(item) {
 
 // Универсальная проверка блокировки товара по уровню
 export function isItemLocked(item) {
-    if (activeTab.value === 'clothes' && isUnlocked(item.id)) {
-        return false
-    }
+    // Убираем условие с isUnlocked, чтобы купленные вещи тоже проверялись по уровню!
 
     if (Boolean(item.level) && gameData.level < item.level) {
         return true
@@ -111,13 +109,15 @@ export function isUnlocked(itemId) {
 
 // Универсальная логика клика по кнопке товара
 export async function handleItemClick(item) {
+    // 🛑 Блокируем любое взаимодействие, если предмет не подходит по уровню!
+    if (isItemLocked(item)) return
+
     const isConsumable = activeTab.value === 'food' || activeTab.value === 'laboratory' || activeTab.value === 'bath' || item.category === 'laboratory' || item.category === 'ingredients';
 
     if (isConsumable && getItemQuantity(item) >= 10) {
         alert(i18n.global.t('the_maximum_quantity_for_this_item'))
         return;
     }
-    if (isItemLocked(item)) return
 
     const itemCost = getItemCost(item)
 

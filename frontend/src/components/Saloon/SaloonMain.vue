@@ -114,6 +114,10 @@ function animateFlyTo({ targetEl, isDealer = false }) {
 }
 
 onMounted(() => {
+  const savedLang = localStorage.getItem('user_language') || 'en';
+  if (i18n.global.locale.value !== savedLang) {
+    i18n.global.locale.value = savedLang;
+  }
   result.value = 'jackpot.start_game_prompt';
   startRandomLooking();
 
