@@ -97,7 +97,7 @@ export function feedPet(foodId) {
     const targetId = foodId || cartItemsList.value[currentIndex.value]?.id
     const foodItem = foodList.find(item => item.id === targetId)
     if (!foodItem || gameData.cart[targetId] <= 0) return
-    if (tutorialStep.value === 2) {
+    if (tutorialStep.value === 3) {
         gameData.stinky = true
         nextTutorialStep()
     }

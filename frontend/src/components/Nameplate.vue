@@ -32,7 +32,7 @@ watch(isEditing, async (newVal) => {
 <template>
   <div
       class="absolute inset-0  pointer-events-auto "
-      :class="[1,3,4, 7, 8].includes(tutorialStep)?'brightness-40':''"
+      :class="[1,2,3,4, 7, 8].includes(tutorialStep)?'brightness-40':''"
       v-show="(location === 'home' || location === 'food')"
   >
   <div class="absolute w-19 left-4 top-19 pointer-events-auto">

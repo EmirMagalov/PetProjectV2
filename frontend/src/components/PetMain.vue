@@ -60,10 +60,11 @@ function getHornAsset(level) {
 }
 
 function getEggsAsset() {
-  if (gameData.exp>=80) return `/character/egg_pahse_four.webp?v=${APP_VERSION}`
-  if (gameData.exp>=40) return `/character/egg_pahse_three.webp?v=${APP_VERSION}`
-  if (gameData.exp>=20) return `/character/egg_pahse_two.webp?v=${APP_VERSION}`
-  if (gameData.exp>=0) return `/character/egg_pahse_one.webp?v=${APP_VERSION}`
+  if (gameData.exp >= 80) return `/character/egg_pahse_five.webp?v=${APP_VERSION}`
+  if (gameData.exp >= 60) return `/character/egg_pahse_four.webp?v=${APP_VERSION}`
+  if (gameData.exp >= 40) return `/character/egg_pahse_three.webp?v=${APP_VERSION}`
+  if (gameData.exp >= 20) return `/character/egg_pahse_two.webp?v=${APP_VERSION}`
+  return `/character/egg_pahse_one.webp?v=${APP_VERSION}`
 }
 
 function getCombo() {
@@ -427,7 +428,7 @@ function handleCharacterClick() {
              @pointerleave="handlePointerEnd"
              class="absolute inset-0 flex justify-center items-center cursor-pointer touch-none select-none transition-[filter,transform] duration-1000 ease-in-out"
              :class="[
-               gameData.sleep ? 'brightness-30' : 'brightness-100',[1,3,4, 7, 8].includes(tutorialStep) ? ' z-205 ' : ''
+               gameData.sleep ? 'brightness-30' : 'brightness-100',[1,2,3,4, 7, 8].includes(tutorialStep) ? ' z-205 ' : ''
 
              ]"
                 >
@@ -767,16 +768,17 @@ function handleCharacterClick() {
 /* Дерганье как яйцо в CS2 (ускоряющаяся тряска с наклонами) */
 @keyframes csEggShake {
   0% { transform: translate(0, 0) rotate(0deg); }
-  20% { transform: translate(-4px, 3px) rotate(-5deg); }
-  40% { transform: translate(4px, -3px) rotate(5deg); }
-  60% { transform: translate(-5px, 2px) rotate(-5deg); }
-  80% { transform: translate(5px, -2px) rotate(5deg); }
+  25% { transform: translate(-10px, 0) rotate(-12deg); }  /* Сильнее влево */
+  50% { transform: translate(0, 0) rotate(0deg); }      /* Возврат в центр */
+  75% { transform: translate(10px, 0) rotate(12deg); }   /* Сильнее вправо */
   100% { transform: translate(0, 0) rotate(0deg); }
 }
 
 .animate-cs-egg {
-  animation: csEggShake 0.25s ease-in-out infinite;
+  animation: csEggShake 0.35s ease-in-out infinite;
+  transform-origin: center center;
 }
+
 
 
 </style>

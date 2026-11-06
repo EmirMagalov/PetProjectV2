@@ -80,6 +80,18 @@ export default {
     you_need_to_be_alert: "You need to be energetic!",
 
 
+    tutorial: {
+        skip: "Skip tutorial",
+        step_1: "Tap the egg to hatch it",
+        step_2: "Tap the fridge to go feed your pet!",
+        step_3: "Drag food onto the pet to feed it!",
+        step_4: "Click on the pet to make combos and earn even more coins and XP!",
+        step_5: "Return to the main menu!",
+        step_6: "The pet is dirty, time for a bath!",
+        step_7: "Drag the shampoo onto the pet!",
+        step_8: "Drag and hold the shower to wash away the foam!"
+    },
+
     heads: {
         incognito_hat: 'Incognito Cap',
         halloween_pumpkin_hat:'Halloween pumpkin Hat',
@@ -232,7 +244,23 @@ export default {
         jackpot_energy: "You need to have enough energy to enter «Jackpot»!",
         food_catch_fed: "You need to be well-fed to enter «Catch Food»!",
         food_catch_energy: "You need to have enough energy to enter «Catch Food»!",
-        hop_hop_fed: "You need to be well-fed to enter «Jump-Jump»!",
-        hop_hop_energy: "You need to have enough energy to enter «Jump-Jump»!"
+        fruit_fresh_fed: "You need to be well-fed to enter «Fruit Fresh»!",
+        fruit_fresh_energy: "You need to have enough energy to enter «Fruit Fresh»!"
+    },
+    match3: {
+        juicing: "Juicing up!",
+        super_fruit: "Super Fruit!",
+        kivano: "Kivano!",
+        magnificent: "Magnificent!",
+        great: "Great!",
+        kivano_attack: "Kivano Attack!",
+        juicy_explosion: "Juicy Explosion!",
+        no_moves: "Out of moves!",
+        level_passed: "Level Passed!",
+        great_job: "Great Job!",
+        level_label: "Level:",
+        earned_score: "Score Earned:",
+        next_level: "Next Level",
+        restart_level: "Restart"
     }
 }
