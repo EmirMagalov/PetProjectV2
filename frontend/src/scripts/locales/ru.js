@@ -134,14 +134,14 @@ export default {
         burger: 'Бургер',
         tako: 'Тако',
         lasagna: 'Лазанья',
-
+        apple:'Яблоко',
         banana: 'Банан',
         kiwi: 'Киви',
         grape: 'Виноград',
         pineapple: 'Ананас',
         peach: 'Персик',
         pomegranate: 'Гранат',
-
+        strawberry:"Клубника",
         salmon_roll: 'Ролл из лосося',
         sake_nigir: 'Нигири с лососем',
         ebi_nigiri: 'Нигири с креветкой',
@@ -167,6 +167,7 @@ export default {
         yummy: 'Ням-ням!',
         max_limit: 'MAX!',
         happy_birthday:"С днем рождения!",
+        growth_spurt:"Скачек роста!",
         already_open_device: '⚠️ Игра уже открыта в другой вкладке!',
         device_already_open: '⚠️ Игра запущена на другом устройстве',
         close_other_device: 'Закройте игру там, чтобы продолжить играть здесь.',
@@ -252,9 +253,15 @@ export default {
         no_moves: "Кончились ходы!",
         level_passed: "Уровень пройден!",
         great_job: "Великолепная работа!",
-        level_label: "Уровень:",
+        level_label: "Уровень",
         earned_score: "Заработано очков:",
+        earned_coins: "Заработано монет:",
+        earned_exp: "Заработано опыта",
         next_level: "Следующий уровень",
-        restart_level: "Перезагрузить"
+        restart_level: "Перезагрузить",
+        moves:"Ходы",
+        score:"Счет",
+        play_btn: "Играть",
+        start_game_prompt: "Начнем игру?"
     }
 }

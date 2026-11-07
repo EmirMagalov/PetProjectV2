@@ -64,7 +64,16 @@ export const foodList = [
         level: 10
     },
 
-
+    {
+        id: 'apple',
+        name: 'Яблоко',
+        image: `/food/apple.webp?v=${APP_VERSION}`,
+        category: 'food',
+        subcategory: 'fruits',
+        energyGain: 1,
+        foodGain: 5,
+        price: 20
+    },
     {
         id: 'banana',
         name: 'Банан',
@@ -75,10 +84,11 @@ export const foodList = [
         foodGain: 5,
         price: 20
     },
+
     {
-        id: 'kiwi',
-        name: 'Киви',
-        image: `/food/kiwi.webp?v=${APP_VERSION}`,
+        id: 'strawberry',
+        name: 'Клубника',
+        image: `/food/strawberry.webp?v=${APP_VERSION}`,
         category: 'food',
         subcategory: 'fruits',
         energyGain: 1,
@@ -136,7 +146,8 @@ export const foodList = [
         category: 'food',
         subcategory: 'sushi',
         foodGain: 12,
-        price: 60
+        price: 60,
+        level: 10
     },
     {
         id: 'sake_nigir',
@@ -218,7 +229,7 @@ export const foodList = [
         subcategory: 'shampoo',
         color: 'bg-[#34bc39]/50',
         price: 80,
-        level: 10
+        level: 5
 
     },
     {
@@ -229,7 +240,7 @@ export const foodList = [
         subcategory: 'shampoo',
         color: 'bg-[#3552b8]/50',
         price: 80,
-        level: 10
+        level: 5
 
     },
     {
@@ -240,7 +251,7 @@ export const foodList = [
         subcategory: 'shampoo',
         color: 'bg-[#a05fba]/50',
         price: 80,
-        level: 10
+        level: 5
 
     },
 ]

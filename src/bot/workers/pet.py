@@ -135,7 +135,7 @@ async def process_pet_notifications(pet: PetModel, now: float):
             is_notified_changed = True
 
         # --- 3. ПРЕДУПРЕЖДЕНИЯ О ЖИЗНЯХ ---
-        if pet.lives == 2:
+        if pet.lives == 2 and pet.level<80:
             if not pet.low_lives_notified:
                 if await send_telegram_message(
                     pet.tg_id, m["low_lives"], last_act, lang

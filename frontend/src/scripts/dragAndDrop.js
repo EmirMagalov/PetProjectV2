@@ -154,7 +154,7 @@ export function handleEnd(itemType, Item) {
                 feedPet(Item.id)
                 nextTutorialStep()
             } else if (Item) {
-                const isFullLives = (Item.id === 'life_serum' && gameData.lives >= 3)
+                const isFullLives = (Item.id === 'life_serum' && gameData.lives >= gameData.lives)
                 const isUnneededHealth = (Item.id === 'health_serum' && !gameData.sick)
                 const isUnneededEnergy = (Item.id === 'energy_serum' && gameData.energy >= 80)
 

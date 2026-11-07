@@ -2,7 +2,7 @@ import {watch} from "vue";
 import {
     bodyType, characterPath,
     cloudShow,
-    gameData, isBadMood, isGameInitialized,
+    gameData, isGameInitialized,
     lowEnergy,
     mouth,
     showHunger, showStatus, showTongue,
@@ -19,15 +19,15 @@ import {syncToBackend} from "@/scripts/api.js";
 const FOOD_PER_HOUR_HEALTHY = 0.25;     // ~6.7 часа
 const FOOD_PER_HOUR_SICK = 0.416;     // ~4 часа
 
-const ENERGY_PER_HOUR_HEALTHY = 0.16;
+const ENERGY_PER_HOUR_HEALTHY = gameData.level < 80 ? 0.16 : 0.25;
 const ENERGY_PER_HOUR_SICK = 0.25;
 // ===================================================
 
 setInterval(() => {
     if (gameData.level <= 1 || gameData.isGameOver) return;
     // Переводим часовой расход в минутный (потому что интервал = 1 минута)
-    const foodPerMinute = (gameData.sick ? FOOD_PER_HOUR_SICK : FOOD_PER_HOUR_HEALTHY) ;
-    const energyPerMinute = (gameData.sick ? ENERGY_PER_HOUR_SICK : ENERGY_PER_HOUR_HEALTHY) ;
+    const foodPerMinute = (gameData.sick ? FOOD_PER_HOUR_SICK : FOOD_PER_HOUR_HEALTHY);
+    const energyPerMinute = (gameData.sick ? ENERGY_PER_HOUR_SICK : ENERGY_PER_HOUR_HEALTHY);
     // 1. Уменьшаем еду
     if (gameData.foodLevel > 0) {
         gameData.foodLevel = Math.max(0, gameData.foodLevel - foodPerMinute);
@@ -127,18 +127,33 @@ watch(
         () => gameData.energy, // <--- Добавили энергию!
         () => gameData.sick,     // <--- Добавили болезнь!
         () => gameData.lives,
-        characterPath
+        characterPath,
+        () => gameData.level,
     ],
-    ([hovered, isBathe, isShowTongue, foodLevel, isFat, energy, sick,lives]) => {
+    ([hovered, isBathe, isShowTongue, foodLevel, isFat, energy, sick, lives]) => {
         const isLowEnergy = energy < 20
         const isHungry = foodLevel < 20
         const isSick = sick
-        const hasIssues = isLowEnergy || isHungry || isSick || lives<=1
+        const hasIssues = isLowEnergy || isHungry || isSick || lives <= 1
+
+        // if (gameData.level >= 80 && gameData.lives > 2) {
+        //     gameData.lives = 2 // Обрезаем до нового максимума в 2 жизни
+        // }
+        if (gameData.level <10 ) {
+            gameData.equippedHead = null
+            gameData.equippedClothes = null
+        }
+        if (gameData.level >= 50) {
+            gameData.old_1_phase = true
+        }
+        if (gameData.level >= 80) {
+            gameData.old_2_phase = true
+        }
+
         if (foodLevel <= 85) {
             gameData.foodStreak = 0
             gameData.isFat = false
         }
-
         if (foodLevel < 15) {
             bodyType.value = 'skinny'
         } else if (isFat) {
@@ -164,7 +179,6 @@ watch(
     },
     {immediate: true}
 )
-
 
 
 watch(() => gameData.lives, async (newLives, oldLives) => {
@@ -198,8 +212,6 @@ watch(() => gameData.sick, (newSick) => {
     }
 
 })
-
-
 
 
 let sunTimer = null

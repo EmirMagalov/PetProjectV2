@@ -75,7 +75,7 @@ export function otherFeedPet(foodId) {
 
         if (foodId === "life_serum") {
 
-            gameData.lives = Math.min(3, gameData.lives + 1)
+            gameData.lives = Math.min(gameData.lives, gameData.lives + 1)
             showStatus('lifeGain')
         }
         if (foodId === "health_serum") {
@@ -155,7 +155,7 @@ export function feedPet(foodId) {
     incrementTaskProgress('feed', 1)
     const oldFoodLevel = gameData.foodLevel
     const oldEnergy = gameData.energy
-    gameData.foodLevel = Math.min(100, gameData.foodLevel + foodItem.foodGain)
+    gameData.foodLevel = Math.min(100, gameData.foodLevel + (gameData.level<10?(foodItem.foodGain * 2) : foodItem.foodGain ))
     const actualGain = gameData.foodLevel - oldFoodLevel
     let actualEnergyGain = 0
     if (foodItem.energyGain) {

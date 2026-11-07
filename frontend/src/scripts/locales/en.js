@@ -141,14 +141,14 @@ export default {
         burger: 'Burger',
         tako: 'Taco',
         lasagna: 'Lasagna',
-
+        apple: 'Apple',
         banana: 'Banana',
         kiwi: 'Kiwi',
         grape: 'Grapes',
         pineapple: 'Pineapple',
         peach: 'Peach',
         pomegranate: 'Pomegranate',
-
+        strawberry:'Strawberry',
         salmon_roll: 'Salmon Roll',
         sake_nigir: 'Sake Nigiri',
         ebi_nigiri: 'Ebi Nigiri',
@@ -173,6 +173,7 @@ export default {
         yummy: 'Yummy!',
         max_limit: 'MAX!',
         happy_birthday:"Happy birthday!",
+        growth_spurt:"Growth spurt!",
         already_open_device: '⚠️ Game is already open in another tab!',
         device_already_open: '⚠️ Game is running on another device',
         close_other_device: 'Close the game there to continue playing here.',
@@ -258,9 +259,15 @@ export default {
         no_moves: "Out of moves!",
         level_passed: "Level Passed!",
         great_job: "Great Job!",
-        level_label: "Level:",
+        level_label: "Level",
         earned_score: "Score Earned:",
+        earned_coins: "Coins earned:",
+        earned_exp: "EXP earned:",
         next_level: "Next Level",
-        restart_level: "Restart"
+        restart_level: "Restart",
+        moves:"Moves",
+        score:"Score",
+        play_btn: "Play",
+        start_game_prompt: "Let's start the game?"
     }
 }

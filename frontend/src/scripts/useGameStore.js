@@ -93,12 +93,12 @@ watch(ZeroPlayCount, (newValue) => {
 
 // export const body = ref("/character/main_body.webp")
 export const bodyType = ref('normal')
-const savedLevel = localStorage.getItem('match3_level') ? parseInt(localStorage.getItem('match3_level')) : 1
+const savedMatch3Level = localStorage.getItem('match3_level') ? parseInt(localStorage.getItem('match3_level')) : 1
 
 export const defaultGameData = {
     name: '',
     level: 1,
-    match3_level:savedLevel,
+    match3_level:savedMatch3Level,
     exp: 0,
     coins: 50,
     lives: 3,
@@ -109,6 +109,8 @@ export const defaultGameData = {
     fatCount: 0,
     stinky: false,
     sleep: false,
+    old_1_phase:false,
+    old_2_phase:false,
     sleepEndTime: 0,
     feedCount: 0,
     equippedHead: null,
@@ -319,9 +321,33 @@ export const activeStatus = computed(() => {
                 text: i18n.global.t('store.happy_birthday'),
                 additional: gameData.level,
                 image: null,
-                bgColor: "bg-[#FFFF66]/40"
+                bgColor: "bg-[#FFB266]/60"
             }
-        }else{
+        }else if(gameData.level ===10){
+            return {
+                show: true,
+                text: i18n.global.t('store.growth_spurt'),
+                additional: gameData.level,
+                image: null,
+                bgColor: "bg-[#FFB266]/60"
+            }
+        }else if(gameData.level ===40){
+            return {
+                show: true,
+                text: i18n.global.t('store.growth_spurt'),
+                additional: gameData.level,
+                image: null,
+                bgColor: "bg-[#FFB266]/60"
+            }
+        }else if(gameData.level ===80){
+            return {
+                show: true,
+                text: i18n.global.t('store.growth_spurt'),
+                additional: gameData.level,
+                image: null,
+                bgColor: "bg-[#FFB266]/60"
+            }
+        } else{
             return {
                 show: true,
                 text: i18n.global.t('store.level_up'),

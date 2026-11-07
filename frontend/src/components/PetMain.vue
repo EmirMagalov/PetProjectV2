@@ -250,7 +250,7 @@ const isEggShaking = ref(false)
 
 function handleEggClick() {
   // Начисляем опыт за один клик
-  addExp(0.2)
+  addExp(0.4)
   console.log(gameData.exp)
   // Если сальто уже играет, игнорируем повторный клик
   if (isFlips.value || isEggShaking.value) return
@@ -478,9 +478,11 @@ function handleCharacterClick() {
                   :class="bodyType === 'fat' ? 'opacity-100' : 'opacity-0'"
               />
             </div>
+            <img v-show="gameData.old_1_phase" :src="`${characterPath}/wrinkles_1_phase.webp?v=${APP_VERSION}`" class="absolute w-45 z-5 pointer-events-none" alt="">
+            <img v-show="gameData.old_2_phase" :src="`${characterPath}/wrinkles_2_phase.webp?v=${APP_VERSION}`" class="absolute w-45 z-5 pointer-events-none" alt="">
 
             <img :src="getHornAsset(gameData.level)" class="absolute  w-45 pointer-events-none" alt="">
-            <img v-show="gameData.sick" :src="`${characterPath}/drunk.webp?v=${APP_VERSION}`" class="absolute w-45 pointer-events-none" alt="">
+            <img v-show="gameData.sick" :src="`${characterPath}/drunk.webp?v=${APP_VERSION}`" class="absolute z-6 w-45 pointer-events-none" alt="">
             <img v-show="gameData.sick && bodyType==='fat'" :src="`${characterPath}/sick_fat.webp?v=${APP_VERSION}`" class="absolute w-45 z-10 pointer-events-none" alt="">
             <img v-show="gameData.sick && bodyType!=='fat'" :src="`${characterPath}/sick.webp?v=${APP_VERSION}`" class="absolute w-45 z-10 pointer-events-none" alt="">
 
