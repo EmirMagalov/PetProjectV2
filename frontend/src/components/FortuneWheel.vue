@@ -27,7 +27,7 @@ watch(canSpin, (newValue) => {
 </script>
 
 <template>
-  <div class="fortune-overlay" v-if="isFortuneOpen && isTutorialCompleted && !gameData.isGameOver">
+  <div class="fortune-overlay" v-if="isFortuneOpen && isTutorialCompleted && !gameData.isGameOver && gameData.level>1">
     <div class="fortune-card">
       <button
           class="absolute top-2 right-3 text-3xl text-red-600 font-bold hover:text-red-800 transition-colors"
