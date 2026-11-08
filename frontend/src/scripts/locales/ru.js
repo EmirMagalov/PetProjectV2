@@ -1,5 +1,6 @@
 export default {
     loading: "Загрузка",
+    home_loading:"Дом, милый дом",
     connection_error: "Ошибка подключения",
     retry: "Повторить попытку",
     enter_the_laboratory:"Входим в Лабораторию...",

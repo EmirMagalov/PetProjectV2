@@ -168,9 +168,15 @@ export function handleEnd(itemType, Item) {
                 }
             }
         } else if (itemType === 'foam') {
+            // Если пены ЕЩЕ НЕТ — только тогда намыливаем и сохраняем цвет
             if (!statusFoam.value) {
                 statusFoam.value = true
-                colorFoam.value = Item?.color || 'bg-white/70'
+
+                if (Item?.color) {
+                    colorFoam.value = Item.color
+                    localStorage.setItem('pet_colorFoam', Item.color)
+                }
+
                 nextTutorialStep()
                 if (Item?.id) {
                     removeFromCart(Item.id)

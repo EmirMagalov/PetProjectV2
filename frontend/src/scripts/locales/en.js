@@ -1,6 +1,7 @@
 export default {
     loading: "Loading",
     connection_error: "Connection error",
+    home_loading:"home Sweet Home",
     retry: "Retry",
     enter_the_laboratory: "Entering the Laboratory...",
     enter_the_jackpot: "Entering Jackpot...",

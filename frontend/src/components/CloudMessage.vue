@@ -26,7 +26,7 @@ const activeItems = computed(() => {
           class="relative flex items-center justify-center z-50 pointer-events-auto"
       >
         <!-- Само облако -->
-        <img :src="`/gamePlay/cloud_message.webp?v=${APP_VERSION}`" class="relative w-40 block" alt="cloud">
+        <img :src="`/gamePlay/cloud_message.webp?v=${APP_VERSION}`" class="relative w-30 block" alt="cloud">
 
         <!-- 🌧️ СЛОЙ ДОЖДЯ (появляется с задержкой, исчезает мгновенно при уходе облака) -->
         <div class="absolute inset-x-4 -bottom-10 h-14 pointer-events-none overflow-visible z-40 rain-wrapper">
@@ -41,23 +41,23 @@ const activeItems = computed(() => {
         </div>
 
         <!-- Контейнер для иконки внутри облака -->
-        <div class="absolute inset-0 flex gap-2 items-center justify-center z-50">
+<!--        <div class="absolute inset-0 flex gap-2 items-center justify-center z-50">-->
 
-          <!-- Hunger (Бургер) -->
-          <div v-show="showHunger" class="flex items-center justify-center w-9">
-            <img :src="`/food/burger.webp?v=${APP_VERSION}`" class="w-full object-contain" alt="hunger">
-          </div>
+<!--          &lt;!&ndash; Hunger (Бургер) &ndash;&gt;-->
+<!--          <div v-show="showHunger" class="flex items-center justify-center w-9">-->
+<!--            <img :src="`/food/burger.webp?v=${APP_VERSION}`" class="w-full object-contain" alt="hunger">-->
+<!--          </div>-->
 
-          <!-- Energy (Энергия) -->
-          <div v-show="energyFull || lowEnergy" class="flex items-center justify-center gap-1 w-10">
-            <img
-                :src="lowEnergy ? `/gamePlay/energy_low.webp?v=${APP_VERSION}` : ''"
-                class="w-full object-contain"
-                alt="energy"
-            >
-          </div>
+<!--          &lt;!&ndash; Energy (Энергия) &ndash;&gt;-->
+<!--          <div v-show="energyFull || lowEnergy" class="flex items-center justify-center gap-1 w-10">-->
+<!--            <img-->
+<!--                :src="lowEnergy ? `/gamePlay/energy_low.webp?v=${APP_VERSION}` : ''"-->
+<!--                class="w-full object-contain"-->
+<!--                alt="energy"-->
+<!--            >-->
+<!--          </div>-->
 
-        </div>
+<!--        </div>-->
       </div>
     </Transition>
 
@@ -94,7 +94,7 @@ const activeItems = computed(() => {
 
 .rain-wrapper {
   opacity: 0;
-  animation: fadeInRain 0.3s ease-in-out 1.1s forwards;
+  animation: fadeInRain 0.3s ease-in-out 0.1s forwards;
 }
 
 /* Когда компонент начинает уходить, скрываем дождь моментально без задержек */

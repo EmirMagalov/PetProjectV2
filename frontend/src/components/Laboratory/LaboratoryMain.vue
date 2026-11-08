@@ -15,7 +15,6 @@ import RecipeHints from "@/components/Laboratory/RecipeHints.vue";
 
 
 const isLoading = ref(true);
-const router = useRouter();
 
 onMounted(() => {
   setTimeout(() => {

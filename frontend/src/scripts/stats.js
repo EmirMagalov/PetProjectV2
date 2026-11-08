@@ -1,19 +1,20 @@
 import {watch} from "vue";
 import {
     bodyType, characterPath,
-    cloudShow,
+    cloudShow, energyFull, foamOffset,
     gameData, isGameInitialized,
     lowEnergy,
-    mouth,
+    mouth, nextTutorialStep,
     showHunger, showStatus, showTongue,
-    sleepTimeRemaining
+    sleepTimeRemaining, statusFoam, statusShower
 } from "@/scripts/useGameStore.js";
 import {addExp} from "@/scripts/level.js";
 
-import {addCoin, sunAnimating} from "@/scripts/actions.js";
-import {batheStatus, isHovered} from "@/scripts/dragAndDrop.js";
+import {addCoin, isLosingLife, sunAnimating} from "@/scripts/actions.js";
+import {batheStatus, isHovered, showerCount} from "@/scripts/dragAndDrop.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {syncToBackend} from "@/scripts/api.js";
+import {incrementTaskProgress} from "@/scripts/dealyTasks.js";
 
 
 const FOOD_PER_HOUR_HEALTHY = 0.25;     // ~6.7 часа
@@ -133,13 +134,13 @@ watch(
     ([hovered, isBathe, isShowTongue, foodLevel, isFat, energy, sick, lives]) => {
         const isLowEnergy = energy < 20
         const isHungry = foodLevel < 20
-        const isSick = sick
-        const hasIssues = isLowEnergy || isHungry || isSick || lives <= 1
+        const isFullEnergy = energy >= 80
+        const hasIssues = isLowEnergy || isHungry || sick || lives <= 1
 
         // if (gameData.level >= 80 && gameData.lives > 2) {
         //     gameData.lives = 2 // Обрезаем до нового максимума в 2 жизни
         // }
-        if (gameData.level <10 ) {
+        if (gameData.level < 10) {
             gameData.equippedHead = null
             gameData.equippedClothes = null
         }
@@ -174,7 +175,8 @@ watch(
         // Обновляем флаги
         lowEnergy.value = isLowEnergy
         showHunger.value = isHungry
-        cloudShow.value = isLowEnergy || isHungry
+        cloudShow.value = isLowEnergy || isHungry || sick
+        energyFull.value = isFullEnergy
 
     },
     {immediate: true}
@@ -233,3 +235,66 @@ watch(() => gameData.sleep, () => {
         }, 800)
     }, 500)
 })
+
+
+let actionTimer = null
+let lastBathTime = 0
+const BATH_COOLDOWN = 5000
+const clearActionTimer = () => {
+    if (actionTimer) {
+        clearInterval(actionTimer)
+        actionTimer = null
+    }
+}
+
+// Следим за появлением облака и пены
+watch([cloudShow, statusFoam,location], ([isCloud, hasFoam]) => {
+    // Если облако есть И на персонаже есть пена
+    if (isCloud && hasFoam) {
+        if (!actionTimer) {
+            statusShower.value = true // Включаем анимацию душа
+
+            actionTimer = setInterval(() => {
+                // Проверяем, что условия всё еще актуальны
+                if (cloudShow.value && statusFoam.value) {
+                    foamOffset.value += 1.5 // Пена плавно сползает вниз
+
+                    // Когда пена сместилась достаточно низко (до 60px) — смыв завершен
+                    if (foamOffset.value >= 60) {
+                        if (gameData.sick) {
+                            isLosingLife()
+                        }
+                        const now = Date.now()
+                        if (now - lastBathTime < BATH_COOLDOWN) {
+                            gameData.sick = true
+                        }
+                        lastBathTime = now
+
+                        statusShower.value = false
+                        statusFoam.value = false
+                        foamOffset.value = 0
+                        localStorage.removeItem('pet_statusFoam')
+                        localStorage.removeItem('pet_foamOffset')
+                        localStorage.removeItem('pet_colorFoam')
+                        showerCount.value += 1
+                        gameData.stinky = false
+                        nextTutorialStep()
+                        addCoin(2)
+                        addExp(25)
+                        incrementTaskProgress('wash', 1)
+                        gameData.feedCount = 0
+                        clearActionTimer()
+                    }
+                } else {
+                    // Если облако или пена пропали — выключаем душ и таймер
+                    statusShower.value = false
+                    clearActionTimer()
+                }
+            }, 50) // Каждые 50мс двигаем пену
+        }
+    } else {
+        // Если облака нет или пены нет — гасим душ и таймер
+        statusShower.value = false
+        clearActionTimer()
+    }
+}, { immediate: true })

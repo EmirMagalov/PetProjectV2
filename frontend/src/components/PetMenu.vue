@@ -306,9 +306,9 @@ const currentBathImage = computed(() => {
         <div
             @click="goSleep()"
 
-            :class="['bg-[#fff6ef] relative justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95',showHunger || energyFull?'opacity-50':'']"
+            :class="[lowEnergy && !showHunger && !gameData.sleep?'animate-pulse':'','bg-[#fff6ef] relative justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95',showHunger || energyFull?'opacity-50':'']"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-
+          <img v-show="energyFull" class="w-10 absolute top-0 right-0" src="/gamePlay/energy_full.webp" alt="">
           <div class="w-[60px] h-[60px] bg-contain bg-no-repeat bg-center"
                :style="{ 'background-image': `url('/gamePlay/${gameData.sleep ? 'sun_icon.webp' : 'sleep_icon.webp'}?v=${APP_VERSION}')` }">
           </div>

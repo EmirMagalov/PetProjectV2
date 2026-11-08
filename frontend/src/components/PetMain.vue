@@ -46,7 +46,7 @@ let isDragging = false
 let vibrateTimer = null
 const isFlips = ref(false)
 const isEggShaking = ref(false)
-
+const isLoading = ref(true);
 function getHornAsset(level) {
   if (level >= 50) return `${characterPath.value}/horns/50lvl.webp?v=${APP_VERSION}`
   if (level >= 45) return `${characterPath.value}/horns/45lvl.webp?v=${APP_VERSION}`
@@ -216,7 +216,9 @@ onMounted(async () => {
       tg.disableVerticalSwipes()
     }
   }
-
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 800);
   const urlParams = new URLSearchParams(window.location.search);
   const urlLang = urlParams.get('lang');
   if (urlLang && (urlLang === 'ru' || urlLang === 'en')) {
@@ -307,6 +309,32 @@ const pumpkinAnimation = (event) => {
 </script>
 
 <template>
+  <Transition name="fade">
+    <div
+        v-if="isLoading"
+        class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-[#ABD7DD] via-[#ABD7DD] to-blue-300 text-[#D18900]"
+    >
+      <div class="relative flex items-center justify-center mb-4">
+        <!-- Пульсирующее свечение -->
+        <div class="absolute w-24 h-24 rounded-full bg-amber-500/20 animate-ping"></div>
+
+        <!-- Анимированный логотип/иконка -->
+        <div class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
+          <div class="w-full h-full bg-[#FADCCC]  rounded-full flex items-center justify-center border border-amber-300/40">
+            <img :src="`/gamePlay/logo_icons.webp?v=${APP_VERSION}`" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
+          </div>
+        </div>
+      </div>
+
+      <!-- Текст загрузки -->
+      <span class="text-[#D18900] font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
+          {{ $t('home_loading') }}
+        </span>
+
+      <!-- Спиннер -->
+      <div class="mt-4 w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></div>
+    </div>
+  </Transition>
   <div
       :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000 relative', gameData.sleep ? 'bg-linear-to-r from-blue-900 via-blue-800 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']">
 

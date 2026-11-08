@@ -207,21 +207,21 @@ export function feedPet(foodId) {
     }
 }
 
-export function energyFullShow() {
-    if (hideTrackerTimer) return
-
-    energyFull.value = true
-    const prevCloudShow = cloudShow.value
-    cloudShow.value = true
-
-    hideTrackerTimer = setTimeout(() => {
-        energyFull.value = false
-        if (!prevCloudShow) {
-            cloudShow.value = false
-        }
-        hideTrackerTimer = null
-    }, 2000)
-}
+// export function energyFullShow() {
+//     if (hideTrackerTimer) return
+//
+//     energyFull.value = true
+//     const prevCloudShow = cloudShow.value
+//     cloudShow.value = true
+//
+//     hideTrackerTimer = setTimeout(() => {
+//         energyFull.value = false
+//         if (!prevCloudShow) {
+//             cloudShow.value = false
+//         }
+//         hideTrackerTimer = null
+//     }, 2000)
+// }
 
 export function goSleep() {
     // 🛡️ Если питомец уже спит, мы ВСЕГДА разрешаем нажать кнопку, чтобы разбудить его
@@ -235,8 +235,6 @@ export function goSleep() {
         if (!showHunger.value) {
             toggleSleep()
         }
-    } else {
-        energyFullShow()
     }
 }
 
