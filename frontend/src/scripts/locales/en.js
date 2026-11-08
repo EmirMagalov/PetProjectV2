@@ -216,6 +216,7 @@ export default {
         play_btn: "Play",
         game_over: "Game Over!",
         earned_coins: "Coins earned:",
+        earned_exp: "EXP earned:",
         try_again: "Try Again"
     },
     jumping_game: {
@@ -250,11 +251,13 @@ export default {
     },
     match3: {
         juicing: "Juicing up!",
-        super_fruit: "Super Fruit!",
+        super_fruit: "Dragon Fruit!",
         kivano: "Kivano!",
+        lemon: "Lemon!",
         magnificent: "Magnificent!",
         great: "Great!",
         kivano_attack: "Kivano Attack!",
+        lemon_blast: "Lemon Blast!",
         juicy_explosion: "Juicy Explosion!",
         no_moves: "Out of moves!",
         level_passed: "Level Passed!",

@@ -210,6 +210,7 @@ export default {
         play_btn: "Играть",
         game_over: "Игра окончена!",
         earned_coins: "Заработано монет:",
+        earned_exp: "Заработано опыта",
         try_again: "Попробовать снова"
     },
     jumping_game: {
@@ -244,11 +245,13 @@ export default {
     },
     match3: {
         juicing: "Выжимаем соки!",
-        super_fruit: "Супер-фрукт!",
+        super_fruit: "Драконий фрукт!",
         kivano: "Кивано!",
+        lemon:"Лимон!",
         magnificent: "Великолепно!",
         great: "Отлично!",
         kivano_attack: "Кивано атака!",
+        lemon_blast:"Лимонный взрыв",
         juicy_explosion: "Сочный взрыв!",
         no_moves: "Кончились ходы!",
         level_passed: "Уровень пройден!",

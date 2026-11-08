@@ -15,7 +15,7 @@ import {
   showHunger,
   sleepTimeRemaining,
   statusFoam, location, handleRestart, warning, lowEnergy, activeTab, tutorialStep, nextTutorialStep,
-  isAdmin
+  isAdmin, energyFull
 } from "@/scripts/useGameStore.js";
 import {goSleep} from "@/scripts/actions.js";
 import {
@@ -306,7 +306,7 @@ const currentBathImage = computed(() => {
         <div
             @click="goSleep()"
 
-            :class="['bg-[#fff6ef] relative justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95',showHunger?'opacity-50':'']"
+            :class="['bg-[#fff6ef] relative justify-center h-25  flex flex-col  items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95',showHunger || energyFull?'opacity-50':'']"
             style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
 
           <div class="w-[60px] h-[60px] bg-contain bg-no-repeat bg-center"

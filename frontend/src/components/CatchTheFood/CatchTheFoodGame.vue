@@ -5,6 +5,7 @@ import { addCoin } from "@/scripts/actions.js";
 import { APP_VERSION } from "@/scripts/imageVersion.js";
 import i18n from "@/scripts/locales/i18n.js";
 import {addExp} from "@/scripts/level.js";
+import {gameData} from "@/scripts/useGameStore.js";
 
 const isLoading = ref(true);
 
@@ -172,7 +173,7 @@ const startGame = async () => {
 
     cart.x = logicalWidth / 2 - cart.width / 2
     cart.targetX = cart.x
-    cart.y = logicalHeight - cart.height - 230
+    cart.y = logicalHeight - cart.height - 219
   }
 
   gameState.value = 'PLAYING'
@@ -227,7 +228,9 @@ const addParticles = (x, y, count = 8) => {
     })
   }
 }
-
+function earned_exp_catch() {
+  return Math.max(1, Math.floor(gameData.level + (score.value / 100)))
+}
 const updateGame = (timestamp) => {
   const canvas = canvasRef.value
   if (!canvas || gameState.value !== 'PLAYING') return
@@ -249,7 +252,7 @@ const updateGame = (timestamp) => {
     const cartLeft = cart.x + hitBoxPaddingX
     const cartRight = (cart.x + cart.width) - hitBoxPaddingX
     const cartTop = cart.y + 15
-    const cartBottom = cart.y + 20
+    const cartBottom = cart.y + 10
 
     const isInsideX = item.x >= cartLeft && item.x <= cartRight
     const isInsideY = item.y + item.radius >= cartTop && item.y - item.radius <= cartBottom
@@ -308,7 +311,7 @@ const updateGame = (timestamp) => {
         }
 
         gameState.value = 'GAMEOVER'
-        // addExp(Math.trunc(score.value / 100))
+        addExp(earned_exp_catch())
         stopLoop()
       }
     }
@@ -517,7 +520,7 @@ onUnmounted(() => {
       </div>
     </Transition>
 
-    <PetHeaderMenu class="mb-1" />
+    <PetHeaderMenu  />
 
     <!-- Фон супермаркета -->
     <div class="absolute bottom-30 z-0 pointer-events-none">
@@ -622,6 +625,10 @@ onUnmounted(() => {
           <div class="flex justify-between items-center text-[15px] text-slate-600">
             <span>{{ $t('food_catch.score') }}:</span>
             <strong>{{ score }}</strong>
+          </div>
+          <div class="flex justify-between items-center text-[15px] text-slate-600">
+            <span>{{ $t('food_catch.earned_exp') }}:</span>
+            <strong>{{ earned_exp_catch() }}</strong>
           </div>
           <div class="flex justify-between items-center text-[15px] text-slate-600">
             <span>{{ $t('food_catch.earned_coins') }}</span>

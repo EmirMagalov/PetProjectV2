@@ -8,7 +8,7 @@ import {
   boardPixelSize, cellSize, cellStep, earned_coins, earned_exp, flatBoard, flyingKivano,
   gameState, gridCols, gridOffsetX, gridOffsetY, gridRows,
   isGameOver, isJellyLevel,
-  isLevelPassed, isShuffling, isVictoryTriggered, kivanoImage, level,
+  isLevelPassed, isShuffling, isVictoryTriggered, kivanoImage, lemonImage, level,
   levelButtonsRef, levelProgressPercent, moves, nextLevelOrRestart,
   obstacleImage, onMouseDown, onTouchEnd,
   onTouchMove, onTouchStart, rainbowImage, remainingTargets, restartLevel, // 🌟 И restartLevel сюда
@@ -74,7 +74,7 @@ onUnmounted(() => {
 
       <!-- Шапка игры -->
 
-      <div class="w-full my-1 max-w-[440px]">
+      <div class="w-full  max-w-[440px]">
         <div class="bg-gradient-to-r h-21 from-pink-300 to-pink-400 rounded-2xl border-2 border-amber-50 px-4 pt-3 pb-2 text-lg font-bold shadow-md flex flex-col justify-center">
           <div>
             <div class="flex items-center justify-between px-8 mb-1">
@@ -218,6 +218,13 @@ onUnmounted(() => {
                 :style="{ width: (cellSize * 0.9) + 'px', height: (cellSize * 0.9) + 'px' }"
                 alt="kivano"
             />
+            <img
+                v-else-if="cell.isLemon"
+                :src="lemonImage"
+                class="animate-bounce brightness-140 object-contain drop-shadow-md pointer-events-none"
+                :style="{ width: (cellSize * 0.9) + 'px', height: (cellSize * 0.9) + 'px' }"
+                alt="lemon"
+            />
             <div v-else-if="cell.type" class="relative w-full h-full flex items-center justify-center">
               <img
                   :src="cell.type"
@@ -225,6 +232,7 @@ onUnmounted(() => {
                   :style="{ width: (cellSize * 0.92) + 'px', height: (cellSize * 0.92) + 'px' }"
                   alt="candy"
               />
+
               <div v-if="cell.chained" class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl">
                 <img class="opacity-80" :style="{ width: (cellSize * 0.55) + 'px' }" src="/gamePlay/lock.webp" alt="">
               </div>

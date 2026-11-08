@@ -102,7 +102,7 @@ const getClipInset = (progress) => {
 </script>
 
 <template>
-  <div class="relative px-2 pt-1" :class="tutorialStep === 1 ? 'z-205' : 'z-200'">
+  <div class="relative px-2 mb-1 pt-1" :class="tutorialStep === 1 ? 'z-205' : 'z-200'">
     <!-- Клик по любому месту плашки откроет подробную статистику -->
     <div
 
