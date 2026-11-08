@@ -136,7 +136,8 @@ function Match3Game() {
   } else {
     console.log('Android')
     // Для Android и ПК оставляем быструю SPA-навигацию
-    router.push('/match3game');
+    // router.push('/match3game');
+    window.location.href = '/match3game';
   }
 }
 function resetTutorial() {
