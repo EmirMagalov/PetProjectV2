@@ -257,6 +257,12 @@ export function showStatus(type, payload = null) {
         return
     }
 
+    if (type === 'levelUp') {
+        localStorage.setItem('pending_level_up', JSON.stringify({
+            level: gameData.level,
+            timestamp: Date.now()
+        }));
+    }
     // Добавляем новое событие в очередь
     statusQueue.value.push({
         type,

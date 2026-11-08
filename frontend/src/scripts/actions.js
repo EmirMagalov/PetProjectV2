@@ -31,11 +31,10 @@ export let drunkTimer = null
 
 let hideTrackerTimer = null
 let lastFatTime = 0
-const FAT_COOLDOWN = 10000 // 10 секунд
-let comboTimer = null                // Таймер сброса комбо
+const FAT_COOLDOWN = 10000 // 10 секунд // Таймер сброса комбо
 let comboHideTimer = null
 let sunHideTimer = null
-let vibrateTimer = null
+
 let coinHideTimer = null
 let lookResetTimer = null;
 let lastTouchTime = 0;
@@ -369,12 +368,6 @@ export function spawnHeart(x = 160, y = 135) {
 
     gameData.sleep = false
     gameData.clickCounter++
-    if (vibrateTimer) clearTimeout(vibrateTimer)
-
-    vibrateTimer = setTimeout(() => {
-        isVibrating.value = false
-    }, 150)
-
 
     if (gameData.isFat) {
         FatPlayCount.value++
@@ -392,6 +385,12 @@ export function spawnHeart(x = 160, y = 135) {
     if (gameData.clickCounter % coinInterval === 0) {
         addCoin(1, x, y)
     }
+    const expAmount = comboMultiplier.value >= 2 ? 1 * comboMultiplier.value : 1
+
+    if (gameData.clickCounter % coinInterval === 0) {
+        addExp(expAmount, x+15, y)
+    }
+
     if (isBothStatsZero.value) {
         ZeroPlayCount.value++
         console.log(clickLimit - ZeroPlayCount.value)
@@ -410,7 +409,7 @@ export function spawnHeart(x = 160, y = 135) {
         ZeroPlayCount.value = 0;
     }
 
-    if (comboTimer) clearTimeout(comboTimer)
+
 
     if (comboClicks.value >= 150 && !isBothStatsZero.value) {
         comboMultiplier.value = 5
@@ -421,16 +420,9 @@ export function spawnHeart(x = 160, y = 135) {
     } else {
         comboMultiplier.value = 1
     }
-    isComboAnimating.value = true
+
     comboAnimKey.value++
 
-
-    comboTimer = setTimeout(() => {
-        const expAmount = comboMultiplier.value >= 2 ? 5 * comboMultiplier.value : 2
-        addExp(expAmount)
-        comboClicks.value = 0
-        comboMultiplier.value = 1
-    }, 900)
 
     comboHideTimer = setTimeout(() => {
         isComboAnimating.value = false

@@ -5,7 +5,7 @@ import {
   activeBadgeText,
   activeCell, badgeKey,
   board,
-  boardPixelSize, cellSize, cellStep, flatBoard, flyingKivano,
+  boardPixelSize, cellSize, cellStep, earned_coins, earned_exp, flatBoard, flyingKivano,
   gameState, gridCols, gridOffsetX, gridOffsetY, gridRows,
   isGameOver, isJellyLevel,
   isLevelPassed, isShuffling, isVictoryTriggered, kivanoImage, level,
@@ -147,8 +147,8 @@ onUnmounted(() => {
                   :style="{
                     width: cellSize + 'px',
                     height: cellSize + 'px',
-                    left: (c * cellStep + 10 + gridOffsetX) + 'px',
-                    top: (r * cellStep + 10 + gridOffsetY) + 'px'
+                    left: (c * cellStep + 5 + gridOffsetX) + 'px',
+                    top: (r * cellStep + 5 + gridOffsetY) + 'px'
                   }"
               ></div>
             </template>
@@ -178,8 +178,8 @@ onUnmounted(() => {
               :style="{
                 width: cellSize + 'px',
                 height: cellSize + 'px',
-                left: (cell.c * cellStep + 10 + gridOffsetX) + 'px',
-                top: (cell.r * cellStep + 10 + gridOffsetY) + 'px'
+                left: (cell.c * cellStep + 5 + gridOffsetX) + 'px',
+                top: (cell.r * cellStep + 5 + gridOffsetY) + 'px'
               }"
           >
             <div v-if="cell.jelly > 0" class="relative w-full h-full flex items-center justify-center">
@@ -284,7 +284,7 @@ onUnmounted(() => {
             </div>
             <p class="text-gray-300 text-sm mb-1">{{ $t('match3.great_job') }}</p>
 
-            <div class="bg-pink-300 border-2 border-gray-700 rounded-xl p-4 w-full max-w-xs mb-6 text-left space-y-2">
+            <div class="bg-pink-300 border-2 border-gray-700 rounded-xl p-4 w-full max-w-xs  text-left">
               <div class="flex justify-between">
                 <span class="text-white">{{ $t('match3.level_label') }}</span>
                 <span class="font-bold text-pink-400 text-shadow-md text-shadow-black">{{ level - 1 }}</span>
@@ -294,15 +294,15 @@ onUnmounted(() => {
                 <span class="font-bold text-green-400 text-shadow-md text-shadow-black">{{ score }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-white">{{ $t('match3.earned_score') }}</span>
+                <span class="text-white">{{ $t('match3.earned_exp') }}</span>
                 <span class="font-bold text-blue-400 text-shadow-md text-shadow-black">{{
-                    Math.floor(score / 10)
+                    earned_exp()
                   }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-white">{{ $t('match3.earned_coins') }}</span>
                 <span class="font-bold text-yellow-400 text-shadow-md text-shadow-black">{{
-                    Math.floor(score / 5)
+                    earned_coins()
                   }}</span>
               </div>
             </div>
@@ -325,7 +325,7 @@ onUnmounted(() => {
             <div class="text-2xl font-black text-red-400 mb-2 animate-bounce">{{ $t('match3.no_moves') }}</div>
 
             <div
-                class="bg-pink-300 border-2 border-gray-700 rounded-xl p-4 w-full max-w-xs mb-6 text-left space-y-2 mt-2">
+                class="bg-pink-300 border-2 border-gray-700 rounded-xl p-4 w-full max-w-xs  text-left mt-2">
               <div class="flex justify-between">
                 <span class="text-white">{{ $t('match3.level_label') }}</span>
                 <span class="font-bold text-pink-400 text-shadow-md text-shadow-black">{{ level }}</span>

@@ -308,7 +308,7 @@ const updateGame = (timestamp) => {
         }
 
         gameState.value = 'GAMEOVER'
-        addExp(Math.trunc(score.value / 100))
+        // addExp(Math.trunc(score.value / 100))
         stopLoop()
       }
     }

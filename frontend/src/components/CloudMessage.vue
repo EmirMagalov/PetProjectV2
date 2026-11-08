@@ -16,30 +16,36 @@ const activeItems = computed(() => {
 </script>
 
 <template>
-  <div class="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible z-30">
-  <div
-      v-show="cloudShow && !gameData.sleep "
-      class="inset-0 flex items-center  animate-thought-cloud justify-center pointer-events-none overflow-visible z-50 pointer-events-auto">
-    <!-- Облако -->
-    <img :src="`/gamePlay/cloud_message.webp?v=${APP_VERSION}`" class="relative opacity-60" width="85%" alt="">
-<!--    <div-->
-<!--        v-show="gameData.addictionLevel ===1"-->
-<!--         :class="['absolute flex justify-center items-center top-10 left-44 w-10']">-->
-<!--      <img src="/other/pipe.webp" alt="">-->
-<!--    </div>-->
-    <!-- Hunger -->
-    <div v-show="showHunger "
-         :class="['absolute flex justify-center items-center', activeItems <= 1 ? 'top-12 left-51 w-10' : 'top-13 left-47 w-8']">
-      <img :src="`/food/burger.webp?v=${APP_VERSION}`" alt="">
+  <!-- Внешний позиционирующий контейнер (оставляем как у тебя, но убираем мусор) -->
+  <div class="absolute -right-20 -top-40 inset-0 flex items-center justify-center pointer-events-none overflow-visible z-30">
+
+    <div
+        v-show="cloudShow && !gameData.sleep"
+        class="relative flex items-center justify-center animate-thought-cloud z-50 pointer-events-auto"
+    >
+      <!-- Само облако (базовый размер контейнера) -->
+      <img :src="`/gamePlay/cloud_message.webp?v=${APP_VERSION}`" class="relative opacity-60 w-45 block" alt="cloud">
+
+      <!-- Контейнер для иконки внутри облака (строго по центру облака) -->
+      <div class="absolute  inset-0 flex gap-2 items-center justify-center">
+
+        <!-- Hunger (Бургер) -->
+        <div v-show="showHunger" class="flex items-center justify-center w-10">
+          <img :src="`/food/burger.webp?v=${APP_VERSION}`" class="w-full object-contain" alt="hunger">
+        </div>
+
+        <!-- Energy (Энергия) -->
+        <div v-show="energyFull || lowEnergy" class="flex items-center justify-center gap-1 w-12">
+          <img
+              :src="energyFull ? `/gamePlay/energy_full.webp?v=${APP_VERSION}` : (lowEnergy ? `/gamePlay/energy_low.webp?v=${APP_VERSION}` : '')"
+              class="w-full object-contain"
+              alt="energy"
+          >
+        </div>
+
+      </div>
     </div>
 
-    <!-- Energy -->
-    <div v-show="energyFull || lowEnergy"
-         :class="['absolute flex justify-center items-center gap-1', activeItems <= 1 ? 'top-11 left-50 w-12' : 'top-13 left-56 w-8']">
-      <img :src="energyFull?`/gamePlay/energy_full.webp?v=${APP_VERSION}`:(lowEnergy?'/gamePlay/energy_low.webp':'')"  alt="">
-<!--      <p class="font-bold text-md text-[#47B949]">{{ gameData.energy }}%</p>-->
-    </div>
-  </div>
   </div>
 </template>
 

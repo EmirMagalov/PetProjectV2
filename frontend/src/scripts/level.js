@@ -28,10 +28,9 @@ export function addExp(amount,x=180,y=130) {
         const needed = getExpNeeded(gameData.level);
         gameData.exp -= needed;
         gameData.level += 1;
+        // 🌟 Сохраняем информацию о том, что уровень вырос
+        localStorage.setItem('pending_level_up', 'true');
 
-        showStatus('levelUp')
-        console.log(gameData.level)
-        console.log(tutorialStep.value)
         if (tutorialStep.value === 1) {
             if (gameData.level>1) nextTutorialStep()
         }

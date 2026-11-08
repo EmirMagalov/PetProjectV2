@@ -22,7 +22,7 @@ import {
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
   location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus, colorFoam, isTutorialCompleted, resetLocal,
-  characterPath
+  characterPath, showStatus, FatPlayCount
 } from "@/scripts/useGameStore.js";
 import {
   activeCoins, activeExp, addCoin, comboClicks,
@@ -43,7 +43,9 @@ import {addExp} from "@/scripts/level.js";
 let blinkInterval = null
 let lookInterval = null
 let isDragging = false
-
+let vibrateTimer = null
+const isFlips = ref(false)
+const isEggShaking = ref(false)
 
 function getHornAsset(level) {
   if (level >= 50) return `${characterPath.value}/horns/50lvl.webp?v=${APP_VERSION}`
@@ -155,6 +157,58 @@ function updateClock() {
 
 let clockInterval = null;
 
+
+function handleEggClick() {
+  // Начисляем опыт за один клик
+  addExp(0.4)
+  console.log(gameData.exp)
+  // Если сальто уже играет, игнорируем повторный клик
+  if (isFlips.value || isEggShaking.value) return
+
+  // Случайный выбор: сальто (25%) или короткая тряска (75%)
+  const randomChance = Math.random()
+  if (randomChance < 0.25) {
+    isFlips.value = true
+    setTimeout(() => {
+      isFlips.value = false
+    }, 750) // Длительность сальто строго по таймеру анимации
+  } else {
+    isEggShaking.value = true
+
+    // Короткая тряска длится 0.4 секунды и сама выключается
+    setTimeout(() => {
+      isEggShaking.value = false
+    }, 400)
+  }
+}
+
+let comboHideTimer = null
+let comboTimer = null
+function handleCharacterClick() {
+  isVibrating.value = true
+  if (comboHideTimer) clearTimeout(comboHideTimer)
+  if (vibrateTimer) clearTimeout(vibrateTimer)
+  if (comboTimer) clearTimeout(comboTimer)
+
+  vibrateTimer = setTimeout(() => {
+    isVibrating.value = false
+  }, 400)
+  triggerPop()
+  isComboAnimating.value = true
+  if (gameData.level > 1) {
+    comboClicks.value++
+  }
+  comboHideTimer = setTimeout(() => {
+    isComboAnimating.value = false
+  }, 800)
+  comboTimer = setTimeout(() => {
+    comboClicks.value = 0
+    comboMultiplier.value = 1
+  }, 900)
+
+}
+
+
 onMounted(async () => {
   if (window.Telegram?.WebApp) {
     const tg = window.Telegram.WebApp
@@ -185,7 +239,7 @@ onMounted(async () => {
 
   if (!isTutorialCompleted.value) {
     // Если уровень уже 2-й (или выше, но обучение еще не завершено)
-    if (gameData.level>2){
+    if (gameData.level > 2) {
       tutorialStep.value = 0 // Исправлено: работаем через .value
       localStorage.setItem('tutorial_completed', 'true')
       gameData.tutorialCompleted = true
@@ -208,7 +262,11 @@ onMounted(async () => {
       addToCart('shampoo');
     }
   }
-
+  if (localStorage.getItem('pending_level_up') === 'true') {
+    localStorage.removeItem('pending_level_up');
+    // Небольшая задержка, чтобы компонент успел смонтироваться и очередь статусов отработала корректно
+    showStatus('levelUp');
+  }
 })
 
 onUnmounted(() => {
@@ -245,46 +303,6 @@ const pumpkinAnimation = (event) => {
   }, 200)
 }
 
-const isFlips = ref(false)
-const isEggShaking = ref(false)
-
-function handleEggClick() {
-  // Начисляем опыт за один клик
-  addExp(0.4)
-  console.log(gameData.exp)
-  // Если сальто уже играет, игнорируем повторный клик
-  if (isFlips.value || isEggShaking.value) return
-
-  // Случайный выбор: сальто (25%) или короткая тряска (75%)
-  const randomChance = Math.random()
-  if (randomChance < 0.25) {
-    isFlips.value = true
-    setTimeout(() => {
-      isFlips.value = false
-    }, 750) // Длительность сальто строго по таймеру анимации
-  } else {
-    isEggShaking.value = true
-
-    // Короткая тряска длится 0.4 секунды и сама выключается
-    setTimeout(() => {
-      isEggShaking.value = false
-    }, 400)
-  }
-}
-
-function handleCharacterClick() {
-  isVibrating.value = true
-
-  setTimeout(() => {
-    isVibrating.value = false
-  }, 400)
-
-  triggerPop()
-
-  if (gameData.level > 1) {
-    comboClicks.value++
-  }
-}
 
 </script>
 
@@ -292,7 +310,7 @@ function handleCharacterClick() {
   <div
       :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000 relative', gameData.sleep ? 'bg-linear-to-r from-blue-900 via-blue-800 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']">
 
-    <PetHeaderMenu class="mb-1" />
+    <PetHeaderMenu class="mb-1"/>
 
     <!-- Холст -->
     <div class="relative flex justify-center w-full">
@@ -310,19 +328,20 @@ function handleCharacterClick() {
         <!-- Фон локации -->
         <div class="absolute inset-0  pointer-events-none transition-all duration-1000 ease-in-out "
              :class="gameData.sleep ? 'brightness-30' : 'brightness-100'">
-        <div v-show="location==='home' || location === 'food'">
+          <div v-show="location==='home' || location === 'food'">
 
-          <img
+            <img
 
-              :src="`/location/home.webp?v=${APP_VERSION}`"
-              fetchpriority="high"
-              decoding="sync"
-              class="w-[320px] h-[270px] relative z-5"
+                :src="`/location/home.webp?v=${APP_VERSION}`"
+                fetchpriority="high"
+                decoding="sync"
+                class="w-[320px] h-[270px] relative z-5"
 
-          />
+            />
 
-          <img :src="`/location/${gameData.season}.webp?v=${APP_VERSION}`" id="season-bg" alt="Season background" class="absolute top-0 z-0 w-[320px] h-[270px]">
-        </div>
+            <img :src="`/location/${gameData.season}.webp?v=${APP_VERSION}`" id="season-bg" alt="Season background"
+                 class="absolute top-0 z-0 w-[320px] h-[270px]">
+          </div>
 
           <img
               v-show="location==='bath'"
@@ -343,8 +362,6 @@ function handleCharacterClick() {
         >
           {{ currentTime }}
         </div>
-
-
 
 
         <div class="relative flex items-center justify-center p-12">
@@ -402,11 +419,10 @@ function handleCharacterClick() {
         </div>
 
 
-
-          <CloudMessage />
+        <CloudMessage/>
 
         <!-- Монетки / Опыт -->
-        <CoinsAndXP v-if="gameData.level>1" />
+        <CoinsAndXP v-if="gameData.level>1"/>
         <Status
             :class="[1,3,4,7, 8].includes(tutorialStep)? 'z-210' : ''"
             v-if="activeStatus.show"
@@ -431,7 +447,7 @@ function handleCharacterClick() {
                gameData.sleep ? 'brightness-30' : 'brightness-100',[1,2,3,4, 7, 8].includes(tutorialStep) ? ' z-205 ' : ''
 
              ]"
-                >
+        >
 
           <div v-show="gameData.sleep"
                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-40">
@@ -440,14 +456,15 @@ function handleCharacterClick() {
           </div>
 
           <!-- Табличка с именем -->
-          <Nameplate />
+          <Nameplate/>
 
           <!-- Персонаж (исходный контейнер w-45 h-45, ничего не сжимается) -->
-          <div v-if="gameData.level>1" class="absolute flex justify-center items-center w-45 h-45 pointer-events-none" :class="[isPopping ? 'animate-pop' : '']">
+          <div v-if="gameData.level>1" class="absolute flex justify-center items-center w-45 h-45 pointer-events-none"
+               :class="[isPopping ? 'animate-pop' : '']">
 
             <!-- 🎯 Точечная кликабельная зона поверх персонажа (размер w-24 h-24, клик работает строго по центру) -->
             <div
-                @click="handleCharacterClick"
+                @pointerdown="handleCharacterClick"
                 class="absolute z-30 w-20 h-20  top-25 cursor-pointer pointer-events-auto"
             ></div>
 
@@ -478,15 +495,20 @@ function handleCharacterClick() {
                   :class="bodyType === 'fat' ? 'opacity-100' : 'opacity-0'"
               />
             </div>
-            <img v-show="gameData.old_1_phase" :src="`${characterPath}/wrinkles_1_phase.webp?v=${APP_VERSION}`" class="absolute w-45 z-5 pointer-events-none" alt="">
-            <img v-show="gameData.old_2_phase" :src="`${characterPath}/wrinkles_2_phase.webp?v=${APP_VERSION}`" class="absolute w-45 z-5 pointer-events-none" alt="">
+            <img v-show="gameData.old_1_phase" :src="`${characterPath}/wrinkles_1_phase.webp?v=${APP_VERSION}`"
+                 class="absolute w-45 z-5 pointer-events-none" alt="">
+            <img v-show="gameData.old_2_phase" :src="`${characterPath}/wrinkles_2_phase.webp?v=${APP_VERSION}`"
+                 class="absolute w-45 z-5 pointer-events-none" alt="">
 
             <img :src="getHornAsset(gameData.level)" class="absolute  w-45 pointer-events-none" alt="">
-            <img v-show="gameData.sick" :src="`${characterPath}/drunk.webp?v=${APP_VERSION}`" class="absolute z-6 w-45 pointer-events-none" alt="">
-            <img v-show="gameData.sick && bodyType==='fat'" :src="`${characterPath}/sick_fat.webp?v=${APP_VERSION}`" class="absolute w-45 z-10 pointer-events-none" alt="">
-            <img v-show="gameData.sick && bodyType!=='fat'" :src="`${characterPath}/sick.webp?v=${APP_VERSION}`" class="absolute w-45 z-10 pointer-events-none" alt="">
+            <img v-show="gameData.sick" :src="`${characterPath}/drunk.webp?v=${APP_VERSION}`"
+                 class="absolute z-6 w-45 pointer-events-none" alt="">
+            <img v-show="gameData.sick && bodyType==='fat'" :src="`${characterPath}/sick_fat.webp?v=${APP_VERSION}`"
+                 class="absolute w-45 z-10 pointer-events-none" alt="">
+            <img v-show="gameData.sick && bodyType!=='fat'" :src="`${characterPath}/sick.webp?v=${APP_VERSION}`"
+                 class="absolute w-45 z-10 pointer-events-none" alt="">
 
-            <div v-if="!blink && !gameData.sleep" class="pointer-events-none">
+            <div v-if="!blink && !gameData.sleep && !isVibrating" class="pointer-events-none">
               <div v-show="lowEnergy" class="absolute inset-0 flex justify-center items-center z-10">
                 <img :src="`${characterPath}/bags_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
                 <img :src="`${characterPath}/bags_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
@@ -508,9 +530,12 @@ function handleCharacterClick() {
                 </div>
               </div>
             </div>
-
-            <img v-else :src="`${characterPath}/eye_close.webp?v=${APP_VERSION}`" class="absolute w-45 pointer-events-none" alt="">
-            <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''" class="absolute w-45 pointer-events-none" alt="">
+            <img v-else-if="isVibrating" :src="`${characterPath}/eye_close.webp?v=${APP_VERSION}`"
+                 class="absolute w-45 pointer-events-none" alt="">
+            <img v-else-if="!isVibrating" :src="`${characterPath}/eye_close.webp?v=${APP_VERSION}`"
+                 class="absolute w-45 pointer-events-none" alt="">
+            <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''" class="absolute w-45 pointer-events-none"
+                 alt="">
           </div>
           <!-- Яйцо: сальто всегда доигрывает до конца, тряска останавливается при отпускании -->
           <div
@@ -571,8 +596,6 @@ function handleCharacterClick() {
 </template>
 
 <style scoped>
-
-
 
 
 .body-fade {
@@ -645,7 +668,6 @@ function handleCharacterClick() {
 }
 
 
-
 @keyframes popCharacter {
   0% {
     transform: scale(1);
@@ -682,7 +704,6 @@ function handleCharacterClick() {
 .pupils-look {
   transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
-
 
 
 @keyframes sleep-breath {
@@ -769,18 +790,30 @@ function handleCharacterClick() {
 
 /* Дерганье как яйцо в CS2 (ускоряющаяся тряска с наклонами) */
 @keyframes csEggShake {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(-10px, 0) rotate(-12deg); }  /* Сильнее влево */
-  50% { transform: translate(0, 0) rotate(0deg); }      /* Возврат в центр */
-  75% { transform: translate(10px, 0) rotate(12deg); }   /* Сильнее вправо */
-  100% { transform: translate(0, 0) rotate(0deg); }
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-10px, 0) rotate(-12deg);
+  }
+  /* Сильнее влево */
+  50% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  /* Возврат в центр */
+  75% {
+    transform: translate(10px, 0) rotate(12deg);
+  }
+  /* Сильнее вправо */
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
 }
 
 .animate-cs-egg {
   animation: csEggShake 0.35s ease-in-out infinite;
   transform-origin: center center;
 }
-
 
 
 </style>

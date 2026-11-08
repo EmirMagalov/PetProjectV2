@@ -240,13 +240,22 @@ export function startGame() {
     initLevel()
 }
 
+export function earned_exp (){
+    return Math.max(1, Math.floor(gameData.level + (score.value / 200)))
+}
+export function earned_coins (){
+    return Math.max(1, Math.floor(gameData.level + (score.value / 50)))
+}
 function triggerVictory() {
     if (isVictoryTriggered) return
     isVictoryTriggered = true
-    addCoin(Math.floor(score.value / 5))
-    addExp(Math.floor(score.value / 10))
+    const leftoverMoves = Math.max(0, moves.value)
+    const moveBonusScore = leftoverMoves * 150
+    const finalScoreForStars = score.value + moveBonusScore
+    addCoin(earned_coins())
+    addExp(earned_exp());
 
-    const earnedStars = calculateStars(level.value, score.value, moves.value || calculatedMoves)
+    const earnedStars = calculateStars(level.value, finalScoreForStars, moves.value || calculatedMoves)
     if (!gameData.match3_stars) {
         gameData.match3_stars = {}
     }
