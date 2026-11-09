@@ -5,7 +5,7 @@ import {
     isAnimating, isBadMood, isBothStatsZero, isCoinPopping,
     isVibrating,
     lastFedItem, nextTutorialStep, FatPlayCount, sameFoodCount,
-    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount, isTutorialCompleted
+    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount, isTutorialCompleted, maxLives
 
 }
     from "@/scripts/useGameStore.js";
@@ -73,8 +73,7 @@ export function otherFeedPet(foodId) {
 
 
         if (foodId === "life_serum") {
-
-            gameData.lives = Math.min(gameData.lives, gameData.lives + 1)
+            gameData.lives = Math.min(maxLives.value, gameData.lives + 1)
             showStatus('lifeGain')
         }
         if (foodId === "health_serum") {

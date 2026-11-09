@@ -17,13 +17,13 @@ const activeItems = computed(() => {
 
 <template>
   <!-- Внешний позиционирующий контейнер -->
-  <div class="absolute -top-40 inset-0 flex items-center justify-center pointer-events-none opacity-80 overflow-visible z-30">
+  <div class="absolute -top-45 inset-0 flex items-center justify-center pointer-events-none opacity-80 overflow-visible z-30">
 
     <!-- Vue Transition с классами для перелета -->
     <Transition name="cloud-fly">
       <div
           v-show="cloudShow && !gameData.sleep"
-          class="relative flex items-center justify-center z-50 pointer-events-auto"
+          class="relative flex items-center justify-center z-50 pointer-events-auto cloud-hover"
       >
         <!-- Само облако -->
         <img :src="`/gamePlay/cloud_message.webp?v=${APP_VERSION}`" class="relative w-30 block" alt="cloud">
@@ -41,23 +41,23 @@ const activeItems = computed(() => {
         </div>
 
         <!-- Контейнер для иконки внутри облака -->
-<!--        <div class="absolute inset-0 flex gap-2 items-center justify-center z-50">-->
+        <!--        <div class="absolute inset-0 flex gap-2 items-center justify-center z-50">-->
 
-<!--          &lt;!&ndash; Hunger (Бургер) &ndash;&gt;-->
-<!--          <div v-show="showHunger" class="flex items-center justify-center w-9">-->
-<!--            <img :src="`/food/burger.webp?v=${APP_VERSION}`" class="w-full object-contain" alt="hunger">-->
-<!--          </div>-->
+        <!--          <!– Hunger (Бургер) –>-->
+        <!--          <div v-show="showHunger" class="flex items-center justify-center w-9">-->
+        <!--            <img :src="`/food/burger.webp?v=${APP_VERSION}`" class="w-full object-contain" alt="hunger">-->
+        <!--          </div>-->
 
-<!--          &lt;!&ndash; Energy (Энергия) &ndash;&gt;-->
-<!--          <div v-show="energyFull || lowEnergy" class="flex items-center justify-center gap-1 w-10">-->
-<!--            <img-->
-<!--                :src="lowEnergy ? `/gamePlay/energy_low.webp?v=${APP_VERSION}` : ''"-->
-<!--                class="w-full object-contain"-->
-<!--                alt="energy"-->
-<!--            >-->
-<!--          </div>-->
+        <!--          <!– Energy (Энергия) –>-->
+        <!--          <div v-show="energyFull || lowEnergy" class="flex items-center justify-center gap-1 w-10">-->
+        <!--            <img-->
+        <!--                :src="lowEnergy ? `/gamePlay/energy_low.webp?v=${APP_VERSION}` : ''"-->
+        <!--                class="w-full object-contain"-->
+        <!--                alt="energy"-->
+        <!--            >-->
+        <!--          </div>-->
 
-<!--        </div>-->
+        <!--        </div>-->
       </div>
     </Transition>
 
@@ -84,6 +84,20 @@ const activeItems = computed(() => {
 .cloud-fly-leave-to {
   transform: translateX(-200px) scale(0.6);
   opacity: 0;
+}
+
+/* 🔄 Бесконечное покачивание влево-вправо (плавание облака) */
+@keyframes floatX {
+  0%, 100% {
+    transform: translateX(0px) translateY(0px);
+  }
+  50% {
+    transform: translateX(5px) translateY(-2px); /* Смещается вправо и чуть вверх */
+  }
+}
+
+.cloud-hover {
+  animation: floatX 3s ease-in-out infinite;
 }
 
 /* ⏱️ Дождь появляется с задержкой 1.1с, но при исчезновении контейнера (.cloud-fly-leave-active) сбрасывается мгновенно */

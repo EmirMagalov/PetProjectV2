@@ -161,7 +161,6 @@ let clockInterval = null;
 function handleEggClick() {
   // Начисляем опыт за один клик
   addExp(0.4)
-  console.log(gameData.exp)
   // Если сальто уже играет, игнорируем повторный клик
   if (isFlips.value || isEggShaking.value) return
 

@@ -137,9 +137,7 @@ watch(
         const isFullEnergy = energy >= 80
         const hasIssues = isLowEnergy || isHungry || sick || lives <= 1
 
-        // if (gameData.level >= 80 && gameData.lives > 2) {
-        //     gameData.lives = 2 // Обрезаем до нового максимума в 2 жизни
-        // }
+
         if (gameData.level < 10) {
             gameData.equippedHead = null
             gameData.equippedClothes = null
@@ -257,7 +255,7 @@ watch([cloudShow, statusFoam,location], ([isCloud, hasFoam]) => {
             actionTimer = setInterval(() => {
                 // Проверяем, что условия всё еще актуальны
                 if (cloudShow.value && statusFoam.value) {
-                    foamOffset.value += 1.5 // Пена плавно сползает вниз
+                    foamOffset.value += 0.8 // Пена плавно сползает вниз
 
                     // Когда пена сместилась достаточно низко (до 60px) — смыв завершен
                     if (foamOffset.value >= 60) {

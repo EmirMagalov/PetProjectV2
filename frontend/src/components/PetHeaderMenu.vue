@@ -6,7 +6,7 @@ import {
   isBothStatsZero,
   isCoinPopping,
   isExpPopping,
-  isPopping, tutorialStep,
+  isPopping, maxLives, tutorialStep,
   ZeroPlayCount
 } from "@/scripts/useGameStore.js";
 import ProgressBar from "@/components/ProgressBar.vue";
@@ -194,7 +194,7 @@ const getClipInset = (progress) => {
         <div class="absolute bottom-0 left-5 flex items-center gap-2 w-full">
           <div class="flex justify-center items-center gap-1.5 pb-1">
             <img
-                v-for="i in gameData.level<80?3:2"
+                v-for="i in maxLives"
                 :key="i"
                 :src="i <= gameData.lives ? `/gamePlay/heart.webp?v=${APP_VERSION}` : `/gamePlay/heart_empty.webp?v=${APP_VERSION}`"
                 :class="i <= gameData.lives && gameData.lives<=1 ? 'animate-pulse' : ''"

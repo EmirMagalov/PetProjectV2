@@ -5,7 +5,7 @@ import {
     colorFoam,
     currentDraggedItem,
     dropZoneRef, energyFull, foamOffset,
-    gameData, nextTutorialStep, showTongue,
+    gameData, maxLives, nextTutorialStep, showTongue,
     statusFoam,
     statusShower
 } from "@/scripts/useGameStore.js";
@@ -154,7 +154,7 @@ export function handleEnd(itemType, Item) {
                 feedPet(Item.id)
                 nextTutorialStep()
             } else if (Item) {
-                const isFullLives = (Item.id === 'life_serum' && gameData.lives >= gameData.lives)
+                const isFullLives = (Item.id === 'life_serum' && gameData.lives >= maxLives.value)
                 const isUnneededHealth = (Item.id === 'health_serum' && !gameData.sick)
                 const isUnneededEnergy = (Item.id === 'energy_serum' && gameData.energy >= 80)
 

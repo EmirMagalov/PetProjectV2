@@ -131,7 +131,6 @@ export async function initGameData() {
             }
             // ... (твой существующий маппинг gameData.name, level, coins и т.д.) ...
             gameData.name = serverData.name && serverData.name.trim() ? serverData.name : 'store.pet_name_placeholder'
-            console.log(gameData.name)
             gameData.level = serverData.level
             gameData.exp = serverData.exp
             gameData.coins = serverData.coins
@@ -169,6 +168,9 @@ export async function initGameData() {
             if (serverData.language) {
                 gameData.language = serverData.language
                 // localStorage.setItem('user-locale', serverData.language)
+            }
+            if (gameData.level >= 80 && gameData.lives > 2) {
+                gameData.lives = 2;
             }
 
             // 👈 ДОБАВЛЯЕМ ЭТУ ПРОВЕРКУ:
