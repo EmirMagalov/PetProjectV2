@@ -11,7 +11,7 @@ import {
   isLevelPassed, isShuffling, isVictoryTriggered, kivanoImage, lemonImage, level,
   levelButtonsRef, levelProgressPercent, moves, nextLevelOrRestart,
   obstacleImage, onMouseDown, onTouchEnd,
-  onTouchMove, onTouchStart, rainbowImage, remainingTargets, restartLevel, // 🌟 И restartLevel сюда
+  onTouchMove, onTouchStart, rainbowImage, remainingChains, remainingObstacles, remainingTargets, restartLevel, // 🌟 И restartLevel сюда
   score,
   scrollToCurrentLevel, selectLevel, startGame, stoneImage,
   updateBoardSize
@@ -64,7 +64,7 @@ onUnmounted(() => {
     <PetHeaderMenu/>
 
     <div class="flex flex-col items-center justify-center text-white select-none px-2 relative ">
-      <RouterLink to="/" class="z-20 absolute top-4 -left-2 opacity-80 ">
+      <RouterLink to="/" class="z-20 absolute top-4 -left-2 opacity-65 ">
         <div
             class="bg-[#fff6ef] ml-3 h-12 w-12 flex flex-col items-center justify-center p-0.5 rounded-xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer shadow-inner">
           <div class="w-8 h-8 bg-contain bg-no-repeat bg-center"
@@ -75,46 +75,69 @@ onUnmounted(() => {
       <!-- Шапка игры -->
 
       <div class="w-full  max-w-[440px]">
-        <div class="bg-gradient-to-r h-21 from-pink-300 to-pink-400 rounded-2xl border-2 border-amber-50 px-4 pt-3 pb-2 text-lg font-bold shadow-md flex flex-col justify-center">
+        <div
+            class="bg-gradient-to-r h-21 from-pink-300 to-pink-400 rounded-2xl border-2 border-amber-50 px-4 pt-3 pb-2 text-lg font-bold shadow-md flex flex-col justify-center">
           <div>
             <div class="flex items-center justify-between px-8 mb-1">
 
               <!-- Осталось ходов (фиксируем ширину, чтобы цифры не двигали макет) -->
-              <div class="flex flex-col items-center w-16">
-                <span class="text-xs text-pink-900 font-extrabold uppercase tracking-wider">{{ $t('match3.moves') }}</span>
+              <div class="flex flex-col items-center w-10">
+                <span class="text-xs text-pink-900 font-extrabold uppercase tracking-wider">{{
+                    $t('match3.moves')
+                  }}</span>
                 <span class="text-3xl text-shadow-md text-shadow-red-500 tabular-nums">{{ moves }}</span>
               </div>
 
-              <!-- Цель уровня (коробки / варенье) — по центру -->
-              <div class="text-cyan-400 text-shadow-sm rounded-2xl bg-amber-100 px-4 py-1 text-shadow-black text-sm h-[52px] flex items-center justify-center min-w-[64px] border border-amber-200">
+              <!-- Цель уровня (коробки / варенье / цепи) — по центру -->
+              <div
+                  class="text-cyan-400 text-shadow-sm rounded-2xl bg-amber-100 px-3 py-1 text-shadow-black text-sm h-[52px] flex items-center justify-center gap-2 min-w-15 border border-amber-200">
                 <div v-if="(!isGameOver && !isLevelPassed) && gameState !== 'MENU' && !isVictoryTriggered"
-                     class="relative flex items-center justify-center">
-                  <img
-                      :src="level === 1
-                    ? `/gamePlay/match_fruit_icon.webp`
-                    : (isJellyLevel ? `/food/strawberry_jam.webp` : `/gamePlay/a_crate_of_fruit.webp`)"
-                      class="object-contain"
-                      :class="level === 1 ? 'w-10' : 'w-8'"
-                      alt=""
-                  />
-                  <span
-                      v-show="level > 1"
-                      class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
-                  {{ remainingTargets }}
-                </span>
+                     class="flex items-center gap-3">
+
+                  <!-- 1. Если это уровень варенья -->
+                  <div v-if="isJellyLevel" class="relative flex items-center justify-center">
+                    <img src="/food/strawberry_jam.webp" class="object-contain w-8" alt="jelly" />
+                    <span class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
+        {{ remainingTargets }}
+      </span>
+                  </div>
+
+                  <template v-else>
+                    <!-- 2. Если есть коробки / препятствия -->
+                    <div v-if="remainingObstacles > 0" class="relative flex items-center justify-center">
+                      <img src="/gamePlay/a_crate_of_fruit.webp" class="object-contain w-8" alt="obstacle" />
+                      <span class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
+          {{ remainingObstacles }}
+        </span>
+                    </div>
+
+                    <!-- 3. Если есть закрытые цепями фрукты -->
+                    <div v-if="remainingChains > 0" class="relative flex items-center justify-center">
+                      <img src="/gamePlay/lock.webp" class="object-contain w-8" alt="chain" />
+                      <span class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
+          {{ remainingChains }}
+        </span>
+                    </div>
+                  </template>
+
                 </div>
               </div>
 
               <!-- Текущий счет (фиксируем ширину и выравниваем по центру/правому краю) -->
-              <div class="flex flex-col items-center w-20">
-                <span class="text-xs text-pink-900 font-extrabold uppercase tracking-wider">{{ $t('match3.score') }}</span>
-                <span class="text-2xl text-shadow-md text-shadow-yellow-600 text-yellow-100 tabular-nums">{{ score }}</span>
+              <div class="flex flex-col items-center w-10">
+                <span class="text-xs text-pink-900 font-extrabold uppercase tracking-wider">{{
+                    $t('match3.score')
+                  }}</span>
+                <span class="text-2xl text-shadow-md text-shadow-yellow-600 text-yellow-100 tabular-nums">{{
+                    score
+                  }}</span>
               </div>
 
             </div>
 
             <!-- 📊 Прогресс-бар уровня -->
-            <div class="w-full bg-black/20 rounded-full h-3.5 p-0.5 mb-1 overflow-hidden border border-white/30 shadow-inner">
+            <div
+                class="w-full bg-black/20 rounded-full h-3.5 p-0.5 mb-1 overflow-hidden border border-white/30 shadow-inner">
               <div
                   class="bg-gradient-to-r from-yellow-400 to-amber-500 h-full rounded-full transition-all duration-300 ease-out shadow-sm"
                   :style="{ width: levelProgressPercent + '%' }"
@@ -221,6 +244,7 @@ onUnmounted(() => {
             <img
                 v-else-if="cell.isLemon"
                 :src="lemonImage"
+                :class="{ 'lemon-wave-flash': cell.isLemonWave }"
                 class="animate-bounce brightness-140 object-contain drop-shadow-md pointer-events-none"
                 :style="{ width: (cellSize * 0.9) + 'px', height: (cellSize * 0.9) + 'px' }"
                 alt="lemon"
@@ -246,13 +270,13 @@ onUnmounted(() => {
               :src="kivanoImage"
               class="absolute object-contain drop-shadow-2xl kivano-flying-anim"
               :style="{
-                width: (cellSize * 0.9) + 'px',
-                height: (cellSize * 0.9) + 'px',
-                '--start-x': (flyingKivano.startX * cellStep + gridOffsetX) + 'px',
-                '--start-y': (flyingKivano.startY * cellStep + gridOffsetY) + 'px',
-                '--end-x': (flyingKivano.endX * cellStep + gridOffsetX) + 'px',
-                '--end-y': (flyingKivano.endY * cellStep + gridOffsetY) + 'px',
-              }"
+        width: (cellSize * 0.9) + 'px',
+        height: (cellSize * 0.9) + 'px',
+        left: (flyingKivano.startX * cellStep + 5 + gridOffsetX) + 'px',
+        top: (flyingKivano.startY * cellStep + 5 + gridOffsetY) + 'px',
+        '--dx': ((flyingKivano.endX - flyingKivano.startX) * cellStep) + 'px',
+        '--dy': ((flyingKivano.endY - flyingKivano.startY) * cellStep) + 'px',
+      }"
               alt="flying kivano"
           />
         </div>
@@ -260,7 +284,7 @@ onUnmounted(() => {
         <!-- Плашка -->
         <transition name="badge-fade" :key="badgeKey">
           <div
-              v-if="activeBadgeText"
+              v-if="activeBadgeText && gameState === 'PLAYING' && !isLevelPassed && !isGameOver"
               class="absolute inset-0 z-40 pointer-events-none flex items-center justify-center overflow-hidden"
           >
             <div
@@ -271,7 +295,6 @@ onUnmounted(() => {
             </div>
           </div>
         </transition>
-
         <!-- Победный экран -->
         <transition name="badge-fade">
           <div
@@ -408,6 +431,8 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+
+
 .candy-move {
   transition: transform 0.4s ease-in-out;
 }
@@ -526,33 +551,46 @@ onUnmounted(() => {
   animation: rainbowBlink 0.3s ease-in-out 3; /* мигает 3 раза */
   z-index: 25 !important;
 }
+@property --progress {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: false;
+}
 
+@property --arc {
+  syntax: '<length>';
+  initial-value: 0px;
+  inherits: false;
+}
 @keyframes kivanoFlight {
   0% {
-    transform: translate(var(--start-x), var(--start-y)) scale(1) rotate(0deg);
-  }
-  40% {
-    /* Быстро поднимаемся и проходим большую часть пути */
+    --progress: 0;
+    --arc: 0px;
     transform: translate(
-        calc(var(--start-x) + (var(--end-x) - var(--start-x)) * 0.55),
-        calc(var(--start-y) + (var(--end-y) - var(--start-y)) * 0.55 - 40px)
-    ) scale(1.15) rotate(140deg);
+        calc(var(--dx) * var(--progress)),
+        calc(var(--dy) * var(--progress) - var(--arc))
+    ) scale(1) rotate(0deg);
   }
-  70% {
-    /* Начинаем плавно снижаться */
+  50% {
+    --progress: 0.5;
+    --arc: 45px;
     transform: translate(
-        calc(var(--start-x) + (var(--end-x) - var(--start-x)) * 0.82),
-        calc(var(--start-y) + (var(--end-y) - var(--start-y)) * 0.82 - 18px)
-    ) scale(1.08) rotate(260deg);
+        calc(var(--dx) * var(--progress)),
+        calc(var(--dy) * var(--progress) - var(--arc))
+    ) scale(1.15) rotate(180deg);
   }
   100% {
-    /* Медленный и мягкий финальный подлёт */
-    transform: translate(var(--end-x), var(--end-y)) scale(1) rotate(360deg);
+    --progress: 1;
+    --arc: 0px;
+    transform: translate(
+        calc(var(--dx) * var(--progress)),
+        calc(var(--dy) * var(--progress) - var(--arc))
+    ) scale(1) rotate(360deg);
   }
 }
 
 .kivano-flying-anim {
-  animation: kivanoFlight 1.6s cubic-bezier(0.33, 0.1, 0.25, 1) forwards;
+  animation: kivanoFlight 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   will-change: transform;
 }
 
@@ -570,4 +608,27 @@ onUnmounted(() => {
 .animate-bounce {
   animation: bounce 0.9s infinite;
 }
+
+@keyframes lemonWaveGlow {
+  0% {
+    transform: scale(1);
+    background-color: rgba(253, 224, 71);
+    box-shadow: 0 0 10px #facc15;
+  }
+  50% {
+    transform: scale(1.2);
+    background-color: rgba(253, 224, 71);
+    box-shadow: 0 0 25px #facc15, inset 0 0 15px #fff;
+  }
+  100% {
+    transform: scale(1);
+    background-color: transparent;
+  }
+}
+
+.lemon-wave-flash {
+  animation: lemonWaveGlow 0.4s ease-out forwards;
+  z-index: 10;
+}
+
 </style>

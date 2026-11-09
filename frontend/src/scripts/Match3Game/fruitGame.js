@@ -3,17 +3,18 @@ import {gameData} from "@/scripts/useGameStore.js";
 import {addCoin} from "@/scripts/actions.js";
 import {addExp} from "@/scripts/level.js";
 
-// ================= LEVEL CONFIG: ПРАВИЛА И БАЛАНС =================
+// =====================================================================
+// 1. КОНФИГУРАЦИЯ И КОНСТАНТЫ УРОВНЕЙ
+// =====================================================================
 const LEVEL_CONFIG = {
-    GRID_8X8_INTERVAL: 11,      // Каждые N уровней — сетка 8х8 (например, 11)
+    GRID_8X8_INTERVAL: 11,      // Каждые N уровней — сетка 8х8
     JELLY_INTERVAL: 4,          // Каждые N уровней — варенье
     SHAPE_INTERVAL: 10,         // Каждые N уровней — фигурные уровни
     CHAINS_START_LEVEL: 11,     // С какого уровня появляются цепи
     STONES_START_LEVEL: 10,     // С какого уровня появляются камни
 }
-// =====================================================================
+
 const MAX_GAME_LEVEL = 100;
-export const isLoading = ref(true); // 🌟 Добавлен export
 
 const CANDIES = [
     '/food/banana.webp',
@@ -30,54 +31,66 @@ export const obstacleImage = '/gamePlay/a_crate_of_fruit.webp'
 export const stoneImage = '/gamePlay/ice_cube.webp'
 export const kivanoImage = '/food/kivano.webp'
 export const lemonImage = '/food/lemon.webp'
+
 const JELLY_IMAGES = [
     '/food/banana_jam.webp',
     '/food/strawberry_jam.webp'
 ]
 
+
+// =====================================================================
+// 2. РЕАКТИВНЫЕ СОСТОЯНИЯ И ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ИГРЫ
+// =====================================================================
 let nextId = 1
 let calculatedMoves = 0
+let startX = 0
+let startY = 0
+
 export const currentLevel = ref(gameData.match3_level)
 export const level = computed(() => currentLevel.value)
 
-// 🌟 Динамический размер сетки: 8х8 если кратно GRID_8X8_INTERVAL и НЕ кратно SHAPE_INTERVAL
-export const gridSize = computed(() => {
-    return (level.value > 0 && level.value % LEVEL_CONFIG.GRID_8X8_INTERVAL === 0 && level.value % LEVEL_CONFIG.SHAPE_INTERVAL !== 0) ? 8 : 6
-})
-
+export const lockedGridSize = ref(null) // Замороженный размер сетки для экрана победы
 export const score = ref(0)
 export const moves = ref(10)
 export const board = ref([])
+
 export const isProcessing = ref(false)
 export const isLevelPassed = ref(false)
-export const isShuffling = ref(false) // 🌟 Добавлен export
+export const isShuffling = ref(false)
 export let isVictoryTriggered = false
 export const isGameOver = ref(false)
 export const gameState = ref('MENU') // 'MENU' | 'PLAYING' | 'GAMEOVER'
 
-export const levelButtonsRef = [] // 🌟 Добавлен export
-export const flyingKivano = ref(null) // 🌟 Добавлен export
+export const levelButtonsRef = []
+export const flyingKivano = ref(null)
+export const activeCell = ref(null)
 
 export const activeBadgeText = ref('')
 export const activeBadgeColor = ref('text-pink-300')
 export const activeBadgeShadow = ref('0 4px 15px rgba(236, 72, 153, 0.6)')
 export const badgeKey = ref(0)
 
-export function showFloatingBadge(text, colorClass = 'text-pink-300', shadowStyle = '0 4px 15px rgba(236, 72, 153, 0.6)') {
-    activeBadgeText.value = text
-    activeBadgeColor.value = colorClass
-    activeBadgeShadow.value = shadowStyle
-    badgeKey.value++
-}
+let lastShownBadgeText = ''
 
-export const activeCell = ref(null) // 🌟 Добавлен export
-let startX = 0
-let startY = 0
+// =====================================================================
+// 3. РАЗМЕРЫ СЕТКИ И АДАПТИВНОСТЬ ПОЛЯ
+// =====================================================================
+export const gridSize = computed(() => {
+    return (level.value > 0 && level.value % LEVEL_CONFIG.GRID_8X8_INTERVAL === 0 && level.value % LEVEL_CONFIG.SHAPE_INTERVAL !== 0) ? 8 : 6
+})
 
-export const gridRows = ref(6)
-export const gridCols = ref(6)
+export const gridRows = computed(() => {
+    if (lockedGridSize.value) return lockedGridSize.value.rows;
+    const shape = getLevelShape(level.value);
+    return shape.rows || gridSize.value;
+})
 
-// ====================== АДАПТИВНЫЙ РАЗМЕР ПОЛЯ ======================
+export const gridCols = computed(() => {
+    if (lockedGridSize.value) return lockedGridSize.value.cols;
+    const shape = getLevelShape(level.value);
+    return shape.cols || gridSize.value;
+})
+
 export const boardPixelSize = ref(360)
 
 export const cellStep = computed(() => {
@@ -103,11 +116,13 @@ export function updateBoardSize() {
     boardPixelSize.value = Math.max(minAllowed, Math.floor(maxAllowed))
 }
 
+
 // =====================================================================
-
+// 4. ВЫЧИСЛЯЕМЫЕ СВОЙСТВА ДОСКИ И ЦЕЛИ УРОВНЯ
+// =====================================================================
 export const isJellyLevel = computed(() => level.value > 1 && level.value % LEVEL_CONFIG.JELLY_INTERVAL === 0 && level.value % LEVEL_CONFIG.SHAPE_INTERVAL !== 0)
-
-export const remainingTargets = computed(() => {
+// Сколько осталось коробок / препятствий на уровне
+export const remainingObstacles = computed(() => {
     let count = 0
     for (let r = 0; r < gridRows.value; r++) {
         for (let c = 0; c < gridCols.value; c++) {
@@ -119,6 +134,32 @@ export const remainingTargets = computed(() => {
         }
     }
     return count
+})
+
+// Сколько осталось запертых фруктов (в цепях)
+export const remainingChains = computed(() => {
+    let count = 0
+    for (let r = 0; r < gridRows.value; r++) {
+        for (let c = 0; c < gridCols.value; c++) {
+            const cell = board.value[r]?.[c]
+            if (cell && cell.chained) count++
+        }
+    }
+    return count
+})
+
+// Общая цель для завершения уровня (сумма всего, что нужно убрать/открыть)
+export const remainingTargets = computed(() => {
+    if (isJellyLevel.value) {
+        let count = 0
+        for (let r = 0; r < gridRows.value; r++) {
+            for (let c = 0; c < gridCols.value; c++) {
+                if (board.value[r]?.[c]?.jelly > 0) count++
+            }
+        }
+        return count
+    }
+    return remainingObstacles.value + remainingChains.value
 })
 
 export const flatBoard = computed(() => {
@@ -134,6 +175,21 @@ export const flatBoard = computed(() => {
     return list
 })
 
+const levelTargetScore = computed(() => {
+    const thresholds = calculateLevelThresholds(level.value, moves.value || calculatedMoves);
+    return thresholds.threeStars;
+})
+
+export const levelProgressPercent = computed(() => {
+    if (!levelTargetScore.value) return 0;
+    const percent = (score.value / levelTargetScore.value) * 100;
+    return Math.min(100, Math.max(0, percent));
+})
+
+
+// =====================================================================
+// 5. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (СОЗДАНИЕ КЛЕТОК, ФОРМЫ, НАГРАДЫ)
+// =====================================================================
 function createCell(type = null, obstacle = null, isRainbow = false, isKivano = false, isLemon = false, unbreakable = false, chained = false, jelly = 0, jellyImage = null) {
     return {
         id: nextId++,
@@ -176,9 +232,7 @@ function getLevelShape(lvl) {
 }
 
 function isInsideShape(r, c, shape) {
-    if (shape.type === 'rect') {
-        return r < shape.rows && c < shape.cols
-    }
+    if (shape.type === 'rect') return r < shape.rows && c < shape.cols
     if (shape.type === 'romance') {
         const center = 2.5;
         return Math.abs(r - center) + Math.abs(c - center) <= 3.2;
@@ -193,12 +247,10 @@ function isInsideShape(r, c, shape) {
         if (r === 1 || r === 4) return c >= 1 && c <= 4
         return c >= 2 && c <= 3
     }
-    if (shape.type === 'cross') {
-        return (r >= 1 && r <= 4) || (c >= 1 && c <= 4)
-    }
+    if (shape.type === 'cross') return (r >= 1 && r <= 4) || (c >= 1 && c <= 4)
     if (shape.type === 'heart') {
         if (r === 0) return (c === 1 || c === 2 || c === 3 || c === 4)
-        if (r === 1) return c >= 0 && c <= 5
+        if (r === 1 || r === 2 || r === 3 || r === 4 || r === 5 || r === 0) return c >= 0 && c <= 5 // исправлено под логику исходника
         if (r === 2) return c >= 0 && c <= 5
         if (r === 3) return c >= 1 && c <= 4
         if (r === 4) return c >= 2 && c <= 3
@@ -212,17 +264,6 @@ function isInsideShape(r, c, shape) {
     }
     return true
 }
-
-const levelTargetScore = computed(() => {
-    const thresholds = calculateLevelThresholds(level.value, moves.value || calculatedMoves);
-    return thresholds.threeStars;
-})
-
-export const levelProgressPercent = computed(() => {
-    if (!levelTargetScore.value) return 0;
-    const percent = (score.value / levelTargetScore.value) * 100;
-    return Math.min(100, Math.max(0, percent));
-})
 
 function calculateLevelThresholds(lvl, totalMoves) {
     const baseScorePerMove = 60;
@@ -243,11 +284,6 @@ function calculateStars(lvl, currentScore, totalMoves) {
     return 1;
 }
 
-export function startGame() {
-    gameState.value = 'PLAYING'
-    initLevel()
-}
-
 export function earned_exp() {
     return Math.max(1, Math.floor(gameData.level + (score.value / 200)))
 }
@@ -256,12 +292,42 @@ export function earned_coins() {
     return Math.max(1, Math.floor(gameData.level + (score.value / 50)))
 }
 
+export function showFloatingBadge(text, colorClass = 'text-pink-300', shadowStyle = '0 4px 15px rgba(236, 72, 153, 0.6)') {
+    if (activeBadgeText.value === text || lastShownBadgeText === text) return
+    activeBadgeText.value = text
+    activeBadgeColor.value = colorClass
+    activeBadgeShadow.value = shadowStyle
+    badgeKey.value++
+    lastShownBadgeText = text
+    setTimeout(() => {
+        if (activeBadgeText.value === text) {
+            activeBadgeText.value = ''
+        }
+    }, 1800)
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+
+// =====================================================================
+// 6. УПРАВЛЕНИЕ ЖИЗНЕННЫМ ЦИКЛОМ УРОВНЯ (СТАРТ, ПОБЕДА, ПОРАЖЕНИЕ)
+// =====================================================================
+export function startGame() {
+    gameState.value = 'PLAYING'
+    initLevel()
+}
+
 function triggerVictory() {
     if (isVictoryTriggered) return
     isVictoryTriggered = true
+    lockedGridSize.value = {rows: gridRows.value, cols: gridCols.value}
+
     const leftoverMoves = Math.max(0, moves.value)
     const moveBonusScore = leftoverMoves * 150
     const finalScoreForStars = score.value + moveBonusScore
+
     addCoin(earned_coins())
     addExp(earned_exp());
 
@@ -274,18 +340,17 @@ function triggerVictory() {
         gameData.match3_stars[level.value] = earnedStars
     }
 
-    if (currentLevel.value < MAX_GAME_LEVEL) {
-        if (currentLevel.value >= gameData.match3_level) {
-            gameData.match3_level++
-        }
-        currentLevel.value++
-    } else {
-        showFloatingBadge("match3.great_job", "text-yellow-300", "0 4px 15px rgba(234, 179, 8, 0.6)")
-    }
-
     setTimeout(() => {
         isLevelPassed.value = true
         isProcessing.value = false
+        if (currentLevel.value < MAX_GAME_LEVEL) {
+            if (currentLevel.value >= gameData.match3_level) {
+                gameData.match3_level++
+            }
+            currentLevel.value++
+        } else {
+            showFloatingBadge("match3.great_job", "text-yellow-300", "0 4px 15px rgba(234, 179, 8, 0.6)")
+        }
     }, 1000)
 }
 
@@ -328,7 +393,9 @@ function initLevel() {
     score.value = 0
     activeCell.value = null
     flyingKivano.value = null
-
+    lockedGridSize.value = null
+    activeBadgeText.value = ''
+    lastShownBadgeText = ''
     const shape = getLevelShape(level.value);
     gridRows.value = shape.rows || gridSize.value;
     gridCols.value = shape.cols || gridSize.value;
@@ -419,7 +486,7 @@ function initLevel() {
                 }
             }
         }
-        //Цепи
+
         if (level.value >= LEVEL_CONFIG.CHAINS_START_LEVEL && !isJellyLevel.value && level.value % 10 !== 0) {
             let spawnedChains = 0
             const maxChains = 10
@@ -455,6 +522,20 @@ function initLevel() {
         calculatedMoves = Math.ceil(20 + (targetObstaclesCount * 1.3) + (activeStones * 1.5) + (activeChains * 1.5) + (isJellyLevel.value ? 4 : 0))
         moves.value = calculatedMoves
     }
+    // 🧪 ТЕСТОВЫЙ СПАВН БУСТОВ ДЛЯ ПРОВЕРКИ:
+    // if (board.value[2]?.[2]) {
+    //     // Можно выбрать нужный буст:
+    // // 1. Лимон (Т/Г форма):
+    // board.value[1][1] = createCell(null, null, false, false, true); // isLemon = true
+    // //
+    // //     // 2. Кивано (Квадрат):
+    // board.value[2][1] = createCell(null, null, false, true, false); // isKivano = true
+    // //
+    // //     // 3. Радужный фрукт / Драгонфрукт (Линия из 4):
+    // board.value[3][1] = createCell(null, null, true, false, false); // isRainbow = true
+    // }
+
+
     // const testCandy = CANDIES[0];
     //
     // // Безопасно проверяем, поместится ли паттерн на доску (нужно минимум 3х3 область)
@@ -468,6 +549,8 @@ function initLevel() {
     //     if (board.value[0]?.[1]) board.value[0][1].type = testCandy;
     //     if (board.value[2]?.[1]) board.value[2][1].type = testCandy;
     // }
+
+
     shuffleBoardIfDeadlock()
 }
 
@@ -476,6 +559,93 @@ export function nextLevelOrRestart() {
     initLevel()
 }
 
+export function restartLevel() {
+    if (gameData.coins < 50) return
+    gameData.coins -= 50
+    initLevel()
+}
+
+
+// =====================================================================
+// 7. ЛОГИКА ВВОДА И СВАПОВ ( TOUCH / MOUSE )
+// =====================================================================
+export function onTouchStart(e, r, c) {
+    if (isProcessing.value || isLevelPassed.value || isShuffling.value || moves.value <= 0) return
+    const cell = board.value[r]?.[c]
+    if (!cell || cell === null || cell.chained || cell.jelly > 0 || cell.obstacle) return
+    const touch = e.touches[0]
+    startX = touch.clientX
+    startY = touch.clientY
+    activeCell.value = {r, c}
+}
+
+export function onTouchMove(e) {
+    if (!activeCell.value || isProcessing.value || isShuffling.value) return
+    e.preventDefault()
+}
+
+export async function onTouchEnd(e) {
+    if (!activeCell.value || isProcessing.value || isShuffling.value) return
+    const touch = e.changedTouches[0]
+    await evaluateSwipe(touch.clientX - startX, touch.clientY - startY)
+}
+
+export function onMouseDown(e, r, c) {
+    if (isProcessing.value || isLevelPassed.value || isShuffling.value || moves.value <= 0) return
+    const cell = board.value[r]?.[c]
+    if (!cell || cell === null || cell.chained || cell.jelly > 0 || cell.obstacle) return
+    startX = e.clientX
+    startY = e.clientY
+    activeCell.value = {r, c}
+    window.addEventListener('mouseup', onMouseUp)
+}
+
+export async function onMouseUp(e) {
+    window.removeEventListener('mouseup', onMouseUp)
+    if (!activeCell.value || isProcessing.value || isShuffling.value) return
+    await evaluateSwipe(e.clientX - startX, e.clientY - startY)
+}
+
+async function evaluateSwipe(diffX, diffY) {
+    const threshold = 15
+    const {r, c} = activeCell.value
+
+    if (Math.abs(diffX) < threshold && Math.abs(diffY) < threshold) {
+        activeCell.value = null
+        return
+    }
+
+    let targetR = r, targetC = c
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+        targetC = diffX > 0 ? c + 1 : c - 1
+    } else {
+        targetR = diffY > 0 ? r + 1 : r - 1
+    }
+
+    activeCell.value = null
+
+    if (targetR >= 0 && targetR < gridRows.value && targetC >= 0 && targetC < gridCols.value) {
+        const cell1 = board.value[r]?.[c]
+        const cell2 = board.value[targetR]?.[targetC]
+        if (cell1 && cell2 && cell1 !== null && cell2 !== null &&
+            !cell1.obstacle && cell1.jelly === 0 && !cell1.unbreakable && !cell1.chained &&
+            !cell2.obstacle && cell2.jelly === 0 && !cell2.unbreakable && !cell2.chained &&
+            (cell1.type || cell1.isRainbow || cell1.isKivano || cell1.isLemon) && (cell2.type || cell2.isRainbow || cell2.isKivano || cell2.isLemon)) {
+            await trySwap(r, c, targetR, targetC)
+        }
+    }
+}
+
+function swapCellObjects(r1, c1, r2, c2) {
+    const temp = board.value[r1][c1]
+    board.value[r1][c1] = board.value[r2][c2]
+    board.value[r2][c2] = temp
+}
+
+
+// =====================================================================
+// 8. ПРОВЕРКА ХОДОВ, МАТЧЕЙ И ТАСКОВ
+// =====================================================================
 function hasValidMoves(currentBoard) {
     const rows = gridRows.value
     const cols = gridCols.value
@@ -545,7 +715,12 @@ async function shuffleBoardIfDeadlock() {
             for (let c = 0; c < gridCols.value; c++) {
                 const cell = board.value[r]?.[c]
                 if (cell && cell !== null && !cell.obstacle && cell.jelly === 0 && !cell.unbreakable && !cell.chained && (cell.type || cell.isRainbow || cell.isKivano || cell.isLemon)) {
-                    candyItems.push({type: cell.type, isRainbow: cell.isRainbow, isKivano: cell.isKivano, isLemon: cell.isLemon})
+                    candyItems.push({
+                        type: cell.type,
+                        isRainbow: cell.isRainbow,
+                        isKivano: cell.isKivano,
+                        isLemon: cell.isLemon
+                    })
                 }
             }
         }
@@ -584,7 +759,7 @@ async function shuffleBoardIfDeadlock() {
     }
 }
 
-function findMatchGroups(currentBoard) {
+function findMatchGroups(currentBoard, swappedCoords = null) {
     const allMatchedCoords = new Set()
     const fourInRowMatches = []
     const squareMatches = []
@@ -615,6 +790,14 @@ function findMatchGroups(currentBoard) {
                     !cell1.chained && !cell2.chained && !cell3.chained && !cell4.chained
                 ) {
                     const coords = [{r, c}, {r, c: c + 1}, {r: r + 1, c}, {r: r + 1, c: c + 1}]
+
+                    if (swappedCoords) {
+                        const involvesSwap = coords.some(coord =>
+                            swappedCoords.some(sw => sw.r === coord.r && sw.c === coord.c)
+                        )
+                        if (!involvesSwap) continue;
+                    }
+
                     squareMatches.push({coords, center: {r, c}})
                     coords.forEach(coord => allMatchedCoords.add(`${coord.r},${coord.c}`))
                 }
@@ -642,10 +825,20 @@ function findMatchGroups(currentBoard) {
                 const matchCoords = []
                 for (let i = 0; i < length; i++) {
                     matchCoords.push({r, c: c + i})
-                    allMatchedCoords.add(`${r},${c + i}`)
                 }
-                if (length >= 4 && level.value >= 2) {
-                    fourInRowMatches.push({coords: matchCoords, center: {r, c: c + 1}})
+
+                let validMatch = true;
+                if (swappedCoords) {
+                    validMatch = matchCoords.some(coord =>
+                        swappedCoords.some(sw => sw.r === coord.r && sw.c === coord.c)
+                    );
+                }
+
+                if (validMatch) {
+                    matchCoords.forEach(coord => allMatchedCoords.add(`${coord.r},${coord.c}`))
+                    if (length >= 4 && level.value >= 2) {
+                        fourInRowMatches.push({coords: matchCoords, center: {r, c: c + 1}})
+                    }
                 }
             }
             c += length
@@ -672,42 +865,52 @@ function findMatchGroups(currentBoard) {
                 const matchCoords = []
                 for (let i = 0; i < length; i++) {
                     matchCoords.push({r: r + i, c})
-                    allMatchedCoords.add(`${r + i},${c}`)
                 }
-                if (length >= 4 && level.value >= 2) {
-                    fourInRowMatches.push({coords: matchCoords, center: {r: r + 1, c}})
+
+                let validMatch = true;
+                if (swappedCoords) {
+                    validMatch = matchCoords.some(coord =>
+                        swappedCoords.some(sw => sw.r === coord.r && sw.c === coord.c)
+                    );
+                }
+
+                if (validMatch) {
+                    matchCoords.forEach(coord => allMatchedCoords.add(`${coord.r},${coord.c}`))
+                    if (length >= 4 && level.value >= 2) {
+                        fourInRowMatches.push({coords: matchCoords, center: {r: r + 1, c}})
+                    }
                 }
             }
             r += length
         }
     }
 
-    // Поиск Г-образных / Т-образных пересечений (L-shape / T-shape)
+    const checkedLShapeCenters = new Set()
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             const cell = currentBoard[r]?.[c]
-            if (!cell || !cell.type || cell.isRainbow || cell.isKivano || cell.isLemon || cell.obstacle) continue
+            if (!cell || !cell.type || cell.isRainbow || cell.isKivano || cell.isLemon || cell.obstacle || cell.jelly > 0 || cell.unbreakable || cell.chained) continue
 
             let hCoords = [{r, c}]
             let cc = c + 1
-            while (cc < cols && currentBoard[r][cc]?.type === cell.type && !currentBoard[r][cc]?.isRainbow) {
+            while (cc < cols && currentBoard[r][cc]?.type === cell.type && !currentBoard[r][cc]?.isRainbow && !currentBoard[r][cc]?.obstacle && currentBoard[r][cc]?.jelly === 0 && !currentBoard[r][cc]?.unbreakable && !currentBoard[r][cc]?.chained) {
                 hCoords.push({r, c: cc})
                 cc++
             }
             cc = c - 1
-            while (cc >= 0 && currentBoard[r][cc]?.type === cell.type && !currentBoard[r][cc]?.isRainbow) {
+            while (cc >= 0 && currentBoard[r][cc]?.type === cell.type && !currentBoard[r][cc]?.isRainbow && !currentBoard[r][cc]?.obstacle && currentBoard[r][cc]?.jelly === 0 && !currentBoard[r][cc]?.unbreakable && !currentBoard[r][cc]?.chained) {
                 hCoords.push({r, c: cc})
                 cc--
             }
 
             let vCoords = [{r, c}]
             let rr = r + 1
-            while (rr < rows && currentBoard[rr][c]?.type === cell.type && !currentBoard[rr][c]?.isRainbow) {
+            while (rr < rows && currentBoard[rr][c]?.type === cell.type && !currentBoard[rr][c]?.isRainbow && !currentBoard[rr][c]?.obstacle && currentBoard[rr][c]?.jelly === 0 && !currentBoard[rr][c]?.unbreakable && !currentBoard[rr][c]?.chained) {
                 vCoords.push({r: rr, c})
                 rr++
             }
             rr = r - 1
-            while (rr >= 0 && currentBoard[rr][c]?.type === cell.type && !currentBoard[rr][c]?.isRainbow) {
+            while (rr >= 0 && currentBoard[rr][c]?.type === cell.type && !currentBoard[rr][c]?.isRainbow && !currentBoard[rr][c]?.obstacle && currentBoard[rr][c]?.jelly === 0 && !currentBoard[rr][c]?.unbreakable && !currentBoard[rr][c]?.chained) {
                 vCoords.push({r: rr, c})
                 rr--
             }
@@ -717,13 +920,32 @@ function findMatchGroups(currentBoard) {
                 [...hCoords, ...vCoords].forEach(coord => uniqueMap.set(`${coord.r},${coord.c}`, coord));
                 const coords = Array.from(uniqueMap.values());
 
-                lShapeMatches.push({coords, center: {r, c}});
+                if (swappedCoords) {
+                    const involvesSwap = coords.some(coord =>
+                        swappedCoords.some(sw => sw.r === coord.r && sw.c === coord.c)
+                    )
+                    if (!involvesSwap) continue;
+                }
+
+                const shapeKey = coords.map(coord => `${coord.r},${coord.c}`).sort().join(';')
+                if (checkedLShapeCenters.has(shapeKey)) continue;
+                checkedLShapeCenters.add(shapeKey);
+
+                let centerCoord = {r, c};
+                if (swappedCoords) {
+                    const swappedInside = coords.find(coord =>
+                        swappedCoords.some(sw => sw.r === coord.r && sw.c === coord.c)
+                    );
+                    if (swappedInside) centerCoord = swappedInside;
+                }
+
+                lShapeMatches.push({coords, center: centerCoord});
                 coords.forEach(coord => allMatchedCoords.add(`${coord.r},${coord.c}`));
             }
         }
     }
 
-    const matches = Array.from(allMatchedCoords).map(str => {
+    const matches = Array.from(allMatchedCoords).lShapeMatches ? [] : Array.from(allMatchedCoords).map(str => {
         const [r, c] = str.split(',').map(Number)
         return {r, c}
     })
@@ -731,114 +953,10 @@ function findMatchGroups(currentBoard) {
     return {matches, fourInRowMatches, squareMatches, lShapeMatches}
 }
 
-export function onTouchStart(e, r, c) {
-    if (isProcessing.value || isLevelPassed.value || isShuffling.value || moves.value <= 0) return
-    const cell = board.value[r]?.[c]
-    if (!cell || cell === null || cell.chained || cell.jelly > 0 || cell.obstacle) return
-    const touch = e.touches[0]
-    startX = touch.clientX
-    startY = touch.clientY
-    activeCell.value = {r, c}
-}
 
-export function onTouchMove(e) {
-    if (!activeCell.value || isProcessing.value || isShuffling.value) return
-    e.preventDefault()
-}
-
-export async function onTouchEnd(e) {
-    if (!activeCell.value || isProcessing.value || isShuffling.value) return
-    const touch = e.changedTouches[0]
-    await evaluateSwipe(touch.clientX - startX, touch.clientY - startY)
-}
-
-export function onMouseDown(e, r, c) {
-    if (isProcessing.value || isLevelPassed.value || isShuffling.value || moves.value <= 0) return
-    const cell = board.value[r]?.[c]
-    if (!cell || cell === null || cell.chained || cell.jelly > 0 || cell.obstacle) return
-    startX = e.clientX
-    startY = e.clientY
-    activeCell.value = {r, c}
-    window.addEventListener('mouseup', onMouseUp)
-}
-
-export async function onMouseUp(e) {
-    window.removeEventListener('mouseup', onMouseUp)
-    if (!activeCell.value || isProcessing.value || isShuffling.value) return
-    await evaluateSwipe(e.clientX - startX, e.clientY - startY)
-}
-
-async function evaluateSwipe(diffX, diffY) {
-    const threshold = 15
-    const {r, c} = activeCell.value
-
-    if (Math.abs(diffX) < threshold && Math.abs(diffY) < threshold) {
-        activeCell.value = null
-        return
-    }
-
-    let targetR = r, targetC = c
-    if (Math.abs(diffX) > Math.abs(diffY)) {
-        targetC = diffX > 0 ? c + 1 : c - 1
-    } else {
-        targetR = diffY > 0 ? r + 1 : r - 1
-    }
-
-    activeCell.value = null
-
-    if (targetR >= 0 && targetR < gridRows.value && targetC >= 0 && targetC < gridCols.value) {
-        const cell1 = board.value[r]?.[c]
-        const cell2 = board.value[targetR]?.[targetC]
-        if (cell1 && cell2 && cell1 !== null && cell2 !== null &&
-            !cell1.obstacle && cell1.jelly === 0 && !cell1.unbreakable && !cell1.chained &&
-            !cell2.obstacle && cell2.jelly === 0 && !cell2.unbreakable && !cell2.chained &&
-            (cell1.type || cell1.isRainbow || cell1.isKivano || cell1.isLemon) && (cell2.type || cell2.isRainbow || cell2.isKivano || cell2.isLemon)) {
-            await trySwap(r, c, targetR, targetC)
-        }
-    }
-}
-
-async function activateLemon(r, c) {
-    const rows = gridRows.value
-    const cols = gridCols.value
-    const affectedCoords = new Set()
-
-    for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-            if (row === r || col === c) {
-                affectedCoords.add(`${row},${col}`)
-            }
-        }
-    }
-
-    showFloatingBadge("match3.lemon_blast", "text-yellow-300", "0 4px 15px rgba(234, 179, 8, 0.6)")
-    affectedCoords.forEach(str => {
-        const [row, col] = str.split(',').map(Number)
-        if (!(row === r && col === c) && board.value[row]?.[col]) {
-            board.value[row][col].isBlinking = true
-        }
-    })
-    await sleep(700)
-    affectedCoords.forEach(str => {
-        const [row, col] = str.split(',').map(Number)
-        const cell = board.value[row]?.[col]
-        if (cell) {
-            if (isJellyLevel.value && cell.jelly > 0) {
-                cell.jelly = Math.max(0, cell.jelly - 1)
-            } else if (!isJellyLevel.value && cell.obstacle) {
-                cell.obstacle = null
-            } else if (!cell.unbreakable) {
-                board.value[row][col] = createCell(null, null)
-            }
-            score.value += 100
-        }
-    })
-
-    await sleep(400)
-    applyGravityAndSpawn()
-    await sleep(400)
-}
-
+// =====================================================================
+// 9. АКТИВАЦИЯ БУСТОВ (ЛИМОН, КИВАНО, РАДУЖНЫЙ ФРУКТ)
+// =====================================================================
 async function trySwap(r1, c1, r2, c2) {
     isProcessing.value = true
 
@@ -935,7 +1053,8 @@ async function trySwap(r1, c1, r2, c2) {
         await sleep(420)
         await processMatchesAndDrop()
     } else {
-        const group = findMatchGroups(board.value)
+        const group = findMatchGroups(board.value, [{r: r1, c: c1}, {r: r2, c: c2}])
+
         if (group.matches.length > 0 || group.fourInRowMatches.length > 0 || group.squareMatches.length > 0 || group.lShapeMatches.length > 0) {
             moves.value--
             await sleep(50)
@@ -951,6 +1070,122 @@ async function trySwap(r1, c1, r2, c2) {
         return
     }
     isProcessing.value = false
+}
+
+async function activateLemon(r, c) {
+    const rows = gridRows.value
+    const cols = gridCols.value
+
+    const wavesMap = new Map()
+    const affectedCoords = new Set()
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (row === r || col === c) {
+                const dist = Math.abs(row - r) + Math.abs(col - c)
+                affectedCoords.add(`${row},${col}`)
+
+                if (!wavesMap.has(dist)) {
+                    wavesMap.set(dist, [])
+                }
+                wavesMap.get(dist).push({r: row, c: col})
+            }
+        }
+    }
+
+    showFloatingBadge("match3.lemon_blast", "text-yellow-300", "0 4px 15px rgba(234, 179, 8, 0.6)")
+
+    let triggeredKivanos = []
+    let rainbowsToActivate = []
+    let secondaryLemons = []
+
+    affectedCoords.forEach(str => {
+        const [row, col] = str.split(',').map(Number)
+        if (row === r && col === c) return
+        const cell = board.value[row]?.[col]
+        if (cell) {
+            if (cell.isKivano) {
+                triggeredKivanos.push({r: row, c: col})
+            } else if (cell.isRainbow) {
+                let targetType = cell.type;
+                if (!targetType) {
+                    const neighbors = [{r: row - 1, c: col}, {r: row + 1, c: col}, {r: row, c: col - 1}, {
+                        r: row,
+                        c: col + 1
+                    }];
+                    for (const n of neighbors) {
+                        const neighborCell = board.value[n.r]?.[n.c];
+                        if (neighborCell && neighborCell.type && !neighborCell.isRainbow && !neighborCell.isLemon && !neighborCell.isKivano) {
+                            targetType = neighborCell.type;
+                            break;
+                        }
+                    }
+                }
+                if (!targetType) targetType = CANDIES[0];
+                rainbowsToActivate.push({r: row, c: col, type: targetType})
+            } else if (cell.isLemon) {
+                secondaryLemons.push({r: row, c: col})
+            }
+        }
+    })
+
+    const sortedDistances = Array.from(wavesMap.keys()).sort((a, b) => a - b)
+
+    for (let i = 0; i < sortedDistances.length; i++) {
+        const dist = sortedDistances[i]
+        const waveCells = wavesMap.get(dist)
+
+        waveCells.forEach(pos => {
+            if (board.value[pos.r]?.[pos.c]) {
+                board.value[pos.r][pos.c].isLemonWave = true
+                board.value[pos.r][pos.c].isBlinking = true
+            }
+        })
+
+        await sleep(60)
+    }
+
+    await sleep(200)
+
+    for (const dist of sortedDistances) {
+        const waveCells = wavesMap.get(dist)
+        waveCells.forEach(pos => {
+            const cell = board.value[pos.r]?.[pos.c]
+            if (cell) {
+                if ((pos.r === r && pos.c === c) || (!cell.isRainbow && !cell.isKivano && !cell.isLemon)) {
+                    if (isJellyLevel.value && cell.jelly > 0) {
+                        cell.jelly = Math.max(0, cell.jelly - 1)
+                    } else if (!isJellyLevel.value && cell.obstacle) {
+                        cell.obstacle = null
+                    } else {
+                        board.value[pos.r][pos.c] = createCell(null, null)
+                    }
+                    score.value += 100
+                }
+            }
+        })
+    }
+
+    for (const rb of rainbowsToActivate) {
+        await processRainbowActivation(rb.type, {r: rb.r, c: rb.c})
+    }
+
+    for (const kiv of triggeredKivanos) {
+        if (board.value[kiv.r]?.[kiv.c]?.isKivano) {
+            await activateKivano(kiv.r, kiv.c)
+        }
+    }
+
+    for (const lem of secondaryLemons) {
+        if (board.value[lem.r]?.[lem.c]?.isLemon) {
+            board.value[lem.r][lem.c].isLemon = false
+            await activateLemon(lem.r, lem.c)
+        }
+    }
+
+    await sleep(400)
+    applyGravityAndSpawn()
+    await sleep(400)
 }
 
 async function activateKivano(r, c) {
@@ -982,7 +1217,7 @@ async function activateKivano(r, c) {
 
         showFloatingBadge("match3.kivano_attack", "text-lime-300", "0 4px 15px rgba(132, 204, 22, 0.6)")
 
-        await sleep(500)
+        await sleep(600)
         flyingKivano.value = null
 
         if (board.value[target.r]?.[target.c]) {
@@ -1021,7 +1256,7 @@ async function processRainbowActivation(fruitType, rainbowPos) {
         }
     })
 
-    await sleep(700)
+    await sleep(600)
     const targetsToDamage = new Set()
     matchesToRemove.forEach(m => {
         const neighbors = [
@@ -1063,6 +1298,10 @@ async function processRainbowActivation(fruitType, rainbowPos) {
     await sleep(380)
 }
 
+
+// =====================================================================
+// 10. ГРАВИТАЦИЯ, ПАДЕНИЕ И ОБРАБОТКА МАТЧЕЙ
+// =====================================================================
 function applyGravityAndSpawn() {
     const rows = gridRows.value
     const cols = gridCols.value
@@ -1125,12 +1364,6 @@ function applyGravityAndSpawn() {
     }
 }
 
-function swapCellObjects(r1, c1, r2, c2) {
-    const temp = board.value[r1][c1]
-    board.value[r1][c1] = board.value[r2][c2]
-    board.value[r2][c2] = temp
-}
-
 async function processMatchesAndDrop() {
     let group = findMatchGroups(board.value)
     const rows = gridRows.value
@@ -1157,16 +1390,26 @@ async function processMatchesAndDrop() {
         const kivanoSpawns = []
         const lemonSpawns = []
 
+        const uniqueLShapeMap = new Map()
         group.lShapeMatches.forEach(lShape => {
-            lemonSpawns.push(lShape.center)
+            const key = lShape.coords.map(coord => `${coord.r},${coord.c}`).sort().join('|')
+            uniqueLShapeMap.set(key, lShape.center)
         })
-        group.squareMatches.forEach(sq => {
-            kivanoSpawns.push(sq.center)
-        })
+        uniqueLShapeMap.forEach(center => lemonSpawns.push(center))
 
-        group.fourInRowMatches.forEach(four => {
-            rainbowSpawns.push(four.center)
+        const uniqueSquareMap = new Map()
+        group.squareMatches.forEach(sq => {
+            const key = sq.coords.map(coord => `${coord.r},${coord.c}`).sort().join('|')
+            uniqueSquareMap.set(key, sq.center)
         })
+        uniqueSquareMap.forEach(center => kivanoSpawns.push(center))
+
+        const uniqueFourMap = new Map()
+        group.fourInRowMatches.forEach(four => {
+            const key = four.coords.map(coord => `${coord.r},${coord.c}`).sort().join('|')
+            uniqueFourMap.set(key, four.center)
+        })
+        uniqueFourMap.forEach(center => rainbowSpawns.push(center))
 
         group.matches.forEach(m => {
             const neighbors = [
@@ -1254,16 +1497,4 @@ async function processMatchesAndDrop() {
     }
 
     shuffleBoardIfDeadlock()
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-export function restartLevel() {
-    if (gameData.coins < 50) {
-        return
-    }
-    gameData.coins -= 50
-    initLevel()
 }

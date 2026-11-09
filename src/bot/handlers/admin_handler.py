@@ -483,9 +483,9 @@ async def claim_lives_handler(callback: types.CallbackQuery):
         return
 
     actual_add = min(lives_amount, MAX_LIVES - pet.lives)
-    await PetModel.filter(tg_id=tg_id).update(lives=db_f("lives") + actual_add)
+    await PetModel.filter(tg_id=tg_id).update(lives=db_f("lives") + actual_add,is_game_over = False)
     pet.lives += actual_add
-
+    pet.is_game_over = False
     try:
         await callback.message.edit_text(
             m["lives_success_text"].format(actual_add=actual_add, pet=pet, MAX_LIVES=MAX_LIVES)
