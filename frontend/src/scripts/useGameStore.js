@@ -313,7 +313,9 @@ export const activeStatus = computed(() => {
         return {
             show: true,
             text: i18n.global.t('store.pet_died'),
-            image: "/gamePlay/grave.webp",
+            image: "/gamePlay/hunting_trophy.webp",
+            weight:25,
+            height:25,
             bgColor: "bg-[#808080]"
         }
     }
@@ -329,7 +331,8 @@ export const activeStatus = computed(() => {
                 text: i18n.global.t('store.happy_birthday'),
                 additional: gameData.level,
                 image: null,
-                bgColor: "bg-[#FFB266]/60"
+                bgColor: "bg-[#FFB266]/60",
+                textColor: "text-blue-300",
             }
         }else if(gameData.level ===10){
             return {
@@ -337,7 +340,8 @@ export const activeStatus = computed(() => {
                 text: i18n.global.t('store.growth_spurt'),
                 additional: gameData.level,
                 image: null,
-                bgColor: "bg-[#FFB266]/60"
+                bgColor: "bg-[#FFB266]/60",
+                textColor: "text-blue-300",
             }
         }else if(gameData.level ===40){
             return {
@@ -345,7 +349,8 @@ export const activeStatus = computed(() => {
                 text: i18n.global.t('store.growth_spurt'),
                 additional: gameData.level,
                 image: null,
-                bgColor: "bg-[#FFB266]/60"
+                bgColor: "bg-[#FFB266]/60",
+                textColor: "text-blue-300",
             }
         }else if(gameData.level ===80){
             return {
@@ -353,14 +358,16 @@ export const activeStatus = computed(() => {
                 text: i18n.global.t('store.growth_spurt'),
                 additional: gameData.level,
                 image: null,
-                bgColor: "bg-[#FFB266]/60"
+                bgColor: "bg-[#FFB266]/60",
+                textColor: "text-blue-300",
             }
         } else{
             return {
                 show: true,
                 text: i18n.global.t('store.level_up'),
                 additional: gameData.level,
-                image: null
+                image: null,
+                textColor: "text-blue-300",
             }
         }
 
@@ -372,7 +379,8 @@ export const activeStatus = computed(() => {
             show: true,
             text: i18n.global.t('store.loss_life'),
             image: "/gamePlay/heart_broken.webp",
-            bgColor: "bg-[#CC0000]/40"
+            textColor: "text-red-500",
+            bgColor: "bg-[#CC0000]/30"
         }
     }
 
@@ -382,7 +390,8 @@ export const activeStatus = computed(() => {
             show: true,
             text: i18n.global.t('store.gain_life'),
             image: "/gamePlay/heart.webp",
-            bgColor: "bg-[#FF0000]/40"
+            textColor: "text-red-500",
+            bgColor: "bg-[#FF0000]/30"
         }
     }
 

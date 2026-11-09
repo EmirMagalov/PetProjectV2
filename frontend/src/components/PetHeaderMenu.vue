@@ -183,7 +183,7 @@ const getClipInset = (progress) => {
             <div
                 class="flex relative h-8 justify-center items-center shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border whitespace-nowrap border-white/10"
             >
-              <img :src="`/gamePlay/scull_icon.webp?v=${APP_VERSION}`" alt="Смерти" width="20" class="shrink-0">
+              <img :src="`/gamePlay/hunting_trophy.webp?v=${APP_VERSION}`" alt="Смерти" width="25" class="shrink-0">
               <span class="text-xs font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">
               {{ formatNumber(gameData.deathsCount) }}
             </span>
@@ -356,7 +356,7 @@ const getClipInset = (progress) => {
 
               <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-2xl border border-[#f7c9a5]/40">
                 <div class="flex items-center gap-1.5">
-                  <img :src="`/gamePlay/scull_icon.webp?v=${APP_VERSION}`" alt="Смерти" width="20">
+                  <img :src="`/gamePlay/hunting_trophy.webp?v=${APP_VERSION}`" alt="Смерти" width="20">
                   <span class="font-semibold text-gray-600">{{ $t(`total_deaths`) }}:</span>
                 </div>
                 <span class="font-bold text-gray-800">{{ formatFullNumber(gameData.deathsCount) }}</span>

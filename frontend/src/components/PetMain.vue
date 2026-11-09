@@ -48,9 +48,9 @@ const isFlips = ref(false)
 const isEggShaking = ref(false)
 const isLoading = ref(true);
 function getHornAsset(level) {
-  if (level >= 50) return `${characterPath.value}/horns/50lvl.webp?v=${APP_VERSION}`
-  if (level >= 45) return `${characterPath.value}/horns/45lvl.webp?v=${APP_VERSION}`
-  if (level >= 40) return `${characterPath.value}/horns/40lvl.webp?v=${APP_VERSION}`
+  // if (level >= 50) return `${characterPath.value}/horns/50lvl.webp?v=${APP_VERSION}`
+  // if (level >= 45) return `${characterPath.value}/horns/45lvl.webp?v=${APP_VERSION}`
+  // if (level >= 40) return `${characterPath.value}/horns/40lvl.webp?v=${APP_VERSION}`
   if (level >= 35) return `${characterPath.value}/horns/35lvl.webp?v=${APP_VERSION}`
   if (level >= 30) return `${characterPath.value}/horns/30lvl.webp?v=${APP_VERSION}`
   if (level >= 25) return `${characterPath.value}/horns/25lvl.webp?v=${APP_VERSION}`
@@ -459,7 +459,10 @@ const pumpkinAnimation = (event) => {
             :additional="activeStatus.additional"
             :energyAdditional="activeStatus.energyAdditional"
             :energy-image="activeStatus.energyImage"
+            :text-color="activeStatus.textColor"
             :bg-color="activeStatus.bgColor"
+            :weight="activeStatus.weight"
+            :height="activeStatus.height"
             class="pointer-events-auto"
         />
         <!-- Зона персонажа (исправлены классы transition и синтаксис :class) -->
