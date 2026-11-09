@@ -142,10 +142,10 @@ watch(
             gameData.equippedHead = null
             gameData.equippedClothes = null
         }
-        if (gameData.level >= 50) {
+        if (gameData.level >= 45) {
             gameData.old_1_phase = true
         }
-        if (gameData.level >= 80) {
+        if (gameData.level >= 65) {
             gameData.old_2_phase = true
         }
 
