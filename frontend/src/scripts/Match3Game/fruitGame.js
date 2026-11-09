@@ -14,7 +14,7 @@ const LEVEL_CONFIG = {
     STONES_START_LEVEL: 10,     // С какого уровня появляются камни
 }
 
-const MAX_GAME_LEVEL = 100;
+const MAX_GAME_LEVEL = 99;
 
 const CANDIES = [
     '/food/banana.webp',
@@ -1197,8 +1197,14 @@ async function activateKivano(r, c) {
         for (let col = 0; col < cols; col++) {
             const cell = board.value[row]?.[col]
             if (cell) {
-                if (isJellyLevel.value && cell.jelly > 0) targets.push({r: row, c: col})
-                else if (!isJellyLevel.value && cell.obstacle) targets.push({r: row, c: col})
+                // 🌟 Добавили проверку на цепи (замки) наряду с вареньем и коробками
+                if (isJellyLevel.value && cell.jelly > 0) {
+                    targets.push({r: row, c: col, type: 'jelly'})
+                } else if (!isJellyLevel.value && cell.obstacle) {
+                    targets.push({r: row, c: col, type: 'obstacle'})
+                } else if (cell.chained) {
+                    targets.push({r: row, c: col, type: 'chain'})
+                }
             }
         }
     }
@@ -1220,11 +1226,15 @@ async function activateKivano(r, c) {
         await sleep(600)
         flyingKivano.value = null
 
-        if (board.value[target.r]?.[target.c]) {
-            if (isJellyLevel.value) {
-                board.value[target.r][target.c].jelly = Math.max(0, board.value[target.r][target.c].jelly - 1)
+        const targetCell = board.value[target.r]?.[target.c]
+        if (targetCell) {
+            // 🌟 Обрабатываем попадание кивано по цепи (снимаем замок)
+            if (target.type === 'chain') {
+                targetCell.chained = false
+            } else if (isJellyLevel.value) {
+                targetCell.jelly = Math.max(0, targetCell.jelly - 1)
             } else {
-                board.value[target.r][target.c].obstacle = null
+                targetCell.obstacle = null
             }
             score.value += 500
         }
@@ -1258,6 +1268,7 @@ async function processRainbowActivation(fruitType, rainbowPos) {
 
     await sleep(600)
     const targetsToDamage = new Set()
+    const cellsToBreakChain = new Set() // 🌟 Сет для разрушения цепей на соседних клетках
     matchesToRemove.forEach(m => {
         const neighbors = [
             {r: m.r - 1, c: m.c},
@@ -1271,6 +1282,9 @@ async function processRainbowActivation(fruitType, rainbowPos) {
                 if (neighborCell) {
                     if (isJellyLevel.value && neighborCell.jelly > 0) targetsToDamage.add(`${n.r},${n.c}`)
                     else if (!isJellyLevel.value && neighborCell.obstacle) targetsToDamage.add(`${n.r},${n.c}`)
+                    if (neighborCell.chained) {
+                        cellsToBreakChain.add(`${n.r},${n.c}`)
+                    }
                 }
             }
         })
@@ -1293,7 +1307,12 @@ async function processRainbowActivation(fruitType, rainbowPos) {
             score.value += 500
         }
     })
-
+    cellsToBreakChain.forEach(str => {
+        const [r, c] = str.split(',').map(Number)
+        if (board.value[r]?.[c]) {
+            board.value[r][c].chained = false
+        }
+    })
     await nextTick()
     await sleep(380)
 }
