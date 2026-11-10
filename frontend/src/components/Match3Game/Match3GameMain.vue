@@ -90,8 +90,16 @@ onUnmounted(() => {
 
               <!-- Цель уровня (коробки / варенье / цепи) — по центру -->
               <div
-                  class="text-cyan-400 text-shadow-sm rounded-2xl bg-amber-100 px-3 py-1 text-shadow-black text-sm h-[52px] flex items-center justify-center gap-2 min-w-15 border border-amber-200">
-                <div v-if="(!isGameOver && !isLevelPassed) && gameState !== 'MENU' && !isVictoryTriggered"
+                  class="text-cyan-400 text-shadow-sm rounded-2xl bg-amber-100 px-3 py-1 text-shadow-black text-sm h-13 flex items-center justify-center gap-2 min-w-15 border border-amber-200">
+                <div v-if="gameState === 'MENU'">
+                  <img src="/gamePlay/star_icon.webp" class="object-contain w-8" alt="jelly"/>
+                </div>
+                <div class="flex justify-center items-center" v-if="gameState !== 'MENU' && level===1">
+                    <div v-for="_ in 3">
+                      <img src="/gamePlay/star_icon.webp" class="object-contain w-8" alt="jelly"/>
+                    </div>
+                </div>
+                <div v-if="(!isGameOver && !isLevelPassed) && gameState !== 'MENU' && !isVictoryTriggered && level !==1"
                      class="flex items-center gap-3">
 
                   <!-- 1. Если это уровень варенья -->
@@ -99,8 +107,8 @@ onUnmounted(() => {
                     <img src="/food/strawberry_jam.webp" class="object-contain w-8" alt="jelly"/>
                     <span
                         class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
-        {{ remainingTargets }}
-      </span>
+                  {{ remainingTargets }}
+                </span>
                   </div>
 
                   <template v-else>
@@ -109,8 +117,8 @@ onUnmounted(() => {
                       <img src="/gamePlay/a_crate_of_fruit.webp" class="object-contain w-8" alt="obstacle"/>
                       <span
                           class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
-          {{ remainingObstacles }}
-        </span>
+                    {{ remainingObstacles }}
+                  </span>
                     </div>
 
                     <!-- 3. Если есть закрытые цепями фрукты -->
@@ -118,7 +126,7 @@ onUnmounted(() => {
                       <img src="/gamePlay/lock.webp" class="object-contain w-8" alt="chain"/>
                       <span
                           class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
-          {{ remainingChains }}
+                     {{ remainingChains }}
         </span>
                     </div>
                   </template>
@@ -291,7 +299,8 @@ onUnmounted(() => {
           />
         </div>
         <!-- Анимационный слой для летящего Драгонфрукта -->
-        <div v-if="flyingRainbow" class="absolute inset-0 brightness-200 pointer-events-none z-50" style="padding: 10px;">
+        <div v-if="flyingRainbow" class="absolute inset-0 brightness-200 pointer-events-none z-50"
+             style="padding: 10px;">
           <img
               :src="rainbowImage"
               class="absolute object-contain drop-shadow-2xl kivano-flying-anim"
