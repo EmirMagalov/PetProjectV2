@@ -1385,7 +1385,7 @@ async function processMatchesAndDrop() {
         if (group.fiveInRowMatches.length > 0) {
             showFloatingBadge("match3.durian", "text-amber-400", "0 4px 15px rgba(217, 119, 6, 0.6)")
         } else if (group.fourInRowMatches.length > 0) {
-            showFloatingBadge("match3.super_fruit", "text-purple-400", "0 4px 15px rgba(168, 85, 247, 0.6)")
+            showFloatingBadge("match3.super_fruit", "text-red-400", "0 4px 15px rgba(168, 85, 247, 0.6)")
         } else if (group.lShapeMatches.length > 0) {
             showFloatingBadge("match3.lemon", "text-yellow-300", "0 4px 15px rgba(234, 179, 8, 0.6)")
         } else if (group.squareMatches.length > 0) {
