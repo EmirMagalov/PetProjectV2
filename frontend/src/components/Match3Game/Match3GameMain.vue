@@ -307,7 +307,7 @@ onUnmounted(() => {
              style="padding: 10px;">
           <img
               :src="rainbowImage"
-              class="absolute object-contain drop-shadow-2xl kivano-flying-anim"
+              class="absolute object-contain drop-shadow-2xl dragon-flying-anim"
               :style="{
                 width: (cellSize * 0.9) + 'px',
                 height: (cellSize * 0.9) + 'px',
@@ -612,12 +612,17 @@ onUnmounted(() => {
     ) scale(1) rotate(0deg);
   }
   50% {
-    --progress: 0.5;
-    --arc: 45px;
+
     transform: translate(
         calc(var(--dx) * var(--progress)),
         calc(var(--dy) * var(--progress) - var(--arc))
     ) scale(1.15) rotate(180deg);
+  }
+  75% {
+    transform: translate(
+        calc(var(--dx) * var(--progress)),
+        calc(var(--dy) * var(--progress) - var(--arc))
+    ) scale(1.10) rotate(0deg);
   }
   100% {
     --progress: 1;
@@ -633,6 +638,46 @@ onUnmounted(() => {
   animation: kivanoFlight 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   will-change: transform;
 }
+
+
+
+@keyframes dragonFlight {
+  0% {
+    --progress: 0;
+    --arc: 0px;
+    transform: translate(
+        calc(var(--dx) * var(--progress)),
+        calc(var(--dy) * var(--progress) - var(--arc))
+    ) scale(1);
+  }
+  50% {
+
+    transform: translate(
+        calc(var(--dx) * var(--progress)),
+        calc(var(--dy) * var(--progress) - var(--arc))
+    ) scale(1.15);
+  }
+  75% {
+    transform: translate(
+        calc(var(--dx) * var(--progress)),
+        calc(var(--dy) * var(--progress) - var(--arc))
+    ) scale(1.10);
+  }
+  100% {
+    --progress: 1;
+    --arc: 0px;
+    transform: translate(
+        calc(var(--dx) * var(--progress)),
+        calc(var(--dy) * var(--progress) - var(--arc))
+    ) scale(1);
+  }
+}
+
+.dragon-flying-anim {
+  animation: dragonFlight 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform;
+}
+
 
 @keyframes bounce {
   0%, 100% {

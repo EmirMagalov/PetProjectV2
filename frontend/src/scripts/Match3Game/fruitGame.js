@@ -502,9 +502,9 @@ function initLevel() {
 
     // 🧪 ТЕСТОВЫЙ СПАВН БУСТОВ ДЛЯ ПРОВЕРКИ:
     // if (board.value[2]?.[2]) {
-    // // board.value[2][1] = createCell(null, null, false, false, true); // isLemon = true
-    // board.value[3][1] = createCell(null, null, false, true, false); // isKivano = true
-    // board.value[3][1] = createCell(null, null, true, false, false); // isRainbow = true
+    // board.value[3][1] = createCell(null, null, false, false, true); // isLemon = true
+    // board.value[2][1] = createCell(null, null, false, true, false); // isKivano = true
+    // board.value[4][1] = createCell(null, null, true, false, false); // isRainbow = true
     // }
 
 
@@ -934,56 +934,78 @@ async function trySwap(r1, c1, r2, c2) {
     const cell1 = board.value[r1][c1]
     const cell2 = board.value[r2][c2]
 
-    let lemonActivated = false
-    let lemonPos = null
-    if (cell1.isLemon) { lemonActivated = true; lemonPos = {r: r2, c: c2} }
-    else if (cell2.isLemon) { lemonActivated = true; lemonPos = {r: r1, c: c1} }
+    // Проверяем, являются ли ОБА элемента бустами (или хотя бы один из них)
+    const isCell1Boost = cell1.isRainbow || cell1.isKivano || cell1.isLemon || cell1.isDurian;
+    const isCell2Boost = cell2.isRainbow || cell2.isKivano || cell2.isLemon || cell2.isDurian;
 
-    let kivanoActivated = false
-    if (cell1.isKivano || cell2.isKivano) kivanoActivated = true
+    if (isCell1Boost || isCell2Boost) {
+        moves.value--;
 
-    let durianActivated = false
-    let durianPos = null
-    if (cell1.isDurian) { durianActivated = true; durianPos = {r: r2, c: c2} }
-    else if (cell2.isDurian) { durianActivated = true; durianPos = {r: r1, c: c1} }
+        // Запоминаем типы ДО свайпа, пока они точно известны
+        let fruitTypeForRainbow = null;
+        if (cell1.isRainbow && cell2.type) fruitTypeForRainbow = cell2.type;
+        else if (cell2.isRainbow && cell1.type) fruitTypeForRainbow = cell1.type;
 
-    // Срабатывание Лимона
-    if (lemonActivated) {
-        moves.value--
-        swapCellObjects(r1, c1, r2, c2)
-        await sleep(150)
-        await activateLemon(lemonPos.r, lemonPos.c)
+        // Если оба были бустами и типа не оказалось, ищем первый попавшийся фрукт на доске
+        if (!fruitTypeForRainbow) {
+            outerLoop: for (let r = 0; r < gridRows.value; r++) {
+                for (let c = 0; c < gridCols.value; c++) {
+                    const candidate = board.value[r]?.[c];
+                    if (candidate && candidate.type) {
+                        fruitTypeForRainbow = candidate.type;
+                        break outerLoop;
+                    }
+                }
+            }
+        }
+        if (!fruitTypeForRainbow) fruitTypeForRainbow = CANDIES[0];
+
+        swapCellObjects(r1, c1, r2, c2);
+        await sleep(150);
+
+        const updatedCell1 = board.value[r1][c1];
+        const updatedCell2 = board.value[r2][c2];
+
+        const activeTasks = [];
+
+        // Для первой позиции (r1, c1)
+        if (updatedCell1.isRainbow) {
+            activeTasks.push(processRainbowActivation(fruitTypeForRainbow, {r: r1, c: c1}));
+        } else if (updatedCell1.isLemon) {
+            activeTasks.push(activateLemon(r1, c1));
+        } else if (updatedCell1.isKivano) {
+            activeTasks.push(activateKivano(r1, c1));
+        } else if (updatedCell1.isDurian) {
+            activeTasks.push(activateDurian(r1, c1));
+        }
+
+        // Для второй позиции (r2, c2)
+        if (updatedCell2.isRainbow) {
+            activeTasks.push(processRainbowActivation(fruitTypeForRainbow, {r: r2, c: c2}));
+        } else if (updatedCell2.isLemon) {
+            activeTasks.push(activateLemon(r2, c2));
+        } else if (updatedCell2.isKivano) {
+            activeTasks.push(activateKivano(r2, c2));
+        } else if (updatedCell2.isDurian) {
+            activeTasks.push(activateDurian(r2, c2));
+        }
+
+        await Promise.all(activeTasks);
+
         finishTurnChecks();
-        return
+        return;
     }
 
-    // Срабатывание Кивано
-    if (kivanoActivated) {
-        moves.value--
-        swapCellObjects(r1, c1, r2, c2)
-        await sleep(150)
-        await activateKivano(r2, c2)
-        finishTurnChecks();
-        return
-    }
-
-    // 🌟 Срабатывание Дуриана
-    if (durianActivated) {
-        moves.value--
-        swapCellObjects(r1, c1, r2, c2)
-        await sleep(150)
-        await activateDurian(durianPos.r, durianPos.c)
-        finishTurnChecks();
-        return
-    }
-
+    // Ниже идет обычная логика для стандартных конфет (не бустов)...
     let rainbowActivated = false
     let targetFruitType = null
 
     if (cell1.isRainbow && !cell2.obstacle && cell2.jelly === 0 && !cell2.unbreakable && !cell2.chained && cell2.type) {
-        rainbowActivated = true; targetFruitType = cell2.type
+        rainbowActivated = true;
+        targetFruitType = cell2.type || CANDIES[0];
     } else if (cell2.isRainbow && !cell1.obstacle && cell1.jelly === 0 && !cell1.unbreakable && !cell1.chained && cell1.type) {
-        rainbowActivated = true; targetFruitType = cell1.type
+        rainbowActivated = true;
+        targetFruitType = cell1.type || CANDIES[0];
     }
 
     swapCellObjects(r1, c1, r2, c2)
@@ -991,9 +1013,13 @@ async function trySwap(r1, c1, r2, c2) {
 
     if (rainbowActivated) {
         moves.value--
+        swapCellObjects(r1, c1, r2, c2)
         showFloatingBadge("match3.juicy_explosion", "text-[#66FF66]", "0 4px 15px rgba(6, 182, 212, 0.6)")
-        await processRainbowActivation(targetFruitType, cell1.isRainbow ? {r: r2, c: c2} : {r: r1, c: c1})
+
+        const rainbowPosCoord = (board.value[r2][c2]?.isRainbow) ? {r: r2, c: c2} : {r: r1, c: c1};
+        await processRainbowActivation(targetFruitType, rainbowPosCoord)
         finishTurnChecks();
+        return
     } else {
         const group = findMatchGroups(board.value, [{r: r1, c: c1}, {r: r2, c: c2}])
         if (group.matches.length > 0 || group.fiveInRowMatches.length > 0 || group.fourInRowMatches.length > 0 || group.squareMatches.length > 0 || group.lShapeMatches.length > 0) {
@@ -1208,7 +1234,6 @@ async function activateKivano(r, c) {
         showFloatingBadge("match3.kivano_attack", "text-lime-300", "0 4px 15px rgba(132, 204, 22, 0.6)")
         await sleep(600)
         flyingKivano.value = null
-
         const targetCell = board.value[target.r]?.[target.c]
         if (targetCell) {
             if (target.type === 'chain') targetCell.chained = false
@@ -1260,7 +1285,7 @@ async function processRainbowActivation(fruitType, rainbowPos) {
             endY: target.r
         }
 
-        await sleep(200)
+        await sleep(300)
         currentPos = { r: target.r, c: target.c }
 
         checkCell.isBlinking = true
