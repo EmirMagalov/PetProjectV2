@@ -648,20 +648,7 @@ onUnmounted(() => {
     transform: translate(
         calc(var(--dx) * var(--progress)),
         calc(var(--dy) * var(--progress) - var(--arc))
-    ) scale(1);
-  }
-  50% {
-
-    transform: translate(
-        calc(var(--dx) * var(--progress)),
-        calc(var(--dy) * var(--progress) - var(--arc))
-    ) scale(1.15);
-  }
-  75% {
-    transform: translate(
-        calc(var(--dx) * var(--progress)),
-        calc(var(--dy) * var(--progress) - var(--arc))
-    ) scale(1.10);
+    ) scale(1.4);
   }
   100% {
     --progress: 1;
@@ -669,12 +656,25 @@ onUnmounted(() => {
     transform: translate(
         calc(var(--dx) * var(--progress)),
         calc(var(--dy) * var(--progress) - var(--arc))
-    ) scale(1);
+    ) scale(1.4);
   }
 }
 
+/* Очень частая и мелкая тряска (шейкер) */
+@keyframes quickShake {
+  0% { transform: rotate(0deg) translate(0, 0) scale(1.5); }
+  20% { transform: rotate(-20deg) translate(-4px, 4px) scale(1.2); }
+  40% { transform: rotate(20deg) translate(4px, -2px) scale(1.2); }
+  60% { transform: rotate(-18deg) translate(-2px, -4px) scale(1.2); }
+  80% { transform: rotate(18deg) translate(4px, 4px) scale(1.2); }
+  100% { transform: rotate(0deg) translate(0, 0) scale(1.2); }
+}
+
 .dragon-flying-anim {
-  animation: dragonFlight 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  /* Запускаем полёт на 1.5 секунды И одновременно бесконечную частую тряску (0.12с цикл) */
+  animation:
+      dragonFlight 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+      quickShake 0.5s ease-in-out infinite;
   will-change: transform;
 }
 
