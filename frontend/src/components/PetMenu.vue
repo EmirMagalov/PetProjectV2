@@ -116,7 +116,7 @@ function Match3Game() {
   // Безопасный расчет монет (поддерживает ref и обычный объект)
 
   if (gameData.foodLevel < 3) {
-    alert(i18n.global.t('minigames_access.hop_hop_fed'));
+    alert(i18n.global.t('minigames_access.fruit_fresh_fed'));
     return;
   }
   if (gameData.energy < 3) {
