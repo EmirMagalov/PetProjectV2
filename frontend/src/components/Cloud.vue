@@ -17,27 +17,30 @@ const activeItems = computed(() => {
 
 <template>
   <!-- Внешний позиционирующий контейнер -->
-  <div class="absolute -top-45 inset-0 flex items-center justify-center pointer-events-none opacity-80 overflow-visible z-30">
+  <div class="absolute -top-50 inset-0 flex items-center justify-center pointer-events-none opacity-80 overflow-visible z-30">
 
-    <!-- Vue Transition с классами для перелета -->
+    <!-- Vue Transition с классами для перелета (не трогаем) -->
     <Transition name="cloud-fly">
       <div
           v-show="cloudShow && !gameData.sleep"
-          class="relative flex items-center justify-center z-50 pointer-events-auto cloud-hover"
+          class="relative flex items-center justify-center z-50 pointer-events-auto"
       >
-        <!-- Само облако -->
-        <img :src="`/gamePlay/cloud_message.webp?v=${APP_VERSION}`" class="relative w-30 block" alt="cloud">
+        <!-- Внутренний контейнер только для покачивания -->
+        <div class="relative flex items-center justify-center cloud-hover">
+          <!-- Само облако -->
+          <img :src="`/gamePlay/cloud_message.webp?v=${APP_VERSION}`" class="relative w-25 block" alt="cloud">
 
-        <!-- 🌧️ СЛОЙ ДОЖДЯ (появляется с задержкой, исчезает мгновенно при уходе облака) -->
-        <div class="absolute inset-x-4 -bottom-10 h-14 pointer-events-none overflow-visible z-40 rain-wrapper">
-          <span class="rain-drop drop-1"></span>
-          <span class="rain-drop drop-2"></span>
-          <span class="rain-drop drop-3"></span>
-          <span class="rain-drop drop-4"></span>
-          <span class="rain-drop drop-5"></span>
-          <span class="rain-drop drop-6"></span>
-          <span class="rain-drop drop-7"></span>
-          <span class="rain-drop drop-8"></span>
+          <!-- 🌧️ СЛОЙ ДОЖДЯ (появляется с задержкой, исчезает мгновенно при уходе облака) -->
+          <div class="absolute inset-x-4 -bottom-10 h-14 pointer-events-none overflow-visible z-40 rain-wrapper">
+            <span class="rain-drop drop-1"></span>
+            <span class="rain-drop drop-2"></span>
+            <span class="rain-drop drop-3"></span>
+            <span class="rain-drop drop-4"></span>
+            <span class="rain-drop drop-5"></span>
+            <span class="rain-drop drop-6"></span>
+            <span class="rain-drop drop-7"></span>
+            <span class="rain-drop drop-8"></span>
+          </div>
         </div>
 
         <!-- Контейнер для иконки внутри облака -->
@@ -51,7 +54,8 @@ const activeItems = computed(() => {
         <!--          <!– Energy (Энергия) –>-->
         <!--          <div v-show="energyFull || lowEnergy" class="flex items-center justify-center gap-1 w-10">-->
         <!--            <img-->
-        <!--                :src="lowEnergy ? `/gamePlay/energy_low.webp?v=${APP_VERSION}` : ''"-->
+        <!--                v-if="lowEnergy"-->
+        <!--                :src="`/gamePlay/energy_low.webp?v=${APP_VERSION}`"-->
         <!--                class="w-full object-contain"-->
         <!--                alt="energy"-->
         <!--            >-->
@@ -86,7 +90,7 @@ const activeItems = computed(() => {
   opacity: 0;
 }
 
-/* 🔄 Бесконечное покачивание влево-вправо (плавание облака) */
+/* 🔄 Покачивание облака */
 @keyframes floatX {
   0%, 100% {
     transform: translateX(0px) translateY(0px);
@@ -100,7 +104,7 @@ const activeItems = computed(() => {
   animation: floatX 3s ease-in-out infinite;
 }
 
-/* ⏱️ Дождь появляется с задержкой 1.1с, но при исчезновении контейнера (.cloud-fly-leave-active) сбрасывается мгновенно */
+/* ⏱️ Дождь появляется с задержкой 0.5с, но при исчезновении контейнера (.cloud-fly-leave-active) сбрасывается мгновенно */
 @keyframes fadeInRain {
   0% { opacity: 0; }
   100% { opacity: 1; }
@@ -108,7 +112,7 @@ const activeItems = computed(() => {
 
 .rain-wrapper {
   opacity: 0;
-  animation: fadeInRain 0.3s ease-in-out 0.1s forwards;
+  animation: fadeInRain 0.3s ease-in-out 0.5s forwards;
 }
 
 /* Когда компонент начинает уходить, скрываем дождь моментально без задержек */

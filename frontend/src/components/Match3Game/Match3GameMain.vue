@@ -5,7 +5,7 @@ import {
   activeBadgeText,
   activeCell, badgeKey,
   board,
-  boardPixelSize, cellSize, cellStep, earned_coins, earned_exp, flatBoard, flyingKivano,
+  boardPixelSize, cellSize, cellStep, durianImage, earned_coins, earned_exp, flatBoard, flyingKivano, flyingRainbow,
   gameState, gridCols, gridOffsetX, gridOffsetY, gridRows,
   isGameOver, isJellyLevel,
   isLevelPassed, isShuffling, isVictoryTriggered, kivanoImage, lemonImage, level,
@@ -96,8 +96,9 @@ onUnmounted(() => {
 
                   <!-- 1. Если это уровень варенья -->
                   <div v-if="isJellyLevel" class="relative flex items-center justify-center">
-                    <img src="/food/strawberry_jam.webp" class="object-contain w-8" alt="jelly" />
-                    <span class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
+                    <img src="/food/strawberry_jam.webp" class="object-contain w-8" alt="jelly"/>
+                    <span
+                        class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
         {{ remainingTargets }}
       </span>
                   </div>
@@ -105,16 +106,18 @@ onUnmounted(() => {
                   <template v-else>
                     <!-- 2. Если есть коробки / препятствия -->
                     <div v-if="remainingObstacles > 0" class="relative flex items-center justify-center">
-                      <img src="/gamePlay/a_crate_of_fruit.webp" class="object-contain w-8" alt="obstacle" />
-                      <span class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
+                      <img src="/gamePlay/a_crate_of_fruit.webp" class="object-contain w-8" alt="obstacle"/>
+                      <span
+                          class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
           {{ remainingObstacles }}
         </span>
                     </div>
 
                     <!-- 3. Если есть закрытые цепями фрукты -->
                     <div v-if="remainingChains > 0" class="relative flex items-center justify-center">
-                      <img src="/gamePlay/lock.webp" class="object-contain w-8" alt="chain" />
-                      <span class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
+                      <img src="/gamePlay/lock.webp" class="object-contain w-8" alt="chain"/>
+                      <span
+                          class="absolute -bottom-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow">
           {{ remainingChains }}
         </span>
                     </div>
@@ -228,7 +231,7 @@ onUnmounted(() => {
                 alt="obstacle"
             />
             <img
-                v-else-if="cell.isRainbow"
+                v-else-if="cell.isRainbow && !flyingRainbow"
                 :src="rainbowImage"
                 class="animate-bounce brightness-200 object-contain drop-shadow-md pointer-events-none"
                 :style="{ width: (cellSize * 0.9) + 'px', height: (cellSize * 0.9) + 'px' }"
@@ -248,6 +251,13 @@ onUnmounted(() => {
                 class="animate-bounce brightness-140 object-contain drop-shadow-md pointer-events-none"
                 :style="{ width: (cellSize * 0.9) + 'px', height: (cellSize * 0.9) + 'px' }"
                 alt="lemon"
+            />
+            <img
+                v-else-if="cell.isDurian"
+                :src="durianImage"
+                class="animate-bounce brightness-170 object-contain drop-shadow-md pointer-events-none"
+                :style="{ width: (cellSize * 0.9) + 'px', height: (cellSize * 0.9) + 'px' }"
+                alt="durian"
             />
             <div v-else-if="cell.type" class="relative w-full h-full flex items-center justify-center">
               <img
@@ -280,7 +290,22 @@ onUnmounted(() => {
               alt="flying kivano"
           />
         </div>
-
+        <!-- Анимационный слой для летящего Драгонфрукта -->
+        <div v-if="flyingRainbow" class="absolute inset-0 brightness-200 pointer-events-none z-50" style="padding: 10px;">
+          <img
+              :src="rainbowImage"
+              class="absolute object-contain drop-shadow-2xl kivano-flying-anim"
+              :style="{
+                width: (cellSize * 0.9) + 'px',
+                height: (cellSize * 0.9) + 'px',
+                left: (flyingRainbow.startX * cellStep + 5 + gridOffsetX) + 'px',
+                top: (flyingRainbow.startY * cellStep + 5 + gridOffsetY) + 'px',
+                '--dx': ((flyingRainbow.endX - flyingRainbow.startX) * cellStep) + 'px',
+                '--dy': ((flyingRainbow.endY - flyingRainbow.startY) * cellStep) + 'px',
+              }"
+              alt="flying rainbow"
+          />
+        </div>
         <!-- Плашка -->
         <transition name="badge-fade" :key="badgeKey">
           <div
@@ -551,6 +576,7 @@ onUnmounted(() => {
   animation: rainbowBlink 0.3s ease-in-out 3; /* мигает 3 раза */
   z-index: 25 !important;
 }
+
 @property --progress {
   syntax: '<number>';
   initial-value: 0;
@@ -562,6 +588,7 @@ onUnmounted(() => {
   initial-value: 0px;
   inherits: false;
 }
+
 @keyframes kivanoFlight {
   0% {
     --progress: 0;

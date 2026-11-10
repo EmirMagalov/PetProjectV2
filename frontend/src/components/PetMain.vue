@@ -4,7 +4,7 @@ import PetFoam from "@/components/PetFoam.vue";
 import PetShower from "@/components/PetShower.vue";
 import {ref, onMounted, onUnmounted, watch, computed} from "vue"
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
-import CloudMessage from "@/components/CloudMessage.vue";
+import Cloud from "@/components/Cloud.vue";
 import PetStinky from "@/components/PetStinky.vue";
 import PetHeadwear from "@/components/PetHeadwear.vue";
 import Status from "@/components/Status.vue";
@@ -446,7 +446,7 @@ const pumpkinAnimation = (event) => {
         </div>
 
 
-        <CloudMessage/>
+        <Cloud/>
 
         <!-- Монетки / Опыт -->
         <CoinsAndXP v-if="gameData.level>1"/>
