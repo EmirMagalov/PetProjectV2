@@ -3,6 +3,7 @@ import {gameData} from "@/scripts/useGameStore.js";
 import {addCoin} from "@/scripts/actions.js";
 import {addExp} from "@/scripts/level.js";
 import {syncToBackend} from "@/scripts/api.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 // =====================================================================
 // 1. КОНФИГУРАЦИЯ И КОНСТАНТЫ УРОВНЕЙ
@@ -27,12 +28,12 @@ const CANDIES = [
     '/food/orange.webp',
 ]
 
-export const rainbowImage = '/food/dragonfruit.webp'
-export const obstacleImage = '/gamePlay/a_crate_of_fruit.webp'
-export const stoneImage = '/gamePlay/ice_cube.webp'
-export const kivanoImage = '/food/kivano.webp'
-export const lemonImage = '/food/lemon.webp'
-export const durianImage = '/food/durian.webp' // 🌟 Добавили картинку дуриана
+export const rainbowImage = `/food/dragonfruit.webp?v=${APP_VERSION}`
+export const obstacleImage = `/gamePlay/a_crate_of_fruit.webp?v=${APP_VERSION}`
+export const stoneImage = `/gamePlay/ice_cube.webp?v=${APP_VERSION}`
+export const kivanoImage = `/food/kivano.webp?v=${APP_VERSION}`
+export const lemonImage = `/food/lemon.webp?v=${APP_VERSION}`
+export const durianImage = `/food/durian.webp?v=${APP_VERSION}` // 🌟 Добавили картинку дуриана
 
 const JELLY_IMAGES = [
     '/food/banana_jam.webp',
