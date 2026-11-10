@@ -19,10 +19,14 @@ import {
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {gameData} from "@/scripts/useGameStore.js";
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
-
+import i18n from "@/scripts/locales/i18n.js";
 const isLoading = ref(true);
 
 onMounted(() => {
+  const savedLang = localStorage.getItem('user_language') || 'en'; // 👈 вот здесь
+  if (i18n.global.locale.value !== savedLang) {
+    i18n.global.locale.value = savedLang;
+  }
   updateBoardSize()
   window.addEventListener('resize', updateBoardSize)
   scrollToCurrentLevel()
@@ -91,7 +95,7 @@ onUnmounted(() => {
               <!-- Цель уровня (коробки / варенье / цепи) — по центру -->
               <div
                   class="text-cyan-400 text-shadow-sm rounded-2xl bg-amber-100 px-3 py-1 text-shadow-black text-sm h-13 flex items-center justify-center gap-2 min-w-15 border border-amber-200">
-                <div v-if="gameState === 'MENU'">
+                <div v-if="gameState === 'MENU' || isLevelPassed || isGameOver || isVictoryTriggered">
                   <img src="/gamePlay/star_icon.webp" class="object-contain w-8" alt="jelly"/>
                 </div>
                 <div class="flex justify-center items-center" v-if="gameState !== 'MENU' && level===1">

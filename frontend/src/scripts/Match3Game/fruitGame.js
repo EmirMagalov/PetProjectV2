@@ -502,9 +502,9 @@ function initLevel() {
 
     // 🧪 ТЕСТОВЫЙ СПАВН БУСТОВ ДЛЯ ПРОВЕРКИ:
     // if (board.value[2]?.[2]) {
-    // board.value[2][1] = createCell(null, null, false, false, true); // isLemon = true
+    // // board.value[2][1] = createCell(null, null, false, false, true); // isLemon = true
     // board.value[3][1] = createCell(null, null, false, true, false); // isKivano = true
-    // board.value[4][1] = createCell(null, null, true, false, false); // isRainbow = true
+    // board.value[3][1] = createCell(null, null, true, false, false); // isRainbow = true
     // }
 
 
@@ -514,7 +514,7 @@ function initLevel() {
     // if (gridRows.value >= 3 && gridCols.value >= 5) {
     //     const testCandy = CANDIES[0];
     //     // Выстраиваем горизонтальный ряд из 5 одинаковых конфет на 1-й строке
-    //     for (let c = 0; c < 4; c++) {
+    //     for (let c = 0; c < 5; c++) {
     //         if (board.value[1]?.[c]) {
     //             board.value[1][c].type = testCandy;
     //             board.value[1][c].obstacle = null;
@@ -1230,93 +1230,81 @@ async function processRainbowActivation(fruitType, rainbowPos) {
     const cols = gridCols.value
     const targetsToRemove = []
 
-    // 1. Находим все фрукты нужного цвета на доске
+    // 1. Сразу стираем сам драгонфрукт с той позиции, куда его перетащили
+    if (board.value[rainbowPos.r]?.[rainbowPos.c] !== null) {
+        board.value[rainbowPos.r][rainbowPos.c] = createCell(null, null)
+    }
+
+    // 2. Находим ВСЕ фрукты нужного цвета на доске
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             const cell = board.value[r]?.[c]
-            if (cell && cell !== null && cell?.type === fruitType && !cell?.unbreakable && !cell?.chained) {
+            if (cell && cell !== null && cell?.type === fruitType && !cell?.unbreakable && !cell?.chained && !cell?.obstacle && cell?.jelly === 0) {
                 targetsToRemove.push({r, c})
             }
         }
     }
 
-    // Добавляем сам драгонфрукт в список для удаления в самом конце
-    targetsToRemove.push(rainbowPos)
-
-    const targetsToDamage = new Set()
-    const cellsToBreakChain = new Set()
-
-    // Текущая позиция драгонфрукта, с которой он начинает прыгать
+    // Откуда начинает лететь анимация
     let currentPos = { ...rainbowPos }
 
-    // 2. Прыгаем по каждому найденному фрукту и уничтожаем его сразу по прилёту
+    // 3. Прыгаем по каждому фрукту: уничтожаем его И СРАЗУ бьем соседние препятствия
     for (const target of targetsToRemove) {
-        // Если это не стартовая позиция, показываем "прыжок"
-        if (currentPos.r !== target.r || currentPos.c !== target.c) {
-            flyingRainbow.value = {
-                startX: currentPos.c,
-                startY: currentPos.r,
-                endX: target.c,
-                endY: target.r
-            }
-            // Скорость одного прыжка
-            await sleep(250)
-            currentPos = { r: target.r, c: target.c }
+        const checkCell = board.value[target.r]?.[target.c];
+        if (!checkCell || checkCell === null) continue;
+
+        flyingRainbow.value = {
+            startX: currentPos.c,
+            startY: currentPos.r,
+            endX: target.c,
+            endY: target.r
         }
 
-        const cell = board.value[target.r]?.[target.c]
-        if (cell) {
-            cell.isBlinking = true
-        }
+        await sleep(200)
+        currentPos = { r: target.r, c: target.c }
 
-        // 🌟 СРАЗУ удаляем фрукт в момент прилёта
-        if (board.value[target.r]?.[target.c] !== null) {
-            board.value[target.r][target.c] = createCell(null, null)
-        }
+        checkCell.isBlinking = true
 
-        // Собираем соседей уничтожаемого фрукта для урона коробкам/цепи
+        // 🌟 Уничтожаем фрукт в момент прилёта
+        board.value[target.r][target.c] = createCell(null, null)
+
+        // 🌟 СРАЗУ же наносим урон коробкам, варенью и цепям на соседних клетках
         const neighbors = [
             {r: target.r - 1, c: target.c},
             {r: target.r + 1, c: target.c},
             {r: target.r, c: target.c - 1},
             {r: target.r, c: target.c + 1}
         ]
+
         neighbors.forEach(n => {
             if (n.r >= 0 && n.r < rows && n.c >= 0 && n.c < cols) {
                 const neighborCell = board.value[n.r]?.[n.c]
                 if (neighborCell) {
-                    if (isJellyLevel.value && neighborCell.jelly > 0) targetsToDamage.add(`${n.r},${n.c}`)
-                    else if (!isJellyLevel.value && neighborCell.obstacle) targetsToDamage.add(`${n.r},${n.c}`)
-                    if (neighborCell.chained) cellsToBreakChain.add(`${n.r},${n.c}`)
+                    // Урон по варенью
+                    if (isJellyLevel.value && neighborCell.jelly > 0) {
+                        neighborCell.jelly = Math.max(0, neighborCell.jelly - 1)
+                        score.value += 200
+                    }
+                    // Урон по коробкам / препятствиям
+                    else if (!isJellyLevel.value && neighborCell.obstacle) {
+                        neighborCell.obstacle = null
+                        score.value += 200
+                    }
+                    // Снятие цепей (замков)
+                    if (neighborCell.chained) {
+                        neighborCell.chained = false
+                        score.value += 200
+                    }
                 }
             }
         })
     }
 
+    // Убираем анимацию полета
     flyingRainbow.value = null
     await sleep(100)
 
-    // 3. Наносим урон коробкам / варенью вокруг всех точек взрыва
-    targetsToDamage.forEach(str => {
-        const [r, c] = str.split(',').map(Number)
-        if (board.value[r]?.[c] !== null) {
-            if (isJellyLevel.value) {
-                board.value[r][c].jelly = Math.max(0, board.value[r][c].jelly - 1)
-            } else {
-                board.value[r][c].obstacle = null
-            }
-            score.value += 300
-        }
-    })
-
-    // 4. Разрушаем цепи на соседних клетках
-    cellsToBreakChain.forEach(str => {
-        const [r, c] = str.split(',').map(Number)
-        if (board.value[r]?.[c]) {
-            board.value[r][c].chained = false
-        }
-    })
-
+    // Запускаем гравитацию и проверку матчей
     await nextTick()
     await sleep(200)
     applyGravityAndSpawn()
@@ -1385,8 +1373,13 @@ async function processMatchesAndDrop() {
     let group = findMatchGroups(board.value)
     const rows = gridRows.value
     const cols = gridCols.value
+    let cascadeCount = 0; // 🌟 Счётчик каскадов (цепочки взрывов)
 
     while (group.matches.length > 0 || group.fiveInRowMatches.length > 0 || group.fourInRowMatches.length > 0 || group.squareMatches.length > 0 || group.lShapeMatches.length > 0) {
+        cascadeCount++;
+        if (cascadeCount > 1) {
+            showFloatingBadge("match3.magnificent", "text-green-500", "0 4px 15px rgba(217, 119, 6, 0.8)");
+        }
         score.value += (group.matches.length * 30 + group.fiveInRowMatches.length * 300 + group.fourInRowMatches.length * 150 + group.squareMatches.length * 150 + group.lShapeMatches.length * 200)
 
         if (group.fiveInRowMatches.length > 0) {
