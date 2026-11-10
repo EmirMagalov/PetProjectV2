@@ -36,7 +36,12 @@ const changeLanguage = async (lang) => {
   if (gameData) {
     gameData.language = lang;
   }
-  await syncToBackend()
+  try {
+    await syncToBackend()
+  } catch (error) {
+    console.error(error);
+  }
+
 };
 
 watch(comboClicks, (newVal) => {

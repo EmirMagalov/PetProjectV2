@@ -2,6 +2,7 @@ import {ref, computed, nextTick, watch} from 'vue'
 import {gameData} from "@/scripts/useGameStore.js";
 import {addCoin} from "@/scripts/actions.js";
 import {addExp} from "@/scripts/level.js";
+import {syncToBackend} from "@/scripts/api.js";
 
 // =====================================================================
 // 1. КОНФИГУРАЦИЯ И КОНСТАНТЫ УРОВНЕЙ
@@ -47,7 +48,7 @@ let calculatedMoves = 0
 let startX = 0
 let startY = 0
 
-export const currentLevel = ref(gameData.match3_level)
+export const currentLevel = ref(gameData.match3Level)
 export const level = computed(() => currentLevel.value)
 
 export const lockedGridSize = ref(null) // Замороженный размер сетки для экрана победы
@@ -312,7 +313,7 @@ export function startGame() {
     initLevel()
 }
 
-function triggerVictory() {
+async function triggerVictory() {
     if (isVictoryTriggered) return
     isVictoryTriggered = true
     lockedGridSize.value = {rows: gridRows.value, cols: gridCols.value}
@@ -328,12 +329,16 @@ function triggerVictory() {
     if (!gameData.match3_stars) gameData.match3_stars = {}
     const previousStars = gameData.match3_stars[level.value] || 0
     if (earnedStars > previousStars) gameData.match3_stars[level.value] = earnedStars
-
+    try {
+    await syncToBackend()
+    } catch (error) {
+        console.error(error);
+    }
     setTimeout(() => {
         isLevelPassed.value = true
         isProcessing.value = false
         if (currentLevel.value < MAX_GAME_LEVEL) {
-            if (currentLevel.value >= gameData.match3_level) gameData.match3_level++
+            if (currentLevel.value >= gameData.match3Level) gameData.match3Level++
             currentLevel.value++
         } else {
             showFloatingBadge("match3.great_job", "text-yellow-300", "0 4px 15px rgba(234, 179, 8, 0.6)")
@@ -350,7 +355,7 @@ function triggerGameOver() {
 }
 
 export function selectLevel(lvl) {
-    if (lvl > gameData.match3_level) return
+    if (lvl > gameData.match3Level) return
     currentLevel.value = lvl
     gameState.value = 'MENU'
     initLevel()

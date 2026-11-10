@@ -196,7 +196,11 @@ export async function placeBet(amount) {
     bettingPhase.value = false;
     result.value = "";
 
-    await syncToBackend();
+    try {
+        await syncToBackend()
+    } catch (error) {
+        console.error(error);
+    }
     return true;
 }
 
@@ -238,7 +242,11 @@ export async function finishGame(type) {
         addCoin(currentBet.value);
         addExp(5)
     }
-    await syncToBackend();
+    try {
+        await syncToBackend()
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 export async function determineWinner() {

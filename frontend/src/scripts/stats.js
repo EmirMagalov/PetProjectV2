@@ -195,7 +195,11 @@ watch(() => gameData.lives, async (newLives, oldLives) => {
             showStatus('gameOver');
 
             // Сразу отправляем обновленные данные на бэкенд
-            await syncToBackend();
+            try {
+                await syncToBackend()
+            } catch (error) {
+                console.error(error);
+            }
         } else if (!gameData.isGameOver) {
             // Если при перезагрузке он уже пришел мертвым, но флаг на фронте еще не стоял —
             // просто включаем экран смерти БЕЗ инкремента счетчика!

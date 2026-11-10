@@ -129,6 +129,7 @@ class Pet(models.Model):
 
     #Прочее
     season = fields.CharField(max_length=20, default="summer")
+    match3_level=fields.IntField(default=1)
 
 
     # МЕТОДЫ МОДЕЛИ

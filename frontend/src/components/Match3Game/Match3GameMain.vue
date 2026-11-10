@@ -435,7 +435,7 @@ onUnmounted(() => {
           <div
               class="flex gap-2 overflow-x-auto p-2 scrollbar-thin scrollbar-thumb-pink-400 scrollbar-track-transparent w-full">
             <button
-                v-for="i in gameData.match3_level"
+                v-for="i in gameData.match3Level"
                 :key="i"
                 :ref="el => { if (el) levelButtonsRef[i] = el }"
                 @click="selectLevel(i)"

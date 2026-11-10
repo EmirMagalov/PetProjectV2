@@ -98,7 +98,7 @@ const savedMatch3Level = localStorage.getItem('match3_level') ? parseInt(localSt
 export const defaultGameData = {
     name: '',
     level: 1,
-    match3_level:savedMatch3Level,
+    match3Level:savedMatch3Level,
     exp: 0,
     coins: 50,
     lives: 3,
@@ -149,7 +149,7 @@ export const gameData = reactive({
     lastUpdate: Date.now()
 })
 
-watch(() => gameData.match3_level, (newLevel) => {
+watch(() => gameData.match3Level, (newLevel) => {
     localStorage.setItem('match3_level', newLevel)
 })
 

@@ -154,7 +154,11 @@ export async function handleItemClick(item) {
             }
 
             showNotification(item, 1)
-            await syncToBackend()
+            try {
+                await syncToBackend()
+            } catch (error) {
+                console.error(error);
+            }
         } else {
             alert(i18n.global.t('not_enough_coins'))
         }
@@ -204,7 +208,7 @@ export function getItemCost(item) {
     if (!item) return 0
     const baseCost = item.baseCost ?? item.price ?? 0
 
-    if (item.category === 'food' ) {
+    if (item.category === 'food') {
         const rawLevel = gameData.level || 1
         const effectiveLevel = Math.min(rawLevel, 50)
         return baseCost + (effectiveLevel)

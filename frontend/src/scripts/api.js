@@ -164,7 +164,7 @@ export async function initGameData() {
             gameData.tutorialCompleted = serverData.tutorial_completed || false
             gameData.referredBy = serverData.referred_by || false
             gameData.isGameOver = serverData.is_game_over || false
-
+            gameData.match3Level=serverData.match3_level || 1
             if (serverData.language) {
                 gameData.language = serverData.language
                 // localStorage.setItem('user-locale', serverData.language)
@@ -188,7 +188,11 @@ export async function initGameData() {
                 if (!serverData.tutorial_completed) {
                     console.log("🔄 Обнаружен локальный прогресс туториала. Синхронизируем с сервером...")
                     // Отправляем актуальные данные на сервер, чтобы в базе тоже стало true
-                    await syncToBackend()
+                    try {
+                        await syncToBackend()
+                    } catch (error) {
+                        console.error(error);
+                    }
                 }
             }
             isDataLoaded = true
@@ -276,6 +280,7 @@ function getPayload() {
         daily_tasks: gameData.daily_tasks,
         language: gameData.language,
         is_game_over:gameData.isGameOver,
+        match3_level:gameData.match3Level,
         last_update: Math.floor(Date.now() / 1000)
     }
 }
