@@ -14,7 +14,7 @@ import {currentBathItem, currentFoodItem, removeFromCart,} from "@/scripts/baske
 import {addExp} from "@/scripts/level.js";
 import {incrementTaskProgress} from "@/scripts/dealyTasks.js";
 
-export let actionTimer = null
+let actionTimer = null
 
 
 export const showerCount = ref(0)

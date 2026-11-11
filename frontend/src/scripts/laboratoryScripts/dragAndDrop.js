@@ -10,7 +10,7 @@ import { ingredientList } from "@/scripts/laboratoryScripts/ingredientItems.js";
 import {incrementTaskProgress} from "@/scripts/dealyTasks.js";
 import {useDraggable} from "@vueuse/core";
 import {resetEyeLook, updateEyeLook} from "@/scripts/actions.js";
-import {actionTimer, foamEl, foodConsumedByPipe, foodEl, handleEnd, handleMove} from "@/scripts/dragAndDrop.js";
+import {foodConsumedByPipe, foodEl, handleEnd, handleMove} from "@/scripts/dragAndDrop.js";
 
 
 export const ingredientDropZoneRef = ref(null);
@@ -18,6 +18,7 @@ export const activeIngredient = ref([]); // Что лежит на столе с
 export const craftedSerumModal = ref(null); // Данные для всплывающего окна
 export const lastCrafted = ref(null);
 export const lastCraftedQuantity = ref(1);
+let actionTimer = null
 let currentHoveredItem = null;
 let craftTimer = null;
 function clearActionTimer() {
