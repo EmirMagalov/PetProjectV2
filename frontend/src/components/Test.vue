@@ -1,24 +1,20 @@
-<script setup>
+<script setup lang="ts">
 import { useDraggable } from '@vueuse/core'
-import { ref } from 'vue'
+import { useTemplateRef } from 'vue'
 
-const el = ref()
+const el = useTemplateRef('el')
 
-const { style } = useDraggable(el, {
-  storageKey: 'vueuse-draggable',
-  storageType: 'session',
+// `style` will be a helper computed for `left: ?px; top: ?px;`
+const { x, y, style } = useDraggable(el, {
   preventDefault: true,
-  // pointerTypes: ['mouse', 'touch', 'pen'] // можно явно добавить
+  initialValue: { x: 40, y: 40 },
+  exact: true,
+  capture: true,
 })
 </script>
 
 <template>
-  <div
-      ref="el"
-      :style="style"
-      class="fixed "
-      style="touch-action: none;"
-  >
-  ауауа
+  <div ref="el" :style="[style, { touchAction: 'none' }]" style="position: fixed">
+    Drag me! I am at {{ x }}, {{ y }}
   </div>
 </template>

@@ -20,33 +20,19 @@ import {APP_VERSION} from "@/scripts/imageVersion.js";
 // СОСТОЯНИЕ ЗАГРУЗКИ (LOADER)
 // =====================================================
 const isLoading = ref(true);
-// const MIN_ENERGY_REQUIRED = 3;
-// const MIN_FOOD_REQUIRED = 3;
-//
-// watch(gameFinished, (isFinished) => {
-//   if (isFinished) {
-//     const isOutOfEnergy = gameData.energy < MIN_ENERGY_REQUIRED;
-//     const isOutOfFood = gameData.foodLevel < MIN_FOOD_REQUIRED; // Проверьте имя свойства (foodLevel или food)
-//
-//     if (isOutOfEnergy || isOutOfFood) {
-//       // Задержка 1.5 сек, чтобы игрок увидел результат партии и анимацию монет
-//       setTimeout(() => {
-//         if (isOutOfEnergy && isOutOfFood) {
-//           alert("У вас закончились и энергия, и сытость! Вы покинули Jackpot.");
-//         } else if (isOutOfEnergy) {
-//           alert("У вас закончилась энергия! Вы покинули Jackpot.");
-//         } else {
-//           alert("Персонаж слишком голоден для игры! Вы покинули Jackpot.");
-//         }
-//
-//         // Перенаправление на главную/другую локацию
-//         router.push('/');
-//       }, 800);
-//     }
-//   }
-// });
 
-// const router = useRouter();
+// =====================================================
+// АДАПТИВНОЕ МАСШТАБИРОВАНИЕ
+// =====================================================
+const scale = ref(1)
+const BASE_WIDTH = 320
+
+function updateScale() {
+  const vw = window.visualViewport?.width || window.innerWidth
+  const available = vw - 12
+  const raw = available / BASE_WIDTH
+  scale.value = Math.min(Math.max(raw, 0.82), 1.28)
+}
 
 
 
@@ -114,6 +100,20 @@ function animateFlyTo({ targetEl, isDealer = false }) {
 }
 
 onMounted(() => {
+  if (window.Telegram?.WebApp) {
+    const tg = window.Telegram.WebApp
+    if (typeof tg.disableVerticalSwipes === 'function') {
+      tg.disableVerticalSwipes()
+    }
+    try { tg.expand() } catch (e) {}
+  }
+
+  updateScale()
+  window.addEventListener('resize', updateScale)
+  window.addEventListener('orientationchange', () => {
+    setTimeout(updateScale, 150)
+  })
+
   const savedLang = localStorage.getItem('user_language') || 'en';
   if (i18n.global.locale.value !== savedLang) {
     i18n.global.locale.value = savedLang;
@@ -121,7 +121,7 @@ onMounted(() => {
   result.value = 'jackpot.start_game_prompt';
   startRandomLooking();
 
-  // Имитируем загрузку на 1.8 секунды для плавности
+  // Имитируем загрузку для плавности
   setTimeout(() => {
     isLoading.value = false;
   }, 800);
@@ -130,14 +130,18 @@ onMounted(() => {
 onUnmounted(() => {
   clearInterval(lookInterval);
   clearInterval(blinkInterval);
+  window.removeEventListener('resize', updateScale)
+  window.removeEventListener('orientationchange', updateScale)
 });
 </script>
 
 <template>
   <div
-      :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000 relative', gameData.sleep ? 'bg-linear-to-r from-blue-900 via-blue-800 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']">
+      :class="['bg-[#DBEAFE] min-h-dvh transition-colors duration-3000 relative flex flex-col', gameData.sleep ? 'bg-linear-to-r from-blue-900 via-blue-800 to-blue-950':'bg-linear-65 from-yellow-300 via-yellow-600 to-orange-600']"
+      style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);"
+  >
 
-  <!-- ПОЛНОЭКРАННЫЙ ЭКРАН ЗАГРУЗКИ (LOADER) -->
+    <!-- ПОЛНОЭКРАННЫЙ ЭКРАН ЗАГРУЗКИ (LOADER) -->
     <Transition name="fade">
       <div
           v-if="isLoading"
@@ -165,112 +169,133 @@ onUnmounted(() => {
       </div>
     </Transition>
 
-    <PetHeaderMenu/>
+    <PetHeaderMenu class="shrink-0"/>
 
-    <!-- САЛУН -->
-    <div class="relative flex justify-center items-center w-full my-auto" >
-      <div class="relative w-[320px] h-[270px] overflow-hidden rounded-3xl border-2 border-red-400/80 shadow-2xl" :class="gameData.sleep ? 'bg-[#0F175C]':'bg-[#98E5FE]'">
-<!--        <img-->
-<!--            :src="`/location/saloon.webp?v=${APP_VERSION}`"-->
-<!--            class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"-->
-<!--            alt="Saloon Background"-->
-<!--        />-->
+    <!-- Масштабируемый блок (холст + меню) -->
+    <div class="flex-1 flex flex-col items-center justify-start overflow-x-hidden px-1">
+      <div
+          class="overflow-hidden"
+          :style="{
+            width: (BASE_WIDTH * scale) + 'px',
+            height: (540 * scale) + 'px'
+          }"
+      >
+        <div
+            :style="{
+              zoom: scale,
+              width: BASE_WIDTH + 'px',
 
-        <!-- FLUFFY (ПЕРСОНАЖ) -->
-        <div class="absolute inset-0 z-20 flex justify-center items-center cursor-pointer pointer-events-none">
-          <img
-              v-if="randomCharacterImage && randomCharacterImage.includes('.webp')"
-              :src="randomCharacterImage"
-              alt="Fluffy Body"
-              class="absolute"
-          />
-          <img :src="`/saloonPhotos/location/casino.webp?v=${APP_VERSION}`" alt="location saloon" class="object-contain"/>
+            }"
+        >
+          <!-- САЛУН -->
+          <div class="relative flex justify-center items-center w-full" >
+            <div class="relative w-[320px] h-[270px] overflow-hidden rounded-3xl border-2 border-red-400/80 shadow-2xl" :class="gameData.sleep ? 'bg-[#0F175C]':'bg-[#98E5FE]'">
+              <!--        <img-->
+              <!--            :src="`/location/saloon.webp?v=${APP_VERSION}`"-->
+              <!--            class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"-->
+              <!--            alt="Saloon Background"-->
+              <!--        />-->
 
-          <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
-            <div
-                class="absolute inset-0 flex justify-center items-center transition-transform duration-300 ease-out"
-                :style="{ transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)` }"
-            >
-              <img :src="`/saloonPhotos/characters/pupils_left.webp?v=${APP_VERSION}`" class="absolute" alt=""/>
-              <img :src="`/saloonPhotos/characters/pupils_right.webp?v=${APP_VERSION}`" class="absolute" alt=""/>
-            </div>
-          </div>
-        </div>
+              <!-- FLUFFY (ПЕРСОНАЖ) -->
+              <div class="absolute inset-0 z-20 flex justify-center items-center cursor-pointer pointer-events-none">
+                <img
+                    v-if="randomCharacterImage && randomCharacterImage.includes('.webp')"
+                    :src="randomCharacterImage"
+                    alt="Fluffy Body"
+                    class="absolute"
+                />
+                <img :src="`/saloonPhotos/location/casino.webp?v=${APP_VERSION}`" alt="location saloon" class="object-contain"/>
 
-        <!-- ИГРОВОЙ ИНТЕРФЕЙС ДИЛЕРА -->
-        <div class="absolute inset-x-0 top-0 z-30 p-2.5 flex flex-col items-center gap-1.5 pointer-events-auto">
+                <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
+                  <div
+                      class="absolute inset-0 flex justify-center items-center transition-transform duration-300 ease-out"
+                      :style="{ transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)` }"
+                  >
+                    <img :src="`/saloonPhotos/characters/pupils_left.webp?v=${APP_VERSION}`" class="absolute" alt=""/>
+                    <img :src="`/saloonPhotos/characters/pupils_right.webp?v=${APP_VERSION}`" class="absolute" alt=""/>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ИГРОВОЙ ИНТЕРФЕЙС ДИЛЕРА -->
+              <div class="absolute inset-x-0 top-0 z-30 p-2.5 flex flex-col items-center gap-1.5 pointer-events-auto">
           <span
               class="text-[11px] font-semibold text-amber-200 bg-black/80 px-2.5 py-0.5 rounded-full shadow-sm">
             {{ $t('jackpot.dealer') }}<template v-if="gameFinished"> · {{ dealerScore }}</template>
           </span>
 
-          <!-- КОЛОДА КАРТ -->
-          <div class="absolute top-28 left-3 flex flex-col items-center gap-2">
-            <div>
-              <p class="text-white font-bold text-[11px]  bg-black/80 px-2.5 py-0.5 rounded-full shadow-sm">
-                {{ $t('jackpot.points_21') }}
-              </p>
-            </div>
+                <!-- КОЛОДА КАРТ -->
+                <div class="absolute top-28 left-3 flex flex-col items-center gap-2">
+                  <div>
+                    <p class="text-white font-bold text-[11px]  bg-black/80 px-2.5 py-0.5 rounded-full shadow-sm">
+                      {{ $t('jackpot.points_21') }}
+                    </p>
+                  </div>
 
-            <div ref="deckRef" class="relative w-[42px] h-[58px]">
-              <div
-                  class="absolute inset-0 translate-x-[4px] translate-y-[4px] rounded-md bg-red-950 border border-black/50 shadow-md"></div>
-              <div
-                  class="absolute inset-0 translate-x-[2px] translate-y-[2px] rounded-md bg-red-900 border border-amber-300/60 shadow-md"></div>
-              <div
-                  class="absolute inset-0 rounded-md bg-red-800 border-2 border-amber-300 shadow-lg overflow-hidden flex items-center justify-center">
-                <div class="absolute inset-[3px] rounded-[4px] border border-amber-200/80"></div>
-                <span class="relative z-10 text-amber-200 text-[16px] font-bold drop-shadow-md">
+                  <div ref="deckRef" class="relative w-[42px] h-[58px]">
+                    <div
+                        class="absolute inset-0 translate-x-[4px] translate-y-[4px] rounded-md bg-red-950 border border-black/50 shadow-md"></div>
+                    <div
+                        class="absolute inset-0 translate-x-[2px] translate-y-[2px] rounded-md bg-red-900 border border-amber-300/60 shadow-md"></div>
+                    <div
+                        class="absolute inset-0 rounded-md bg-red-800 border-2 border-amber-300 shadow-lg overflow-hidden flex items-center justify-center">
+                      <div class="absolute inset-[3px] rounded-[4px] border border-amber-200/80"></div>
+                      <span class="relative z-10 text-amber-200 text-[16px] font-bold drop-shadow-md">
                   <img :src="`/gamePlay/logo_icons.webp?v=${APP_VERSION}`" class="w-7 object-contain" alt=""/>
                 </span>
+                    </div>
+                  </div>
+                  <p class="text-white font-bold text-[8px]  bg-black/80 px-2.5 py-0.5 rounded-full shadow-sm">
+                    {{ $t('jackpot.cards_count') }}
+                  </p>
+                </div>
+
+                <!-- КАРТЫ ДИЛЕРА -->
+                <div v-if="gameStarted" ref="dealerCardsZone"
+                     class="absolute top-33 flex items-center justify-center min-h-[58px] mt-0.5">
+                  <div
+                      v-for="(card, index) in dealerCards"
+                      :key="index"
+                      class="w-[42px] h-[58px] -ml-5 first:ml-0 transition-all duration-300"
+                  >
+                    <img
+                        v-if="gameFinished"
+                        :src="card.image"
+                        :alt="`${card.name} of ${card.suit}`"
+                        loading="eager"
+                        decoding="sync"
+                        class="w-full h-full object-contain drop-shadow-md"
+                    />
+                    <div
+                        v-else
+                        class="w-full h-full rounded-md bg-red-800 border-2 border-amber-300 shadow-md flex items-center justify-center relative overflow-hidden"
+                    >
+                      <div class="absolute inset-[2px] rounded-[3px] border border-amber-200/60"></div>
+                      <span class="text-amber-200 text-xs font-bold shadow-sm">?</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- РЕЗУЛЬТАТ МАТЧА -->
+                <div
+                    v-if="result"
+                    class="mt-1 bg-black/85 backdrop-blur-md text-amber-300 border border-amber-400/30 px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-bounce z-40"
+                >
+                  {{ $t(result) }}
+                </div>
               </div>
             </div>
-            <p class="text-white font-bold text-[8px]  bg-black/80 px-2.5 py-0.5 rounded-full shadow-sm">
-              {{ $t('jackpot.cards_count') }}
-            </p>
           </div>
 
-          <!-- КАРТЫ ДИЛЕРА -->
-          <div v-if="gameStarted" ref="dealerCardsZone"
-               class="absolute top-33 flex items-center justify-center min-h-[58px] mt-0.5">
-            <div
-                v-for="(card, index) in dealerCards"
-                :key="index"
-                class="w-[42px] h-[58px] -ml-5 first:ml-0 transition-all duration-300"
-            >
-              <img
-                  v-if="gameFinished"
-                  :src="card.image"
-                  :alt="`${card.name} of ${card.suit}`"
-                  loading="eager"
-                  decoding="sync"
-                  class="w-full h-full object-contain drop-shadow-md"
-              />
-              <div
-                  v-else
-                  class="w-full h-full rounded-md bg-red-800 border-2 border-amber-300 shadow-md flex items-center justify-center relative overflow-hidden"
-              >
-                <div class="absolute inset-[2px] rounded-[3px] border border-amber-200/60"></div>
-                <span class="text-amber-200 text-xs font-bold shadow-sm">?</span>
-              </div>
-            </div>
+          <!-- НИЖНЕЕ МЕНЮ (внутри масштабируемого блока) -->
+          <div class="mt-2 pb-2">
+            <SaloonMenu @animate-draw="animateFlyTo"/>
           </div>
+        </div> <!-- end transform scale -->
+      </div> <!-- end size-constrained wrapper -->
+    </div> <!-- end flex-1 -->
 
-          <!-- РЕЗУЛЬТАТ МАТЧА -->
-          <div
-              v-if="result"
-              class="mt-1 bg-black/85 backdrop-blur-md text-amber-300 border border-amber-400/30 px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-bounce z-40"
-          >
-            {{ $t(result) }}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- НИЖНЕЕ МЕНЮ -->
-    <div class="mt-auto pb-4 shrink-0">
-      <SaloonMenu @animate-draw="animateFlyTo"/>
-    </div>
+    <!-- Анимации монет/опыта остаются fixed поверх всего -->
     <div class="fixed inset-0 pointer-events-none overflow-hidden z-50 flex items-center justify-center">
       <template v-for="group in activeCoins" :key="group.id">
         <img

@@ -1,3 +1,4 @@
+import interact from 'interactjs';
 import { computed, ref } from "vue";
 import {
     currentSerumIndex,
@@ -12,12 +13,13 @@ import {useDraggable} from "@vueuse/core";
 import {resetEyeLook, updateEyeLook} from "@/scripts/actions.js";
 import {foodConsumedByPipe, foodEl, handleEnd, handleMove} from "@/scripts/dragAndDrop.js";
 
-
 export const ingredientDropZoneRef = ref(null);
 export const activeIngredient = ref([]); // Что лежит на столе сейчас
 export const craftedSerumModal = ref(null); // Данные для всплывающего окна
 export const lastCrafted = ref(null);
 export const lastCraftedQuantity = ref(1);
+export const serumEl = ref(null);
+
 let actionTimer = null
 let currentHoveredItem = null;
 let craftTimer = null;
@@ -27,30 +29,104 @@ function clearActionTimer() {
         actionTimer = null
     }
 }
-export const serumEl = ref(null);
-export const serumDrag = useDraggable(serumEl, {
-    preventDefault: true,
-    onStart: (pos, event) => {
-        clearActionTimer()
-        currentDraggedItem.value = 'food'
-        foodConsumedByPipe.value = false
-        if (serumEl.value) {
-            const rect = serumEl.value.getBoundingClientRect()
-            serumDrag.x.value = rect.left
-            serumDrag.y.value = rect.top
+
+export function initIngredientInteract(el, itemData) {
+    if (!el) return
+    if (el.dataset.interactInitialized) return
+    el.dataset.interactInitialized = 'true'
+
+    interact(el).draggable({
+        inertia: false,
+        listeners: {
+            start(event) {
+                clearActionTimer()
+                currentDraggedItem.value = 'food'
+                foodConsumedByPipe.value = false
+                event.target.style.zIndex = '150'
+            },
+            move(event) {
+                const target = event.target
+                const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
+                const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+
+                target.style.transform = `translate(${x}px, ${y}px)`
+                target.setAttribute('data-x', x)
+                target.setAttribute('data-y', y)
+
+                const fakeEvent = {
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    touches: [{ clientX: event.clientX, clientY: event.clientY }]
+                }
+                updateEyeLook(fakeEvent)
+                ingredientMove(fakeEvent, itemData)
+            },
+            end(event) {
+                const target = event.target
+
+
+                ingredientEnd(itemData)
+                resetEyeLook(600)
+
+                // Мгновенный возврат на исходную позицию без задержек
+                target.style.transition = 'none'
+                target.style.transform = 'translate(0px, 0px)'
+                target.setAttribute('data-x', 0)
+                target.setAttribute('data-y', 0)
+            }
         }
-    },
-    onMove: (pos, event) => {
-        updateEyeLook(event)
-        const serumItem = serumCartList.value?.[currentSerumIndex.value]
-        handleMove(event, 'food', serumItem)
-    },
-    onEnd: () => {
-        const serumItem = serumCartList.value?.[currentSerumIndex.value]
-        handleEnd('food', serumItem)
-        resetEyeLook(600)
-    }
-})
+    })
+}
+
+
+export function initSerumInteract(el) {
+    if (!el) return
+    if (el.dataset.interactInitialized) return
+    el.dataset.interactInitialized = 'true'
+
+    interact(el).draggable({
+        inertia: false, // Мгновенный отклик без инерции
+        listeners: {
+            start(event) {
+                clearActionTimer()
+                currentDraggedItem.value = 'food'
+                foodConsumedByPipe.value = false
+                event.target.style.zIndex = '150'
+            },
+            move(event) {
+                const target = event.target
+                const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
+                const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+
+                target.style.transform = `translate(${x}px, ${y}px)`
+                target.setAttribute('data-x', x)
+                target.setAttribute('data-y', y)
+
+                const fakeEvent = {
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    touches: [{ clientX: event.clientX, clientY: event.clientY }]
+                }
+                updateEyeLook(fakeEvent)
+                const serumItem = serumCartList.value?.[currentSerumIndex.value]
+                handleMove(fakeEvent, 'food', serumItem)
+            },
+            end(event) {
+                const target = event.target
+
+                const serumItem = serumCartList.value?.[currentSerumIndex.value]
+                handleEnd('food', serumItem)
+                resetEyeLook(600)
+
+                // Мгновенный возврат на исходную позицию
+                target.style.transition = 'none'
+                target.style.transform = 'translate(0px, 0px)'
+                target.setAttribute('data-x', 0)
+                target.setAttribute('data-y', 0)
+            }
+        }
+    })
+}
 
 export const getPurchasedItem = (ingredientId) => {
     return laboratoryIngredientsList.value.find(item => item.id === ingredientId);

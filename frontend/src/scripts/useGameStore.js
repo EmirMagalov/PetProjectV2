@@ -37,7 +37,7 @@ export const fruitStreak = ref(
 export const statusFoam = ref(localStorage.getItem('pet_statusFoam') === 'true')
 export const colorFoam = ref(localStorage.getItem('pet_colorFoam') || 'bg-white/70')
 export const foamOffset = ref(Number(localStorage.getItem('pet_foamOffset')) || 0)
-
+export const scale = ref(1)
 // Автоматически сохраняем при любом изменении
 watch(statusFoam, (newValue) => {
     localStorage.setItem('pet_statusFoam', newValue)

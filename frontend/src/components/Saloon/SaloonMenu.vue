@@ -124,14 +124,14 @@ function handleRestart() {
 <template>
   <!-- Главный контейнер меню с фиксом для Safari -->
   <div
-      class="saloon-container rounded-4xl p-2 mx-5 bg-[#fff6ef] h-65 border-2 border-[#f7c9a5] flex flex-col mt-1 items-center justify-between relative"
+      class="saloon-container rounded-4xl p-2 bg-[#fff6ef] h-60 border-2 border-[#f7c9a5] flex flex-col mt-1 items-center justify-between relative w-full max-w-[300px] mx-auto"
       :style="{backgroundImage: `url('/gamePlay/poker_table.webp?v=${APP_VERSION}')`, backgroundSize: `cover`}"
 
   >
     <!-- Кнопка "Назад" -->
     <RouterLink to="/" class="z-30">
       <div
-          class="bg-[#fff6ef] absolute -left-6 top-1/2 -translate-y-1/2 h-15 w-10 flex flex-col items-center justify-center p-0.5 rounded-l-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer z-30"
+          class="bg-[#fff6ef] absolute -left-2 top-1/2 -translate-y-1/2 h-15 w-10 flex flex-col items-center justify-center p-0.5 rounded-l-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer z-30"
           style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
       >
         <div

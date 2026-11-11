@@ -10,6 +10,7 @@ import CatchTheFoodGame from "@/components/CatchTheFood/CatchTheFoodGame.vue";
 import HopHopGame from "@/components/HopHop/hopHopGame.vue";
 import i18n from "@/scripts/locales/i18n.js";
 import Match3GameMain from "@/components/Match3Game/Match3GameMain.vue";
+import Test from "@/components/Test.vue";
 
 // 1. Принудительный сброс кэша для iOS Safari / Telegram WebApp
 const APP_VERSION = '1.0.2'; // Меняй версию при каждом обновлении
@@ -64,6 +65,7 @@ const routes = [
     { path: '/thefoodgame', component: CatchTheFoodGame },
     { path: '/thejumpgame', component: HopHopGame },
     { path: '/match3game', component: Match3GameMain },
+    { path: '/test', component: Test },
 ];
 
 export const router = createRouter({

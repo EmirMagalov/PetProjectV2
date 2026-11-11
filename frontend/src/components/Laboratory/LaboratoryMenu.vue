@@ -1,17 +1,17 @@
 <script setup>
 import IngredientItem from "@/components/Laboratory/ingredientItem.vue";
-import { laboratoryIngredientsList } from "@/scripts/basket.js";
-import { ingredientList } from "@/scripts/laboratoryScripts/ingredientItems.js";
-import { getItemCost, handleItemClick, lastBought, lastBoughtQuantity } from "@/scripts/shop.js";
-import { APP_VERSION } from "@/scripts/imageVersion.js";
+import {ingredientList} from "@/scripts/laboratoryScripts/ingredientItems.js";
+import {getItemCost, handleItemClick, lastBought, lastBoughtQuantity} from "@/scripts/shop.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {
   getAvailableIngredientCount,
   getPurchasedItem,
-  getTotalIngredientCount
+  getTotalIngredientCount, initSerumInteract
 } from "../../scripts/laboratoryScripts/dragAndDrop.js";
-import {gameData} from "@/scripts/useGameStore.js";
-import {ref} from "vue";
+
+import {onMounted, ref, watch} from "vue";
 import {serumRecipes} from "@/scripts/laboratoryScripts/recipes.js";
+
 const showRecipeModal = ref(false);
 
 function getIngredient(id) {
@@ -21,10 +21,12 @@ function getIngredient(id) {
 </script>
 
 <template>
-  <div class="rounded-4xl p-3 mx-5 bg-blue-200 min-h-[260px] mt-1 border-2 border-[#f7c9a5] relative flex flex-col items-center">
+  <!--  class="rounded-4xl p-3 mt-1 bg-[#fff6ef] max-h-60 border-2 border-[#f7c9a5] flex flex-col justify-center items-center w-full max-w-[300px] mx-auto">-->
+  <div
+      class="rounded-4xl p-3 mt-1  bg-blue-200 max-h-60 border-2 border-[#f7c9a5] relative flex flex-col justify-center items-center w-full max-w-[300px]  mx-auto">
     <RouterLink to="/" class="z-30">
       <div
-          class="bg-[#fff6ef] absolute -left-6 top-1/2 -translate-y-1/2 h-15 w-10 flex flex-col items-center justify-center p-0.5 rounded-l-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer z-30"
+          class="bg-[#fff6ef] absolute -left-3 top-1/2 -translate-y-1/2 h-15 w-10 flex flex-col items-center justify-center p-0.5 rounded-l-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer z-30"
           style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
       >
         <div
@@ -36,27 +38,27 @@ function getIngredient(id) {
     </RouterLink>
 
 
-
-    <div @click="showRecipeModal=true" class="absolute -top-5 -right-2 w-8 rounded-full bg-white p-1 border border-[#f7c9a5] ">
+    <div @click="showRecipeModal=true"
+         class="absolute -top-5 -right-2 w-8 rounded-full bg-white p-1 border border-[#f7c9a5] ">
       <img src="/gamePlay/question_mark.webp" alt="">
     </div>
-
 
 
     <div class="grid grid-cols-2 gap-2 w-70">
       <div
           v-for="item in ingredientList"
           :key="item.id"
-          class="flex flex-col items-center justify-between h-[120px] bg-white/30 p-2 rounded-2xl border border-white/40 shadow-sm relative"
+          class="flex flex-col items-center justify-between h-25 bg-white/30 p-2 rounded-2xl border border-white/40 shadow-sm relative"
       >
         <p class="absolute inset-0 flex text-blue-800/75 items-center  justify-center text-center text-[11px] pointer-events-none">
           {{ $t(`ingredients.${item.id}`) }}
         </p>
 
         <div v-if="getPurchasedItem(item.id)" class="w-full flex flex-col items-center relative">
-          <IngredientItem :item="getPurchasedItem(item.id)" />
+          <IngredientItem :item="getPurchasedItem(item.id)"/>
 
-          <span class="absolute -top-1 -right-1 bg-amber-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.2 rounded-full shadow">
+          <span
+              class="absolute -top-1 -right-1 bg-amber-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.2 rounded-full shadow">
             x{{ getAvailableIngredientCount(item.id) }}
           </span>
         </div>
@@ -64,7 +66,7 @@ function getIngredient(id) {
         <div v-else class="w-full flex flex-col items-center">
           <img
               :src="item.image"
-              class="w-16 h-16 object-contain opacity-30 drop-shadow-md mb-2"
+              class="w-15 h-15 object-contain opacity-30 drop-shadow-md mb-2"
               :alt="item.name"
           />
         </div>
@@ -74,7 +76,7 @@ function getIngredient(id) {
             @click="handleItemClick(item)"
             :disabled="getTotalIngredientCount(item.id) >= 10"
             :class="[
-              'py-1.5 w-full font-bold rounded-lg text-xs transition-all shadow-md flex justify-center items-center gap-1.5 mt-auto',
+              'absolute bottom-1 py-1 w-20 font-bold rounded-lg text-xs transition-all shadow-md flex justify-center items-center gap-1.5 mt-auto',
               getTotalIngredientCount(item.id) >= 10
                 ? 'bg-slate-400 text-slate-700 cursor-not-allowed shadow-none'
                 : 'bg-amber-500 hover:bg-amber-400 text-slate-950 active:scale-95 cursor-pointer'
@@ -107,7 +109,7 @@ function getIngredient(id) {
           </span>
         </div>
         <div>
-          <p class="text-[10px] text-white font-medium">{{$t('successful_purchase')}}</p>
+          <p class="text-[10px] text-white font-medium">{{ $t('successful_purchase') }}</p>
           <p class="text-xs text-amber-300 font-bold">
             {{ $t(`ingredients.${lastBought.id}`) }}
           </p>
@@ -122,12 +124,14 @@ function getIngredient(id) {
       class="fixed inset-0 z-300 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       @click.self="showRecipeModal = false"
   >
-    <div  class="bg-[#CCFFFF] border-2 border-[#99FFFF] rounded-3xl p-5 w-full max-w-xs shadow-2xl relative flex flex-col gap-3">
+    <div
+        class="bg-[#CCFFFF] border-2 border-[#99FFFF] rounded-3xl p-5 w-full max-w-xs shadow-2xl relative flex flex-col gap-3">
 
       <h3 class="text-lg font-bold text-center text-gray-800">{{ $t("synthesis") }}</h3>
 
       <div class="flex flex-col  gap-2 text-sm">
-        <div v-for="serum in serumRecipes" :key="serum.id" class="flex justify-between items-center bg-white/60 p-2 rounded-2xl border border-[#f7c9a5]/40">
+        <div v-for="serum in serumRecipes" :key="serum.id"
+             class="flex justify-between items-center bg-white/60 p-2 rounded-2xl border border-[#f7c9a5]/40">
 
           <div class="flex flex-col gap-2 items-center w-full">
             <p class="text-sm">{{ $t(`serums.${serum.id}`) }}</p>
@@ -140,10 +144,12 @@ function getIngredient(id) {
 
                 <!-- Карточка ингредиента -->
                 <div class="relative flex items-center ">
-                  <span class="absolute -top-2 -left-2 bg-slate-900/80 text-xs px-1 rounded font-bold text-amber-400 z-10">
+                  <span
+                      class="absolute -top-2 -left-2 bg-slate-900/80 text-xs px-1 rounded font-bold text-amber-400 z-10">
                     x{{ quantity }}
                   </span>
-                  <img class="w-12 h-12 object-contain bg-emerald-300/50 rounded-lg p-0.5" :src="getIngredient(receptId)?.image" alt="">
+                  <img class="w-12 h-12 object-contain bg-emerald-300/50 rounded-lg p-0.5"
+                       :src="getIngredient(receptId)?.image" alt="">
                 </div>
 
                 <!-- Плюс между ингредиентами (рендерится, если это НЕ последний элемент) -->

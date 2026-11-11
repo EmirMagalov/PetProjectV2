@@ -773,23 +773,23 @@ function findMatchGroups(currentBoard, swappedCoords = null) {
     const cols = gridCols.value
 
     // Проверка квадратов (Кивано)
-    if (level.value >= 2) {
-        for (let r = 0; r < rows - 1; r++) {
-            for (let c = 0; c < cols - 1; c++) {
-                const cell1 = currentBoard[r]?.[c]
-                const cell2 = currentBoard[r]?.[c + 1]
-                const cell3 = currentBoard[r + 1]?.[c]
-                const cell4 = currentBoard[r + 1]?.[c + 1]
 
-                if (
-                    cell1 && cell2 && cell3 && cell4 &&
-                    cell1.type &&
-                    cell1.type === cell2.type &&
-                    cell1.type === cell3.type &&
-                    cell1.type === cell4.type &&
-                    !cell1.isRainbow && !cell2.isRainbow && !cell3.isRainbow && !cell4.isRainbow &&
-                    !cell1.isKivano && !cell2.isKivano && !cell3.isKivano && !cell4.isKivano &&
-                    !cell1.isLemon && !cell2.isLemon && !cell3.isLemon && !cell4.isLemon &&
+    for (let r = 0; r < rows - 1; r++) {
+        for (let c = 0; c < cols - 1; c++) {
+            const cell1 = currentBoard[r]?.[c]
+            const cell2 = currentBoard[r]?.[c + 1]
+            const cell3 = currentBoard[r + 1]?.[c]
+            const cell4 = currentBoard[r + 1]?.[c + 1]
+
+            if (
+                cell1 && cell2 && cell3 && cell4 &&
+                cell1.type &&
+                cell1.type === cell2.type &&
+                cell1.type === cell3.type &&
+                cell1.type === cell4.type &&
+                !cell1.isRainbow && !cell2.isRainbow && !cell3.isRainbow && !cell4.isRainbow &&
+                !cell1.isKivano && !cell2.isKivano && !cell3.isKivano && !cell4.isKivano &&
+                !cell1.isLemon && !cell2.isLemon && !cell3.isLemon && !cell4.isLemon &&
                     !cell1.isDurian && !cell2.isDurian && !cell3.isDurian && !cell4.isDurian &&
                     !cell1.obstacle && !cell2.obstacle && !cell3.obstacle && !cell4.obstacle &&
                     cell1.jelly === 0 && cell2.jelly === 0 && cell3.jelly === 0 && cell4.jelly === 0 &&
@@ -806,7 +806,7 @@ function findMatchGroups(currentBoard, swappedCoords = null) {
                 }
             }
         }
-    }
+
 
     // Горизонтальные линии (3, 4, 5+)
     for (let r = 0; r < rows; r++) {
@@ -836,9 +836,9 @@ function findMatchGroups(currentBoard, swappedCoords = null) {
 
                 if (validMatch) {
                     matchCoords.forEach(coord => allMatchedCoords.add(`${coord.r},${coord.c}`))
-                    if (length >= 5 && level.value >= 2) {
+                    if (length >= 5) {
                         fiveInRowMatches.push({coords: matchCoords, center: {r, c: c + 2}}) // Дуриан
-                    } else if (length === 4 && level.value >= 2) {
+                    } else if (length === 4) {
                         fourInRowMatches.push({coords: matchCoords, center: {r, c: c + 1}}) // Драгонфрукт
                     }
                 }
@@ -875,9 +875,9 @@ function findMatchGroups(currentBoard, swappedCoords = null) {
 
                 if (validMatch) {
                     matchCoords.forEach(coord => allMatchedCoords.add(`${coord.r},${coord.c}`))
-                    if (length >= 5 && level.value >= 2) {
+                    if (length >= 5) {
                         fiveInRowMatches.push({coords: matchCoords, center: {r: r + 2, c}}) // Дуриан
-                    } else if (length === 4 && level.value >= 2) {
+                    } else if (length === 4 ) {
                         fourInRowMatches.push({coords: matchCoords, center: {r: r + 1, c}}) // Драгонфрукт
                     }
                 }

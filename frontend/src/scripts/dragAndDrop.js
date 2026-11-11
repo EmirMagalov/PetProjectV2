@@ -1,33 +1,36 @@
-import {useDraggable} from "@vueuse/core";
-import {computed, ref} from "vue";
+import interact from 'interactjs'
+import {ref} from "vue";
 import {addCoin, feedPet, isLosingLife, otherFeedPet, updateEyeLook, resetEyeLook} from "@/scripts/actions.js";
 import {
     colorFoam,
     currentDraggedItem,
-    dropZoneRef, energyFull, foamOffset,
+    dropZoneRef, foamOffset,
     gameData, maxLives, nextTutorialStep, showTongue,
     statusFoam,
     statusShower
 } from "@/scripts/useGameStore.js";
 
-import {currentBathItem, currentFoodItem, removeFromCart,} from "@/scripts/basket.js";
+import {currentBathItem, currentFoodItem, removeFromCart} from "@/scripts/basket.js";
 import {addExp} from "@/scripts/level.js";
 import {incrementTaskProgress} from "@/scripts/dealyTasks.js";
 
 let actionTimer = null
 
-
 export const showerCount = ref(0)
-
 export const isHovered = ref(false)
 export const foodConsumedByPipe = ref(false)
 
-export const foodEl = ref()
-export const showerEl = ref()
-export const foamEl = ref()
+export const foodEl = ref(null)
+export const showerEl = ref(null)
+export const foamEl = ref(null)
+
 export const statusSmoke = ref(false)
 
 export const batheStatus = ref(false)
+
+export const showerX = ref(0)
+export const showerY = ref(0)
+
 let lastBathTime = 0
 const BATH_COOLDOWN = 5000
 
@@ -38,19 +41,84 @@ function clearActionTimer() {
     }
 }
 
-// Универсальная функция проверки зоны
+// Универсальная настройка interact.js для перетаскивания с мгновенным возвратом
+function setupInteract(el, itemType, getItemFn) {
+    if (!el) return
+    if (el.dataset.interactInitialized) return
+    el.dataset.interactInitialized = 'true'
+
+    interact(el).draggable({
+        inertia: false, // ОТКЛЮЧАЕМ ИНЕРЦИЮ ДЛЯ МГНОВЕННОГО ОТКЛИКА
+        listeners: {
+            start(event) {
+                clearActionTimer()
+                currentDraggedItem.value = itemType
+                if (itemType === 'food') {
+                    foodConsumedByPipe.value = false
+                }
+                event.target.style.zIndex = '150'
+            },
+            move(event) {
+                const target = event.target
+                const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
+                const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+
+                target.style.transform = `translate(${x}px, ${y}px)`
+                target.setAttribute('data-x', x)
+                target.setAttribute('data-y', y)
+
+                // ЕСЛИ ЭТО ДУШ — ОБНОВЛЯЕМ ЕГО КООРДИНАТЫ ДЛЯ ВОДЫ
+                if (itemType === 'shower') {
+                    const rect = target.getBoundingClientRect()
+                    showerX.value = rect.left
+                    showerY.value = rect.top
+                }
+
+                const fakeEvent = {
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    touches: [{ clientX: event.clientX, clientY: event.clientY }]
+                }
+                updateEyeLook(fakeEvent)
+                handleMove(fakeEvent, itemType, getItemFn())
+            },
+            end(event) {
+                const target = event.target
+                // target.style.zIndex = '150'
+
+                const item = getItemFn()
+                handleEnd(itemType, item)
+                resetEyeLook(600)
+
+                // Мгновенный возврат на исходную позицию без задержки и анимации
+                target.style.transition = 'none'
+                target.style.transform = 'translate(0px, 0px)'
+                target.setAttribute('data-x', 0)
+                target.setAttribute('data-y', 0)
+            }
+        }
+    })
+}
+
+export function initFoodInteract(el) {
+    setupInteract(el, 'food', () => currentFoodItem.value)
+}
+
+export function initFoamInteract(el) {
+    setupInteract(el, 'foam', () => currentBathItem.value)
+}
+export function initShowerInteract(el) {
+    setupInteract(el, 'shower', () => null)
+}
+
 export function handleMove(event, itemType, Item) {
-    if (itemType === 'food' && foodConsumedByPipe.value) {
-        foodDrag.x.value = -9999
-        foodDrag.y.value = -9999
-        return
-    }
+    if (itemType === 'food' && foodConsumedByPipe.value) return
     if (!dropZoneRef.value) return
+
     const dropRect = dropZoneRef.value.getBoundingClientRect()
     const clientX = event.clientX || (event.touches && event.touches[0]?.clientX) || 0
     const clientY = event.clientY || (event.touches && event.touches[0]?.clientY) || 0
 
-    // Базовая проверка вхождения в общий холст
     let isInside = (
         clientX >= dropRect.left &&
         clientX <= dropRect.right &&
@@ -58,12 +126,11 @@ export function handleMove(event, itemType, Item) {
         clientY <= dropRect.bottom
     )
 
-    // 🔥 ДЛЯ ШАМПУНЯ И ДУША: сужаем зону строго до центрального квадрата (где персонаж)
     if (isInside && (itemType === 'shower' || itemType === 'foam')) {
         const centerX = dropRect.left + dropRect.width / 2
         const centerY = dropRect.top + dropRect.height / 2
-        const radiusX = 80 // радиус зоны по горизонтали (пиксели)
-        const radiusY = 80 // радиус зоны по вертикали (пиксели)
+        const radiusX = 80
+        const radiusY = 80
 
         isInside = (
             clientX >= centerX - radiusX &&
@@ -84,12 +151,10 @@ export function handleMove(event, itemType, Item) {
                 statusShower.value = true
 
                 if (!actionTimer) {
-                    // Каждые 50мс немного опускаем пену вниз
                     actionTimer = setInterval(() => {
                         if (isHovered.value && currentDraggedItem.value === 'shower') {
-                            foamOffset.value += 1.5 // Пена постепенно сползает вниз
+                            foamOffset.value += 1.5
 
-                            // Когда пена сместилась достаточно низко (например, на 60px) — считаем смыв завершенным
                             if (foamOffset.value >= 60) {
                                 if (gameData.sick) {
                                     isLosingLife()
@@ -102,7 +167,7 @@ export function handleMove(event, itemType, Item) {
 
                                 statusShower.value = false
                                 statusFoam.value = false
-                                foamOffset.value = 0 // Сбрасываем только когда пена ПОЛНОСТЬЮ смота
+                                foamOffset.value = 0
                                 localStorage.removeItem('pet_statusFoam')
                                 localStorage.removeItem('pet_foamOffset')
                                 localStorage.removeItem('pet_colorFoam')
@@ -136,7 +201,6 @@ export function handleMove(event, itemType, Item) {
     }
 }
 
-// Универсальная функция окончания перетаскивания
 export function handleEnd(itemType, Item) {
     clearActionTimer()
     statusShower.value = false
@@ -168,7 +232,6 @@ export function handleEnd(itemType, Item) {
                 }
             }
         } else if (itemType === 'foam') {
-            // Если пены ЕЩЕ НЕТ — только тогда намыливаем и сохраняем цвет
             if (!statusFoam.value) {
                 statusFoam.value = true
 
@@ -195,72 +258,3 @@ export function handleEnd(itemType, Item) {
     window.getSelection()?.removeAllRanges()
     document.activeElement?.blur()
 }
-
-export const foodDrag = useDraggable(foodEl, {
-    disabled: computed(() => Object.keys(gameData.cart).length === 0),
-    preventDefault: true,
-    onStart: (pos, event) => {
-        clearActionTimer()
-        currentDraggedItem.value = 'food'
-        foodConsumedByPipe.value = false
-        if (foodEl.value) {
-            const rect = foodEl.value.getBoundingClientRect()
-            foodDrag.x.value = rect.left
-            foodDrag.y.value = rect.top
-        }
-    },
-    onMove: (pos, event) => {
-        updateEyeLook(event)
-        const foodItem = currentFoodItem.value
-        handleMove(event, 'food', foodItem)
-    },
-    onEnd: () => {
-        const foodItem = currentFoodItem.value
-        handleEnd('food', foodItem)
-        resetEyeLook(600)
-    }
-})
-
-export const showerDrag = useDraggable(showerEl, {
-    preventDefault: true,
-    onStart: (pos, event) => {
-        clearActionTimer()
-        currentDraggedItem.value = 'shower'
-        if (showerEl.value) {
-            const rect = showerEl.value.getBoundingClientRect()
-            showerDrag.x.value = rect.left
-            showerDrag.y.value = rect.top
-        }
-    },
-    onMove: (pos, event) => {
-        updateEyeLook(event)
-        handleMove(event, 'shower')
-    },
-    onEnd: () => {
-        handleEnd('shower')
-        resetEyeLook(600)
-    }
-})
-
-export const foamDrag = useDraggable(foamEl, {
-    preventDefault: true,
-    onStart: (pos, event) => {
-        clearActionTimer()
-        currentDraggedItem.value = 'foam'
-        if (foamEl.value) {
-            const rect = foamEl.value.getBoundingClientRect()
-            foamDrag.x.value = rect.left
-            foamDrag.y.value = rect.top
-        }
-    },
-    onMove: (pos, event) => {
-        updateEyeLook(event)
-        const bathItem = currentBathItem.value
-        handleMove(event, 'foam', bathItem)
-    },
-    onEnd: () => {
-        const bathItem = currentBathItem.value
-        handleEnd('foam', bathItem)
-        resetEyeLook(600)
-    }
-})
