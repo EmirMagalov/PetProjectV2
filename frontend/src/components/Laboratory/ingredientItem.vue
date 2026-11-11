@@ -1,8 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { useDraggable } from '@vueuse/core';
-import { ingredientMove, ingredientEnd, activeIngredient } from "@/scripts/laboratoryScripts/dragAndDrop.js";
-import { laboratoryIngredientsList } from "@/scripts/basket.js";
+import { useItemDraggable } from "@/scripts/laboratoryScripts/dragAndDrop.js";
 
 const props = defineProps({
   item: {
@@ -11,44 +9,15 @@ const props = defineProps({
   }
 });
 
-const el = ref();
-
-// Проверяем, можем ли мы вытащить еще один такой предмет на стол
-const canDragMore = () => {
-  const purchased = laboratoryIngredientsList.value.find(i => i.id === props.item.id);
-  const ownedCount = purchased ? purchased.count : 0;
-
-  const onTable = activeIngredient.value.find(i => i.id === props.item.id);
-  const tableCount = onTable ? onTable.count : 0;
-
-  // Разрешаем тянуть, если на столе меньше, чем куплено
-  return tableCount < ownedCount;
-};
-
-// Инициализируем draggable
-const serumDrag = useDraggable(el, {
-  onStart: () => {
-    if (!canDragMore()) return;
-    const rect = el.value.getBoundingClientRect();
-    serumDrag.x.value = rect.left;
-    serumDrag.y.value = rect.top;
-  },
-  onMove: (pos, event) => {
-    if (!canDragMore()) return;
-    ingredientMove(event, props.item);
-  },
-  onEnd: () => {
-    if (!canDragMore()) return;
-    ingredientEnd(props.item);
-  }
-});
+const el = ref(null);
+const { isDragging, style, canDragMore } = useItemDraggable(el, props.item);
 </script>
 
 <template>
   <div class="relative flex flex-col items-center justify-center select-none w-full">
-    <!-- Статический призрак-подложка всегда видна в меню -->
+    <!-- Статический призрак-подложка -->
     <img
-        v-show="serumDrag.isDragging.value || !canDragMore()"
+        v-show="isDragging || !canDragMore()"
         :src="item.image"
         :alt="item.name"
         class="w-16 h-16 object-contain opacity-30 drop-shadow-md mb-2"
@@ -59,11 +28,11 @@ const serumDrag = useDraggable(el, {
         v-show="canDragMore()"
         ref="el"
         :style="[
-          serumDrag.isDragging.value ? serumDrag.style.value : {},
+          isDragging ? style : {},
           { 'touch-action': 'none' }
         ]"
         :class="[
-          serumDrag.isDragging.value ? 'fixed z-150 pointer-events-none' : '',
+          isDragging ? 'fixed z-150 pointer-events-none' : '',
           !canDragMore() ? 'opacity-40 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'
         ]"
     >

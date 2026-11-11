@@ -4,14 +4,15 @@ import { laboratoryIngredientsList } from "@/scripts/basket.js";
 import { ingredientList } from "@/scripts/laboratoryScripts/ingredientItems.js";
 import { getItemCost, handleItemClick, lastBought, lastBoughtQuantity } from "@/scripts/shop.js";
 import { APP_VERSION } from "@/scripts/imageVersion.js";
-import { getAvailableIngredientCount, getTotalIngredientCount } from "../../scripts/laboratoryScripts/dragAndDrop.js";
+import {
+  getAvailableIngredientCount,
+  getPurchasedItem,
+  getTotalIngredientCount
+} from "../../scripts/laboratoryScripts/dragAndDrop.js";
 import {gameData} from "@/scripts/useGameStore.js";
 import {ref} from "vue";
 import {serumRecipes} from "@/scripts/laboratoryScripts/recipes.js";
 const showRecipeModal = ref(false);
-const getPurchasedItem = (ingredientId) => {
-  return laboratoryIngredientsList.value.find(item => item.id === ingredientId);
-};
 
 function getIngredient(id) {
   return ingredientList.find(i => i.id === id)

@@ -10,6 +10,7 @@ export default {
     synthesize:"Синтезировать",
 
     fridge_empty: "Холодильник пуст",
+    first_aid_empty: "Аптечка пуста",
     close:"Закрыть",
     back:"Назад",
     claim_reward: "Забрать награду",

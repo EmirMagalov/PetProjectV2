@@ -10,7 +10,8 @@ import {headItems} from "@/scripts/headwearItems.js";
 import {syncToBackend} from "@/scripts/api.js";
 import {clothesItems} from "@/scripts/clothesItems.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
-import {ingredientList} from "@/scripts/laboratoryScripts/ingredientItems.js"; // 1. Импортируем костюмы
+import {ingredientList} from "@/scripts/laboratoryScripts/ingredientItems.js";
+import {router} from "@/scripts/main.js"; // 1. Импортируем костюмы
 
 export const currentIndex = ref(0)
 export const currentBathIndex = ref(0) // Индекс для банных принадлежностей
@@ -36,12 +37,18 @@ export const cartItemsList = computed(() => {
 
 // Отдельный список только для еды и шамана (исключаем баню)
 export const foodCartList = computed(() => {
-    return cartItemsList.value.filter(item => item.category !== 'bath accessories' &&  item.category !== 'ingredients')
+    return cartItemsList.value.filter(item => item.category !== 'bath accessories' && item.category!=='laboratory' && item.category !== 'ingredients')
 })
 
 // Отдельный список только для банных принадлежностей
 export const bathCartList = computed(() => {
     return cartItemsList.value.filter(item => item.category === 'bath accessories')
+})
+
+export const serumCartList = computed(() => {
+    return cartItemsList.value.filter(item =>
+        item.category === 'laboratory' || item.subcategory === 'serum'
+    )
 })
 
 export const ingredientCartList = computed(() => {
@@ -78,7 +85,10 @@ watch(() => gameData.cart, () => {
     if (currentIndex.value >= foodLength) {
         currentIndex.value = Math.max(0, foodLength - 1)
     }
-
+    const serumLength = serumCartList.value.length
+    if (currentSerumIndex.value >= serumLength) {
+        currentSerumIndex.value = Math.max(0, serumLength - 1)
+    }
     const bathLength = bathCartList.value.length
     if (currentBathIndex.value >= bathLength) {
         currentBathIndex.value = Math.max(0, bathLength - 1)
@@ -158,7 +168,15 @@ export function nextItem() {
         currentIndex.value = (currentIndex.value + 1) % foodCartList.value.length
     }
 }
+// Переключение лабораторных сывороток/ингредиентов
+export function nextSerumItem() {
+    if (!serumCartList.value || serumCartList.value.length === 0) {
+        router.push('/laboratory')
 
+    } else {
+        currentSerumIndex.value = (currentSerumIndex.value + 1) % serumCartList.value.length
+    }
+}
 // Переключение банных принадлежностей
 export function nextBathItem() {
     if (!bathCartList.value || bathCartList.value.length === 0) {

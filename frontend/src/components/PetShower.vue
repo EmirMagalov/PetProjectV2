@@ -17,7 +17,7 @@ defineProps({
   <div
       v-show="statusShower"
       class="absolute pointer-events-none z-20 transition-all duration-75 ease-out"
-      :style="{ left: `${x-30}px`, top: `${y-60}px` }"
+      :style="{ left: `${x-30}px`, top: `${y-65}px` }"
   >
     <div class="relative w-10 h-10 flex justify-center">
       <!-- Струйки воды (тонкие линии с анимацией падения) -->

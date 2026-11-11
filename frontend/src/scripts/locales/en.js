@@ -17,6 +17,7 @@ export default {
     flip: "Flip",
     hit_his_head: "Hit his head!",
     fridge_empty: "Fridge is empty",
+    first_aid_empty: "First aid kit is empty",
     close: "Close",
     back: "Back",
     claim_reward: "Claim reward",

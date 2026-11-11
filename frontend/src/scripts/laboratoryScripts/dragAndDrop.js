@@ -1,9 +1,16 @@
 import { computed, ref } from "vue";
-import { laboratoryIngredientsList } from "@/scripts/basket.js";
+import {
+    currentSerumIndex,
+    laboratoryIngredientsList,
+    serumCartList
+} from "@/scripts/basket.js";
 import { serumRecipes } from "@/scripts/laboratoryScripts/recipes.js";
-import {gameData} from "@/scripts/useGameStore.js";
+import {currentDraggedItem, gameData} from "@/scripts/useGameStore.js";
 import { ingredientList } from "@/scripts/laboratoryScripts/ingredientItems.js";
 import {incrementTaskProgress} from "@/scripts/dealyTasks.js";
+import {useDraggable} from "@vueuse/core";
+import {resetEyeLook, updateEyeLook} from "@/scripts/actions.js";
+import {actionTimer, foamEl, foodConsumedByPipe, foodEl, handleEnd, handleMove} from "@/scripts/dragAndDrop.js";
 
 
 export const ingredientDropZoneRef = ref(null);
@@ -13,6 +20,76 @@ export const lastCrafted = ref(null);
 export const lastCraftedQuantity = ref(1);
 let currentHoveredItem = null;
 let craftTimer = null;
+function clearActionTimer() {
+    if (actionTimer) {
+        clearTimeout(actionTimer)
+        actionTimer = null
+    }
+}
+export const serumEl = ref(null);
+export const serumDrag = useDraggable(serumEl, {
+    preventDefault: true,
+    onStart: (pos, event) => {
+        clearActionTimer()
+        currentDraggedItem.value = 'food'
+        foodConsumedByPipe.value = false
+        if (serumEl.value) {
+            const rect = serumEl.value.getBoundingClientRect()
+            serumDrag.x.value = rect.left
+            serumDrag.y.value = rect.top
+        }
+    },
+    onMove: (pos, event) => {
+        updateEyeLook(event)
+        const serumItem = serumCartList.value?.[currentSerumIndex.value]
+        handleMove(event, 'food', serumItem)
+    },
+    onEnd: () => {
+        const serumItem = serumCartList.value?.[currentSerumIndex.value]
+        handleEnd('food', serumItem)
+        resetEyeLook(600)
+    }
+})
+
+export const getPurchasedItem = (ingredientId) => {
+    return laboratoryIngredientsList.value.find(item => item.id === ingredientId);
+};
+
+// 🌟 Фабрика для создания независимого draggable под каждый конкретный предмет
+export function useItemDraggable(elementRef, itemData) {
+    const canDragMore = () => {
+        const purchased = laboratoryIngredientsList.value.find(i => i.id === itemData.id);
+        const ownedCount = purchased ? purchased.count : 0;
+        const onTable = activeIngredient.value.find(i => i.id === itemData.id);
+        const tableCount = onTable ? onTable.count : 0;
+        return tableCount < ownedCount;
+    };
+
+    const drag = useDraggable(elementRef, {
+        onStart: () => {
+            if (!canDragMore()) return false;
+            const rect = elementRef.value?.getBoundingClientRect();
+            if (rect) {
+                drag.x.value = rect.left;
+                drag.y.value = rect.top;
+            }
+        },
+        onMove: (pos, event) => {
+            if (!canDragMore()) return;
+            ingredientMove(event, itemData);
+        },
+        onEnd: () => {
+            if (!canDragMore()) return;
+            ingredientEnd(itemData);
+        }
+    });
+
+    return {
+        ...drag,
+        canDragMore
+    };
+}
+
 export function ingredientMove(event, item) {
     if (!ingredientDropZoneRef.value || typeof ingredientDropZoneRef.value.getBoundingClientRect !== 'function') return;
 
@@ -51,6 +128,7 @@ export function ingredientEnd(item) {
     }
     currentHoveredItem = null;
 }
+
 
 // 📊 Вычисляем прогресс для подсказок
 export const recipesProgress = computed(() => {

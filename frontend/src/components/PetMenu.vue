@@ -1,12 +1,9 @@
 <script setup>
-
 import ShopModal from '@/components/ShopModal.vue'
-
 import {
-  cartItemsList, currentIndex, bathCartList, foodCartList,
-  currentBathIndex, nextItem, nextBathItem
+  cartItemsList, currentIndex, bathCartList, foodCartList, serumCartList,
+  currentBathIndex, currentSerumIndex, nextItem, nextBathItem, nextSerumItem
 } from "@/scripts/basket.js";
-
 import {
   currentDraggedItem,
   feedStatus,
@@ -29,7 +26,10 @@ import {
 } from "@/scripts/dragAndDrop.js";
 import {computed} from "vue";
 import i18n from "@/scripts/locales/i18n.js";
-
+import {useRouter} from 'vue-router';
+import {currentBet, isDealing} from "@/scripts/saloonScripts/twentyOneGame.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
+import {serumDrag,serumEl} from "@/scripts/laboratoryScripts/dragAndDrop.js";
 
 const shouldPulse = computed(() => {
   const list = cartItemsList.value || cartItemsList;
@@ -42,10 +42,8 @@ const shouldPulse = computed(() => {
   }
   return list[currentIndex.value].category !== 'laboratory';
 });
-import {useRouter} from 'vue-router';
-import {currentBet, isDealing} from "@/scripts/saloonScripts/twentyOneGame.js";
-import {APP_VERSION} from "@/scripts/imageVersion.js";
-import {isFortuneOpen} from "@/scripts/fortune.js";
+
+
 
 
 const router = useRouter();
@@ -165,7 +163,10 @@ const currentFoodImage = computed(() => {
   const item = foodCartList.value?.[currentIndex.value]
   return item?.image ? `${item.image}?v=${APP_VERSION}` : ''
 })
-
+const currentSerumImage = computed(() => {
+  const item = serumCartList.value?.[currentSerumIndex.value]
+  return item?.image ? `${item.image}?v=${APP_VERSION}` : ''
+})
 // Вычисляем картинку активного средства для купания с версией
 const currentBathImage = computed(() => {
   const item = bathCartList.value?.[currentBathIndex.value]
@@ -469,33 +470,29 @@ const currentBathImage = computed(() => {
       </div>
 
       <!-- FOOD -->
-
-
       <div v-show="location==='food'" class="grid grid-cols-2 gap-8 relative  gap-y-1.5 w-65 place-self-center " >
 
+        <!-- 1. БЛОК ПРОДУКТОВ (Food) -->
         <div
             @click="nextItem()"
             class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 overflow-hidden"
             :class="[
               tutorialStep === 3 && foodCartList.length > 0 ? 'z-205 pointer-events-auto bg-white' : 'z-30',
               tutorialStep === 3 && foodCartList.length > 0 && !foodDrag.isDragging.value ? 'animate-pulse' : ''
-]"
-
+            ]"
         >
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
-          <!-- 1. Если холодильник пуст: используем foodCartList вместо cartItemsList -->
+          <!-- Если продукты отсутствуют -->
           <template v-if="foodCartList.length === 0">
             <div
                 :class="!foodDrag.isDragging.value  && showHunger ? 'animate-pulse' : ''"
                 class="flex flex-col items-center justify-center w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
-
-                :style="{backgroundImage: `url('/gamePlay/fridge_empty.webp?v=${APP_VERSION}')`}">
-
-            </div>
+                :style="{backgroundImage: `url('/gamePlay/fridge_empty.webp?v=${APP_VERSION}')`}"
+            ></div>
           </template>
 
-          <!-- 2. Если в холодильнике есть еда -->
+          <!-- Если продукты есть -->
           <template v-else>
             <div v-show="!feedStatus"
                  ref="foodEl"
@@ -507,12 +504,9 @@ const currentBathImage = computed(() => {
                    }
                  ]"
                  :class="[
-
                    (foodDrag.isDragging.value && !foodConsumedByPipe) ? 'fixed z-150 pointer-events-none' : 'relative ',
-                   !foodDrag.isDragging.value &&( foodCartList[currentIndex]?.category === 'food') && showHunger ? 'animate-pulse' : '',
-                    !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'health_serum' && gameData.sick ? 'animate-pulse' : '',
-                    !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'pipe' && lowEnergy.value ? 'animate-pulse' : '',
-
+                   !foodDrag.isDragging.value && (foodCartList[currentIndex]?.category === 'food') && showHunger ? 'animate-pulse' : '',
+                   !foodDrag.isDragging.value && foodCartList[currentIndex]?.id === 'health_serum' && gameData.sick ? 'animate-pulse' : '',
 
                  ]"
                  class="flex flex-col items-center cursor-move w-[80px] h-[80px]  bg-contain bg-no-repeat bg-center"
@@ -531,7 +525,6 @@ const currentBathImage = computed(() => {
           <p v-show="foodCartList.length > 0" class="absolute top-0 left-2 text-amber-500">
             x{{ gameData.cart[foodCartList[currentIndex]?.id] || 0 }}
           </p>
-          <!-- Текст названия / статуса с использованием foodCartList -->
           <p class="absolute bottom-0 font-bold text-gray-600 pointer-events-none " :class="foodCartList[currentIndex]?.name.length < 15?'text-[10px]':'text-[7px]'">
             {{
               foodCartList.length > 0 && foodCartList[currentIndex]
@@ -539,19 +532,65 @@ const currentBathImage = computed(() => {
                   :  $t('fridge_empty')
             }}
           </p>
-
         </div>
 
+        <!-- 2. БЛОК ЛАБОРАТОРНЫХ ТОВАРОВ / СЫВОРОТОК (Laboratory goods) -->
         <div
-            @click="isShopOpen = true;activeTab='food'"
-            class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
-            style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-          <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
-               :style="{backgroundImage: `url('/gamePlay/market.webp?v=${APP_VERSION}')`}">
-          </div>
-          <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('shop') }}</button>
+            @click="nextSerumItem()"
+            class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-emerald-200/30 overflow-hidden"
+        >
+          <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
+
+          <!-- Если сыворотки/ингредиенты отсутствуют -->
+          <template v-if="serumCartList.length === 0">
+            <div
+                class="flex flex-col items-center justify-center w-[80px] h-[80px] bg-contain bg-no-repeat bg-center opacity-40"
+                :style="{backgroundImage: `url('/gamePlay/first_aid_empty.webp?v=${APP_VERSION}')`}"
+            ></div>
+          </template>
+
+          <!-- Если сыворотки/ингредиенты есть в наличии -->
+
+          <template v-else>
+            <div v-show="!feedStatus"
+                 ref="serumEl"
+                 :style="[
+                   serumDrag.isDragging.value ? serumDrag.style.value : {},
+                   {
+                     'touch-action': 'none',
+                     'background-image': currentSerumImage ? `url('${currentSerumImage}')` : 'none'
+                   }
+                 ]"
+                 :class="[
+                   serumDrag.isDragging.value ? 'fixed z-150 pointer-events-none' : 'relative',
+                   !serumDrag.isDragging.value && serumCartList[currentSerumIndex]?.id === 'health_serum' && gameData.sick ? 'animate-pulse' : '',
+                   !serumDrag.isDragging.value && serumCartList[currentSerumIndex]?.id === 'life_serum' && gameData.lives<=1 ? 'animate-pulse' : '',
+                   !serumDrag.isDragging.value && serumCartList[currentSerumIndex]?.id === 'energy_serum' && lowEnergy ? 'animate-pulse' : '',
+                 ]"
+                 class="flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
+            ></div>
+
+            <div
+                v-show="serumDrag.isDragging.value || feedStatus"
+                :style="{ backgroundImage: `url('${currentSerumImage}')` }"
+                class="opacity-30 relative w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
+            ></div>
+          </template>
+
+          <p v-show="serumCartList.length > 0" class="absolute top-0 left-2 text-amber-500">
+            x{{ gameData.cart[serumCartList[currentSerumIndex]?.id] || 0 }}
+          </p>
+
+          <p class="absolute bottom-0 font-bold text-gray-600 pointer-events-none" :class="serumCartList[currentSerumIndex]?.name.length < 15 ? 'text-[10px]' : 'text-[7px]' ">
+            {{
+              serumCartList.length > 0 && serumCartList[currentSerumIndex]
+                  ? $t(`items.${serumCartList[currentSerumIndex].id}`)
+                  : $t('first_aid_empty')
+            }}
+          </p>
         </div>
 
+        <!-- Кнопка Назад -->
         <div
             @click="location = 'home',nextTutorialStep()"
             class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer"
@@ -562,7 +601,19 @@ const currentBathImage = computed(() => {
           </div>
           <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('back') }}</button>
         </div>
+        <!-- Кнопка Магазин -->
+        <div
+            @click="isShopOpen = true;activeTab='food'"
+            class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 cursor-pointer"
+            style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+          <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
+               :style="{backgroundImage: `url('/gamePlay/market.webp?v=${APP_VERSION}')`}">
+          </div>
+          <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('shop') }}</button>
+        </div>
+
       </div>
+
     </div>
 
   </div>

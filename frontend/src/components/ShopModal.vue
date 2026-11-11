@@ -195,7 +195,7 @@ defineEmits(['close'])
 
 
               <!-- Бонусы предмета -->
-              <div v-if="activeTab === 'food' || activeTab === 'laboratory' || activeTab === 'bath'"
+              <div v-if="activeTab === 'food' || activeTab === 'bath'"
                    class="text-xs mt-0.5 leading-tight break-words">
                 <div
                     v-for="(bonus, index) in getItemBonuses(item)"

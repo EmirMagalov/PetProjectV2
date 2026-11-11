@@ -20,8 +20,9 @@ import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {gameData} from "@/scripts/useGameStore.js";
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import i18n from "@/scripts/locales/i18n.js";
+import {serumRecipes} from "@/scripts/laboratoryScripts/recipes.js";
 const isLoading = ref(true);
-
+const showComboModal = ref(false);
 onMounted(() => {
   const savedLang = localStorage.getItem('user_language') || 'en'; // 👈 вот здесь
   if (i18n.global.locale.value !== savedLang) {
@@ -38,7 +39,22 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', updateBoardSize)
 })
+const fruits = [
+  '/food/strawberry.webp',
+  '/food/banana.webp',
+  '/food/apple.webp',
+  '/food/orange.webp',
+  '/food/watermelon.webp',
+  '/food/watermelon.webp',
+  '/food/grape.webp',
+  '/food/pomegranate.webp',
+]
 
+// Функция для получения случайного элемента
+function getRandomFruit() {
+  const randomIndex = Math.floor(Math.random() * fruits.length)
+  return fruits[randomIndex]
+}
 </script>
 
 <template>
@@ -96,9 +112,9 @@ onUnmounted(() => {
               <div
                   class="text-cyan-400 text-shadow-sm rounded-2xl bg-amber-100 px-3 py-1 text-shadow-black text-sm h-13 flex items-center justify-center gap-2 min-w-15 border border-amber-200">
                 <div v-if="gameState === 'MENU' || isLevelPassed || isGameOver || isVictoryTriggered">
-                  <img src="/gamePlay/star_icon.webp" class="object-contain w-8" alt="jelly"/>
+                  <img :src="getRandomFruit()" class="object-contain w-8" alt="jelly"/>
                 </div>
-                <div class="flex justify-center items-center" v-if="gameState !== 'MENU' && level===1">
+                <div class="flex justify-center items-center" v-if="gameState !== 'MENU' && !isLevelPassed && !isGameOver && !isVictoryTriggered && level===1">
                     <div v-for="_ in 3">
                       <img src="/gamePlay/star_icon.webp" class="object-contain w-8" alt="jelly"/>
                     </div>
@@ -443,7 +459,7 @@ onUnmounted(() => {
 
       <!-- 🎮 ЛЕНТА ПРОКРУТКИ УРОВНЕЙ СНИЗУ -->
       <div
-          class="mt-4 w-full max-w-[440px] mx-auto bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20 shadow-lg box-border">
+          class="mt-1 w-full max-w-[440px] mx-auto bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20 shadow-lg box-border z-50">
         <div class="w-full overflow-hidden">
           <div
               class="flex gap-2 overflow-x-auto p-2 scrollbar-thin scrollbar-thumb-pink-400 scrollbar-track-transparent w-full">
@@ -460,10 +476,92 @@ onUnmounted(() => {
             >
               {{ i }}
             </button>
+
+          </div>
+          <div @click="showComboModal=true" class="absolute -top-3 -right-1 w-8 rounded-full bg-white p-1 border border-[#f7c9a5] ">
+            <img src="/gamePlay/question_mark.webp" alt="">
           </div>
         </div>
+
       </div>
 
+    </div>
+
+  </div>
+  <div
+      v-if="showComboModal"
+      class="fixed inset-0 z-300 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      @click.self="showComboModal = false"
+  >
+    <div class="bg-amber-100 border-2 border-red-200 rounded-3xl p-5 w-full max-w-sm shadow-2xl relative flex flex-col gap-3">
+
+      <h3 class="text-lg font-bold text-center text-gray-800">Combo</h3>
+
+      <div class="flex flex-col gap-3 items-center  max-h-[60vh] overflow-y-auto">
+
+        <!-- 1. Драгонфрукт: 4 в ряд -->
+        <div class="bg-white/60 p-3 rounded-2xl border border-green-300/40 flex items-center justify-center gap-2 w-full">
+          <div class="flex gap-1 items-center">
+            <img class="bg-orange-200/40 rounded-xl p-1 w-9 h-9 object-contain" src="/food/apple.webp" alt="">
+            <img class="bg-orange-200/40 rounded-xl p-1 w-9 h-9 object-contain" src="/food/apple.webp" alt="">
+            <img class="bg-orange-200/40 rounded-xl p-1 w-9 h-9 object-contain" src="/food/apple.webp" alt="">
+            <img class="bg-orange-200/40 rounded-xl p-1 w-9 h-9 object-contain" src="/food/apple.webp" alt="">
+          </div>
+          <span class="font-bold text-gray-600 text-lg">=</span>
+          <img class="bg-yellow-200/40 rounded-xl p-1 w-10 h-10 object-contain" src="/food/dragonfruit.webp" alt="">
+        </div>
+
+        <!-- 2. Дуриан: 5 в ряд -->
+        <div class="bg-white/60 p-3 rounded-2xl border border-green-300/40 flex items-center justify-center gap-2 w-full">
+          <div class="flex gap-1 items-center">
+            <img class="bg-orange-200/40 rounded-lg p-0.5 w-8 h-8 object-contain" src="/food/apple.webp" alt="">
+            <img class="bg-orange-200/40 rounded-lg p-0.5 w-8 h-8 object-contain" src="/food/apple.webp" alt="">
+            <img class="bg-orange-200/40 rounded-lg p-0.5 w-8 h-8 object-contain" src="/food/apple.webp" alt="">
+            <img class="bg-orange-200/40 rounded-lg p-0.5 w-8 h-8 object-contain" src="/food/apple.webp" alt="">
+            <img class="bg-orange-200/40 rounded-lg p-0.5 w-8 h-8 object-contain" src="/food/apple.webp" alt="">
+          </div>
+          <span class="font-bold text-gray-600 text-lg">=</span>
+          <img class="bg-yellow-200/40 rounded-xl p-1 w-10 h-10 object-contain" src="/food/durian.webp" alt="">
+        </div>
+
+        <!-- 3. Кивано: Квадрат 2x2 -->
+        <div class="bg-white/60 p-3 rounded-2xl border border-green-300/40 flex items-center justify-center gap-3 w-full">
+          <div class="grid grid-cols-2 gap-1 w-16">
+            <img class="bg-orange-200/40 rounded-lg p-0.5 w-full h-8 object-contain" src="/food/apple.webp" alt="">
+            <img class="bg-orange-200/40 rounded-lg p-0.5 w-full h-8 object-contain" src="/food/apple.webp" alt="">
+            <img class="bg-orange-200/40 rounded-lg p-0.5 w-full h-8 object-contain" src="/food/apple.webp" alt="">
+            <img class="bg-orange-200/40 rounded-lg p-0.5 w-full h-8 object-contain" src="/food/apple.webp" alt="">
+          </div>
+          <span class="font-bold text-gray-600 text-lg">=</span>
+          <img class="bg-yellow-200/40 rounded-xl p-1 w-10 h-10 object-contain" src="/food/kivano.webp" alt="">
+        </div>
+
+        <!-- 4. Лимон: T/L-форма (ровно 5 штук) -->
+        <div class="bg-white/60 p-3 rounded-2xl border border-green-300/40 flex items-center justify-center gap-3 w-full">
+          <div class="grid grid-cols-3 gap-1 w-24">
+            <!-- Верхний вертикальный хвостик из 2 штук по центру -->
+            <div class="col-start-2 flex flex-col gap-1">
+              <img class="bg-orange-200/40 rounded-lg p-0.5 w-full h-7 object-contain" src="/food/apple.webp" alt="">
+              <img class="bg-orange-200/40 rounded-lg p-0.5 w-full h-7 object-contain" src="/food/apple.webp" alt="">
+            </div>
+            <div class="col-span-3"></div>
+            <!-- Нижний ряд из 3 штук -->
+            <img class="bg-orange-200/40 rounded-lg p-0.5 w-full h-7 object-contain" src="/food/apple.webp" alt="">
+            <img class="bg-orange-200/40 rounded-lg p-0.5 w-full h-7 object-contain" src="/food/apple.webp" alt="">
+            <img class="bg-orange-200/40 rounded-lg p-0.5 w-full h-7 object-contain" src="/food/apple.webp" alt="">
+          </div>
+          <span class="font-bold text-gray-600 text-lg">=</span>
+          <img class="bg-yellow-200/40 rounded-xl p-1 w-10 h-10 object-contain" src="/food/lemon.webp" alt="">
+        </div>
+
+      </div>
+
+      <button
+          @click="showComboModal = false"
+          class="mt-1 bg-orange-300 text-gray-800 font-bold py-2 rounded-2xl border border-red-200 transition-colors active:scale-95"
+      >
+        {{ $t(`close`) }}
+      </button>
     </div>
   </div>
 </template>
