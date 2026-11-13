@@ -142,7 +142,7 @@ const removeSerum = (index) => {
             </transition>
             <RecipeHints />
             <div
-                class="relative w-[320px] h-[270px] overflow-hidden rounded-3xl border-2 border-red-400/80 shadow-2xl flex items-center justify-center p-4"
+                class="relative w-[300px] h-[270px] overflow-hidden rounded-3xl border-2 border-red-400/80 shadow-2xl flex items-center justify-center p-4"
                 :class="gameData.sleep ? 'bg-[#0F175C]' : 'bg-[#98E5FE]'"
             >
               <!-- ФОН ЛАБОРАТОРИИ -->
@@ -172,7 +172,7 @@ const removeSerum = (index) => {
           </div>
 
           <!-- НИЖНЕЕ МЕНЮ -->
-          <div class="mt-2 pb-2">
+          <div class="">
             <LaboratoryMenu/>
           </div>
         </div> <!-- end transform scale -->

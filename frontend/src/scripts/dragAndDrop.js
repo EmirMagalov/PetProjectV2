@@ -18,6 +18,7 @@ let actionTimer = null
 
 export const showerCount = ref(0)
 export const isHovered = ref(false)
+export const isDraggingMain = ref(false);
 export const foodConsumedByPipe = ref(false)
 
 export const foodEl = ref(null)
@@ -112,6 +113,7 @@ export function initShowerInteract(el) {
 }
 
 export function handleMove(event, itemType, Item) {
+    isDraggingMain.value = true
     if (itemType === 'food' && foodConsumedByPipe.value) return
     if (!dropZoneRef.value) return
 
@@ -202,6 +204,7 @@ export function handleMove(event, itemType, Item) {
 }
 
 export function handleEnd(itemType, Item) {
+    isDraggingMain.value = false
     clearActionTimer()
     statusShower.value = false
     if (foodConsumedByPipe.value || Item?.category === 'pipe') {

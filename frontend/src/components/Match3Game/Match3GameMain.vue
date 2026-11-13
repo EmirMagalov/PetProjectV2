@@ -20,7 +20,6 @@ import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {gameData} from "@/scripts/useGameStore.js";
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import i18n from "@/scripts/locales/i18n.js";
-import {serumRecipes} from "@/scripts/laboratoryScripts/recipes.js";
 const isLoading = ref(true);
 const showComboModal = ref(false);
 onMounted(() => {
@@ -75,7 +74,7 @@ function getRandomFruit() {
           </div>
         </div>
         <span class="text-[#D18900] font-extrabold tracking-widest text-sm uppercase drop-shadow-md animate-pulse">
-          {{ $t('loading') }}
+          {{ $t('match3.entering_fruit_fresh') }}
         </span>
         <div class="mt-4 w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></div>
       </div>

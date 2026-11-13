@@ -1,13 +1,13 @@
 import interact from 'interactjs';
-import { computed, ref } from "vue";
+import {computed, ref} from "vue";
 import {
     currentSerumIndex,
     laboratoryIngredientsList,
     serumCartList
 } from "@/scripts/basket.js";
-import { serumRecipes } from "@/scripts/laboratoryScripts/recipes.js";
+import {serumRecipes} from "@/scripts/laboratoryScripts/recipes.js";
 import {currentDraggedItem, gameData} from "@/scripts/useGameStore.js";
-import { ingredientList } from "@/scripts/laboratoryScripts/ingredientItems.js";
+import {ingredientList} from "@/scripts/laboratoryScripts/ingredientItems.js";
 import {incrementTaskProgress} from "@/scripts/dealyTasks.js";
 import {useDraggable} from "@vueuse/core";
 import {resetEyeLook, updateEyeLook} from "@/scripts/actions.js";
@@ -19,10 +19,11 @@ export const craftedSerumModal = ref(null); // Данные для всплыв�
 export const lastCrafted = ref(null);
 export const lastCraftedQuantity = ref(1);
 export const serumEl = ref(null);
-
+export const isDraggingLaboratory = ref(false);
 let actionTimer = null
 let currentHoveredItem = null;
 let craftTimer = null;
+
 function clearActionTimer() {
     if (actionTimer) {
         clearTimeout(actionTimer)
@@ -30,7 +31,7 @@ function clearActionTimer() {
     }
 }
 
-export function initIngredientInteract(el, itemData) {
+export function initIngredientInteract(el, itemData, isDraggingRef) {
     if (!el) return
     if (el.dataset.interactInitialized) return
     el.dataset.interactInitialized = 'true'
@@ -56,19 +57,19 @@ export function initIngredientInteract(el, itemData) {
                 const fakeEvent = {
                     clientX: event.clientX,
                     clientY: event.clientY,
-                    touches: [{ clientX: event.clientX, clientY: event.clientY }]
+                    touches: [{clientX: event.clientX, clientY: event.clientY}]
                 }
                 updateEyeLook(fakeEvent)
                 ingredientMove(fakeEvent, itemData)
             },
             end(event) {
                 const target = event.target
+                target.style.zIndex = '150'
 
-
+                if (isDraggingRef) isDraggingRef.value = false // Выключаем призрак
                 ingredientEnd(itemData)
                 resetEyeLook(600)
 
-                // Мгновенный возврат на исходную позицию без задержек
                 target.style.transition = 'none'
                 target.style.transform = 'translate(0px, 0px)'
                 target.setAttribute('data-x', 0)
@@ -105,7 +106,7 @@ export function initSerumInteract(el) {
                 const fakeEvent = {
                     clientX: event.clientX,
                     clientY: event.clientY,
-                    touches: [{ clientX: event.clientX, clientY: event.clientY }]
+                    touches: [{clientX: event.clientX, clientY: event.clientY}]
                 }
                 updateEyeLook(fakeEvent)
                 const serumItem = serumCartList.value?.[currentSerumIndex.value]
@@ -168,6 +169,7 @@ export function useItemDraggable(elementRef, itemData) {
 }
 
 export function ingredientMove(event, item) {
+    isDraggingLaboratory.value = true
     if (!ingredientDropZoneRef.value || typeof ingredientDropZoneRef.value.getBoundingClientRect !== 'function') return;
 
     const dropRect = ingredientDropZoneRef.value.getBoundingClientRect();
@@ -185,6 +187,7 @@ export function ingredientMove(event, item) {
 }
 
 export function ingredientEnd(item) {
+    isDraggingLaboratory.value = false
     if (currentHoveredItem && currentHoveredItem.id === item.id) {
         const purchasedItem = laboratoryIngredientsList.value.find(i => i.id === item.id);
         const ownedCount = purchasedItem ? purchasedItem.count : 0;
@@ -261,7 +264,7 @@ export function craftSerum(targetRecipe) {
     if (!recipe || !recipe.isReady) return;
 
     // 1. Списываем ингредиенты из общей корзины (gameData.cart)
-    const updatedCart = { ...gameData.cart };
+    const updatedCart = {...gameData.cart};
     for (const [reqId, reqCount] of Object.entries(recipe.requirements)) {
         if (updatedCart[reqId]) {
             updatedCart[reqId] -= reqCount;
@@ -304,6 +307,7 @@ export function craftSerum(targetRecipe) {
         lastCrafted.value = null;
     }, 3000);
 }
+
 export function closeCraftModal() {
     craftedSerumModal.value = null;
 }

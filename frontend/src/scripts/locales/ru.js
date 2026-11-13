@@ -246,6 +246,7 @@ export default {
         fruit_fresh_energy: "Чтобы зайти в «Fruit Fresh» нужно быть бодрым!"
     },
     match3: {
+        entering_fruit_fresh: "Входим в Fruit Fresh...",
         juicing: "Выжимаем соки!",
         super_fruit: "Драконий фрукт!",
         kivano: "Кивано!",

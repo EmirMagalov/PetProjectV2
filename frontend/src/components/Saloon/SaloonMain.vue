@@ -189,7 +189,7 @@ onUnmounted(() => {
         >
           <!-- САЛУН -->
           <div class="relative flex justify-center items-center w-full" >
-            <div class="relative w-[320px] h-[270px] overflow-hidden rounded-3xl border-2 border-red-400/80 shadow-2xl" :class="gameData.sleep ? 'bg-[#0F175C]':'bg-[#98E5FE]'">
+            <div class="relative w-[300px] h-[270px] overflow-hidden rounded-3xl border-2 border-red-400/80 shadow-2xl" :class="gameData.sleep ? 'bg-[#0F175C]':'bg-[#98E5FE]'">
               <!--        <img-->
               <!--            :src="`/location/saloon.webp?v=${APP_VERSION}`"-->
               <!--            class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"-->
@@ -288,7 +288,7 @@ onUnmounted(() => {
           </div>
 
           <!-- НИЖНЕЕ МЕНЮ (внутри масштабируемого блока) -->
-          <div class="mt-2 pb-2">
+          <div >
             <SaloonMenu @animate-draw="animateFlyTo"/>
           </div>
         </div> <!-- end transform scale -->

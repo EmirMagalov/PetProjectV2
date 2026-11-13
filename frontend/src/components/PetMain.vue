@@ -39,6 +39,8 @@ import Rain from "@/components/Decorations/Rain.vue";
 import {addToCart} from "@/scripts/basket.js";
 import {addExp} from "@/scripts/level.js";
 import {showerX, showerY} from "@/scripts/dragAndDrop.js";
+import PetActivity from "@/components/PetActivity.vue";
+import BouncingBall from "@/components/BouncingBall.vue";
 
 let blinkInterval = null
 let lookInterval = null
@@ -134,12 +136,12 @@ function startRandomLooking() {
     if (isUserLooking.value || isDragging) return
 
     const directions = [
-      {x: 0, y: 0},
-      {x: -2, y: -2},
-      {x: 2, y: -2},
-      {x: -2, y: 2},
-      {x: 2, y: 2},
-      {x: 0, y: -2}
+      {x: 0, y: 0}, //Смотрит строго прямо (в центр).
+      {x: -1.8, y: -1.8},//Смотрит вверх и влево.
+      {x: 1.8, y: -1.8},//Смотрит вверх и вправо.
+      {x: -1.8, y: 1.8},//Смотрит вниз и влево.
+      {x: 1.8, y: 1.8},//Смотрит вниз и вправо.
+      {x: 0, y: -1.8}//Смотрит строго вверх.
     ]
     const randomDir = directions[Math.floor(Math.random() * directions.length)]
     pupilOffset.value = randomDir
@@ -330,7 +332,41 @@ const pumpkinAnimation = (event) => {
   }, 200)
 }
 
+function handleBallTracking(ballX, ballY, isMoving) {
+  // Центр экрана / персонажа внутри блока 300x270 (примерно середина: X=150, Y=135)
+  const centerX = 150;
+  const centerY = 135;
 
+  // Если мяч неподвижен и не в руке, пусть глаза смотрят по стандартному алгоритму или прямо
+  if (!isMoving) {
+    pupilOffset.value = { x: 0, y: 0 }; // Возвращаем глаза в центр
+    addCoin(1)
+    addExp(1)
+    return;
+  }
+  // 🛑 ДОПОЛНИТЕЛЬНОЕ УСЛОВИЕ РАННЕЙ ОСТАНОВКИ:
+  // Если мяч упал на пол (например, Y >= 250) — перестаем следить раньше
+  // const floorThreshold = 215; // Настрой под высоту своего пола
+  // if (ballY >= floorThreshold) {
+  //   pupilOffset.value = { x: 0, y: 0 }; // Глаза смотрят прямо / расслабленно
+  //   return;
+  // }
+  // Считаем разницу между мячом и центром головы питомца
+  const dx = ballX - centerX;
+  const dy = ballY - centerY;
+
+  // Ограничиваем максимальное смещение зрачков (чтобы они не вылезали из глазниц, например, до 4 пикселей)
+  const maxPupilOffset = 2;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance === 0) return;
+
+  const nx = (dx / distance) * Math.min(Math.abs(dx) * 0.05, maxPupilOffset);
+  const ny = (dy / distance) * Math.min(Math.abs(dy) * 0.05, maxPupilOffset);
+
+  // Передвигаем зрачки
+  pupilOffset.value = { x: nx, y: ny };
+}
 </script>
 
 <template>
@@ -389,7 +425,7 @@ const pumpkinAnimation = (event) => {
           <div class="relative flex justify-center w-full">
 
             <div :class="[
-  'relative w-[320px] h-[270px] border-2 border-red-400 overflow-hidden rounded-2xl object-cover duration-1000',
+  'relative w-[300px] h-[270px] border-2 border-red-400 overflow-hidden rounded-2xl object-cover duration-1000',
    gameData.sleep ? 'bg-[#0F175C]' : isBadMood?'bg-gray-400':'bg-[#98E5FE]',
 ]">
 
@@ -454,42 +490,6 @@ const pumpkinAnimation = (event) => {
 
 
               <!-- 🎃 ТЫКВА с замедленным и плавным ночным переходом (3 секунды) -->
-              <div
-                  @click.stop="pumpkinAnimation($event)"
-                  class="absolute left-2 z-30 bottom-15 w-20 cursor-pointer pointer-events-auto transition-transform duration-300"
-                  :class="{ 'scale-108': pumpkinAnimating }"
-                  v-if="location==='home'|| location === 'food'"
-              >
-                <!-- Ореол света (плавно появляется через opacity за 3 секунды) -->
-                <div
-                    class="absolute inset-0 pointer-events-none flex items-center justify-center z-[-1]"
-                    style="transition: opacity 1s ease-in-out;"
-                    :class="gameData.sleep ? 'opacity-100' : 'opacity-0'"
-                >
-                  <!-- Основной мягкий размытый свет -->
-                  <div class="absolute -inset-6 bg-amber-400/40 blur-xl rounded-full pointer-events-none"></div>
-                  <!-- Яркое ядро свечения за тыквой -->
-                  <div class="absolute w-12 h-12 bg-yellow-200/20 blur-md rounded-full pointer-events-none"></div>
-                </div>
-
-                <!-- Дневная тыква (держит размеры контейнера, плавно исчезает) -->
-                <img
-                    src="/other/halloween_pumpkin.webp"
-                    alt="Pumpkin"
-                    class="w-full h-auto block filter"
-                    style="transition: opacity 0s ease-in-out, filter 0s ease-in-out;"
-                    :class="gameData.sleep ? 'opacity-0 brightness-50' : 'opacity-100 brightness-100'"
-                >
-
-                <!-- Ночная тыква (накладывается поверх, плавно проявляется) -->
-                <img
-                    src="/other/halloween_pumpkin_darkness.webp"
-                    alt="Pumpkin Dark"
-                    class="absolute inset-0 w-full h-auto filter"
-                    style="transition: opacity 0s ease-in-out, filter 0s ease-in-out;"
-                    :class="gameData.sleep ? 'opacity-100 brightness-80 drop-shadow-[0_0_10px_rgba(253,224,71,0.8)]' : 'opacity-0 brightness-100'"
-                >
-              </div>
 
 
               <Cloud/>
@@ -654,14 +654,17 @@ const pumpkinAnimation = (event) => {
                       v-show="gameData.isPooped && (location==='home' || location==='food')"
                       class="pointer-events-auto"
                   />
+
+                  <BouncingBall :on-ball-move="handleBallTracking" />
                 </div>
               </div>
             </div>
-            <PetSideMenu/>
+
           </div> <!-- end relative flex justify-center (холст) -->
 
           <!-- Меню (внутри масштабируемого блока) -->
-
+          <PetSideMenu/>
+          <PetActivity/>
             <PetMenu/>
 
         </div> <!-- end transform scale -->

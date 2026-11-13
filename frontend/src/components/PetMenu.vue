@@ -1,11 +1,10 @@
 <script setup>
 import ShopModal from '@/components/ShopModal.vue'
 import {
-  cartItemsList, currentIndex, bathCartList, foodCartList, serumCartList,
+  currentIndex, bathCartList, foodCartList, serumCartList,
   currentBathIndex, currentSerumIndex, nextItem, nextBathItem, nextSerumItem
 } from "@/scripts/basket.js";
 import {
-  currentDraggedItem,
   feedStatus,
   gameData,
   isShopOpen,
@@ -22,73 +21,17 @@ import {
   foamEl,
   initFoodInteract,
   initFoamInteract,
-  initShowerInteract
+  initShowerInteract, isDraggingMain
 } from "@/scripts/dragAndDrop.js";
 import {computed, onMounted, watch} from "vue";
-import i18n from "@/scripts/locales/i18n.js";
+
 import {useRouter} from 'vue-router';
-import {currentBet} from "@/scripts/saloonScripts/twentyOneGame.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {initSerumInteract, serumEl} from "@/scripts/laboratoryScripts/dragAndDrop.js";
-import {isFortuneOpen} from "@/scripts/fortune.js";
 
 const router = useRouter();
 
-function goToSaloon() {
-  const coins = Number(gameData?.value?.coins ?? gameData?.coins) || 0;
-  if (coins < 50 && !currentBet.value) {
-    alert(i18n.global.t('minigames_access.jackpot_min_coins'));
-    return;
-  }
-  if (gameData.foodLevel < 3) {
-    alert(i18n.global.t('minigames_access.jackpot_fed'));
-    return;
-  }
-  if (gameData.energy < 3) {
-    alert(i18n.global.t('minigames_access.jackpot_energy'));
-    return;
-  }
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS) {
-    window.location.href = '/saloon';
-  } else {
-    router.push('/saloon');
-  }
-}
 
-function goToCatchTheFood() {
-  if (gameData.foodLevel < 3) {
-    alert(i18n.global.t('minigames_access.food_catch_fed'));
-    return;
-  }
-  if (gameData.energy < 3) {
-    alert(i18n.global.t('minigames_access.food_catch_energy'));
-    return;
-  }
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS) {
-    window.location.href = '/thefoodgame';
-  } else {
-    router.push('/thefoodgame');
-  }
-}
-
-function Match3Game() {
-  if (gameData.foodLevel < 3) {
-    alert(i18n.global.t('minigames_access.fruit_fresh_fed'));
-    return;
-  }
-  if (gameData.energy < 3) {
-    alert(i18n.global.t('minigames_access.fruit_fresh_energy'));
-    return;
-  }
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS) {
-    window.location.href = '/match3game';
-  } else {
-    window.location.href = '/match3game';
-  }
-}
 
 function resetTutorial() {
   localStorage.removeItem('tutorial_completed')
@@ -132,6 +75,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
 </script>
 
 <template>
+
   <ShopModal :is-open="isShopOpen" @close="isShopOpen = false" />
 
   <div>
@@ -160,28 +104,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
           <div class="w-[100px] h-[100px] bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/gamePlay/market.webp?v=${APP_VERSION}')` }"></div>
         </div>
 
-        <div v-show="gameData.level>1" class="absolute gap-2 z-20 flex -top-10 left-1/2 -translate-x-1/2">
-          <div @click="isFortuneOpen = true" class="bg-purple-200 overflow-hidden rounded-4xl border-2 border-purple-400 cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-            <div class="h-9 w-9 bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/gamePlay/fortune_icons.webp?v=${APP_VERSION}')` }"></div>
-          </div>
-          <div class="relative rounded-4xl overflow-hidden cursor-pointer" @click="gameData.level >= 10 && goToSaloon()">
-            <div v-if="gameData.level < 10" class="absolute inset-0 z-30 bg-slate-950/50 flex flex-col items-center justify-center text-center pointer-events-none">
-              <span class="text-amber-400 font-bold text-[7px] tracking-wide leading-tight">🔒 10 lvl</span>
-            </div>
-            <div class="bg-red-200 overflow-hidden rounded-4xl border-2 border-red-600" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-              <div class="h-9 w-9 bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/gamePlay/jackpot_icon.webp?v=${APP_VERSION}')` }"></div>
-            </div>
-          </div>
-          <div @click="goToCatchTheFood()" class="bg-orange-200 overflow-hidden rounded-4xl border-2 border-orange-400 cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-            <div class="h-9 w-9 bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/gamePlay/cart_for_game.webp?v=${APP_VERSION}')` }"></div>
-          </div>
-          <div @click="Match3Game()" class="bg-green-300 relative overflow-hidden rounded-4xl border-2 border-yellow-400 cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-            <div class="h-9 w-9 bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/gamePlay/fruit_fresh_icon.webp?v=${APP_VERSION}')` }"></div>
-            <div class="absolute inset-0 z-20 flex flex-col items-center justify-end pb-0.5 text-center pointer-events-none bg-black/10">
-              <span class="text-amber-400 font-bold text-[7px]">Beta</span>
-            </div>
-          </div>
-        </div>
+
 
         <div @click="location = 'food',nextTutorialStep()" class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95" :class="[showHunger?'animate-pulse':'',tutorialStep === 2 ? 'z-205 animate-pulse': 'z-30']" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[80px] h-[80px] bg-contain bg-no-repeat bg-center cursor-pointer" :style="{backgroundImage: `url('/gamePlay/fridge.webp?v=${APP_VERSION}')`}"></div>
@@ -210,10 +133,27 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
       <div v-show="location==='bath'" class="grid grid-cols-2 gap-8 relative gap-y-1.5 w-65 place-self-center">
         <!-- Душ -->
         <div class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34">
-          <div v-show="gameData.sick && statusFoam" class="absolute pointer-events-none w-20 opacity-50 animate-pulse"><img :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt=""></div>
-          <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
-          <div v-show="!feedStatus" ref="showerEl" style="touch-action: none; background-image: url('/gamePlay/shower_icon.webp')" class="flex flex-col items-center cursor-move w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"></div>
-          <button class="absolute text-xs font-bold bottom-0 text-gray-600">{{ $t('shower') }}</button>
+          <div v-show="gameData.sick && statusFoam" class="absolute pointer-events-none w-20 opacity-50 animate-pulse z-20"><img :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt=""></div>
+          <img class="absolute top-0 right-3 z-20" src="/signs/two_lines.svg" width="20" alt="">
+
+          <div class="relative w-[70px] h-[70px]">
+            <!-- 1. Призрак душа -->
+            <div
+                v-show="!feedStatus"
+                style="background-image: url('/gamePlay/shower_icon.webp')"
+                class="absolute inset-0 w-[70px] h-[70px] bg-contain bg-no-repeat bg-center opacity-30 pointer-events-none">
+            </div>
+
+            <!-- 2. Перетаскиваемый душ -->
+            <div
+                v-show="!feedStatus"
+                ref="showerEl"
+                style="touch-action: none; background-image: url('/gamePlay/shower_icon.webp')"
+                class="relative z-10 flex flex-col items-center cursor-move w-[70px] h-[70px] bg-contain bg-no-repeat bg-center">
+            </div>
+          </div>
+
+          <button class="absolute text-xs font-bold bottom-0 text-gray-600 z-20">{{ $t('shower') }}</button>
         </div>
 
         <!-- Шампунь -->
@@ -224,7 +164,23 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
             <div class="flex flex-col items-center justify-center w-[70px] h-[70px] opacity-30 bg-contain bg-no-repeat bg-center" :style="{backgroundImage: `url('/Bath/shampoo_icon.webp?v=${APP_VERSION}')`}"></div>
           </template>
           <template v-else>
-            <div v-show="!feedStatus" ref="foamEl" style="touch-action: none; will-change: transform;" :style="{ 'background-image': currentBathImage ? `url('${currentBathImage}')` : 'none' }" class="relative flex flex-col items-center cursor-move w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"></div>
+            <div class="relative w-[70px] h-[70px]">
+              <!-- 1. Призрак шампуня (лежит строго в 0,0 под основным элементом) -->
+              <div
+                  v-show="!feedStatus"
+                  :style="{ 'background-image': currentBathImage ? `url('${currentBathImage}')` : 'none' }"
+                  class="absolute inset-0 w-[70px] h-[70px] bg-contain bg-no-repeat bg-center opacity-30 pointer-events-none"
+              ></div>
+
+              <!-- 2. Перетаскиваемый шампунь (лежит поверх, двигается через interact.js) -->
+              <div
+                  v-show="!feedStatus"
+                  ref="foamEl"
+                  style="touch-action: none; will-change: transform;"
+                  :style="{ 'background-image': currentBathImage ? `url('${currentBathImage}')` : 'none' }"
+                  class="relative z-10 flex flex-col items-center cursor-move w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
+              ></div>
+            </div>
           </template>
 
           <p v-show="bathCartList.length > 0" class="absolute top-0 left-2 text-amber-500">x{{ gameData.cart[bathCartList[currentBathIndex]?.id] || 0 }}</p>
@@ -253,9 +209,26 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
             <div :class="showHunger ? 'animate-pulse' : ''" class="flex flex-col items-center justify-center w-[80px] h-[80px] bg-contain bg-no-repeat bg-center" :style="{backgroundImage: `url('/gamePlay/fridge_empty.webp?v=${APP_VERSION}')`}"></div>
           </template>
           <template v-else>
-            <div v-show="!feedStatus" ref="foodEl" style="touch-action: none; will-change: transform;" :style="{ 'background-image': currentFoodImage ? `url('${currentFoodImage}')` : 'none' }" class="relative flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center" :class="[showHunger ? 'animate-pulse' : '']"></div>
+            <div class="relative w-[80px] h-[80px] " :class="[!isDraggingMain && showHunger ? 'animate-pulse' : '']">
+              <!-- 1. Призрак (лежит строго в 0,0 этого контейнера) -->
+              <div
+                  v-show="!feedStatus"
+                  :style="{ 'background-image': currentFoodImage ? `url('${currentFoodImage}')` : 'none' }"
+                  class="absolute inset-0 w-[80px] h-[80px] bg-contain bg-no-repeat bg-center opacity-30 pointer-events-none"
+              ></div>
 
-            <div v-show="foodWarning" class="absolute w-20 opacity-50 animate-pulse pointer-events-none">
+              <!-- 2. Перетаскиваемый элемент (лежит ровно поверх призрака, двигается через interact.js) -->
+              <div
+                  v-show="!feedStatus"
+                  ref="foodEl"
+                  style="touch-action: none; will-change: transform;"
+                  :style="{ 'background-image': currentFoodImage ? `url('${currentFoodImage}')` : 'none' }"
+                  class="relative z-10 flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
+
+              ></div>
+            </div>
+
+            <div v-show="foodWarning" class="absolute w-20 opacity-50 animate-pulse pointer-events-none z-20">
               <img :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt="">
             </div>
           </template>
@@ -273,7 +246,28 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
             <div class="flex flex-col items-center justify-center w-[80px] h-[80px] bg-contain bg-no-repeat bg-center opacity-40" :style="{backgroundImage: `url('/gamePlay/first_aid_empty.webp?v=${APP_VERSION}')`}"></div>
           </template>
           <template v-else>
-            <div v-show="!feedStatus" ref="serumEl" style="touch-action: none; will-change: transform;" :style="{ 'background-image': currentSerumImage ? `url('${currentSerumImage}')` : 'none' }" class="relative flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"></div>
+            <div class="relative w-[80px] h-[80px]" :class="[!isDraggingMain &&
+  (gameData.sick && serumCartList[currentSerumIndex]?.id === 'health_serum') ||
+  (gameData.health === 1 && serumCartList[currentSerumIndex]?.id === 'life_serum') || (lowEnergy && serumCartList[currentSerumIndex]?.id === 'energy_serum')
+    ? 'animate-pulse'
+    : ''
+]">
+              <!-- 1. Призрак сыворотки (лежит строго в 0,0 под основным элементом) -->
+              <div
+                  v-show="!feedStatus"
+                  :style="{ 'background-image': currentSerumImage ? `url('${currentSerumImage}')` : 'none' }"
+                  class="absolute inset-0 w-[80px] h-[80px] bg-contain bg-no-repeat bg-center opacity-30 pointer-events-none"
+              ></div>
+
+              <!-- 2. Перетаскиваемая сыворотка (лежит поверх, двигается через interact.js) -->
+              <div
+                  v-show="!feedStatus"
+                  ref="serumEl"
+                  style="touch-action: none; will-change: transform;"
+                  :style="{ 'background-image': currentSerumImage ? `url('${currentSerumImage}')` : 'none' }"
+                  class="relative z-10 flex flex-col items-center cursor-move w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
+              ></div>
+            </div>
           </template>
           <p v-show="serumCartList.length > 0" class="absolute top-0 left-2 text-amber-500">x{{ gameData.cart[serumCartList[currentSerumIndex]?.id] || 0 }}</p>
           <p class="absolute bottom-0 font-bold text-gray-600 pointer-events-none" :class="serumCartList[currentSerumIndex]?.name.length < 15 ? 'text-[10px]' : 'text-[7px]' ">

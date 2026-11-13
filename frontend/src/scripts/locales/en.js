@@ -252,6 +252,7 @@ export default {
         fruit_fresh_energy: "You need to have enough energy to enter «Fruit Fresh»!"
     },
     match3: {
+        entering_fruit_fresh: "Entering Fruit Fresh...",
         juicing: "Juicing up!",
         super_fruit: "Dragon Fruit!",
         kivano: "Kivano!",

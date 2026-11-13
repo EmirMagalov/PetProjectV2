@@ -8,7 +8,7 @@ import {APP_VERSION} from "@/scripts/imageVersion.js";
 </script>
 
 <template>
-  <div v-show="!gameData.isGameOver" class="absolute top-10  left-2 z-40 flex flex-col  gap-1">
+  <div v-show="!gameData.isGameOver" class="absolute top-30  left-0 z-40 flex flex-col  gap-1">
     <!-- (Hunger) -->
 <!--    <div v-show="showHunger" class="relative flex items-center transition-transform duration-50 animate-pulse">-->
 <!--      <img  :src="`/gamePlay/hunger_icon.webp?v=${APP_VERSION}`" class="relative w-18" alt="hunger">-->

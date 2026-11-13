@@ -9,7 +9,7 @@ import {
   getTotalIngredientCount, initSerumInteract
 } from "../../scripts/laboratoryScripts/dragAndDrop.js";
 
-import {onMounted, ref, watch} from "vue";
+import {ref} from "vue";
 import {serumRecipes} from "@/scripts/laboratoryScripts/recipes.js";
 
 const showRecipeModal = ref(false);
@@ -46,9 +46,11 @@ function getIngredient(id) {
 
     <div class="grid grid-cols-2 gap-2 w-70">
       <div
+          @click="getTotalIngredientCount(item.id) < 10?handleItemClick(item):''"
           v-for="item in ingredientList"
           :key="item.id"
-          class="flex flex-col items-center justify-between h-25 bg-white/30 p-2 rounded-2xl border border-white/40 shadow-sm relative"
+          class="flex flex-col items-center justify-between h-25 bg-white/30 p-2 rounded-2xl border border-white/40 shadow-sm relative active:scale-95"
+
       >
         <p class="absolute inset-0 flex text-blue-800/75 items-center  justify-center text-center text-[11px] pointer-events-none">
           {{ $t(`ingredients.${item.id}`) }}
@@ -57,10 +59,7 @@ function getIngredient(id) {
         <div v-if="getPurchasedItem(item.id)" class="w-full flex flex-col items-center relative">
           <IngredientItem :item="getPurchasedItem(item.id)"/>
 
-          <span
-              class="absolute -top-1 -right-1 bg-amber-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.2 rounded-full shadow">
-            x{{ getAvailableIngredientCount(item.id) }}
-          </span>
+
         </div>
 
         <div v-else class="w-full flex flex-col items-center">
@@ -70,16 +69,19 @@ function getIngredient(id) {
               :alt="item.name"
           />
         </div>
-
+        <span
+            class="absolute top-1 right-1 bg-amber-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.2 rounded-full shadow">
+            x{{ getAvailableIngredientCount(item.id) }}
+          </span>
         <!-- Кнопка покупки проверяет общую сумму (инвентарь + стол) -->
         <button
-            @click="handleItemClick(item)"
+
             :disabled="getTotalIngredientCount(item.id) >= 10"
             :class="[
-              'absolute bottom-1 py-1 w-20 font-bold rounded-lg text-xs transition-all shadow-md flex justify-center items-center gap-1.5 mt-auto',
+              'absolute bottom-1 p-1 font-bold rounded-lg text-xs transition-all shadow-md flex justify-center items-center gap-1.5',
               getTotalIngredientCount(item.id) >= 10
                 ? 'bg-slate-400 text-slate-700 cursor-not-allowed shadow-none'
-                : 'bg-amber-500 hover:bg-amber-400 text-slate-950 active:scale-95 cursor-pointer'
+                : 'bg-amber-500 hover:bg-amber-400 text-slate-950  cursor-pointer'
             ]"
         >
           <template v-if="getTotalIngredientCount(item.id) >= 10">
