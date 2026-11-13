@@ -29,11 +29,11 @@ defineEmits(['close'])
 <template>
   <div
       v-if="isOpen"
-      class="fixed inset-0 z-300 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 select-none"
+      class="fixed  inset-0 z-305 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 select-none"
   >
     <!-- Само окно магазина -->
     <div
-        class="relative w-full max-w-md h-180 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        class="relative w-full max-w-md  bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
 
       <!-- Шапка модалки -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80 shrink-0">
