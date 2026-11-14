@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useBallPhysics } from '@/scripts/ballPhysics.js';
 import { APP_VERSION } from '@/scripts/imageVersion.js';
-import {gameData} from "@/scripts/useGameStore.js";
+import {gameData,scale} from "@/scripts/useGameStore.js";
 
 const ballEl = ref(null);
 const containerEl = ref(null);
@@ -26,6 +26,7 @@ const { setupInitial, stop, kickBall } = useBallPhysics(ballEl, containerEl, {
   startX: 20,
   startY: 230,
   floorY: 265,
+  scale: scale.value,
   onUpdate: handleUpdate // передаем функцию напрямую
 });
 

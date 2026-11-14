@@ -42,7 +42,7 @@ defineEmits(['close'])
   >
     <!-- Само окно магазина -->
     <div
-        class="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+        class="relative w-full max-w-md  min-h-140 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
 
       <!-- Шапка модалки -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80 shrink-0">

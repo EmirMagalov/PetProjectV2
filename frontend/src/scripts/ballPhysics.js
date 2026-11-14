@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import interact from 'interactjs';
+import { scale } from '@/scripts/useGameStore.js';
 
 export function useBallPhysics(ballElRef, containerElRef, options = {}) {
     const size = options.size || 64;
@@ -11,38 +12,36 @@ export function useBallPhysics(ballElRef, containerElRef, options = {}) {
     const isMoving = ref(false); // Летит ли мяч сейчас
 
     let x = options.startX || 50;  // Начальная позиция X
-    let y = options.startY || 300; // Начальная позиция Y (например, у пола)
+    let y = options.startY || 300; // Начальная позиция Y
     let vx = 0;
     let vy = 0;
     let rotation = 0;
     let animFrameId = null;
     let lastMoveTime = 0;
 
+    // Фиксированная ширина холста в макетных пикселях (из .w-[300px])
+    const CONTAINER_WIDTH = 320;
+
     function updateTransform() {
         if (!ballElRef.value) return;
         ballElRef.value.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
 
-        // Передаем координаты наружу, если callback задан
         if (typeof options.onUpdate === 'function') {
             options.onUpdate(x, y, isMoving.value || isDragging.value);
         }
     }
 
     function step() {
-        if (!isDragging.value && isMoving.value && containerElRef.value) {
-            const bounds = containerElRef.value.getBoundingClientRect();
-            const rightWallOffset = 12; // 👈 Увеличь до 12-15, если всё еще проваливается
-            const maxX = bounds.width - size - rightWallOffset; // 👈 Обязательно отнимаем offset!
-            const minX = 4;  // 👈 Слева тоже дадим небольшой отступ, чтобы не прилипал
-            // Если задан фиксированный уровень пола в опциях, используем его, адаптируя под текущий scale
-// Иначе считаем по-старому от высоты контейнера
+        if (!isDragging.value && isMoving.value) {
+            const rightWallOffset = 15; // Отступ от правой стены
+            const minX = 4;
+            const maxX = CONTAINER_WIDTH - size - rightWallOffset;
+
             let maxY;
             if (options.floorY !== undefined) {
-                // options.floorY — это точное положение пола в базовых пикселях (например, на холсте 270px)
                 maxY = options.floorY - size;
             } else {
-                const bottomOffset = bounds.height * 0.12;
-                maxY = bounds.height - size - bottomOffset;
+                maxY = 270 - size; // Высота холста по умолчанию 270px
             }
 
             vy += gravity;
@@ -53,15 +52,15 @@ export function useBallPhysics(ballElRef, containerElRef, options = {}) {
             y += vy;
             rotation += vx * 1.5;
 
-
             // Отскок от стен
             if (x >= maxX) {
-                x = maxX;             // Жестко стопорим до провала в текстуру
-                vx = -vx * bounce;    // Отскок
+                x = maxX;
+                vx = -vx * bounce;
             } else if (x <= minX) {
                 x = minX;
                 vx = -vx * bounce;
             }
+
             // Отскок от пола/потолка
             if (y >= maxY) {
                 y = maxY;
@@ -70,7 +69,6 @@ export function useBallPhysics(ballElRef, containerElRef, options = {}) {
                 if (Math.abs(vy) < gravity * 0.5) vy = 0;
                 if (Math.abs(vx) < 0.01) vx = 0;
 
-                // Если мяч полностью остановился — выключаем анимационный цикл, чтобы не нагружать процессор
                 if (vx === 0 && vy === 0) {
                     isMoving.value = false;
                     stop();
@@ -105,7 +103,7 @@ export function useBallPhysics(ballElRef, containerElRef, options = {}) {
             listeners: {
                 start() {
                     isDragging.value = true;
-                    isMoving.value = false; // Останавливаем физику во время пальца
+                    isMoving.value = false;
                     stop();
                     vx = 0;
                     vy = 0;
@@ -114,21 +112,19 @@ export function useBallPhysics(ballElRef, containerElRef, options = {}) {
                 move(event) {
                     const now = performance.now();
                     const dt = Math.max(now - lastMoveTime, 1);
+                    const currentScale = scale.value || 1;
 
-                    x += event.dx;
-                    y += event.dy;
+                    // Важно: делим смещение на scale, чтобы компенсировать CSS-трансформацию экрана
+                    x += event.dx / currentScale;
+                    y += event.dy / currentScale;
 
-                    if (containerElRef.value) {
-                        const bounds = containerElRef.value.getBoundingClientRect();
-                        const rightWallOffset = 12; // 👈 Тот же отступ
-                        const maxX = bounds.width - size - rightWallOffset; // 👈 И здесь отнимаем
-                        const minX = 4;
+                    const rightWallOffset = 15;
+                    const minX = 4;
+                    const maxX = CONTAINER_WIDTH - size - rightWallOffset;
+                    x = Math.max(minX, Math.min(x, maxX));
 
-                        x = Math.max(minX, Math.min(x, maxX));
-                    }
-
-                    vx = (event.dx / dt) * 16;
-                    vy = (event.dy / dt) * 16;
+                    vx = ((event.dx / currentScale) / dt) * 16;
+                    vy = ((event.dy / currentScale) / dt) * 16;
 
                     const maxSpeed = 25;
                     vx = Math.max(-maxSpeed, Math.min(maxSpeed, vx));
@@ -143,14 +139,12 @@ export function useBallPhysics(ballElRef, containerElRef, options = {}) {
                         vx = 0;
                         vy = 0;
                     }
-                    // Запускаем физику полета/отскоков при отпускании!
                     startLoop();
                 }
             }
         });
     }
 
-    // Пнуть мяч по клику
     function kickBall() {
         if (isDragging.value) return;
         vx = (Math.random() - 0.5) * 10;
@@ -159,10 +153,7 @@ export function useBallPhysics(ballElRef, containerElRef, options = {}) {
     }
 
     function setupInitial() {
-        if (containerElRef.value) {
-            // Ставим мяч в переданные координаты или по умолчанию (например, слева снизу)
-            updateTransform();
-        }
+        updateTransform();
         initInteract();
     }
 

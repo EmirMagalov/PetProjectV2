@@ -51,7 +51,7 @@ function Match3Game() {
 </script>
 
 <template>
-  <div v-show="gameData.level>1" class="absolute gap-1.5 z-40 flex flex-col right-0 top-28 select-none">
+  <div v-show="gameData.level>1" class="absolute gap-1.5 flex flex-col right-0 top-28 select-none">
 
     <!-- Колесо фортуны -->
     <div @click="isFortuneOpen = true" class="bg-purple-300/50 overflow-hidden rounded-full border-2 border-purple-400 cursor-pointer shadow-md active:scale-95 transition-transform">
@@ -59,9 +59,9 @@ function Match3Game() {
     </div>
 
     <!-- Салон / Джекпот -->
-    <div class="relative rounded-full overflow-hidden cursor-pointer z-40 shadow-md active:scale-95 transition-transform" @click="gameData.level >= 10 && goToSaloon()">
-      <div v-if="gameData.level < 10" class="absolute inset-0 z-30 bg-slate-950/60 flex flex-col items-center justify-center text-center pointer-events-none rounded-full">
-        <span class="text-amber-400 font-bold text-[8px] tracking-wide leading-tight">🔒 10l</span>
+    <div class="relative rounded-full overflow-hidden cursor-pointer  shadow-md active:scale-95 transition-transform" @click="gameData.level >= 10 && goToSaloon()">
+      <div v-if="gameData.level < 10" class="absolute inset-0 bg-slate-950/60 flex flex-col items-center justify-center text-center pointer-events-none rounded-full">
+        <span class="text-amber-400 font-bold text-[8px] tracking-wide leading-tight">🔒 10lvl</span>
       </div>
       <div class="bg-red-300/50 overflow-hidden rounded-full border-2 border-red-600" style="box-shadow: inset 0 -3px 1px -1px rgba(0, 0, 0, 0.2);">
         <div class="w-10 h-10 sm:w-11 sm:h-11 bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/gamePlay/jackpot_icon.webp?v=${APP_VERSION}')` }"></div>
@@ -76,7 +76,7 @@ function Match3Game() {
     <!-- Три в ряд (Beta) -->
     <div @click="Match3Game()" class="bg-green-300/50 relative overflow-hidden rounded-full border-2 border-yellow-400 cursor-pointer shadow-md active:scale-95 transition-transform" style="box-shadow: inset 0 -3px 1px -1px rgba(0, 0, 0, 0.2);">
       <div class="w-10 h-10 sm:w-11 sm:h-11 bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/gamePlay/fruit_fresh_icon.webp?v=${APP_VERSION}')` }"></div>
-      <div class="absolute inset-0 z-20 flex flex-col items-center justify-end pb-0.5 text-center pointer-events-none bg-black/10">
+      <div class="absolute inset-0 flex flex-col items-center justify-end pb-0.5 text-center pointer-events-none bg-black/10">
         <span class="text-amber-300 font-extrabold text-[7px] text-shadow-xs text-shadow-black">Beta</span>
       </div>
     </div>

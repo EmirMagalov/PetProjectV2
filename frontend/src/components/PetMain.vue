@@ -263,7 +263,6 @@ onMounted(async () => {
   startRandomLooking()
   updateClock();
   clockInterval = setInterval(updateClock, 1000);
-  localStorage.clear();
   if (!isTutorialCompleted.value) {
     // Если уровень уже 2-й (или выше, но обучение еще не завершено)
     if (gameData.level > 2) {
@@ -658,7 +657,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
                       class="pointer-events-auto"
                   />
 
-                  <BouncingBall :on-ball-move="handleBallTracking" />
+                  <BouncingBall v-show="location==='home' || location==='food'" :on-ball-move="handleBallTracking" />
                 </div>
               </div>
             </div>

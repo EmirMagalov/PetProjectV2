@@ -7,7 +7,7 @@ import {APP_VERSION} from "@/scripts/imageVersion.js";
 </script>
 
 <template>
-  <div v-show="!gameData.isGameOver" class="absolute top-28 left-0 z-40 flex flex-col gap-1.5 pointer-events-none">
+  <div v-show="!gameData.isGameOver" class="absolute top-28 left-0  flex flex-col gap-1.5 pointer-events-none">
 
     <!-- (Sick) -->
     <div v-if="gameData.sick" class="relative flex items-center animate-pulse pointer-events-auto">
