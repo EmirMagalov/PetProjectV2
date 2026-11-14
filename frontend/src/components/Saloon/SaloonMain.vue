@@ -181,8 +181,9 @@ onUnmounted(() => {
           }"
       >
         <div
+            class="origin-top-left"
             :style="{
-              zoom: scale,
+             transform: `scale(${scale})`,
               width: BASE_WIDTH + 'px',
 
             }"

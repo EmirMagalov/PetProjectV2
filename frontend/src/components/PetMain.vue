@@ -21,7 +21,7 @@ import {
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
   location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus, colorFoam, isTutorialCompleted, resetLocal,
-  characterPath, showStatus, FatPlayCount, scale
+  characterPath, showStatus, FatPlayCount, scale, isAdmin, isShopOpen
 } from "@/scripts/useGameStore.js";
 import {
   activeCoins, activeExp, addCoin, comboClicks,
@@ -41,6 +41,7 @@ import {addExp} from "@/scripts/level.js";
 import {showerX, showerY} from "@/scripts/dragAndDrop.js";
 import PetActivity from "@/components/PetActivity.vue";
 import BouncingBall from "@/components/BouncingBall.vue";
+import ShopModal from "@/components/ShopModal.vue";
 
 let blinkInterval = null
 let lookInterval = null
@@ -233,7 +234,6 @@ onMounted(async () => {
     // Разворачиваем на всю доступную высоту
     try { tg.expand() } catch (e) {}
   }
-
   // Адаптивное масштабирование
   updateScale()
   window.addEventListener('resize', updateScale)
@@ -263,7 +263,7 @@ onMounted(async () => {
   startRandomLooking()
   updateClock();
   clockInterval = setInterval(updateClock, 1000);
-
+  localStorage.clear();
   if (!isTutorialCompleted.value) {
     // Если уровень уже 2-й (или выше, но обучение еще не завершено)
     if (gameData.level > 2) {
@@ -282,11 +282,13 @@ onMounted(async () => {
     }
     // Если игрок совсем новый (1 уровень) — сбрасываем локал и даем стартовые вещи
     else if (gameData.level < 2) {
-      await resetLocal();
-      gameData.level = 1;
-      tutorialStep.value = 1;
-      addToCart('burger');
-      addToCart('shampoo');
+      tutorialStep.value = 1
+
+      // await resetLocal();
+      // gameData.level = 1;
+      // tutorialStep.value = 1;
+      // addToCart('burger');
+      // addToCart('shampoo');
     }
   }
   if (localStorage.getItem('pending_level_up') === 'true') {
@@ -416,7 +418,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
         <div
             class="origin-top-left"
             :style="{
-              zoom: scale,
+              transform: `scale(${scale})`,
               width: BASE_WIDTH + 'px',
 
             }"
@@ -513,6 +515,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
               />
               <!-- Зона персонажа (исправлены классы transition и синтаксис :class) -->
               <div ref="dropZoneRef"
+                   id="tutorial-pet"
                    @pointerdown="handlePointerDown($event)"
                    @pointermove="handlePointerMove($event)"
                    @pointerup="handlePointerEnd"
@@ -520,9 +523,9 @@ function handleBallTracking(ballX, ballY, isMoving) {
                    @pointerleave="handlePointerEnd"
                    class="absolute inset-0 flex justify-center items-center cursor-pointer touch-none select-none transition-[filter,transform] duration-1000 ease-in-out"
                    :class="[
-               gameData.sleep ? 'brightness-30' : 'brightness-100',[1,2,3,4, 7, 8].includes(tutorialStep) ? ' z-205 ' : ''
-
-             ]"
+               gameData.sleep ? 'brightness-50' : 'brightness-100'
+                    ]"
+                   style="will-change: filter; -webkit-backface-visibility: hidden;"
               >
 
                 <div v-show="gameData.sleep"
@@ -639,7 +642,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
                     'w-15': comboMultiplier >= 2,
                     'w-17': comboMultiplier >= 3,
                     'w-19': comboMultiplier >= 5,
-                    'z-205': tutorialStep === 4 || tutorialStep === 7 || tutorialStep === 8
+
                   }"
                         alt="">
                   </Transition>
@@ -663,8 +666,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
           </div> <!-- end relative flex justify-center (холст) -->
 
           <!-- Меню (внутри масштабируемого блока) -->
-          <PetSideMenu/>
-          <PetActivity/>
+
             <PetMenu/>
 
         </div> <!-- end transform scale -->
@@ -674,6 +676,9 @@ function handleBallTracking(ballX, ballY, isMoving) {
   </div>
   <TutorialOverlay/>
   <FortuneWheel/>
+  <PetSideMenu/>
+  <PetActivity/>
+  <ShopModal :is-open="isShopOpen" @close="isShopOpen = false" />
 </template>
 
 <style scoped>

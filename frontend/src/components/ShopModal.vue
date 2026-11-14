@@ -27,13 +27,22 @@ defineEmits(['close'])
 </script>
 
 <template>
+<!--  <div-->
+<!--      v-if="isOpen"-->
+<!--      class="fixed inset-0 z-9999 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 select-none"-->
+<!--  >-->
+<!--    &lt;!&ndash; Само окно магазина &ndash;&gt;-->
+<!--    <div-->
+<!--        class="relative w-full max-w-full sm:max-w-md bg-slate-900 border border-slate-700 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[85vh] sm:max-h-[80vh]"-->
+<!--        style="padding-bottom: env(safe-area-inset-bottom);"-->
+<!--    >-->
   <div
       v-if="isOpen"
       class="fixed  inset-0 z-9999 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 select-none"
   >
     <!-- Само окно магазина -->
     <div
-        class="relative w-full max-w-md h-130 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+        class="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
 
       <!-- Шапка модалки -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80 shrink-0">

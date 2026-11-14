@@ -219,7 +219,6 @@ export function handleEnd(itemType, Item) {
         if (itemType === 'food') {
             if (Item?.category === 'food') {
                 feedPet(Item.id)
-                nextTutorialStep()
             } else if (Item) {
                 const isFullLives = (Item.id === 'life_serum' && gameData.lives >= maxLives.value)
                 const isUnneededHealth = (Item.id === 'health_serum' && !gameData.sick)

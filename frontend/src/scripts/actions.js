@@ -98,6 +98,7 @@ export function feedPet(foodId) {
     if (tutorialStep.value === 3) {
         gameData.stinky = true
         nextTutorialStep()
+
     }
     // 1. Считаем, сколько раз это блюдо встречалось в последних приемах пищи
     const sameFoodCountInHistory = recentFedItems.value.filter(id => id === targetId).length

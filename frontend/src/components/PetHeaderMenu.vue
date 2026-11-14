@@ -107,7 +107,7 @@ const getClipInset = (progress) => {
 </script>
 
 <template>
-  <div class="relative px-2 mb-1 pt-1" :class="tutorialStep === 1 ? 'z-205' : 'z-200'">
+  <div class="relative z-20 px-2 mb-1 pt-1">
     <!-- Клик по любому месту плашки откроет подробную статистику -->
     <div
 
@@ -117,7 +117,7 @@ const getClipInset = (progress) => {
     >
       <div v-if="gameData.level<=1">
         <div
-            :class="tutorialStep === 1 ? 'z-205' : ''"
+
             class="absolute  top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5  overflow-hidden flex items-center justify-center shadow-md bg-white/10 backdrop-blur-md w-70 py-1 rounded-xl border border-white/10"
 
         >

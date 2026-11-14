@@ -76,7 +76,6 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
 
 <template>
 
-  <ShopModal :is-open="isShopOpen" @close="isShopOpen = false" />
 
   <div>
     <button v-if="isAdmin" @click="resetTutorial" class="absolute bottom-0 right-2 z-300 bg-red-500 text-white text-xs px-2 py-1 rounded shadow">
@@ -106,12 +105,12 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
 
 
 
-        <div @click="location = 'food',nextTutorialStep()" class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95" :class="[showHunger?'animate-pulse':'',tutorialStep === 2 ? 'z-205 animate-pulse': 'z-30']" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+        <div id="tutorial-fridge" @click="location = 'food',nextTutorialStep()" class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95" :class="[showHunger?'animate-pulse':'']" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[80px] h-[80px] bg-contain bg-no-repeat bg-center cursor-pointer" :style="{backgroundImage: `url('/gamePlay/fridge.webp?v=${APP_VERSION}')`}"></div>
           <button class="text-md font-bold text-gray-600">{{ $t('feed') }}</button>
         </div>
 
-        <div @click="location = 'bath',nextTutorialStep()" class="bg-[#fff6ef] justify-center flex flex-col h-25 items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer" :class=" tutorialStep === 6 ? 'z-205 animate-pulse' : ''" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+        <div id="tutorial-bath-btn" @click="location = 'bath',nextTutorialStep()" class="bg-[#fff6ef] justify-center flex flex-col h-25 items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[80px] h-[80px] bg-contain bg-no-repeat bg-center" :style="{backgroundImage: `url('/gamePlay/bath_icon.webp?v=${APP_VERSION}')`}"></div>
           <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('wash') }}</button>
         </div>
@@ -132,7 +131,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
       <!-- BATH -->
       <div v-show="location==='bath'" class="grid grid-cols-2 gap-8 relative gap-y-1.5 w-65 place-self-center">
         <!-- Душ -->
-        <div class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34">
+        <div id="tutorial-shower" class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34">
           <div v-show="gameData.sick && statusFoam" class="absolute pointer-events-none w-20 opacity-50 animate-pulse z-20"><img :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt=""></div>
           <img class="absolute top-0 right-3 z-20" src="/signs/two_lines.svg" width="20" alt="">
 
@@ -157,7 +156,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
         </div>
 
         <!-- Шампунь -->
-        <div @click="nextBathItem()" class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 cursor-pointer" :class="[tutorialStep === 7 && bathCartList.length > 0? 'z-205 bg-white animate-pulse' : '']">
+        <div id="tutorial-shampoo" @click="nextBathItem()" class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 cursor-pointer">
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
           <template v-if="bathCartList.length === 0">
@@ -202,7 +201,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
       <!-- FOOD -->
       <div v-show="location==='food'" class="grid grid-cols-2 gap-8 relative gap-y-1.5 w-65 place-self-center">
         <!-- Блок продуктов -->
-        <div @click="nextItem()" class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34" :class="[tutorialStep === 3 && foodCartList.length > 0 ? 'z-205 pointer-events-auto bg-white animate-pulse' : 'z-30']">
+        <div id="tutorial-food" @click="nextItem()" class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34">
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
 
           <template v-if="foodCartList.length === 0">
@@ -275,7 +274,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
           </p>
         </div>
 
-        <div @click="location = 'home',nextTutorialStep()" class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+        <div id="tutorial-back" @click="location = 'home',nextTutorialStep()" class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-20 h-20 bg-contain bg-no-repeat bg-center" :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"></div>
           <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('back') }}</button>
         </div>

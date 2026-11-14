@@ -5,7 +5,7 @@ import {activeCoins, activeExp} from "@/scripts/actions.js";
 </script>
 
 <template>
-  <div class="absolute inset-0 pointer-events-none overflow-hidden"  :class="tutorialStep === 4 ? 'z-205' : ' z-50'">
+  <div class="absolute inset-0 pointer-events-none overflow-hidden" >
     <template v-for="group in activeCoins" :key="group.id">
       <img
           v-for="coin in group.coins"
@@ -21,7 +21,7 @@ import {activeCoins, activeExp} from "@/scripts/actions.js";
       />
     </template>
   </div>
-  <div class="absolute inset-0 pointer-events-none overflow-hidden" :class="tutorialStep === 4 ? 'z-205' : ' z-50'">
+  <div class="absolute inset-0 pointer-events-none overflow-hidden" >
     <template v-for="group in activeExp" :key="group.id">
       <img
           v-for="exp in group.exp"
