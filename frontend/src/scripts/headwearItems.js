@@ -52,13 +52,13 @@ export const headItems = [
         price: 1700,
         level:20
     },
-    {
-        id: 'cloche_hat',
-        name: 'Шляпа - клош',
-        image: `/headwear/clochehat.webp?v=${APP_VERSION}`,
-        price: 1700,
-        level:20
-    },
+    // {
+    //     id: 'cloche_hat',
+    //     name: 'Шляпа - клош',
+    //     image: `/headwear/clochehat.webp?v=${APP_VERSION}`,
+    //     price: 1700,
+    //     level:20
+    // },
     {
         id: 'beach_hat',
         name: 'Пляжная шляпа',

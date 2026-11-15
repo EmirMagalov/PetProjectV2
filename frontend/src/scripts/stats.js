@@ -142,10 +142,10 @@ watch(
             gameData.equippedHead = null
             gameData.equippedClothes = null
         }
-        if (gameData.level >= 45) {
+        if (gameData.level >= 40) {
             gameData.old_1_phase = true
         }
-        if (gameData.level >= 65) {
+        if (gameData.level >= 60) {
             gameData.old_2_phase = true
         }
 
@@ -154,6 +154,7 @@ watch(
             gameData.isFat = false
         }
         if (foodLevel < 15) {
+            if (bodyType.value !== 'skinny'){showStatus('lostWeight')}
             bodyType.value = 'skinny'
         } else if (isFat) {
             bodyType.value = 'fat'
@@ -250,7 +251,7 @@ const clearActionTimer = () => {
 }
 
 // Следим за появлением облака и пены
-watch([cloudShow, statusFoam,location], ([isCloud, hasFoam]) => {
+watch([cloudShow, statusFoam, location], ([isCloud, hasFoam]) => {
     // Если облако есть И на персонаже есть пена
     if (isCloud && hasFoam) {
         if (!actionTimer) {
@@ -299,4 +300,4 @@ watch([cloudShow, statusFoam,location], ([isCloud, hasFoam]) => {
         statusShower.value = false
         clearActionTimer()
     }
-}, { immediate: true })
+}, {immediate: true})

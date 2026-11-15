@@ -169,7 +169,7 @@ export async function initGameData() {
                 gameData.language = serverData.language
                 // localStorage.setItem('user-locale', serverData.language)
             }
-            if (gameData.level >= 80 && gameData.lives > 2) {
+            if (gameData.level >= 60 && gameData.lives > 2) {
                 gameData.lives = 2;
             }
 

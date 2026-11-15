@@ -168,6 +168,7 @@ export default {
         gain_life: '+ 1 жизнь!',
         yummy: 'Ням-ням!',
         max_limit: 'MAX!',
+        lost_weight: 'Похудел',
         happy_birthday:"С днем рождения!",
         growth_spurt:"Скачек роста!",
         already_open_device: '⚠️ Игра уже открыта в другой вкладке!',

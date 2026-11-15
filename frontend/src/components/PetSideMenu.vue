@@ -28,7 +28,7 @@ import {APP_VERSION} from "@/scripts/imageVersion.js";
     <div v-show="gameData.isFat" class="relative flex items-center transition-transform duration-50 animate-pulse pointer-events-auto">
       <img class="absolute left-4 w-6 h-6 object-contain z-10" src="/gamePlay/click_icon.webp" alt="">
       <img class="relative w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow" :src="`/gamePlay/fat_icon.webp?v=${APP_VERSION}`" alt="">
-      <p class="absolute left-5 text-shadow-xs text-shadow-amber-50 top-5 font-bold text-xs z-20 text-white">{{ gameData.fatCount - FatPlayCount }}</p>
+      <p class="absolute left-5 text-shadow-xs text-shadow-amber-50 top-5 font-bold text-xs z-20 text-black">{{ gameData.fatCount - FatPlayCount }}</p>
     </div>
 
   </div>

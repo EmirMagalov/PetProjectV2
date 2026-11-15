@@ -75,9 +75,20 @@ function getHornAsset(level) {
   if (level >= 15) return `${characterPath.value}/horns/15lvl.webp?v=${APP_VERSION}`
   if (level >= 10) return `${characterPath.value}/horns/10lvl.webp?v=${APP_VERSION}`
   if (level >= 5) return `${characterPath.value}/horns/5lvl.webp?v=${APP_VERSION}`
-  return `${characterPath.value}/horns/1lvl.webp?v=${APP_VERSION}`
+  return `${characterPath.value}/horns/2lvl.webp?v=${APP_VERSION}`
 }
-
+function getTailAsset(level) {
+  if (level >= 50) return `${characterPath.value}/tails/50lvl.webp?v=${APP_VERSION}`
+  if (level >= 45) return `${characterPath.value}/tails/45lvl.webp?v=${APP_VERSION}`
+  if (level >= 40) return `${characterPath.value}/tails/40lvl.webp?v=${APP_VERSION}`
+  if (level >= 35) return `${characterPath.value}/tails/35lvl.webp?v=${APP_VERSION}`
+  if (level >= 30) return `${characterPath.value}/tails/30lvl.webp?v=${APP_VERSION}`
+  if (level >= 25) return `${characterPath.value}/tails/25lvl.webp?v=${APP_VERSION}`
+  if (level >= 20) return `${characterPath.value}/tails/20lvl.webp?v=${APP_VERSION}`
+  if (level >= 15) return `${characterPath.value}/tails/15lvl.webp?v=${APP_VERSION}`
+  if (level >= 10) return `${characterPath.value}/tails/10lvl.webp?v=${APP_VERSION}`
+  return `${characterPath.value}/tails/5lvl.webp?v=${APP_VERSION}`
+}
 function getEggsAsset() {
   if (gameData.exp >= 80) return `/character/egg_pahse_five.webp?v=${APP_VERSION}`
   if (gameData.exp >= 60) return `/character/egg_pahse_four.webp?v=${APP_VERSION}`
@@ -578,7 +589,9 @@ function handleBallTracking(ballX, ballY, isMoving) {
                   <img v-show="gameData.old_2_phase" :src="`${characterPath}/wrinkles_2_phase.webp?v=${APP_VERSION}`"
                        class="absolute w-45 z-5 pointer-events-none" alt="">
 
-                  <img :src="getHornAsset(gameData.level)" class="absolute  w-45 pointer-events-none" alt="">
+<!--                  <img :src="getHornAsset(gameData.level)" class="absolute z-10 w-45 mt-1 pointer-events-none" alt="">-->
+                  <img  :src="`${characterPath}/ears.webp?v=${APP_VERSION}`" class="absolute z-5 w-45 pointer-events-none" alt="">
+
                   <img v-show="gameData.sick" :src="`${characterPath}/drunk.webp?v=${APP_VERSION}`"
                        class="absolute z-6 w-45 pointer-events-none" alt="">
                   <img v-show="gameData.sick && bodyType==='fat'" :src="`${characterPath}/sick_fat.webp?v=${APP_VERSION}`"
@@ -614,6 +627,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
                        class="absolute w-45 pointer-events-none" alt="">
                   <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''" class="absolute w-45 pointer-events-none"
                        alt="">
+                  <img :src="getTailAsset(gameData.level)" class=" w-45 pointer-events-none" alt="">
                 </div>
                 <!-- Яйцо: сальто всегда доигрывает до конца, тряска останавливается при отпускании -->
                 <div

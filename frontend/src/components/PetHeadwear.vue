@@ -6,17 +6,8 @@ import {gameData} from "@/scripts/useGameStore.js";
 </script>
 
 <template>
-  <div class="absolute inset-x-0 flex justify-center items-center pointer-events-none z-10"
-       :class="{
-       '-translate-y-1': gameData.level < 10,
-       '-translate-y-3 -translate-x-7 -rotate-30': gameData.level >= 10 && gameData.level < 15,
-       '-translate-y-8  -translate-x-7 rotate-20': gameData.level >= 15 && gameData.level < 20,
-       '-translate-y-10  -translate-x-7 rotate-25': gameData.level >= 20 && gameData.level < 25,
-       '-translate-y-13  -translate-x-10 rotate-25': gameData.level >= 25 && gameData.level < 30,
-       '-translate-y-14  -translate-x-6 rotate-25': gameData.level >= 30  && gameData.level < 35,
-       '-translate-y-15  -translate-x-7 rotate-25': gameData.level >= 35,
-       // '-translate-y-22': gameData.level >= 40
-     }">
+  <div class="absolute inset-x-0 flex justify-center items-center pointer-events-none -translate-y-1 z-15"
+       >
 
   <img
       v-if="currentHeadItem"

@@ -140,7 +140,7 @@ export const defaultGameData = {
 }
 
 export const maxLives = computed(() => {
-    return gameData.level >= 80 ? 2 : 3;
+    return gameData.level >= 60 ? 2 : 3;
 })
 
 // Создаем реактивный объект, используя дефолты
@@ -238,14 +238,16 @@ const STATUS_DURATIONS = {
     lifeGain: 800,
     losingLife: 800,
     levelUp: 1500,
+    lostWeight:800,
     gameOver: 0 // Не сбрасываем
 }
 const STATUS_PRIORITIES = {
     feed: 1,
-    lifeGain: 2,
-    losingLife: 3,
-    levelUp: 4,
-    gameOver: 5
+    lostWeight:2,
+    lifeGain: 3,
+    losingLife: 4,
+    levelUp: 5,
+    gameOver: 6
 }
 const statusQueue = ref([])
 let isProcessingQueue = false
@@ -313,7 +315,7 @@ export const activeStatus = computed(() => {
         return {
             show: true,
             text: i18n.global.t('store.pet_died'),
-            image: "/gamePlay/hunting_trophy.webp",
+            image: "/gamePlay/a_pig_in_a_poke.webp",
             weight:25,
             height:25,
             bgColor: "bg-[#808080]"
@@ -394,7 +396,14 @@ export const activeStatus = computed(() => {
             bgColor: "bg-[#FF0000]/30"
         }
     }
-
+    if (type === 'lostWeight') {
+        return {
+            show: true,
+            text: i18n.global.t('store.lost_weight'),
+            image: "/gamePlay/hunger.webp",
+            bgColor: 'bg-[#FF9933]/40'
+        }
+    }
     // Приоритет 5: Кормежка (ням-ням)
     if (type === 'feed') {
         const targetFoodId = payload?.fedItemId || lastFedItem.value
