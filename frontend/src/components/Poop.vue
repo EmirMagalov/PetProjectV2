@@ -104,10 +104,10 @@ onMounted(() => {
       >
 
       <!-- Летающая муха №1 -->
-      <span class="absolute top-3 right-5 text-[7px] fly-anim-1 pointer-events-none">🪰</span>
+      <span class="absolute top-3 right-5 text-[7px] w-2 fly-anim-1 pointer-events-none"><img src="/gamePlay/fly.webp" alt=""></span>
 
       <!-- Летающая муха №2 -->
-      <span class="absolute -top-1 right-0 text-[7px] fly-anim-2 pointer-events-none">🪰</span>
+      <span class="absolute -top-1 right-0 text-[7px] w-2 fly-anim-2 pointer-events-none"><img src="/gamePlay/fly.webp" alt=""></span>
     </div>
   </div>
 </template>

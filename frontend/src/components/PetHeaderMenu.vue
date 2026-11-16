@@ -135,6 +135,7 @@ const getClipInset = (progress) => {
 
         <div class="flex justify-between gap-2 p-2">
           <div class="flex flex-col gap-1">
+
             <ProgressBar :class="gameData.foodLevel<=0?'animate-custom-pulse ':''"
                          :image="`/gamePlay/hunger.webp?v=${APP_VERSION}`" name="Сытость" :value="gameData.foodLevel"
                          color="#FFF700"/>

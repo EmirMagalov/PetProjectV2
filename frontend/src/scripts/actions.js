@@ -266,7 +266,7 @@ export function updateEyeLook(event) {
     if (!touch || touch.clientX === undefined) return;
 
     // Находим главный контейнер игры по селектору или берем экран
-    const gameCanvas = document.querySelector('.w-\\[320px\\]') || document.body;
+    const gameCanvas = document.querySelector('.w-\\[300px\\]') || document.body;
     const rect = gameCanvas.getBoundingClientRect();
 
     const clickX = touch.clientX - rect.left;

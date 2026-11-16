@@ -32,7 +32,7 @@ onMounted(() => {
 
   intervalId = setInterval(() => {
     currentFrameIndex.value = (currentFrameIndex.value + 1) % props.currentFrames.length
-  }, 115)
+  }, 135)
 })
 
 onUnmounted(() => {
@@ -48,8 +48,8 @@ onUnmounted(() => {
 
 <style scoped>
 .tail-container {
-  width: 150px;
-  height: 150px;
+  width: 160px;
+  height: 160px;
 }
 .tail-img {
   width: 100%;

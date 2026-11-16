@@ -591,8 +591,8 @@ function handleBallTracking(ballX, ballY, isMoving) {
                   <img v-show="gameData.old_2_phase" :src="`${characterPath}/wrinkles_2_phase.webp?v=${APP_VERSION}`"
                        class="absolute w-45 z-5 pointer-events-none" alt="">
 
-                  <img v-show="isBadMood" src="/character/claws.webp" class="absolute w-45 z-10 pointer-events-none" alt="">
-                  <img v-show="isBadMood && isHovered && !batheStatus" src="/character/fangs.webp" class="absolute w-45 z-10 pointer-events-none" alt="">
+                  <img v-show="isBadMood && gameData.level>=10" src="/character/claws.webp" class="absolute w-45 z-10 pointer-events-none" alt="">
+                  <img v-show="isBadMood && gameData.level>=10 && isHovered && !batheStatus" src="/character/fangs.webp" class="absolute w-45 z-10 pointer-events-none" alt="">
                   <img  :src="`${characterPath}/ears.webp?v=${APP_VERSION}`" class="absolute z-5 w-45 pointer-events-none" alt="">
 
                   <img v-show="gameData.sick" :src="`${characterPath}/drunk.webp?v=${APP_VERSION}`"

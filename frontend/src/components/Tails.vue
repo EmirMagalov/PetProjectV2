@@ -78,12 +78,12 @@ const frames_2 = [
   </div>
 
   <div v-else-if="gameData.level >= 10">
-    <AnimatedTail :current-frames="frames_1" class="original-size" />
+    <AnimatedTail :current-frames="frames_1" />
   </div>
 
   <!-- Для всех остальных уровней (ниже 10) -->
   <div v-else>
-    <AnimatedTail :current-frames="frames_0" class="original-size" />
+    <AnimatedTail :current-frames="frames_0" />
   </div>
 </template>
 
