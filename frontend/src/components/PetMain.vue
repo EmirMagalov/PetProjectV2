@@ -38,10 +38,12 @@ import CoinsAndXP from "@/components/Decorations/CoinsAndXP.vue";
 import Rain from "@/components/Decorations/Rain.vue";
 import {addToCart} from "@/scripts/basket.js";
 import {addExp} from "@/scripts/level.js";
-import {showerX, showerY} from "@/scripts/dragAndDrop.js";
+import {batheStatus, isHovered, showerX, showerY} from "@/scripts/dragAndDrop.js";
 import PetActivity from "@/components/PetActivity.vue";
 import BouncingBall from "@/components/BouncingBall.vue";
 import ShopModal from "@/components/ShopModal.vue";
+import AnimatedTail from "@/components/AnimatedTail.vue";
+import Tails from "@/components/Tails.vue";
 
 let blinkInterval = null
 let lookInterval = null
@@ -556,7 +558,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
                       @pointerdown="handleCharacterClick"
                       class="absolute z-30 w-20 h-20  top-25 cursor-pointer pointer-events-auto"
                   ></div>
-
+                  <Tails class="z-0 pointer-events-none"/>
                   <PetHeadwear/>
                   <PetClothes/>
                   <div class="absolute w-45 h-45 pointer-events-none">
@@ -589,15 +591,16 @@ function handleBallTracking(ballX, ballY, isMoving) {
                   <img v-show="gameData.old_2_phase" :src="`${characterPath}/wrinkles_2_phase.webp?v=${APP_VERSION}`"
                        class="absolute w-45 z-5 pointer-events-none" alt="">
 
-<!--                  <img :src="getHornAsset(gameData.level)" class="absolute z-10 w-45 mt-1 pointer-events-none" alt="">-->
+                  <img v-show="isBadMood" src="/character/claws.webp" class="absolute w-45 z-10 pointer-events-none" alt="">
+                  <img v-show="isBadMood && isHovered && !batheStatus" src="/character/fangs.webp" class="absolute w-45 z-10 pointer-events-none" alt="">
                   <img  :src="`${characterPath}/ears.webp?v=${APP_VERSION}`" class="absolute z-5 w-45 pointer-events-none" alt="">
 
                   <img v-show="gameData.sick" :src="`${characterPath}/drunk.webp?v=${APP_VERSION}`"
                        class="absolute z-6 w-45 pointer-events-none" alt="">
-                  <img v-show="gameData.sick && bodyType==='fat'" :src="`${characterPath}/sick_fat.webp?v=${APP_VERSION}`"
-                       class="absolute w-45 z-10 pointer-events-none" alt="">
-                  <img v-show="gameData.sick && bodyType!=='fat'" :src="`${characterPath}/sick.webp?v=${APP_VERSION}`"
-                       class="absolute w-45 z-10 pointer-events-none" alt="">
+<!--                  <img v-show="gameData.sick && bodyType==='fat'" :src="`${characterPath}/sick_fat.webp?v=${APP_VERSION}`"-->
+<!--                       class="absolute w-45 z-10 pointer-events-none" alt="">-->
+                  <img v-show="gameData.sick" :src="`${characterPath}/sick.webp?v=${APP_VERSION}`"
+                       class="absolute w-45 pointer-events-none" alt="">
 
                   <div v-if="!blink && !gameData.sleep && !isVibrating" class="pointer-events-none">
                     <div v-show="lowEnergy" class="absolute inset-0 flex justify-center items-center z-10">
@@ -627,7 +630,8 @@ function handleBallTracking(ballX, ballY, isMoving) {
                        class="absolute w-45 pointer-events-none" alt="">
                   <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''" class="absolute w-45 pointer-events-none"
                        alt="">
-                  <img :src="getTailAsset(gameData.level)" class=" w-45 pointer-events-none" alt="">
+<!--                  <img :src="getTailAsset(gameData.level)" class=" w-45 pointer-events-none" alt="">-->
+
                 </div>
                 <!-- Яйцо: сальто всегда доигрывает до конца, тряска останавливается при отпускании -->
                 <div

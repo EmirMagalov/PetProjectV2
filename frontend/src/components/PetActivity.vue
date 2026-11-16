@@ -51,7 +51,7 @@ function Match3Game() {
 </script>
 
 <template>
-  <div v-show="gameData.level>1" class="absolute gap-1.5 flex flex-col right-0 top-28 select-none">
+  <div v-show="gameData.level>1" class="absolute gap-1.5 flex flex-col right-1 top-28 select-none">
 
     <!-- Колесо фортуны -->
     <div @click="isFortuneOpen = true" class="bg-purple-300/50 overflow-hidden rounded-full border-2 border-purple-400 cursor-pointer shadow-md active:scale-95 transition-transform">

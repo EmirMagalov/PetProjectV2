@@ -391,7 +391,6 @@ export function spawnHeart(x = 160, y = 135) {
 
     if (isBothStatsZero.value) {
         ZeroPlayCount.value++
-        console.log(clickLimit - ZeroPlayCount.value)
         if((clickLimit - ZeroPlayCount.value) === 10){
             alert(i18n.global.t('pet_in_danger'))
         }

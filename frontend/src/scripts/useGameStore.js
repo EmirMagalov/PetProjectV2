@@ -140,7 +140,7 @@ export const defaultGameData = {
 }
 
 export const maxLives = computed(() => {
-    return gameData.level >= 60 ? 2 : 3;
+    return gameData.old_2_phase ? 2 : 3;
 })
 
 // Создаем реактивный объект, используя дефолты
