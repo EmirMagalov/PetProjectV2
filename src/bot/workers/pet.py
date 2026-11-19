@@ -97,6 +97,8 @@ async def send_telegram_message(tg_id: int, text: str, last_interaction: int, la
 
 async def process_pet_notifications(pet: PetModel, now: float):
     """Обработка одного питомца."""
+    if pet.level <= 1 or getattr(pet, "is_game_over", False):
+        return
     is_notified_changed = False
     last_act = pet.last_interaction or 0
     lang = get_notif_lang(pet)

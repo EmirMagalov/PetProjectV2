@@ -14,7 +14,7 @@ const props = defineProps({
       <!--      <span class="flex items-center gap-1">{{props.name}}</span>-->
 
     </div>
-    <div class="w-40 h-3 bg-slate-700 rounded-full overflow-hidden p-0.5 shadow-inner">
+    <div class="w-30 h-3 bg-slate-700 rounded-full overflow-hidden p-0.5 shadow-inner">
       <!-- Динамическая полоска (ширина привязывается к числу, например health.value) -->
       <div class="h-full rounded-full"
            :style="{ width: props.value + '%' ,
