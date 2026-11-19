@@ -27,7 +27,7 @@ const isClicking = ref(false);
 let clickTimeout = null;
 
 // 🎯 Делаем вкладку "Задания" первой по умолчанию
-const activeTab = ref('tasks');
+const activeTab = ref('stats');
 
 // 🌐 Функция переключения языка
 const changeLanguage = async (lang) => {
@@ -89,31 +89,44 @@ function formatFullNumber(num) {
 
 const showStatsModal = ref(false);
 
-const calculateProgress = (current, min, max) => {
-  if (current <= min) return 0;
-  if (current >= max) return 100;
-  return ((current - min) / (max - min)) * 100;
-};
 
-const progressX2 = computed(() => calculateProgress(animatedComboClicks.value, 0, 50));
-const progressX3 = computed(() => calculateProgress(animatedComboClicks.value, 50, 100));
-const progressX5 = computed(() => calculateProgress(animatedComboClicks.value, 100, 150));
+function getFanStyle(index, total, maxAngle = 40, maxDrop = 5, spreadX = -5) {
+  if (total <= 1) {
+    return {
+      '--fan-x': '0px',
+      '--fan-y': '0px',
+      '--fan-rot': '0deg',
+      transform: 'translate(0px, 0px) rotate(0deg)',
+      transformOrigin: '50% 100%'
+    };
+  }
 
-const getClipInset = (progress) => {
-  const maxFill = 15;
-  const insetValue = 100 - (progress * (100 - maxFill) / 100);
-  return `${insetValue}% 0 0 0`;
-};
+  const center = (total - 1) / 2;
+  const offset = (index - center) / center; // от -1 (слева) до +1 (справа)
+
+  const angle = offset * maxAngle;
+  const dropY = Math.abs(offset) * maxDrop;
+  // Отрицательный spreadX прижимает края к центру (уменьшает расстояние между сердцами)
+  const shiftX = offset * spreadX;
+
+  return {
+    '--fan-x': `${shiftX}px`,
+    '--fan-y': `${dropY}px`,
+    '--fan-rot': `${angle}deg`,
+    transform: `translate(var(--fan-x), var(--fan-y)) rotate(var(--fan-rot))`,
+    transformOrigin: '50% 100%'
+  };
+}
 </script>
 
 <template>
-  <div class="relative z-20 px-2 mb-2 pt-1">
+  <div class="relative z-20 px-2 mb-1 pt-1">
     <!-- Клик по любому месту плашки откроет подробную статистику -->
     <div
 
         @click="showStatsModal = true"
         :class="tutorialStep === 1 ? '' : 'backdrop-blur-md shadow-2xl bg-white/20'"
-        class="relative h-20  rounded-2xl  cursor-pointer active:scale-[0.99] transition-transform"
+        class="relative h-21  rounded-2xl  cursor-pointer active:scale-[0.99] transition-transform"
     >
       <div v-if="gameData.level<=1">
         <div
@@ -128,13 +141,13 @@ const getClipInset = (progress) => {
         </div>
       </div>
       <div v-else>
-        <div v-show="hasAvailableRewards"
+        <div v-if="hasAvailableRewards"
              class="absolute rounded-full animate-pulse p-0.5 w-8 h-8 left-0 -bottom-6 ">
           <img class="relative" src="/gamePlay/calendar.webp" alt="">
         </div>
 
-        <div class="flex justify-between gap-2 p-2">
-          <div class="flex flex-col gap-1">
+        <div class="flex justify-between gap-2 py-2 px-4">
+          <div class="flex flex-col gap-3">
 
             <ProgressBar :class="showHunger?'animate-custom-pulse ':''"
                          :image="`/gamePlay/hunger.webp?v=${APP_VERSION}`" name="Сытость" :value="gameData.foodLevel"
@@ -148,62 +161,64 @@ const getClipInset = (progress) => {
           </div>
           <div class="flex flex-col items-center shrink-0">
             <!-- Иконка X5 -->
-            <div
-                class="relative w-7 h-7 transition-transform duration-100 "
-                :class="{
-          'animate-combo-active z-10': progressX5 >= 100 && !isBothStatsZero,
-          'scale-115': isClicking && progressX5 > 0 && progressX5 < 100 && !isBothStatsZero
-        }"
-            >
-              <img :src="`/gamePlay/x5_combo_icons.webp?v=${APP_VERSION}`"
-                   class="absolute inset-0 w-full h-full brightness-45 object-contain" alt="x5"/>
-              <img
-                  src="/gamePlay/x5_combo_icons.webp"
-                  class="absolute inset-0 w-full h-full transition-all duration-75 ease-linear object-contain"
-                  :class="{ ' brightness-125': progressX5 >= 100 && !isBothStatsZero, 'brightness-100': progressX5 < 100 && !isBothStatsZero }"
-                  :style="{ clipPath: `inset(${isBothStatsZero ? '100%' : getClipInset(progressX5)})` }"
-                  alt="x5"
-              />
-            </div>
-            <!-- Иконка X3 -->
-            <div
-                class="relative w-6 h-6 transition-transform duration-100 -mt-1"
-                :class="{
-          'animate-combo-active z-10': progressX3 >= 100,
-          'scale-115': isClicking && progressX3 > 0 && progressX3 < 100
-        }"
-            >
-              <img :src="`/gamePlay/x3_combo_icons.webp?v=${APP_VERSION}`"
-                   class="absolute inset-0 w-full h-full brightness-45 object-contain" alt="x3"/>
-              <img
-                  src="/gamePlay/x3_combo_icons.webp"
-                  class="absolute inset-0 w-full h-full transition-all duration-75 ease-linear object-contain"
-                  :class="{'brightness-125': progressX3 >= 100, 'brightness-100': progressX3 < 100 }"
-                  :style="{ clipPath: `inset(${getClipInset(progressX3)})` }"
-                  alt="x3"
-              />
-            </div>
-            <!-- Иконка X2 -->
-            <div
-                class="relative w-5 h-5 transition-transform duration-100 -mt-1"
-                :class="{
-          'animate-combo-active z-10': progressX2 >= 100,
-          'scale-115': isClicking && progressX2 > 0 && progressX2 < 100
-        }"
-            >
-              <img :src="`/gamePlay/x2_combo_icons.webp?v=${APP_VERSION}`"
-                   class="absolute inset-0 w-full h-full brightness-45 object-contain" alt="x2"/>
-              <img
-                  src="/gamePlay/x2_combo_icons.webp"
-                  class="absolute inset-0 w-full h-full transition-all duration-75 ease-linear object-contain"
-                  :class="{ 'brightness-125': progressX2 >= 100, 'brightness-100': progressX2 < 100 }"
-                  :style="{ clipPath: `inset(${getClipInset(progressX2)})` }"
-                  alt="x2"
-              />
-            </div>
+<!--            <div-->
+<!--                class="relative w-8 h-8 transition-transform duration-100 -mt-2"-->
+<!--                :class="{-->
+<!--          'animate-combo-active z-10': progressX5 >= 100 && !isBothStatsZero,-->
+<!--          'scale-115': isClicking && progressX5 > 0 && progressX5 < 100 && !isBothStatsZero-->
+<!--        }"-->
+<!--            >-->
+<!--              <img :src="`/gamePlay/x5_combo_icons.webp?v=${APP_VERSION}`"-->
+<!--                   class="absolute inset-0 w-full h-full brightness-45 object-contain" alt="x5"/>-->
+<!--              <img-->
+<!--                  src="/gamePlay/x5_combo_icons.webp"-->
+<!--                  class="absolute inset-0 w-full h-full transition-all duration-75 ease-linear object-contain"-->
+<!--                  :class="{ ' brightness-125': progressX5 >= 100 && !isBothStatsZero, 'brightness-100': progressX5 < 100 && !isBothStatsZero }"-->
+<!--                  :style="{ clipPath: `inset(${isBothStatsZero ? '100%' : getClipInset(progressX5)})` }"-->
+<!--                  alt="x5"-->
+<!--              />-->
+<!--            </div>-->
+<!--            &lt;!&ndash; Иконка X3 &ndash;&gt;-->
+<!--            <div-->
+<!--                class="relative w-7 h-7 transition-transform duration-100 -mt-4"-->
+<!--                :class="{-->
+<!--          'animate-combo-active z-10': progressX3 >= 100,-->
+<!--          'scale-115': isClicking && progressX3 > 0 && progressX3 < 100-->
+<!--        }"-->
+<!--            >-->
+<!--              <img :src="`/gamePlay/x3_combo_icons.webp?v=${APP_VERSION}`"-->
+<!--                   class="absolute inset-0 w-full h-full brightness-45 object-contain" alt="x3"/>-->
+<!--              <img-->
+<!--                  src="/gamePlay/x3_combo_icons.webp"-->
+<!--                  class="absolute inset-0 w-full h-full transition-all duration-75 ease-linear object-contain"-->
+<!--                  :class="{'brightness-125': progressX3 >= 100, 'brightness-100': progressX3 < 100 }"-->
+<!--                  :style="{ clipPath: `inset(${getClipInset(progressX3)})` }"-->
+<!--                  alt="x3"-->
+<!--              />-->
+<!--            </div>-->
+<!--            &lt;!&ndash; Иконка X2 &ndash;&gt;-->
+<!--            <div-->
+<!--                class="relative w-6 h-6 transition-transform duration-100 -mt-3"-->
+<!--                :class="{-->
+<!--          'animate-combo-active z-10': progressX2 >= 100,-->
+<!--          'scale-115': isClicking && progressX2 > 0 && progressX2 < 100-->
+<!--        }"-->
+<!--            >-->
+<!--              <img :src="`/gamePlay/x2_combo_icons.webp?v=${APP_VERSION}`"-->
+<!--                   class="absolute inset-0 w-full h-full brightness-45 object-contain" alt="x2"/>-->
+<!--              <img-->
+<!--                  src="/gamePlay/x2_combo_icons.webp"-->
+<!--                  class="absolute inset-0 w-full h-full transition-all duration-75 ease-linear object-contain"-->
+<!--                  :class="{ 'brightness-125': progressX2 >= 100, 'brightness-100': progressX2 < 100 }"-->
+<!--                  :style="{ clipPath: `inset(${getClipInset(progressX2)})` }"-->
+<!--                  alt="x2"-->
+<!--              />-->
+<!--            </div>-->
 
 
           </div>
+          <!-- Горизонтальный веер сердец -->
+
           <div class="grid grid-cols-2 gap-1 left-0.5">
             <!-- Уровень -->
             <div
@@ -222,59 +237,60 @@ const getClipInset = (progress) => {
 
             <!-- Монетки -->
             <div
-                class="flex relative h-8 justify-center items-center shadow-md bg-white/10 backdrop-blur-md whitespace-nowrap w-15 py-1 rounded-xl border border-white/10"
+                class="flex relative h-8 justify-start items-center pl-1.5 shadow-md bg-yellow-500/10 backdrop-blur-md whitespace-nowrap w-15 py-1 rounded-xl border border-white/10"
                 :class="isCoinPopping ? 'animate-pop' : ''"
             >
               <img :src="`/gamePlay/coin.webp?v=${APP_VERSION}`" alt="Монеты" width="15" class="shrink-0">
-              <span class="text-xs font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">
-              {{ formatNumber(gameData.coins) }}
-            </span>
+              <span class="absolute inset-0 flex items-center justify-center pl-2 text-xs font-bold text-gray-900 text-shadow-xs text-shadow-amber-50 pointer-events-none">
+    {{ formatNumber(gameData.coins) }}
+  </span>
             </div>
-
-            <!-- Клики -->
+            <!-- Жизни -->
             <div
-                class="flex relative h-8 justify-center items-center shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border whitespace-nowrap border-white/10"
-                :class="isPopping ? 'animate-pop' : ''"
+                class="flex  relative h-8 justify-center items-center shadow-md bg-red-500/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border whitespace-nowrap border-white/10"
             >
-              <img :src="`/gamePlay/click_icon.webp?v=${APP_VERSION}`" alt="Клики" width="20" class="shrink-0">
-              <span class="text-xs font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">
-              {{ formatNumber(gameData.clickCounter) }}
-            </span>
-              <div v-show="isBothStatsZero && (clickLimit - ZeroPlayCount)<=10"
-                   class="absolute animate-pulse opacity-80 w-8">
-                <img :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt="" class="shrink-0">
+              <div class="flex items-center justify-center my-auto">
+                <div
+                    v-for="(i, idx) in maxLives"
+                    :key="i"
+                    :class="[
+        idx > 0 ? '-ml-1' : '',
+        i <= gameData.lives && gameData.lives <= 1 ? 'heart-fan-pulse' : ''
+      ]"
+                    :style="getFanStyle(idx, maxLives)"
+                >
+                  <img
+                      :src="i <= gameData.lives ? `/gamePlay/heart.webp?v=${APP_VERSION}` : `/gamePlay/heart_empty.webp?v=${APP_VERSION}`"
+                      alt="Жизнь"
+                      width="18"
+                  >
+                </div>
               </div>
             </div>
-            <!-- Смерти -->
+            <!-- Клики -->
             <div
-                class="flex relative h-8 justify-center items-center shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border whitespace-nowrap border-white/10"
+                class="flex relative h-8 justify-start items-center pl-1 shadow-md bg-white/10 backdrop-blur-md w-15 max-w-15 py-1 rounded-xl border whitespace-nowrap border-white/10 overflow-hidden"
+                :class="isPopping ? 'animate-pop' : ''"
             >
-              <img :src="`/gamePlay/a_pig_in_a_poke.webp?v=${APP_VERSION}`" alt="Смерти" width="25" class="shrink-0">
-              <span class="text-xs font-bold text-gray-900 text-shadow-xs text-shadow-amber-50">
-              {{ formatNumber(gameData.deathsCount) }}
-            </span>
-            </div>
-          </div>
-
-
-          <!-- Добавили inset-x-0 (или w-full), чтобы блок растянулся на всю ширину родителя и центрировал содержимое -->
-          <div class="absolute -bottom-3.5 inset-x-0 flex items-center justify-center gap-1">
-
-            <!-- Убрали лишнюю обертку с w-full -->
-            <div class="flex items-center gap-1.5 shrink-0">
               <img
-                  v-for="i in maxLives"
-                  :key="i"
-                  :src="i <= gameData.lives ? `/gamePlay/heart.webp?v=${APP_VERSION}` : `/gamePlay/heart_empty.webp?v=${APP_VERSION}`"
-                  :class="i <= gameData.lives && gameData.lives <= 1 ? 'animate-pulse' : ''"
-                  alt="Жизнь"
-                  width="22"
+                  :src="`/gamePlay/click_icon.webp?v=${APP_VERSION}`"
+                  alt="Клики"
+                  width="18"
+                  class="shrink-0 opacity-85"
               >
+              <span class="absolute inset-0 flex items-center justify-center pl-3.5 text-xs font-bold text-gray-900 text-shadow-xs text-shadow-amber-50 pointer-events-none">
+    {{ formatNumber(gameData.clickCounter) }}
+  </span>
+              <div
+                  v-show="isBothStatsZero && (clickLimit - ZeroPlayCount) <= 10"
+                  class="absolute inset-0 flex items-center justify-center animate-pulse opacity-80 pointer-events-none"
+              >
+                <img :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt="" class="w-7 h-7 object-contain shrink-0">
+              </div>
             </div>
 
-
-
           </div>
+
         </div>
 
       </div>
@@ -315,25 +331,28 @@ const getClipInset = (progress) => {
             <!-- Переключатель вкладок -->
             <div class="flex bg-[#98E5FE]/60 p-1 rounded-2xl border border-[#3399FF]">
               <button
-                  @click="activeTab = 'tasks'"
-                  class="flex-1 py-1.5 text-xs font-bold rounded-xl transition-all"
-                  :class="activeTab === 'tasks' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-600 hover:text-gray-800'"
-              >
-                <span class="flex items-center justify-center gap-1">
-                  <img src="/gamePlay/calendar.webp" class="w-4" alt="">
-                  {{ $t(`tasks`) }}
-                </span>
-              </button>
-              <button
                   @click="activeTab = 'stats'"
                   class="flex-1 py-1.5 text-xs font-bold rounded-xl transition-all"
                   :class="activeTab === 'stats' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-600 hover:text-gray-800'"
               >
                 <span class="flex items-center justify-center gap-1">
-                  <img src="/gamePlay/statistics.webp" class="w-4" alt="">
+                  <img src="/gamePlay/statistics.webp" class="w-6" alt="">
                   {{ $t(`intelligence`) }}
                 </span>
               </button>
+              <button
+                  @click="activeTab = 'tasks'"
+                  class="relative flex-1 py-1.5 text-xs font-bold rounded-xl transition-all"
+                  :class="activeTab === 'tasks' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-600 hover:text-gray-800'"
+              >
+                <span class="flex items-center justify-center gap-1">
+                  <img src="/gamePlay/calendar.webp" class="w-6" alt="">
+                  {{ $t(`tasks`) }}
+                </span>
+
+                  <img v-if="hasAvailableRewards" src="/gamePlay/exclamation_mark.webp" alt="" class="w-8 top-0 left-0 absolute animate-pulse">
+              </button>
+
             </div>
           </div>
 
@@ -416,6 +435,19 @@ const getClipInset = (progress) => {
 </template>
 
 <style scoped>
+@keyframes heartFanPulse {
+  0%, 100% {
+    transform: translate(var(--fan-x, 0px), var(--fan-y, 0px)) rotate(var(--fan-rot, 0deg)) scale(1);
+  }
+  50% {
+    transform: translate(var(--fan-x, 0px), var(--fan-y, 0px)) rotate(var(--fan-rot, 0deg)) scale(1.1);
+  }
+}
+
+.heart-fan-pulse {
+  animation: heartFanPulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 .custom-scroll::-webkit-scrollbar {
   width: 4px;
 }

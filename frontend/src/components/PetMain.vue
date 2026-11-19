@@ -66,32 +66,6 @@ function updateScale() {
   scale.value = Math.min(Math.max(raw, 0.82), 1.28)
 }
 
-function getHornAsset(level) {
-  // if (level >= 50) return `${characterPath.value}/horns/50lvl.webp?v=${APP_VERSION}`
-  // if (level >= 45) return `${characterPath.value}/horns/45lvl.webp?v=${APP_VERSION}`
-  // if (level >= 40) return `${characterPath.value}/horns/40lvl.webp?v=${APP_VERSION}`
-  if (level >= 35) return `${characterPath.value}/horns/35lvl.webp?v=${APP_VERSION}`
-  if (level >= 30) return `${characterPath.value}/horns/30lvl.webp?v=${APP_VERSION}`
-  if (level >= 25) return `${characterPath.value}/horns/25lvl.webp?v=${APP_VERSION}`
-  if (level >= 20) return `${characterPath.value}/horns/20lvl.webp?v=${APP_VERSION}`
-  if (level >= 15) return `${characterPath.value}/horns/15lvl.webp?v=${APP_VERSION}`
-  if (level >= 10) return `${characterPath.value}/horns/10lvl.webp?v=${APP_VERSION}`
-  if (level >= 5) return `${characterPath.value}/horns/5lvl.webp?v=${APP_VERSION}`
-  return `${characterPath.value}/horns/2lvl.webp?v=${APP_VERSION}`
-}
-
-function getTailAsset(level) {
-  if (level >= 50) return `${characterPath.value}/tails/50lvl.webp?v=${APP_VERSION}`
-  if (level >= 45) return `${characterPath.value}/tails/45lvl.webp?v=${APP_VERSION}`
-  if (level >= 40) return `${characterPath.value}/tails/40lvl.webp?v=${APP_VERSION}`
-  if (level >= 35) return `${characterPath.value}/tails/35lvl.webp?v=${APP_VERSION}`
-  if (level >= 30) return `${characterPath.value}/tails/30lvl.webp?v=${APP_VERSION}`
-  if (level >= 25) return `${characterPath.value}/tails/25lvl.webp?v=${APP_VERSION}`
-  if (level >= 20) return `${characterPath.value}/tails/20lvl.webp?v=${APP_VERSION}`
-  if (level >= 15) return `${characterPath.value}/tails/15lvl.webp?v=${APP_VERSION}`
-  if (level >= 10) return `${characterPath.value}/tails/10lvl.webp?v=${APP_VERSION}`
-  return `${characterPath.value}/tails/5lvl.webp?v=${APP_VERSION}`
-}
 
 function getEggsAsset() {
   if (gameData.exp >= 80) return `/character/egg_pahse_five.webp?v=${APP_VERSION}`
@@ -100,13 +74,92 @@ function getEggsAsset() {
   if (gameData.exp >= 20) return `/character/egg_pahse_two.webp?v=${APP_VERSION}`
   return `/character/egg_pahse_one.webp?v=${APP_VERSION}`
 }
+const calculateComboProgress = (current, min, max) => {
+  if (current <= min) return 0;
+  if (current >= max) return 100;
+  return ((current - min) / (max - min)) * 100;
+};
 
-function getCombo() {
-  if (comboMultiplier.value >= 5) return `/gamePlay/x5_combo_icons.webp?v=${APP_VERSION}`
-  if (comboMultiplier.value >= 3) return `/gamePlay/x3_combo_icons.webp?v=${APP_VERSION}`
-  if (comboMultiplier.value >= 2) return `/gamePlay/x2_combo_icons.webp?v=${APP_VERSION}`
-  return `/gamePlay/x1_combo_icons.webp?v=${APP_VERSION}`
+const progressX2 = computed(() => calculateComboProgress(comboClicks.value, 0, 50));
+const progressX3 = computed(() => calculateComboProgress(comboClicks.value, 50, 100));
+const progressX5 = computed(() => calculateComboProgress(comboClicks.value, 100, 150));
+
+const getClipInset = (progress) => {
+  const maxFill = 15;
+  const insetValue = 100 - (progress * (100 - maxFill) / 100);
+  return `${insetValue}% 0 0 0`;
+};
+
+// Текущий множитель и его прогресс для отображения на холсте
+const activeComboMeta = computed(() => {
+  if (comboMultiplier.value >= 5 || comboClicks.value > 100) {
+    return {
+      src: `/gamePlay/x5_combo_icons.webp?v=${APP_VERSION}`,
+      progress: progressX5.value,
+      sizeClass: 'w-17 h-17'
+    };
+  }
+  if (comboMultiplier.value >= 3 || comboClicks.value > 50) {
+    return {
+      src: `/gamePlay/x3_combo_icons.webp?v=${APP_VERSION}`,
+      progress: progressX3.value,
+      sizeClass: 'w-15 h-15'
+    };
+  }
+  if (comboMultiplier.value >= 2 || comboClicks.value > 0) {
+    return {
+      src: `/gamePlay/x2_combo_icons.webp?v=${APP_VERSION}`,
+      progress: progressX2.value,
+      sizeClass: 'w-13 h-13'
+    };
+  }
+  return {
+    src: `/gamePlay/x1_combo_icons.webp?v=${APP_VERSION}`,
+    progress: 100,
+    sizeClass: 'w-14 h-14'
+  };
+});
+
+const isComboUpgrading = ref(false)
+let comboUpgradeTimer = null
+
+const hasReachedMaxCombo = ref(false)
+
+function triggerComboBurst() {
+  isComboUpgrading.value = false
+  requestAnimationFrame(() => {
+    isComboUpgrading.value = true
+    if (comboUpgradeTimer) clearTimeout(comboUpgradeTimer)
+    comboUpgradeTimer = setTimeout(() => {
+      isComboUpgrading.value = false
+    }, 450)
+  })
 }
+
+// 1. При смене множителя (x1 -> x2 -> x3 -> x5)
+watch(
+    () => activeComboMeta.value.src,
+    (newSrc, oldSrc) => {
+      if (!oldSrc || newSrc === oldSrc) return
+      triggerComboBurst()
+    }
+)
+
+// 2. Когда дошли до последнего комбо (x5 / progressX5 >= 100)
+watch(
+    [() => comboMultiplier.value, () => progressX5.value],
+    ([mult, p5]) => {
+      const isMaxReached = mult >= 5 || p5 >= 100
+
+      if (isMaxReached && !hasReachedMaxCombo.value) {
+        hasReachedMaxCombo.value = true
+        triggerComboBurst()
+      } else if (!isMaxReached) {
+        // Сбрасываем флаг, когда комбо спало ниже максимума, чтобы при новом достижении сработало снова
+        hasReachedMaxCombo.value = false
+      }
+    }
+)
 
 watch(location, (newLocation) => {
   if (newLocation === 'home') {
@@ -445,8 +498,8 @@ function handleBallTracking(ballX, ballY, isMoving) {
           <div class="relative flex justify-center w-full">
 
             <div :class="[
-  'relative w-[300px] h-[270px] border-2 border-red-400 overflow-hidden rounded-2xl object-cover duration-1000',
-   gameData.sleep ? 'bg-[#0F175C]' : isBadMood?'bg-gray-400':'bg-[#98E5FE]',
+  'relative w-[300px] h-[270px] border-2  overflow-hidden rounded-2xl object-cover duration-1000',
+   gameData.sleep ? 'bg-[#0F175C] border-blue-600' : isBadMood?'bg-gray-400  border-gray-400 ':'bg-[#98E5FE] border-orange-600 ',
 ]">
 
               <Cloud/>
@@ -664,18 +717,31 @@ function handleBallTracking(ballX, ballY, isMoving) {
                 <!-- Оверлеи и элементы поверх персонажа -->
                 <div class="absolute inset-0 w-full h-full pointer-events-none">
                   <Transition name="combo-fade">
-                    <img
+                    <div
                         v-if="isComboAnimating"
-                        :src="getCombo()"
-                        class="absolute brightness-130 text-2xl right-30 top-30 select-none z-50 animate-float-combo pointer-events-none"
-                        :class="{
-                    'w-14': comboMultiplier >= 1,
-                    'w-15': comboMultiplier >= 2,
-                    'w-17': comboMultiplier >= 3,
-                    'w-19': comboMultiplier >= 5,
+                        class="absolute right-30 top-30 select-none z-50 animate-float-combo pointer-events-none"
+                        :class="activeComboMeta.sizeClass"
+                    >
+                      <div
+                          class="w-full h-full relative"
+                          :class="{ 'combo-level-burst': isComboUpgrading }"
+                      >
+                        <!-- Тёмная подложка -->
+                        <img
+                            :src="activeComboMeta.src"
+                            class="absolute inset-0 w-full h-full brightness-45 object-contain"
+                            alt="combo-bg"
+                        />
+                        <!-- Заполняемый слой по прогрессу -->
+                        <img
+                            :src="activeComboMeta.src"
+                            class="absolute inset-0 w-full h-full transition-all brightness-110 duration-75 ease-linear object-contain"
 
-                  }"
-                        alt="">
+                            :style="{ clipPath: `inset(${getClipInset(activeComboMeta.progress)})` }"
+                            alt="combo-fill"
+                        />
+                      </div>
+                    </div>
                   </Transition>
 
 
@@ -784,7 +850,24 @@ function handleBallTracking(ballX, ballY, isMoving) {
   transform: scale(0.6) translateY(10px);
 }
 
+@keyframes comboLevelBurst {
+  0% {
+    transform: scale(1) rotate(-12deg);
+    filter: brightness(2.2) drop-shadow(0 0 10px rgba(255, 220, 90, 0.95));
+  }
+  45% {
+    transform: scale(1.2) rotate(10deg);
+    filter: brightness(1.6) drop-shadow(0 0 14px rgba(255, 180, 40, 0.8));
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    filter: brightness(1) drop-shadow(0 0 0 transparent);
+  }
+}
 
+.combo-level-burst {
+  animation: comboLevelBurst 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
 @keyframes popCharacter {
   0% {
     transform: scale(1);
