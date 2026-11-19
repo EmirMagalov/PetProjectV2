@@ -697,7 +697,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
                       class="pointer-events-auto"
                   />
 
-                  <BouncingBall v-show="location==='home' || location==='food'" :on-ball-move="handleBallTracking"/>
+                  <BouncingBall v-if="location==='home' || location==='food'" :on-ball-move="handleBallTracking"/>
                 </div>
               </div>
             </div>
