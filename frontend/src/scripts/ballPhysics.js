@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import interact from 'interactjs';
 import { scale } from '@/scripts/useGameStore.js';
+import {addFun} from "@/scripts/actions.js";
 
 export function useBallPhysics(ballElRef, containerElRef, options = {}) {
     const size = options.size || 64;
@@ -140,6 +141,7 @@ export function useBallPhysics(ballElRef, containerElRef, options = {}) {
                         vy = 0;
                     }
                     startLoop();
+                    addFun(1)
                 }
             }
         });

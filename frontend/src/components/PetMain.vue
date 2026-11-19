@@ -364,7 +364,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
       wasBallMoving = false;
       addCoin(1);
       addExp(1);
-      addFun(3)
+
     }
     return;
   }
