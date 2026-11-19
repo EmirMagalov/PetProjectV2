@@ -351,7 +351,6 @@ const pumpkinAnimation = (event) => {
     pumpkinAnimating.value = false
   }, 200)
 }
-let wasBallMoving = false;
 function handleBallTracking(ballX, ballY, isMoving) {
   // Центр экрана / персонажа внутри блока 300x270 (примерно середина: X=150, Y=135)
   const centerX = 150;
@@ -360,15 +359,8 @@ function handleBallTracking(ballX, ballY, isMoving) {
   // Если мяч неподвижен и не в руке, пусть глаза смотрят по стандартному алгоритму или прямо
   if (!isMoving) {
     pupilOffset.value = {x: 0, y: 0}; // Возвращаем глаза в центр
-    if (wasBallMoving) {
-      wasBallMoving = false;
-      addCoin(1);
-      addExp(1);
-
-    }
     return;
   }
-  wasBallMoving = true;
   // 🛑 ДОПОЛНИТЕЛЬНОЕ УСЛОВИЕ РАННЕЙ ОСТАНОВКИ:
   // Если мяч упал на пол (например, Y >= 250) — перестаем следить раньше
   // const floorThreshold = 215; // Настрой под высоту своего пола

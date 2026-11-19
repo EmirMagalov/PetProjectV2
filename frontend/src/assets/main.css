@@ -23,8 +23,6 @@ html, body, #app {
 
 
 
-
-
 @font-face {
     font-family: 'MyFont';
     src: url('./fonts/rubik/rubik-bubbles-latin-400-normal.woff2') format('woff2');
@@ -80,12 +78,14 @@ body, html {
 }
 
 /* Полный запрет выделения текста и элементов на странице */
+html,
 body {
     -webkit-user-select: none; /* Safari / iOS Safari */
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* Internet Explorer / Edge */
     user-select: none; /* Стандартный синтаксис */
     -webkit-touch-callout: none; /* Отключение всплывающего меню на iOS при долгом таппе */
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Полный запрет контекстных меню, выделения и взаимодействия с фото */
