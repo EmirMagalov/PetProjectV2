@@ -1,8 +1,8 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useBallPhysics } from '@/scripts/ballPhysics.js';
 import { APP_VERSION } from '@/scripts/imageVersion.js';
-import {gameData,scale} from "@/scripts/useGameStore.js";
+import { gameData, scale } from "@/scripts/useGameStore.js";
 
 const ballEl = ref(null);
 const containerEl = ref(null);
@@ -11,7 +11,6 @@ const props = defineProps({
   onBallMove: Function
 });
 
-// Выносим обработчик в отдельную функцию, чтобы избежать ошибок скоупа
 const handleUpdate = (x, y, isMoving) => {
   if (props.onBallMove) {
     props.onBallMove(x, y, isMoving);
@@ -19,7 +18,7 @@ const handleUpdate = (x, y, isMoving) => {
 };
 
 const { setupInitial, stop, kickBall } = useBallPhysics(ballEl, containerEl, {
-  size: 28, // размер мяча w-7 h-7 (28px)
+  size: 28,
   gravity: 0.45,
   bounce: 0.88,
   friction: 0.998,
@@ -27,12 +26,27 @@ const { setupInitial, stop, kickBall } = useBallPhysics(ballEl, containerEl, {
   startY: 230,
   floorY: 265,
   scale: scale.value,
-  onUpdate: handleUpdate // передаем функцию напрямую
+  onUpdate: handleUpdate
 });
 
-onMounted(() => {
+function initBall() {
+  if (!ballEl.value) return;
   containerEl.value = ballEl.value.closest('.w-\\[300px\\]');
   setupInitial();
+}
+
+onMounted(() => {
+  initBall();
+  console.log(gameData.level);
+});
+
+watch(() => gameData.level, async (newLevel) => {
+  if (Number(newLevel) > 1) {
+    await nextTick();
+    initBall();
+  } else {
+    stop();
+  }
 });
 
 onUnmounted(() => {
@@ -43,7 +57,7 @@ onUnmounted(() => {
 <template>
   <div
       ref="ballEl"
-      v-show="gameData.level>1"
+      v-if="Number(gameData.level) > 1"
       @click="kickBall"
       style="touch-action: none; will-change: transform;"
       class="absolute top-0 left-0 z-50 w-7 h-7 cursor-grab active:cursor-grabbing select-none pointer-events-auto"
