@@ -139,6 +139,7 @@ export async function initGameData() {
             gameData.season = serverData.season || 'summer'
             gameData.fatCount = serverData.fat_count
             gameData.foodLevel = serverData.food_level
+            gameData.funLevel = serverData.fun_level,
             gameData.energy = serverData.energy
             gameData.stinky = serverData.stinky
             gameData.clickCounter = serverData.click_counter
@@ -262,6 +263,7 @@ function getPayload() {
         deaths_count: gameData.deathsCount,
         fat_count: gameData.fatCount,
         food_level: gameData.foodLevel,
+        fun_level: gameData.funLevel,
         energy: gameData.energy,
         stinky: gameData.stinky,
         sleep: gameData.sleep,

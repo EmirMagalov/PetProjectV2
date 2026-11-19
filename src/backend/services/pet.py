@@ -6,11 +6,14 @@ from backend.models.pet import Pet as PetModel
 FORTUNE_COOLDOWN = 86400
 
 # === Настройки расхода (в минуту) ===
-FOOD_PER_MIN_HEALTHY = 0.2
-FOOD_PER_MIN_SICK = 0.3
+FOOD_PER_MIN_HEALTHY = 0.15
+FOOD_PER_MIN_SICK = 0.25
 
-ENERGY_PER_MIN_HEALTHY = 0.12
-ENERGY_PER_MIN_SICK = 0.2
+ENERGY_PER_MIN_HEALTHY = 0.1
+ENERGY_PER_MIN_SICK = 0.15
+
+
+FUN_PER_MIN = 0.1
 
 
 async def pet_tick_job():
@@ -26,7 +29,7 @@ async def pet_tick_job():
         # --- 1. ЕДА уменьшается ВСЕГДА ---
         food_rate = FOOD_PER_MIN_SICK if pet.sick else FOOD_PER_MIN_HEALTHY
         pet.food_level = max(0.0, pet.food_level - food_rate)
-
+        pet.fun_level = max(0.0, pet.fun_level - FUN_PER_MIN)
         # --- 2. ЭНЕРГИЯ ---
         if pet.sleep:
             # Сон (+20 в минуту)
@@ -100,6 +103,7 @@ async def pet_tick_job():
         objects=pets,
         fields=[
             "food_level",
+            "fun_level",
             "energy",
             "is_pooped",
             "stinky",

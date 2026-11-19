@@ -21,13 +21,13 @@ import {
   lowEnergy,
   isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
   location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus, colorFoam, isTutorialCompleted, resetLocal,
-  characterPath, showStatus, FatPlayCount, scale, isAdmin, isShopOpen
+  characterPath, showStatus,scale, isShopOpen, lifeStage
 } from "@/scripts/useGameStore.js";
 import {
-  activeCoins, activeExp, addCoin, comboClicks,
+  addCoin, addFun, comboClicks,
   comboMultiplier, handleMultiTouch,
   isComboAnimating, isUserLooking, pupilOffset, resetEyeLook,
-  sunAnimating, updateEyeLook
+  updateEyeLook
 } from "@/scripts/actions.js";
 import PetClothes from "@/components/PetClothes.vue";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
@@ -79,6 +79,7 @@ function getHornAsset(level) {
   if (level >= 5) return `${characterPath.value}/horns/5lvl.webp?v=${APP_VERSION}`
   return `${characterPath.value}/horns/2lvl.webp?v=${APP_VERSION}`
 }
+
 function getTailAsset(level) {
   if (level >= 50) return `${characterPath.value}/tails/50lvl.webp?v=${APP_VERSION}`
   if (level >= 45) return `${characterPath.value}/tails/45lvl.webp?v=${APP_VERSION}`
@@ -91,6 +92,7 @@ function getTailAsset(level) {
   if (level >= 10) return `${characterPath.value}/tails/10lvl.webp?v=${APP_VERSION}`
   return `${characterPath.value}/tails/5lvl.webp?v=${APP_VERSION}`
 }
+
 function getEggsAsset() {
   if (gameData.exp >= 80) return `/character/egg_pahse_five.webp?v=${APP_VERSION}`
   if (gameData.exp >= 60) return `/character/egg_pahse_four.webp?v=${APP_VERSION}`
@@ -213,6 +215,7 @@ function handleEggClick() {
 
 let comboHideTimer = null
 let comboTimer = null
+
 function handleCharacterClick() {
   isVibrating.value = true
   if (comboHideTimer) clearTimeout(comboHideTimer)
@@ -245,7 +248,10 @@ onMounted(async () => {
       tg.disableVerticalSwipes()
     }
     // Разворачиваем на всю доступную высоту
-    try { tg.expand() } catch (e) {}
+    try {
+      tg.expand()
+    } catch (e) {
+    }
   }
   // Адаптивное масштабирование
   updateScale()
@@ -345,7 +351,7 @@ const pumpkinAnimation = (event) => {
     pumpkinAnimating.value = false
   }, 200)
 }
-
+let wasBallMoving = false;
 function handleBallTracking(ballX, ballY, isMoving) {
   // Центр экрана / персонажа внутри блока 300x270 (примерно середина: X=150, Y=135)
   const centerX = 150;
@@ -353,11 +359,16 @@ function handleBallTracking(ballX, ballY, isMoving) {
 
   // Если мяч неподвижен и не в руке, пусть глаза смотрят по стандартному алгоритму или прямо
   if (!isMoving) {
-    pupilOffset.value = { x: 0, y: 0 }; // Возвращаем глаза в центр
-    addCoin(1)
-    addExp(1)
+    pupilOffset.value = {x: 0, y: 0}; // Возвращаем глаза в центр
+    if (wasBallMoving) {
+      wasBallMoving = false;
+      addCoin(1);
+      addExp(1);
+      addFun(3)
+    }
     return;
   }
+  wasBallMoving = true;
   // 🛑 ДОПОЛНИТЕЛЬНОЕ УСЛОВИЕ РАННЕЙ ОСТАНОВКИ:
   // Если мяч упал на пол (например, Y >= 250) — перестаем следить раньше
   // const floorThreshold = 215; // Настрой под высоту своего пола
@@ -379,7 +390,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
   const ny = (dy / distance) * Math.min(Math.abs(dy) * 0.05, maxPupilOffset);
 
   // Передвигаем зрачки
-  pupilOffset.value = { x: nx, y: ny };
+  pupilOffset.value = {x: nx, y: ny};
 }
 </script>
 
@@ -394,9 +405,12 @@ function handleBallTracking(ballX, ballY, isMoving) {
         <div class="absolute w-24 h-24 rounded-full bg-amber-500/20 animate-ping"></div>
 
         <!-- Анимированный логотип/иконка -->
-        <div class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
-          <div class="w-full h-full bg-[#FADCCC]  rounded-full flex items-center justify-center border border-amber-300/40">
-            <img :src="`/gamePlay/logo_icons.webp?v=${APP_VERSION}`" class="w-10 h-10 object-contain drop-shadow-md" alt="Loading..." />
+        <div
+            class="relative w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-400 p-0.5 shadow-2xl animate-bounce">
+          <div
+              class="w-full h-full bg-[#FADCCC]  rounded-full flex items-center justify-center border border-amber-300/40">
+            <img :src="`/gamePlay/logo_icons.webp?v=${APP_VERSION}`" class="w-10 h-10 object-contain drop-shadow-md"
+                 alt="Loading..."/>
           </div>
         </div>
       </div>
@@ -443,13 +457,13 @@ function handleBallTracking(ballX, ballY, isMoving) {
    gameData.sleep ? 'bg-[#0F175C]' : isBadMood?'bg-gray-400':'bg-[#98E5FE]',
 ]">
 
-
+              <Cloud/>
               <SunAndMoon/>
               <Clouds/>
               <rain/>
 
               <!-- Фон локации -->
-              <div class="absolute inset-0  pointer-events-none transition-all duration-1000 ease-in-out "
+              <div class="absolute inset-0 pointer-events-none transition-all duration-1000 ease-in-out "
                    :class="gameData.sleep ? 'brightness-30' : 'brightness-100'">
                 <div v-show="location==='home' || location === 'food'">
 
@@ -462,7 +476,8 @@ function handleBallTracking(ballX, ballY, isMoving) {
 
                   />
 
-                  <img :src="`/location/${gameData.season}.webp?v=${APP_VERSION}`" id="season-bg" alt="Season background"
+                  <img :src="`/location/${gameData.season}.webp?v=${APP_VERSION}`" id="season-bg"
+                       alt="Season background"
                        class="absolute top-0 z-0 w-[320px] h-[270px]">
                 </div>
 
@@ -506,7 +521,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
               <!-- 🎃 ТЫКВА с замедленным и плавным ночным переходом (3 секунды) -->
 
 
-              <Cloud/>
+
 
               <!-- Монетки / Опыт -->
               <CoinsAndXP v-if="gameData.level>1"/>
@@ -550,7 +565,8 @@ function handleBallTracking(ballX, ballY, isMoving) {
                 <Nameplate/>
 
                 <!-- Персонаж (исходный контейнер w-45 h-45, ничего не сжимается) -->
-                <div v-if="gameData.level>1" class="absolute flex justify-center items-center w-45 h-45 pointer-events-none"
+                <div v-if="gameData.level>1"
+                     class="absolute flex justify-center items-center w-45 h-45 pointer-events-none"
                      :class="[isPopping ? 'animate-pop' : '']">
 
                   <!-- 🎯 Точечная кликабельная зона поверх персонажа (размер w-24 h-24, клик работает строго по центру) -->
@@ -591,14 +607,17 @@ function handleBallTracking(ballX, ballY, isMoving) {
                   <img v-show="gameData.old_2_phase" :src="`${characterPath}/wrinkles_2_phase.webp?v=${APP_VERSION}`"
                        class="absolute w-45 z-5 pointer-events-none" alt="">
 
-                  <img v-show="isBadMood && gameData.level>=10" src="/character/claws.webp" class="absolute w-45 z-10 pointer-events-none" alt="">
-                  <img v-show="isBadMood && gameData.level>=10 && isHovered && !batheStatus" src="/character/fangs.webp" class="absolute w-45 z-10 pointer-events-none" alt="">
-                  <img  :src="`${characterPath}/ears.webp?v=${APP_VERSION}`" class="absolute z-5 w-45 pointer-events-none" alt="">
+                  <img v-show="isBadMood && lifeStage === 'adult'" src="/character/claws.webp"
+                       class="absolute w-45 z-10 pointer-events-none" alt="">
+                  <img v-show="isBadMood && lifeStage === 'adult' && isHovered && !batheStatus" src="/character/fangs.webp"
+                       class="absolute w-45 z-10 pointer-events-none" alt="">
+                  <img :src="`${characterPath}/ears.webp?v=${APP_VERSION}`"
+                       class="absolute z-5 w-45 pointer-events-none" alt="">
 
                   <img v-show="gameData.sick" :src="`${characterPath}/drunk.webp?v=${APP_VERSION}`"
                        class="absolute z-6 w-45 pointer-events-none" alt="">
-<!--                  <img v-show="gameData.sick && bodyType==='fat'" :src="`${characterPath}/sick_fat.webp?v=${APP_VERSION}`"-->
-<!--                       class="absolute w-45 z-10 pointer-events-none" alt="">-->
+                  <!--                  <img v-show="gameData.sick && bodyType==='fat'" :src="`${characterPath}/sick_fat.webp?v=${APP_VERSION}`"-->
+                  <!--                       class="absolute w-45 z-10 pointer-events-none" alt="">-->
                   <img v-show="gameData.sick" :src="`${characterPath}/sick.webp?v=${APP_VERSION}`"
                        class="absolute w-45 pointer-events-none" alt="">
 
@@ -619,8 +638,10 @@ function handleBallTracking(ballX, ballY, isMoving) {
                           class="absolute inset-0 flex justify-center items-center pupils-look"
                           :style="{ transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)` }"
                       >
-                        <img :src="`${characterPath}/eye_pupils_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
-                        <img :src="`${characterPath}/eye_pupils_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
+                        <img :src="`${characterPath}/eye_pupils_left.webp?v=${APP_VERSION}`" class="absolute w-45"
+                             alt=""/>
+                        <img :src="`${characterPath}/eye_pupils_right.webp?v=${APP_VERSION}`" class="absolute w-45"
+                             alt=""/>
                       </div>
                     </div>
                   </div>
@@ -628,9 +649,10 @@ function handleBallTracking(ballX, ballY, isMoving) {
                        class="absolute w-45 pointer-events-none" alt="">
                   <img v-else-if="!isVibrating" :src="`${characterPath}/eye_close.webp?v=${APP_VERSION}`"
                        class="absolute w-45 pointer-events-none" alt="">
-                  <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''" class="absolute w-45 pointer-events-none"
+                  <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''"
+                       class="absolute w-45 pointer-events-none"
                        alt="">
-<!--                  <img :src="getTailAsset(gameData.level)" class=" w-45 pointer-events-none" alt="">-->
+                  <!--                  <img :src="getTailAsset(gameData.level)" class=" w-45 pointer-events-none" alt="">-->
 
                 </div>
                 <!-- Яйцо: сальто всегда доигрывает до конца, тряска останавливается при отпускании -->
@@ -675,7 +697,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
                       class="pointer-events-auto"
                   />
 
-                  <BouncingBall v-show="location==='home' || location==='food'" :on-ball-move="handleBallTracking" />
+                  <BouncingBall v-show="location==='home' || location==='food'" :on-ball-move="handleBallTracking"/>
                 </div>
               </div>
             </div>
@@ -684,7 +706,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
 
           <!-- Меню (внутри масштабируемого блока) -->
 
-            <PetMenu/>
+          <PetMenu/>
 
         </div> <!-- end transform scale -->
       </div> <!-- end size-constrained wrapper -->
@@ -695,7 +717,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
   <FortuneWheel/>
   <PetSideMenu/>
   <PetActivity/>
-  <ShopModal :is-open="isShopOpen" @close="isShopOpen = false" />
+  <ShopModal :is-open="isShopOpen" @close="isShopOpen = false"/>
 </template>
 
 <style scoped>

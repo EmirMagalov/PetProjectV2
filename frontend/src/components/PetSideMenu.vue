@@ -11,24 +11,36 @@ import {APP_VERSION} from "@/scripts/imageVersion.js";
 
     <!-- (Sick) -->
     <div v-if="gameData.sick" class="relative flex items-center animate-pulse pointer-events-auto">
-      <img class="relative w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow" :src="`/gamePlay/sick_icon.webp?v=${APP_VERSION}`" alt="">
+      <img class="relative w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow"
+           :src="`/gamePlay/sick_icon.webp?v=${APP_VERSION}`" alt="">
     </div>
 
     <!-- (Hunger) -->
     <div v-else-if="!gameData.sick && showHunger" class="relative flex items-center animate-pulse pointer-events-auto">
-      <img class="relative w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow" :src="`/gamePlay/hunger_icon.webp?v=${APP_VERSION}`" alt="">
+      <img class="relative w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow"
+           :src="`/gamePlay/hunger_icon.webp?v=${APP_VERSION}`" alt="">
     </div>
 
     <!-- (Tired) -->
-    <div v-else-if="!gameData.sick && lowEnergy && !gameData.sleep" class="relative flex items-center animate-pulse pointer-events-auto">
-      <img class="relative w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow" :src="`/gamePlay/tired_icon.webp?v=${APP_VERSION}`" alt="">
+    <div v-else-if="!gameData.sick && lowEnergy && !gameData.sleep"
+         class="relative flex items-center animate-pulse pointer-events-auto">
+      <img class="relative w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow"
+           :src="`/gamePlay/tired_icon.webp?v=${APP_VERSION}`" alt="">
     </div>
-
+    <!-- (LowFun) -->
+    <div v-show="gameData.funLevel<10"
+         class="relative flex items-center transition-transform duration-50 animate-pulse pointer-events-auto">
+      <img class="relative w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow"
+           :src="`/gamePlay/boredom_icon.webp?v=${APP_VERSION}`" alt="">
+    </div>
     <!-- (Fat) -->
-    <div v-show="gameData.isFat" class="relative flex items-center transition-transform duration-50 animate-pulse pointer-events-auto">
+    <div v-show="gameData.isFat"
+         class="relative flex items-center transition-transform duration-50 animate-pulse pointer-events-auto">
       <img class="absolute left-4 w-6 h-6 object-contain z-10" src="/gamePlay/click_icon.webp" alt="">
-      <img class="relative w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow" :src="`/gamePlay/fat_icon.webp?v=${APP_VERSION}`" alt="">
-      <p class="absolute left-5 text-shadow-xs text-shadow-amber-50 top-5 font-bold text-xs z-20 text-black">{{ gameData.fatCount - FatPlayCount }}</p>
+      <img class="relative w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow"
+           :src="`/gamePlay/fat_icon.webp?v=${APP_VERSION}`" alt="">
+      <p class="absolute left-5 text-shadow-xs text-shadow-amber-50 top-5 font-bold text-xs z-20 text-black">
+        {{ gameData.fatCount - FatPlayCount }}</p>
     </div>
 
   </div>

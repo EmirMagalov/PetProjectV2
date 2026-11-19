@@ -1,10 +1,9 @@
 <script setup>
 import {useRouter} from "vue-router";
-import {gameData, location, tutorialStep} from "@/scripts/useGameStore.js";
-import {isFortuneOpen} from "@/scripts/fortune.js";
-import {APP_VERSION} from "@/scripts/imageVersion.js";
+import {gameData} from "@/scripts/useGameStore.js";
 import {currentBet} from "@/scripts/saloonScripts/twentyOneGame.js";
 import i18n from "@/scripts/locales/i18n.js";
+import {isFortuneOpen} from "@/scripts/fortune.js";
 
 const router = useRouter();
 function goToSaloon() {

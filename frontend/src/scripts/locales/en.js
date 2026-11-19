@@ -55,6 +55,7 @@ export default {
     total_deaths: "Total Deaths",
     satiety: "Satiety",
     energy: "Energy",
+    entertainment: "Entertainment",
 
     tasks: "Tasks",
     daily_tasks: "Daily Tasks",

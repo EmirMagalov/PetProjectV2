@@ -1,5 +1,5 @@
 <script setup>
-import {foamOffset, gameData} from "@/scripts/useGameStore.js";
+import {foamOffset, gameData, lifeStage} from "@/scripts/useGameStore.js";
 import {isHovered} from "@/scripts/dragAndDrop.js";
 
 defineProps({
@@ -23,7 +23,7 @@ defineProps({
     >
 
       <!-- Уровень 1: Верхние пузыри -->
-      <div v-show="gameData.level >= 10 && foamOffset < 40">
+      <div v-show="lifeStage === 'adult' && foamOffset < 40">
         <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-2 left-10 w-6 h-6 rounded-full bubble-glossy"></div>
         <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-2 left-0 w-8 h-8 rounded-full bubble-glossy"></div>
       </div>

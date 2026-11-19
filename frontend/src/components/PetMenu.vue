@@ -83,7 +83,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
     </button>
   </div>
 
-  <div class="rounded-4xl p-3 mt-1 bg-[#fff6ef] max-h-60 border-2 border-[#f7c9a5] flex flex-col justify-center items-center w-full max-w-[300px] mx-auto">
+  <div class="rounded-4xl p-2 mt-1 bg-[#fff6ef] border-2 border-[#f7c9a5] flex flex-col justify-center items-center w-full max-w-[300px] mx-auto">
     <div v-if="gameData.isGameOver">
       <div @click="handleRestart" class="bg-[#fff6ef] justify-center flex flex-col h-25 items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
         <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('store.start_again') }}</button>
@@ -98,7 +98,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
       </div>
 
       <!-- HOME -->
-      <div v-show="location==='home'" class="grid grid-cols-2 gap-8 relative gap-y-1.5 w-65 place-self-center">
+      <div v-show="location==='home'" class="grid grid-cols-2 gap-x-8 relative gap-y-1 w-65 place-self-center">
         <div @click="isShopOpen = true" class="bg-[#fff6ef] absolute p-1 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 justify-center h-14 w-14 overflow-hidden flex flex-col items-center rounded-4xl border-2 border-[#f7c9a5] cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[100px] h-[100px] bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/gamePlay/market.webp?v=${APP_VERSION}')` }"></div>
         </div>
@@ -129,7 +129,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
       </div>
 
       <!-- BATH -->
-      <div v-show="location==='bath'" class="grid grid-cols-2 gap-8 relative gap-y-1.5 w-65 place-self-center">
+      <div v-show="location==='bath'" class="grid grid-cols-2 gap-8 relative gap-y-1 w-65 place-self-center">
         <!-- Душ -->
         <div id="tutorial-shower" class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34">
           <div v-show="gameData.sick && statusFoam" class="absolute pointer-events-none w-20 opacity-50 animate-pulse z-20"><img :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt=""></div>
@@ -199,7 +199,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
       </div>
 
       <!-- FOOD -->
-      <div v-show="location==='food'" class="grid grid-cols-2 gap-8 relative gap-y-1.5 w-65 place-self-center">
+      <div v-show="location==='food'" class="grid grid-cols-2 gap-8 relative gap-y-1 w-65 place-self-center">
         <!-- Блок продуктов -->
         <div id="tutorial-food" @click="nextItem()" class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34">
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">

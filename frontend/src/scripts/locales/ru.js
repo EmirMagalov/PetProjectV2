@@ -47,6 +47,7 @@ export default {
     total_deaths: "Всего смертей",
     satiety: "Сытость",
     energy: "Энергия",
+    entertainment:"Развлечения",
     unequip: "Снять",
     select: "Выбрать",
     tasks:'Задания',

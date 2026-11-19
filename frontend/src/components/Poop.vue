@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { gameData } from "@/scripts/useGameStore.js"
+import {gameData, lifeStage} from "@/scripts/useGameStore.js"
 import { Clean } from "@/scripts/actions.js"
 import { APP_VERSION } from "@/scripts/imageVersion.js"
 
@@ -33,7 +33,7 @@ function initPoops() {
 // Функция генерации какашек со случайными координатами без наложения
 function generatePoops() {
   // Если уровень меньше 10 -> ровно 1, если 10 или выше -> рандом от 1 до 3
-  const count = (gameData.level >= 10)
+  const count = (lifeStage.value === 'adult')
       ? Math.floor(Math.random() * 3) + 1
       : 1
 

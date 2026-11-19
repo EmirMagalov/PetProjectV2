@@ -2,7 +2,7 @@ import {watch} from "vue";
 import {
     bodyType, characterPath,
     cloudShow, energyFull, foamOffset,
-    gameData, isGameInitialized,
+    gameData, isBadMood, isGameInitialized,
     lowEnergy,
     mouth, nextTutorialStep,
     showHunger, showStatus, showTongue,
@@ -130,12 +130,13 @@ watch(
         () => gameData.lives,
         characterPath,
         () => gameData.level,
+        () => gameData.funLevel,
     ],
     ([hovered, isBathe, isShowTongue, foodLevel, isFat, energy, sick, lives]) => {
         const isLowEnergy = energy < 20
         const isHungry = foodLevel < 20
         const isFullEnergy = energy >= 80
-        const hasIssues = isLowEnergy || isHungry || sick || lives <= 1
+        isBadMood.value = isLowEnergy || isHungry || sick || lives <= 1 || gameData.funLevel<10
 
 
         if (gameData.level < 10) {
@@ -165,7 +166,7 @@ watch(
             mouth.value = `${characterPath.value}/isPlayed_mouth.webp?v=${APP_VERSION}`
         } else if (hovered && !isBathe) {
             mouth.value = `${characterPath.value}/open_mouth.webp?v=${APP_VERSION}`
-        } else if (hasIssues) {
+        } else if (isBadMood.value) {
             mouth.value = `${characterPath.value}/sad_mouth.webp?v=${APP_VERSION}`
         } else {
             mouth.value = `${characterPath.value}/happy_mouth.webp?v=${APP_VERSION}`

@@ -2,7 +2,7 @@ import { computed, ref, watch } from "vue";
 import { gameData } from "@/scripts/useGameStore.js";
 import { syncToBackend } from "@/scripts/api.js";
 import {addExp} from "@/scripts/level.js";
-import {addCoin} from "@/scripts/actions.js";
+import {addCoin, addFun} from "@/scripts/actions.js";
 import i18n from "@/scripts/locales/i18n.js";
 
 export const pupilOffset = ref({ x: 0, y: 0 });
@@ -242,6 +242,7 @@ export async function finishGame(type) {
         addCoin(currentBet.value);
         addExp(5)
     }
+    addFun(10)
     try {
         await syncToBackend()
     } catch (error) {

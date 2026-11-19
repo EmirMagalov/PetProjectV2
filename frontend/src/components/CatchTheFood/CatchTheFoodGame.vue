@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
-import { addCoin } from "@/scripts/actions.js";
+import {addCoin, addFun} from "@/scripts/actions.js";
 import { APP_VERSION } from "@/scripts/imageVersion.js";
 import i18n from "@/scripts/locales/i18n.js";
 import {addExp} from "@/scripts/level.js";
@@ -312,6 +312,7 @@ const updateGame = (timestamp) => {
 
         gameState.value = 'GAMEOVER'
         addExp(earned_exp_catch())
+        addFun(10)
         stopLoop()
       }
     }

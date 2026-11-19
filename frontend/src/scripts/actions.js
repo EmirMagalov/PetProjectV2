@@ -5,7 +5,8 @@ import {
     isAnimating, isBadMood, isBothStatsZero, isCoinPopping,
     isVibrating,
     lastFedItem, nextTutorialStep, FatPlayCount, sameFoodCount,
-    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount, isTutorialCompleted, maxLives
+    showHunger, showStatus, showTongue, tutorialStep, clickLimit, ZeroPlayCount, isTutorialCompleted, maxLives,
+    lifeStage, scale
 
 }
     from "@/scripts/useGameStore.js";
@@ -27,9 +28,7 @@ export const isCoinAnimating = ref(false)
 export const sunAnimating = ref(false)
 export const pupilOffset = ref({x: 0, y: 0})
 export const isEditing = ref(false);
-export let drunkTimer = null
 
-let hideTrackerTimer = null
 let lastFatTime = 0
 const FAT_COOLDOWN = 10000 // 10 секунд // Таймер сброса комбо
 let comboHideTimer = null
@@ -154,7 +153,7 @@ export function feedPet(foodId) {
     incrementTaskProgress('feed', 1)
     const oldFoodLevel = gameData.foodLevel
     const oldEnergy = gameData.energy
-    gameData.foodLevel = Math.min(100, gameData.foodLevel + (gameData.level<10?(foodItem.foodGain * 2) : foodItem.foodGain ))
+    gameData.foodLevel = Math.min(100, gameData.foodLevel + (lifeStage.value === 'baby'?(foodItem.foodGain * 2) : foodItem.foodGain ))
     const actualGain = gameData.foodLevel - oldFoodLevel
     let actualEnergyGain = 0
     if (foodItem.energyGain) {
@@ -320,8 +319,8 @@ export function handleMultiTouch(event) {
         const rect = event.currentTarget?.getBoundingClientRect();
         const touch = event.touches && event.touches.length > 0 ? event.touches[0] : event;
         if (rect && touch) {
-            x = touch.clientX - rect.left;
-            y = touch.clientY - rect.top;
+            x = (touch.clientX - rect.left) / scale.value;
+            y = (touch.clientY - rect.top) / scale.value;
         }
     }
 
@@ -378,7 +377,7 @@ export function spawnHeart(x = 160, y = 135) {
         }
     }
 
-
+    addFun(0.01)
     const coinInterval = isBothStatsZero.value ? 3 : 2
     if (gameData.clickCounter % coinInterval === 0) {
         addCoin(1, x, y)
@@ -437,6 +436,10 @@ export function spawnHeart(x = 160, y = 135) {
 
 }
 
+export function addFun(amount = 1){
+    gameData.funLevel = Math.min(100, gameData.funLevel + amount);
+}
+
 export function addCoin(coins = 1, x = 160, y = 135) {
     if (coinHideTimer) clearTimeout(coinHideTimer)
     const finalCoins = coins * comboMultiplier.value
@@ -481,8 +484,8 @@ export const Clean = (event) => {
                 : event;
 
         if (touch && touch.clientX !== undefined) {
-            x = touch.clientX - rect.left;
-            y = touch.clientY - rect.top;
+            x = (touch.clientX - rect.left) / scale.value;
+            y = (touch.clientY - rect.top) / scale.value;
         }
     }
 

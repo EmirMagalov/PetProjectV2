@@ -87,6 +87,7 @@ async def get_pet(tg_id: int, device_id: str = Query(None)):
                 "coins": 50,
                 "food_level": 50.0,
                 "energy": 50.0,
+                "fun_level":50,
                 "lives": 3,
                 "feed_count": 9,
                 "bad_stats_minutes": 0,
@@ -198,7 +199,7 @@ async def reset_pet(data: dict):
     pet.cart = {"burger": 1}
     pet.last_update = time.time()
     pet.last_interaction = int(time.time())
-
+    pet.fun_notified = False
     pet.game_over_notified = False
     pet.low_lives_notified = False
     pet.critical_life_notified = False

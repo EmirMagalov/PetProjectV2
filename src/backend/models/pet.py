@@ -33,6 +33,7 @@ class Pet(models.Model):
     # ==========================================
     food_level = fields.FloatField(default=0.0)  # Уровень сытости (0.0 - 100.0)
     energy = fields.FloatField(default=0.0)  # Уровень энергии (0.0 - 100.0)
+    fun_level = fields.FloatField(default=0.0)
     lives = fields.IntField(default=0)  # Количество оставшихся жизней
     deaths_count = fields.IntField(default=0)  # Общее количество смертей питомца
 
@@ -99,6 +100,7 @@ class Pet(models.Model):
     # ==========================================
     hungry_notified = fields.BooleanField(default=False)  # Уведомление о голоде
     energy_notified = fields.BooleanField(default=False)  # Уведомление о низкой энергии
+    fun_notified = fields.BooleanField(default=False)
     poop_notified = fields.BooleanField(default=False)  # Уведомление о какахе
     stinky_notified = fields.BooleanField(default=False)  # Уведомление о вони
     sick_notified = fields.BooleanField(default=False)  # Уведомление о болезни

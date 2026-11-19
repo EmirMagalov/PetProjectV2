@@ -1,6 +1,6 @@
 import {ref, computed, nextTick, watch} from 'vue'
 import {gameData} from "@/scripts/useGameStore.js";
-import {addCoin} from "@/scripts/actions.js";
+import {addCoin, addFun} from "@/scripts/actions.js";
 import {addExp} from "@/scripts/level.js";
 import {syncToBackend} from "@/scripts/api.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
@@ -325,6 +325,7 @@ async function triggerVictory() {
 
     addCoin(earned_coins())
     addExp(earned_exp());
+    addFun(10)
 
     const earnedStars = calculateStars(level.value, finalScoreForStars, moves.value || calculatedMoves)
     if (!gameData.match3_stars) gameData.match3_stars = {}

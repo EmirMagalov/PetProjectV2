@@ -1,6 +1,6 @@
 <script setup>
 import AnimatedTail from "@/components/AnimatedTail.vue";
-import {gameData} from "@/scripts/useGameStore.js";
+import {gameData, lifeStage} from "@/scripts/useGameStore.js";
 
 const frames_0 = [
   '/tails/0-phase-tail-1.webp',
@@ -77,7 +77,7 @@ const frames_2 = [
     <AnimatedTail :current-frames="frames_1" class="absolute" />
   </div>
 
-  <div v-else-if="gameData.level >= 10">
+  <div v-else-if="lifeStage === 'adult'">
     <AnimatedTail :current-frames="frames_1" />
   </div>
 

@@ -1,5 +1,5 @@
 import {ref, reactive, watch, computed} from 'vue'
-import {initGameData, isLoading, resetPet, syncToBackend} from "@/scripts/api.js";
+import {initGameData, isLoading, resetPet} from "@/scripts/api.js";
 import {foodList} from "@/scripts/objectItems.js";
 import i18n from "@/scripts/locales/i18n.js";
 
@@ -121,7 +121,7 @@ export const defaultGameData = {
     addictionStreak: 0,
     lastAddictionTime: 0,
     isFat: false,
-    // isDrunk: false,
+    funLevel: 0,
     isPooped: false,
     badStatsMinutes: 0,
     unlockedHeads: [],
@@ -138,7 +138,11 @@ export const defaultGameData = {
         click: { progress: 0, claimed: false }
     }
 }
-
+export const lifeStage = computed(() => {
+    if (gameData.level <= 1) return 'egg'
+    if (gameData.level < 10) return 'baby' // или 'child'
+    return 'adult'
+})
 export const maxLives = computed(() => {
     return gameData.old_2_phase ? 2 : 3;
 })
@@ -205,9 +209,7 @@ export async function resetLocal() {
 }
 
 
-export const isBadMood = computed(() => {
-    return showHunger.value || lowEnergy.value || gameData.sick || gameData.lives <=1
-})
+export const isBadMood = ref(false)
 
 
 document.addEventListener('contextmenu', e => {
@@ -440,5 +442,5 @@ export const isBothStatsZero = computed(()=>{
 
 
 export const characterPath = computed(() => {
-    return gameData.level >= 10 ? '/character' : '/character/kid'
+    return lifeStage.value === 'adult' ? '/character' : '/character/kid'
 })

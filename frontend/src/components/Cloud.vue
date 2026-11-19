@@ -17,13 +17,13 @@ const activeItems = computed(() => {
 
 <template>
   <!-- Внешний позиционирующий контейнер -->
-  <div class="absolute -top-50 inset-0 flex items-center justify-center pointer-events-none opacity-80 overflow-visible z-30">
+  <div class="absolute -top-50 inset-0 flex items-center justify-center pointer-events-none opacity-80 overflow-visible z-5">
 
     <!-- Vue Transition с классами для перелета (не трогаем) -->
     <Transition name="cloud-fly">
       <div
           v-show="cloudShow && !gameData.sleep"
-          class="relative flex items-center justify-center z-50 pointer-events-auto"
+          class="relative flex items-center justify-center z-50 pointer-events-none"
       >
         <!-- Внутренний контейнер только для покачивания -->
         <div class="relative flex items-center justify-center cloud-hover">
