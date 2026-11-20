@@ -1,27 +1,28 @@
 <script setup>
 import AnimatedTail from "@/components/AnimatedTail.vue";
 import {gameData, lifeStage} from "@/scripts/useGameStore.js";
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 const frames_0 = [
-  '/tails/0-phase-tail-1.webp',
-  '/tails/0-phase-tail-2.webp',
-  '/tails/0-phase-tail-3.webp',
-  '/tails/0-phase-tail-4.webp',
-  '/tails/0-phase-tail-5.webp',
+  `/tails/0-phase-tail-1.webp?v=${APP_VERSION}`,
+  `/tails/0-phase-tail-2.webp?v=${APP_VERSION}`,
+  `/tails/0-phase-tail-3.webp?v=${APP_VERSION}`,
+  `/tails/0-phase-tail-4.webp?v=${APP_VERSION}`,
+  `/tails/0-phase-tail-5.webp?v=${APP_VERSION}`,
 ]
 const frames_1 = [
-  '/tails/1-phase-tail-1.webp',
-  '/tails/1-phase-tail-2.webp',
-  '/tails/1-phase-tail-3.webp',
-  '/tails/1-phase-tail-4.webp',
-  '/tails/1-phase-tail-5.webp',
+  `/tails/1-phase-tail-1.webp?v=${APP_VERSION}`,
+  `/tails/1-phase-tail-2.webp?v=${APP_VERSION}`,
+  `/tails/1-phase-tail-3.webp?v=${APP_VERSION}`,
+  `/tails/1-phase-tail-4.webp?v=${APP_VERSION}`,
+  `/tails/1-phase-tail-5.webp?v=${APP_VERSION}`,
 ]
 const frames_2 = [
-  '/tails/2-phase-tail-1.webp',
-  '/tails/2-phase-tail-2.webp',
-  '/tails/2-phase-tail-3.webp',
-  '/tails/2-phase-tail-4.webp',
-  '/tails/2-phase-tail-5.webp',
+  `/tails/2-phase-tail-1.webp?v=${APP_VERSION}`,
+  `/tails/2-phase-tail-2.webp?v=${APP_VERSION}`,
+  `/tails/2-phase-tail-3.webp?v=${APP_VERSION}`,
+  `/tails/2-phase-tail-4.webp?v=${APP_VERSION}`,
+  `/tails/2-phase-tail-5.webp?v=${APP_VERSION}`,
 ]
 </script>
 

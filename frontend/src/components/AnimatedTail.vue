@@ -1,15 +1,16 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
+import {APP_VERSION} from "@/scripts/imageVersion.js";
 
 const props = defineProps({
   currentFrames: {
     type: Array,
     default: () => [
-      '/tails/0-phase-tail-1.webp',
-      '/tails/0-phase-tail-2.webp',
-      '/tails/0-phase-tail-3.webp',
-      '/tails/0-phase-tail-4.webp',
-      '/tails/0-phase-tail-5.webp',
+      `/tails/0-phase-tail-1.webp?v=${APP_VERSION}`,
+      `/tails/0-phase-tail-2.webp?v=${APP_VERSION}`,
+      `/tails/0-phase-tail-3.webp?v=${APP_VERSION}`,
+      `/tails/0-phase-tail-4.webp?v=${APP_VERSION}`,
+      `/tails/0-phase-tail-5.webp?v=${APP_VERSION}`,
     ]
   }
 })
