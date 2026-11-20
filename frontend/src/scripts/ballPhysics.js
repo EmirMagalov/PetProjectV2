@@ -141,7 +141,7 @@ export function useBallPhysics(ballElRef, containerElRef, options = {}) {
                         vy = 0;
                     }
                     startLoop();
-                    addFun(1)
+                    addFun(2)
                 }
             }
         });

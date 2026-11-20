@@ -9,7 +9,7 @@ const props = defineProps({
 
 <template>
   <div class="relative flex justify-center items-center gap-1">
-    <div class="flex text-xs w-7 absolute -left-2 font-semibold">
+    <div class="flex text-xs w-7 absolute -left-4 font-semibold ">
       <img :src="props.image" class="" alt="">
       <!--      <span class="flex items-center gap-1">{{props.name}}</span>-->
 

@@ -146,7 +146,7 @@ function getFanStyle(index, total, maxAngle = 40, maxDrop = 5, spreadX = -5) {
           <img class="relative" src="/gamePlay/calendar.webp" alt="">
         </div>
 
-        <div class="flex justify-between gap-2 py-2 px-4">
+        <div class="flex justify-between gap-2 py-2 px-5">
           <div class="flex flex-col gap-3">
 
             <ProgressBar :class="showHunger?'animate-custom-pulse ':''"
