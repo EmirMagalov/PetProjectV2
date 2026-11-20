@@ -164,6 +164,7 @@ async def get_admin_lang(user_id: int, message_lang_code: str = None) -> str:
     # По умолчанию английский
     return "en"
 
+
 def keyboard_callback(callback: dict[str, str]):
     keyboard = InlineKeyboardBuilder()
     for key, value in callback.items():
@@ -483,7 +484,7 @@ async def claim_lives_handler(callback: types.CallbackQuery):
         return
 
     actual_add = min(lives_amount, MAX_LIVES - pet.lives)
-    await PetModel.filter(tg_id=tg_id).update(lives=db_f("lives") + actual_add,is_game_over = False)
+    await PetModel.filter(tg_id=tg_id).update(lives=db_f("lives") + actual_add, is_game_over=False)
     pet.lives += actual_add
     pet.is_game_over = False
     try:

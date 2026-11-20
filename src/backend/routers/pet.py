@@ -7,7 +7,6 @@ from bot.workers.pet import check_pet_notifications_job
 
 pet_router = APIRouter(prefix="/api", tags=["api"])
 
-
 # Словарь локализации для эндпоинтов питомца
 MESSAGES = {
     "en": {
@@ -76,6 +75,8 @@ def get_current_season():
         return 'autumn'
 
     return 'summer'
+
+
 @pet_router.get("/{tg_id}")
 async def get_pet(tg_id: int, device_id: str = Query(None)):
     pet = await PetModel.filter(tg_id=tg_id).first()
@@ -87,7 +88,7 @@ async def get_pet(tg_id: int, device_id: str = Query(None)):
                 "coins": 50,
                 "food_level": 50.0,
                 "energy": 50.0,
-                "fun_level":50,
+                "fun_level": 50,
                 "lives": 3,
                 "feed_count": 9,
                 "bad_stats_minutes": 0,
@@ -105,7 +106,7 @@ async def get_pet(tg_id: int, device_id: str = Query(None)):
         lang = get_pet_lang(pet)
         if pet.active_device_id and pet.active_device_id != device_id:
             time_diff = current_time - pet.last_update
-            if time_diff < 16: #20
+            if time_diff < 16:  # 20
                 raise HTTPException(
                     status_code=403,
                     detail=MESSAGES[lang]["already_open"]

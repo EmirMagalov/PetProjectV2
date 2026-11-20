@@ -1,6 +1,6 @@
-import { ref } from 'vue';
+import {ref} from 'vue';
 import interact from 'interactjs';
-import { scale } from '@/scripts/useGameStore.js';
+import {scale} from '@/scripts/useGameStore.js';
 import {addFun} from "@/scripts/actions.js";
 
 export function useBallPhysics(ballElRef, containerElRef, options = {}) {
@@ -99,6 +99,20 @@ export function useBallPhysics(ballElRef, containerElRef, options = {}) {
         if (!el || el.dataset.interactInitialized) return;
         el.dataset.interactInitialized = 'true';
 
+        let touchTriggered = false;
+
+        const triggerFunOnce = () => {
+            if (touchTriggered) return;
+            touchTriggered = true;
+            addFun(2);
+        };
+
+        // Срабатывает при любом касании/клике, даже без сдвига
+        el.addEventListener('pointerdown', () => {
+            touchTriggered = false;
+            triggerFunOnce();
+        }, {passive: true});
+
         interact(el).draggable({
             inertia: false,
             listeners: {
@@ -141,7 +155,7 @@ export function useBallPhysics(ballElRef, containerElRef, options = {}) {
                         vy = 0;
                     }
                     startLoop();
-                    addFun(2)
+
                 }
             }
         });

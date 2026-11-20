@@ -1,4 +1,5 @@
 from tortoise import fields, models
+
 TASKS_CONFIG = {
     "feed": {"target": 5, "reward": 50, "exp": 40},
     "wash": {"target": 2, "reward": 30, "exp": 30},
@@ -6,9 +7,11 @@ TASKS_CONFIG = {
     "serum": {"target": 2, "reward": 100, "exp": 80},
 }
 
+
 def get_fresh_daily_tasks():
     """Возвращает чистый словарь ежедневных заданий с нулевым прогрессом."""
     return {k: {"progress": 0, "claimed": False} for k in TASKS_CONFIG.keys()}
+
 
 class Pet(models.Model):
     """Модель питомца, хранящая его характеристики, состояние и игровой прогресс."""
@@ -129,10 +132,9 @@ class Pet(models.Model):
     daily_tasks = fields.JSONField(default=get_fresh_daily_tasks, null=True)  # 👈 Добавили null=True
     tasks_reset_date = fields.CharField(max_length=20, default="", null=True)
 
-    #Прочее
+    # Прочее
     season = fields.CharField(max_length=20, default="summer")
-    match3_level=fields.IntField(default=1)
-
+    match3_level = fields.IntField(default=1)
 
     # МЕТОДЫ МОДЕЛИ
     # ==========================================

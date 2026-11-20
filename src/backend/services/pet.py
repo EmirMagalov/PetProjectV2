@@ -12,7 +12,6 @@ FOOD_PER_MIN_SICK = 0.25
 ENERGY_PER_MIN_HEALTHY = 0.1
 ENERGY_PER_MIN_SICK = 0.15
 
-
 FUN_PER_MIN = 0.1
 
 
@@ -24,7 +23,7 @@ async def pet_tick_job():
     NOW = int(time.time())
 
     for pet in pets:
-        if pet.level<=1 or pet.is_game_over: continue
+        if pet.level <= 1 or pet.is_game_over: continue
         # pet.last_washed_time = NOW
         # --- 1. ЕДА уменьшается ВСЕГДА ---
         food_rate = FOOD_PER_MIN_SICK if pet.sick else FOOD_PER_MIN_HEALTHY
