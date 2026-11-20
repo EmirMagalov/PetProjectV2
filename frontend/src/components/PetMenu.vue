@@ -83,7 +83,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
     </button>
   </div>
 
-  <div class="rounded-4xl p-2 mt-1 bg-[#fff6ef] border-2 border-[#f7c9a5] flex flex-col justify-center items-center w-full max-w-[300px] mx-auto">
+  <div class="rounded-4xl p-2 mt-1 bg-[#fff6ef] border-2 border-[#f7c9a5] flex flex-col justify-center items-center w-full max-w-[300px] min-h-60 mx-auto">
     <div v-if="gameData.isGameOver">
       <div @click="handleRestart" class="bg-[#fff6ef] justify-center flex flex-col h-25 items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
         <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('store.start_again') }}</button>
@@ -115,11 +115,9 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
           <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('wash') }}</button>
         </div>
 
-        <div @click="goSleep()" :class="[lowEnergy && !showHunger && !gameData.sleep?'animate-pulse':'','bg-[#fff6ef] relative justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95',showHunger || energyFull?'opacity-50':'']" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
-          <img v-show="energyFull" class="w-10 absolute top-0 right-0" src="/gamePlay/energy_full.webp" alt="">
-          <div class="w-[60px] h-[60px] bg-contain bg-no-repeat bg-center" :style="{ 'background-image': `url('/gamePlay/${gameData.sleep ? 'sun_icon.webp' : 'sleep_icon.webp'}?v=${APP_VERSION}')` }"></div>
-          <div v-show="gameData.sleep" class="absolute bottom-8 text-md text-white font-bold"><p>{{ sleepTimeRemaining }}</p></div>
-          <button class="text-md font-bold text-gray-600">{{ gameData.sleep ? $t('wake_up') : $t('sleep') }}</button>
+        <div @click="location = 'bedroom'" :class="[lowEnergy && !showHunger && !gameData.sleep?'animate-pulse':'','bg-[#fff6ef] relative justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95']" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+          <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center" :style="{backgroundImage: `url('/gamePlay/bed_icon.webp?v=${APP_VERSION}')`}"></div>
+          <button class="text-xs font-bold text-gray-600 pointer-events-none">{{ $t('bedroom') }}</button>
         </div>
 
         <div @click="router.push('/laboratory');" class="bg-[#fff6ef] relative justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
@@ -281,6 +279,19 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
         <div @click="isShopOpen = true;activeTab='food'" class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[70px] h-[70px] bg-contain bg-no-repeat bg-center" :style="{backgroundImage: `url('/gamePlay/market.webp?v=${APP_VERSION}')`}"></div>
           <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('shop') }}</button>
+        </div>
+      </div>
+
+      <div  v-show="location==='bedroom'" class="grid grid-cols-1 relative gap-2 w-55 place-self-center">
+        <div @click="goSleep()" :class="[lowEnergy && !showHunger && !gameData.sleep?'animate-pulse':'','bg-[#fff6ef] relative justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95',showHunger || energyFull?'opacity-50':'']" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+          <img v-show="energyFull" class="w-10 absolute top-0 right-0" src="/gamePlay/energy_full.webp" alt="">
+          <div class="w-[60px] h-[60px] bg-contain bg-no-repeat bg-center" :style="{ 'background-image': `url('/gamePlay/${gameData.sleep ? 'sun_icon.webp' : 'sleep_icon.webp'}?v=${APP_VERSION}')` }"></div>
+          <div v-show="gameData.sleep" class="absolute bottom-8 text-md text-white text-shadow-sm text-shadow-black font-bold"><p>{{ sleepTimeRemaining }}</p></div>
+          <button class="text-md font-bold text-gray-600">{{ gameData.sleep ? $t('wake_up') : $t('sleep') }}</button>
+        </div>
+        <div  @click="location = 'home',nextTutorialStep()" class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
+          <div class="w-20 h-20 bg-contain bg-no-repeat bg-center" :style="{backgroundImage: `url('/gamePlay/back_icon.webp?v=${APP_VERSION}')`}"></div>
+          <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('back') }}</button>
         </div>
       </div>
     </div>

@@ -277,7 +277,7 @@ export function updateEyeLook(event) {
     const deltaX = clickX - centerX;
     const deltaY = clickY - centerY;
 
-    const maxOffset = 2.5; // Амплитуда смещения зрачков
+    const maxOffset = 1.2; // Амплитуда смещения зрачков
 
     const pupilX = Math.max(-maxOffset, Math.min(maxOffset, (deltaX / centerX) * maxOffset));
     const pupilY = Math.max(-maxOffset, Math.min(maxOffset, (deltaY / centerY) * maxOffset));
@@ -366,16 +366,7 @@ export function spawnHeart(x = 160, y = 135) {
     gameData.sleep = false
     gameData.clickCounter++
 
-    if (gameData.isFat) {
-        FatPlayCount.value++
-        if ((gameData.fatCount - FatPlayCount.value) <= 0) {
-            gameData.isFat = false
-            FatPlayCount.value = 0
-            gameData.fastfoodStreak = 0
-            addExp(10)
-            addCoin(10, x, y)
-        }
-    }
+
 
     addFun(0.01)
     const coinInterval = isBothStatsZero.value ? 3 : 2

@@ -27,6 +27,7 @@ export default {
     feed: "Feed",
     wash: "Wash",
     sleep: "Sleep",
+    bedroom: "Bedroom",
     wake_up: "Wake up",
     laboratory: "Laboratory",
 

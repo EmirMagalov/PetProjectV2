@@ -6,7 +6,7 @@ import {
     lowEnergy,
     mouth, nextTutorialStep,
     showHunger, showStatus, showTongue,
-    sleepTimeRemaining, statusFoam, statusShower
+    sleepTimeRemaining, statusFoam, statusShower, location
 } from "@/scripts/useGameStore.js";
 import {addExp} from "@/scripts/level.js";
 
@@ -118,6 +118,13 @@ setInterval(() => {
     sleepTimeRemaining.value = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }, 1000)
 
+
+watch(location, (newLocation) => {
+    if (newLocation !== 'bedroom') {
+        gameData.sleep = false
+    }
+})
+
 watch(
     [
         isHovered,
@@ -131,13 +138,13 @@ watch(
         characterPath,
         () => gameData.level,
         () => gameData.funLevel,
+
     ],
     ([hovered, isBathe, isShowTongue, foodLevel, isFat, energy, sick, lives]) => {
         const isLowEnergy = energy < 20
         const isHungry = foodLevel < 20
         const isFullEnergy = energy >= 80
-        isBadMood.value = isLowEnergy || isHungry || sick || lives <= 1 || gameData.funLevel<10
-
+        isBadMood.value = isLowEnergy || isHungry || sick || lives <= 1 || gameData.funLevel < 10
 
         if (gameData.level < 10) {
             gameData.equippedHead = null
@@ -155,7 +162,9 @@ watch(
             gameData.isFat = false
         }
         if (foodLevel < 15) {
-            if (bodyType.value !== 'skinny'){showStatus('lostWeight')}
+            if (bodyType.value !== 'skinny') {
+                showStatus('lostWeight')
+            }
             bodyType.value = 'skinny'
         } else if (isFat) {
             bodyType.value = 'fat'
@@ -252,7 +261,7 @@ const clearActionTimer = () => {
 }
 
 // Следим за появлением облака и пены
-watch([cloudShow, statusFoam, location], ([isCloud, hasFoam]) => {
+watch([cloudShow, statusFoam], ([isCloud, hasFoam]) => {
     // Если облако есть И на персонаже есть пена
     if (isCloud && hasFoam) {
         if (!actionTimer) {
@@ -302,3 +311,5 @@ watch([cloudShow, statusFoam, location], ([isCloud, hasFoam]) => {
         clearActionTimer()
     }
 }, {immediate: true})
+
+

@@ -19,6 +19,7 @@ export default {
     feed:"Кормить",
     wash:"Мыть",
     sleep:"Спать",
+    bedroom:"Спальня",
     wake_up:"Проснуться",
     laboratory:"Лаборатория",
 

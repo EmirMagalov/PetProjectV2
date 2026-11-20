@@ -17,7 +17,7 @@ const activeItems = computed(() => {
 
 <template>
   <!-- Внешний позиционирующий контейнер -->
-  <div class="absolute -top-50 inset-0 flex items-center justify-center pointer-events-none opacity-80 overflow-visible z-5">
+  <div class="flex items-center justify-center pointer-events-none opacity-80 overflow-visible z-5">
 
     <!-- Vue Transition с классами для перелета (не трогаем) -->
     <Transition name="cloud-fly">

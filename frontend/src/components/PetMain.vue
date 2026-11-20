@@ -6,9 +6,7 @@ import {ref, onMounted, onUnmounted, watch, computed} from "vue"
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
 import Cloud from "@/components/Cloud.vue";
 import PetStinky from "@/components/PetStinky.vue";
-import PetHeadwear from "@/components/PetHeadwear.vue";
 import Status from "@/components/Status.vue";
-import PetSmoke from "@/components/PetSmoke.vue";
 import {initGameData} from "@/scripts/api.js";
 import Poop from "@/components/Poop.vue";
 import Nameplate from "@/components/Nameplate.vue";
@@ -44,13 +42,14 @@ import BouncingBall from "@/components/BouncingBall.vue";
 import ShopModal from "@/components/ShopModal.vue";
 import AnimatedTail from "@/components/AnimatedTail.vue";
 import Tails from "@/components/Tails.vue";
+import Character from "@/components/Character.vue";
+import CharacterBedRoom from "@/components/CharacterBedRoom.vue";
 
 let blinkInterval = null
 let lookInterval = null
 let isDragging = false
-let vibrateTimer = null
-const isFlips = ref(false)
-const isEggShaking = ref(false)
+
+
 const isLoading = ref(true);
 
 // === Адаптивное масштабирование под разные мобильные устройства ===
@@ -67,13 +66,7 @@ function updateScale() {
 }
 
 
-function getEggsAsset() {
-  if (gameData.exp >= 80) return `/character/egg_pahse_five.webp?v=${APP_VERSION}`
-  if (gameData.exp >= 60) return `/character/egg_pahse_four.webp?v=${APP_VERSION}`
-  if (gameData.exp >= 40) return `/character/egg_pahse_three.webp?v=${APP_VERSION}`
-  if (gameData.exp >= 20) return `/character/egg_pahse_two.webp?v=${APP_VERSION}`
-  return `/character/egg_pahse_one.webp?v=${APP_VERSION}`
-}
+
 const calculateComboProgress = (current, min, max) => {
   if (current <= min) return 0;
   if (current >= max) return 100;
@@ -174,16 +167,24 @@ watch(location, (newLocation) => {
   }
 })
 
-function triggerPop() {
-  isPopping.value = true
 
-  setTimeout(() => {
-    isPopping.value = false
-
-  }, 200)
-}
 
 function handlePointerDown(event) {
+  const trigger = document.querySelector('[data-nameplate-trigger]')
+  if (trigger) {
+    const rect = trigger.getBoundingClientRect()
+    if (
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+    ) {
+      event.preventDefault()
+      event.stopPropagation()
+      trigger.dispatchEvent(new MouseEvent('click', { bubbles: false, cancelable: true }))
+      return
+    }
+  }
   isDragging = true
   handleMultiTouch(event)
   updateEyeLook(event)
@@ -206,15 +207,15 @@ function startRandomLooking() {
 
     const directions = [
       {x: 0, y: 0}, //Смотрит строго прямо (в центр).
-      {x: -1.8, y: -1.8},//Смотрит вверх и влево.
-      {x: 1.8, y: -1.8},//Смотрит вверх и вправо.
-      {x: -1.8, y: 1.8},//Смотрит вниз и влево.
-      {x: 1.8, y: 1.8},//Смотрит вниз и вправо.
-      {x: 0, y: -1.8}//Смотрит строго вверх.
+      {x: -0.95, y: -0.95},//Смотрит вверх и влево.
+      {x: 0.95, y: -0.95},//Смотрит вверх и вправо.
+      {x: -0.95, y: 0.95},//Смотрит вниз и влево.
+      {x: 0.95, y: 0.95},//Смотрит вниз и вправо.
+      {x: 0, y: -0.95}//Смотрит строго вверх.
     ]
     const randomDir = directions[Math.floor(Math.random() * directions.length)]
     pupilOffset.value = randomDir
-  }, 2500)
+  }, 4500)
 
   blinkInterval = setInterval(() => {
     blink.value = true
@@ -243,55 +244,6 @@ function updateClock() {
 let clockInterval = null;
 
 
-function handleEggClick() {
-  // Начисляем опыт за один клик
-  addExp(0.4)
-  // Если сальто уже играет, игнорируем повторный клик
-  if (isFlips.value || isEggShaking.value) return
-
-  // Случайный выбор: сальто (25%) или короткая тряска (75%)
-  const randomChance = Math.random()
-  if (randomChance < 0.25) {
-    isFlips.value = true
-    setTimeout(() => {
-      isFlips.value = false
-    }, 750) // Длительность сальто строго по таймеру анимации
-  } else {
-    isEggShaking.value = true
-
-    // Короткая тряска длится 0.4 секунды и сама выключается
-    setTimeout(() => {
-      isEggShaking.value = false
-    }, 400)
-  }
-}
-
-let comboHideTimer = null
-let comboTimer = null
-
-function handleCharacterClick() {
-  isVibrating.value = true
-  if (comboHideTimer) clearTimeout(comboHideTimer)
-  if (vibrateTimer) clearTimeout(vibrateTimer)
-  if (comboTimer) clearTimeout(comboTimer)
-
-  vibrateTimer = setTimeout(() => {
-    isVibrating.value = false
-  }, 400)
-  triggerPop()
-  isComboAnimating.value = true
-  if (gameData.level > 1) {
-    comboClicks.value++
-  }
-  comboHideTimer = setTimeout(() => {
-    isComboAnimating.value = false
-  }, 800)
-  comboTimer = setTimeout(() => {
-    comboClicks.value = 0
-    comboMultiplier.value = 1
-  }, 900)
-
-}
 
 
 onMounted(async () => {
@@ -330,7 +282,7 @@ onMounted(async () => {
   // localStorage.removeItem('pet_nextSpinAt')
   document.addEventListener('visibilitychange', handleVisibilityChange)
 
-  location.value = 'home'
+  location.value = gameData.sleep ? 'bedroom' : 'home'
 
   startRandomLooking()
   updateClock();
@@ -502,7 +454,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
    gameData.sleep ? 'bg-[#0F175C] border-blue-600' : isBadMood?'bg-gray-400  border-gray-400 ':'bg-[#98E5FE] border-orange-600 ',
 ]">
 
-              <Cloud/>
+
               <SunAndMoon/>
               <Clouds/>
               <rain/>
@@ -534,7 +486,22 @@ function handleBallTracking(ballX, ballY, isMoving) {
                     class="w-[320px] h-[270px] "
 
                 />
+                <div v-show="location==='bedroom'">
 
+                  <img
+
+                      :src="`/location/bedroom.webp?v=${APP_VERSION}`"
+                      fetchpriority="high"
+                      decoding="sync"
+                      class="w-[320px] h-[270px] relative z-5"
+
+                  />
+
+                  <img :src="`/location/${gameData.season}.webp?v=${APP_VERSION}`" id="season-bg"
+                       alt="Season background"
+                       class="absolute top-0 z-0 w-[320px] h-[270px]">
+                </div>
+                <Nameplate class="pointer-events-auto" />
               </div>
 
 
@@ -546,26 +513,21 @@ function handleBallTracking(ballX, ballY, isMoving) {
                 {{ currentTime }}
               </div>
 
-
-              <div class="relative flex items-center justify-center p-12">
-                <!-- Ореол света ночника -->
-                <div v-show="gameData.sleep" class="absolute top-12 right-10 z-20 flex items-center justify-center">
-                  <div class="absolute top-12 -right-18 w-52 h-56 blur-lg -rotate-30 opacity-85 pointer-events-none">
-                    <div
-                        class="w-full h-full bg-[conic-gradient(from_150deg_at_90%_0%,rgba(253,224,71,0.6)_0deg,rgba(251,191,36,0.1)_180deg,transparent_180deg)]"></div>
+              <div v-if="gameData.sleep && location === 'bedroom'" class="absolute top-6 left-19">
+                <div class="relative flex items-center justify-center p-12">
+                  <!-- Ореол света ночника -->
+                  <div  class="absolute top-12 right-10 z-20 flex items-center justify-center">
+                    <div class="absolute top-12 -right-18 w-52 h-56 blur-lg -rotate-30 opacity-85 pointer-events-none">
+                      <div class="w-full h-full bg-[conic-gradient(from_150deg_at_90%_0%,rgba(253,224,71,0.6)_0deg,rgba(251,191,36,0.1)_180deg,transparent_180deg)]"></div>
+                    </div>
+                    <div class="absolute w-23 h-20 -top-5 blur-xl -right-10 bg-amber-300/30 pointer-events-none"></div>
+                    <div class="relative z-10 w-5 h-5 top-5 left-3.5 bg-yellow-100 rounded-full rotate-12 blur-[3px] opacity-25 shadow-[0_0_20px_#fde047]"></div>
+                    <div class="relative z-10 w-3 h-1 top-5 -left-1 bg-yellow-300 brightness-130 rounded-full blur-[3px] shadow-[0_0_20px_#fde047]"></div>
                   </div>
-                  <div class="absolute w-23 h-20 -top-5 blur-xl -right-10 bg-amber-300/30 pointer-events-none"></div>
-                  <div
-                      class="relative z-10 w-5 h-5 top-2 left-3.5 bg-yellow-100 rounded-full rotate-12 blur-[3px] opacity-25 shadow-[0_0_20px_#fde047]"></div>
-                  <div
-                      class="relative z-10 w-4 h-1 top-5 -left-1 bg-yellow-300 brightness-130 rounded-full blur-[3px] shadow-[0_0_20px_#fde047]"></div>
                 </div>
               </div>
 
-
               <!-- 🎃 ТЫКВА с замедленным и плавным ночным переходом (3 секунды) -->
-
-
 
 
               <!-- Монетки / Опыт -->
@@ -585,6 +547,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
                   :height="activeStatus.height"
                   class="pointer-events-auto"
               />
+
               <!-- Зона персонажа (исправлены классы transition и синтаксис :class) -->
               <div ref="dropZoneRef"
                    id="tutorial-pet"
@@ -600,120 +563,13 @@ function handleBallTracking(ballX, ballY, isMoving) {
                    style="will-change: filter; -webkit-backface-visibility: hidden;"
               >
 
-                <div v-show="gameData.sleep"
-                     class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-40">
-                  <div class="absolute text-[#00BFFF] font-extrabold text-xl z-1 drop-shadow-md">Z</div>
-                  <div class="absolute  text-[#00BFFF] font-bold text-sm z-2 left-4 -top-3 drop-shadow-md">z</div>
-                </div>
+
 
                 <!-- Табличка с именем -->
-                <Nameplate/>
 
-                <!-- Персонаж (исходный контейнер w-45 h-45, ничего не сжимается) -->
-                <div v-if="gameData.level>1"
-                     class="absolute flex justify-center items-center w-45 h-45 pointer-events-none"
-                     :class="[isPopping ? 'animate-pop' : '']">
+                <CharacterBedRoom v-if="location === 'bedroom'"  />
+                <Character v-else />
 
-                  <!-- 🎯 Точечная кликабельная зона поверх персонажа (размер w-24 h-24, клик работает строго по центру) -->
-                  <div
-                      @pointerdown="handleCharacterClick"
-                      class="absolute z-30 w-20 h-20  top-25 cursor-pointer pointer-events-auto"
-                  ></div>
-                  <Tails class="z-0 pointer-events-none"/>
-                  <PetHeadwear/>
-                  <PetClothes/>
-                  <div class="absolute w-45 h-45 pointer-events-none">
-                    <!-- Худое тело -->
-                    <img
-                        :src="`${characterPath}/skinny_body.webp?v=${APP_VERSION}`"
-                        alt="skinny body"
-                        class="absolute inset-0 w-full h-full object-contain body-fade"
-                        :class="bodyType === 'skinny' ? 'opacity-100' : 'opacity-0'"
-                    />
-
-                    <!-- Нормальное тело -->
-                    <img
-                        :src="`${characterPath}/main_body.webp?v=${APP_VERSION}`"
-                        alt="normal body"
-                        class="absolute inset-0 w-full h-full object-contain body-fade"
-                        :class="bodyType === 'normal' ? 'opacity-100' : 'opacity-0'"
-                    />
-
-                    <!-- Толстое тело -->
-                    <img
-                        :src="`${characterPath}/fat_body.webp?v=${APP_VERSION}`"
-                        alt="fat body"
-                        class="absolute inset-0 w-full h-full object-contain body-fade"
-                        :class="bodyType === 'fat' ? 'opacity-100' : 'opacity-0'"
-                    />
-                  </div>
-                  <img v-show="gameData.old_1_phase" :src="`${characterPath}/wrinkles_1_phase.webp?v=${APP_VERSION}`"
-                       class="absolute w-45 z-5 pointer-events-none" alt="">
-                  <img v-show="gameData.old_2_phase" :src="`${characterPath}/wrinkles_2_phase.webp?v=${APP_VERSION}`"
-                       class="absolute w-45 z-5 pointer-events-none" alt="">
-
-                  <img v-show="isBadMood && lifeStage === 'adult'" src="/character/claws.webp"
-                       class="absolute w-45 z-10 pointer-events-none" alt="">
-                  <img v-show="isBadMood && lifeStage === 'adult' && isHovered && !batheStatus" src="/character/fangs.webp"
-                       class="absolute w-45 z-10 pointer-events-none" alt="">
-                  <img :src="`${characterPath}/ears.webp?v=${APP_VERSION}`"
-                       class="absolute z-5 w-45 pointer-events-none" alt="">
-
-                  <img v-show="gameData.sick" :src="`${characterPath}/drunk.webp?v=${APP_VERSION}`"
-                       class="absolute z-6 w-45 pointer-events-none" alt="">
-                  <!--                  <img v-show="gameData.sick && bodyType==='fat'" :src="`${characterPath}/sick_fat.webp?v=${APP_VERSION}`"-->
-                  <!--                       class="absolute w-45 z-10 pointer-events-none" alt="">-->
-                  <img v-show="gameData.sick" :src="`${characterPath}/sick.webp?v=${APP_VERSION}`"
-                       class="absolute w-45 pointer-events-none" alt="">
-
-                  <div v-if="!blink && !gameData.sleep && !isVibrating" class="pointer-events-none">
-                    <div v-show="lowEnergy" class="absolute inset-0 flex justify-center items-center z-10">
-                      <img :src="`${characterPath}/bags_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
-                      <img :src="`${characterPath}/bags_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt=""/>
-                    </div>
-
-                    <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
-                      <img :src="`${characterPath}/eye_left.webp?v=${APP_VERSION}`" class="absolute w-45" alt="">
-                      <img :src="`${characterPath}/eye_right.webp?v=${APP_VERSION}`" class="absolute w-45" alt="">
-                    </div>
-
-                    <!-- Зрачки -->
-                    <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
-                      <div
-                          class="absolute inset-0 flex justify-center items-center pupils-look"
-                          :style="{ transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)` }"
-                      >
-                        <img :src="`${characterPath}/eye_pupils_left.webp?v=${APP_VERSION}`" class="absolute w-45"
-                             alt=""/>
-                        <img :src="`${characterPath}/eye_pupils_right.webp?v=${APP_VERSION}`" class="absolute w-45"
-                             alt=""/>
-                      </div>
-                    </div>
-                  </div>
-                  <img v-else-if="isVibrating" :src="`${characterPath}/eye_close.webp?v=${APP_VERSION}`"
-                       class="absolute w-45 pointer-events-none" alt="">
-                  <img v-else-if="!isVibrating" :src="`${characterPath}/eye_close.webp?v=${APP_VERSION}`"
-                       class="absolute w-45 pointer-events-none" alt="">
-                  <img :src="mouth" :class="isVibrating ? 'animate-vibrate' : ''"
-                       class="absolute w-45 pointer-events-none"
-                       alt="">
-                  <!--                  <img :src="getTailAsset(gameData.level)" class=" w-45 pointer-events-none" alt="">-->
-
-                </div>
-                <!-- Яйцо: сальто всегда доигрывает до конца, тряска останавливается при отпускании -->
-                <div
-                    v-else
-                    @click="handleEggClick"
-
-                    class="absolute flex justify-center items-center bottom-10 w-22 h-22 cursor-pointer transition-transform select-none touch-none"
-                    :class="[
-                isFlips ? 'animate-pet-jump-flip' : '',
-                isEggShaking ? 'animate-cs-egg' : '',
-
-              ]"
-                >
-                  <img :src="getEggsAsset()" alt="Egg" class="pointer-events-none">
-                </div>
                 <!-- Оверлеи и элементы поверх персонажа -->
                 <div class="absolute inset-0 w-full h-full pointer-events-none">
                   <Transition name="combo-fade">
@@ -868,152 +724,11 @@ function handleBallTracking(ballX, ballY, isMoving) {
 .combo-level-burst {
   animation: comboLevelBurst 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
-@keyframes popCharacter {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.animate-pop {
-  animation: popCharacter 0.2s ease-out;
-}
-
-@keyframes vibrate {
-  0% {
-    transform: translate(1px, 1px);
-  }
-  50% {
-    transform: translate(-0.1px, -0.1px);
-  }
-  100% {
-    transform: translate(-0.1px, 0.1px);
-  }
-}
-
-.animate-vibrate {
-  animation: vibrate 0.50s linear infinite;
-  display: inline-block;
-}
-
-.pupils-look {
-  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
 
 
-@keyframes sleep-breath {
-  0%, 100% {
-    transform: scale(1) translateY(0);
-  }
-  50% {
-    transform: scale(1.03) translateY(2px);
-  }
-}
-
-@keyframes float-z {
-  0% {
-    opacity: 0;
-    transform: translate(0, 0) scale(0.6) rotate(-10deg);
-  }
-  30% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(25px, -35px) scale(1.2) rotate(10deg);
-  }
-}
-
-.animate-sleep {
-  animation: sleep-breath 3s ease-in-out infinite;
-}
-
-.z-1 {
-  animation: float-z 2.5s ease-in-out infinite;
-}
-
-.z-2 {
-  animation: float-z 2.5s ease-in-out infinite;
-  animation-delay: 1.2s;
-  font-size: 0.8rem;
-}
 
 
-@keyframes quickPulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05); /* Легкий быстрый толчок вверх */
-  }
-}
 
-.animate-quick-pulse {
-  animation: quickPulse 0.6s ease-in-out infinite; /* В 2 раза быстрее стандартного pulse */
-}
-
-
-/* Анимация прыжка с сальто в воздухе */
-@keyframes petJumpFlip {
-  0% {
-    transform: translateY(0) scale(1, 1) rotate(0deg);
-  }
-  20% {
-    /* Легкое приседание перед прыжком (сжатие) */
-    transform: translateY(5px) scale(1.1, 0.9) rotate(0deg);
-  }
-  40% {
-    /* Взлет вверх и вытягивание в полете */
-    transform: translateY(-45px) scale(0.95, 1.05) rotate(180deg);
-  }
-  60% {
-    /* Пик полета (оборот) */
-    transform: translateY(-60px) scale(1, 1) rotate(270deg);
-  }
-
-  100% {
-    /* Мягкое приземление с легким упругим эффектом */
-    transform: translateY(0) scale(1, 1) rotate(360deg);
-  }
-}
-
-.animate-pet-jump-flip {
-  /* Плавный математический bezier-график для мягкого старта и торможения */
-  animation: petJumpFlip 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-  will-change: transform;
-}
-
-/* Дерганье как яйцо в CS2 (ускоряющаяся тряска с наклонами) */
-@keyframes csEggShake {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  25% {
-    transform: translate(-10px, 0) rotate(-12deg);
-  }
-  /* Сильнее влево */
-  50% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  /* Возврат в центр */
-  75% {
-    transform: translate(10px, 0) rotate(12deg);
-  }
-  /* Сильнее вправо */
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-}
-
-.animate-cs-egg {
-  animation: csEggShake 0.35s ease-in-out infinite;
-  transform-origin: center center;
-}
 
 
 </style>
