@@ -83,7 +83,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
     </button>
   </div>
 
-  <div class="rounded-4xl p-2 mt-1 bg-[#fff6ef] border-2 border-[#f7c9a5] flex flex-col justify-center items-center w-full max-w-[300px] min-h-60 mx-auto">
+  <div class="rounded-4xl p-2 mt-1 bg-[#fff6ef] border-2 border-[#f7c9a5] flex flex-col justify-center items-center w-full max-w-[300px] min-h-50 mx-auto">
     <div v-if="gameData.isGameOver">
       <div @click="handleRestart" class="bg-[#fff6ef] justify-center flex flex-col h-25 items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] transition-transform duration-50 active:scale-95 cursor-pointer" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
         <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('store.start_again') }}</button>
@@ -282,7 +282,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
         </div>
       </div>
 
-      <div  v-show="location==='bedroom'" class="grid grid-cols-1 relative gap-2 w-55 place-self-center">
+      <div  v-show="location==='bedroom'" class="grid grid-cols-1 relative gap-2 w-45 place-self-center">
         <div @click="goSleep()" :class="[lowEnergy && !showHunger && !gameData.sleep?'animate-pulse':'','bg-[#fff6ef] relative justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95',showHunger || energyFull?'opacity-50':'']" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <img v-show="energyFull" class="w-10 absolute top-0 right-0" src="/gamePlay/energy_full.webp" alt="">
           <div class="w-[60px] h-[60px] bg-contain bg-no-repeat bg-center" :style="{ 'background-image': `url('/gamePlay/${gameData.sleep ? 'sun_icon.webp' : 'sleep_icon.webp'}?v=${APP_VERSION}')` }"></div>
