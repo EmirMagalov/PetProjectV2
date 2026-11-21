@@ -37,7 +37,6 @@ function initBall() {
 
 onMounted(() => {
   initBall();
-  console.log(gameData.level);
 });
 
 watch(() => gameData.level, async (newLevel) => {

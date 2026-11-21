@@ -15,19 +15,16 @@ import TutorialOverlay from "@/components/TutorialOverlay.vue";
 import i18n from "@/scripts/locales/i18n.js";
 
 import {
-  mouth,
-  lowEnergy,
-  isVibrating, isBadMood, gameData, blink, statusShower, statusFoam,
-  location, dropZoneRef, tutorialStep, isPopping, bodyType, activeStatus, colorFoam, isTutorialCompleted, resetLocal,
-  characterPath, showStatus,scale, isShopOpen, lifeStage
+  isBadMood, gameData, blink, statusShower, statusFoam,
+  location, tutorialStep, activeStatus, colorFoam, isTutorialCompleted,
+  showStatus,scale, isShopOpen
 } from "@/scripts/useGameStore.js";
 import {
-  addCoin, addFun, comboClicks,
+  addCoin, comboClicks,
   comboMultiplier, handleMultiTouch,
   isComboAnimating, isUserLooking, pupilOffset, resetEyeLook,
   updateEyeLook
 } from "@/scripts/actions.js";
-import PetClothes from "@/components/PetClothes.vue";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 import FortuneWheel from "@/components/FortuneWheel.vue";
 import SunAndMoon from "@/components/Decorations/SunAndMoon.vue";
@@ -35,13 +32,10 @@ import Clouds from "@/components/Decorations/Clouds.vue";
 import CoinsAndXP from "@/components/Decorations/CoinsAndXP.vue";
 import Rain from "@/components/Decorations/Rain.vue";
 import {addToCart} from "@/scripts/basket.js";
-import {addExp} from "@/scripts/level.js";
-import {batheStatus, isHovered, showerX, showerY} from "@/scripts/dragAndDrop.js";
+import {showerX, showerY} from "@/scripts/dragAndDrop.js";
 import PetActivity from "@/components/PetActivity.vue";
 import BouncingBall from "@/components/BouncingBall.vue";
 import ShopModal from "@/components/ShopModal.vue";
-import AnimatedTail from "@/components/AnimatedTail.vue";
-import Tails from "@/components/Tails.vue";
 import Character from "@/components/Character.vue";
 import CharacterBedRoom from "@/components/CharacterBedRoom.vue";
 
@@ -549,7 +543,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
               />
 
               <!-- Зона персонажа (исправлены классы transition и синтаксис :class) -->
-              <div ref="dropZoneRef"
+              <div
                    id="tutorial-pet"
                    @pointerdown="handlePointerDown($event)"
                    @pointermove="handlePointerMove($event)"

@@ -5,7 +5,7 @@ import {
     colorFoam,
     currentDraggedItem,
     dropZoneRef, foamOffset,
-    gameData, maxLives, nextTutorialStep, showTongue,
+    gameData, lifeStage, maxLives, nextTutorialStep, showTongue,
     statusFoam,
     statusShower
 } from "@/scripts/useGameStore.js";
@@ -121,26 +121,33 @@ export function handleMove(event, itemType, Item) {
     const clientX = event.clientX || (event.touches && event.touches[0]?.clientX) || 0
     const clientY = event.clientY || (event.touches && event.touches[0]?.clientY) || 0
 
-    let isInside = (
-        clientX >= dropRect.left &&
-        clientX <= dropRect.right &&
-        clientY >= dropRect.top &&
-        clientY <= dropRect.bottom
-    )
+    // Быстрая отсечка по самому боксу персонажа (с запасом под сдвиг вниз)
+    const inOuterBox =
+        clientX >= dropRect.left - 20 &&
+        clientX <= dropRect.right + 20 &&
+        clientY >= dropRect.top - 20 &&
+        clientY <= dropRect.bottom + 80
 
-    if (isInside && (itemType === 'shower' || itemType === 'foam')) {
-        const centerX = dropRect.left + dropRect.width / 2
-        const centerY = dropRect.top + dropRect.height / 2
-        const radiusX = 80
-        const radiusY = 80
-
-        isInside = (
-            clientX >= centerX - radiusX &&
-            clientX <= centerX + radiusX &&
-            clientY >= centerY - radiusY &&
-            clientY <= centerY + radiusY
-        )
+    if (!inOuterBox) {
+        return
     }
+
+    const offsetY = itemType === 'shower'?0:lifeStage.value === 'baby'?100:80 // сдвиг центра зоны вниз/вверх в пикселях
+    const centerX = dropRect.left + dropRect.width / 2
+    const centerY = dropRect.top + dropRect.height / 2 + offsetY
+
+    // Компактная зона (полуширина и полувысота в px)
+    const radiusX = 35
+    const radiusY = itemType === 'shower'?100:65
+
+    const isInside =
+        clientX >= centerX - radiusX &&
+        clientX <= centerX + radiusX &&
+        clientY >= centerY - radiusY &&
+        clientY <= centerY + radiusY
+
+
+
 
     if (isInside) {
         isHovered.value = true

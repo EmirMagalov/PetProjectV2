@@ -261,55 +261,55 @@ const clearActionTimer = () => {
 }
 
 // Следим за появлением облака и пены
-watch([cloudShow, statusFoam], ([isCloud, hasFoam]) => {
-    // Если облако есть И на персонаже есть пена
-    if (isCloud && hasFoam) {
-        if (!actionTimer) {
-            statusShower.value = true // Включаем анимацию душа
-
-            actionTimer = setInterval(() => {
-                // Проверяем, что условия всё еще актуальны
-                if (cloudShow.value && statusFoam.value) {
-                    foamOffset.value += 0.8 // Пена плавно сползает вниз
-
-                    // Когда пена сместилась достаточно низко (до 60px) — смыв завершен
-                    if (foamOffset.value >= 60) {
-                        if (gameData.sick) {
-                            isLosingLife()
-                        }
-                        const now = Date.now()
-                        if (now - lastBathTime < BATH_COOLDOWN) {
-                            gameData.sick = true
-                        }
-                        lastBathTime = now
-
-                        statusShower.value = false
-                        statusFoam.value = false
-                        foamOffset.value = 0
-                        localStorage.removeItem('pet_statusFoam')
-                        localStorage.removeItem('pet_foamOffset')
-                        localStorage.removeItem('pet_colorFoam')
-                        showerCount.value += 1
-                        gameData.stinky = false
-                        nextTutorialStep()
-                        addCoin(2)
-                        addExp(25)
-                        incrementTaskProgress('wash', 1)
-                        gameData.feedCount = 0
-                        clearActionTimer()
-                    }
-                } else {
-                    // Если облако или пена пропали — выключаем душ и таймер
-                    statusShower.value = false
-                    clearActionTimer()
-                }
-            }, 50) // Каждые 50мс двигаем пену
-        }
-    } else {
-        // Если облака нет или пены нет — гасим душ и таймер
-        statusShower.value = false
-        clearActionTimer()
-    }
-}, {immediate: true})
-
+// watch([cloudShow, statusFoam], ([isCloud, hasFoam]) => {
+//     // Если облако есть И на персонаже есть пена
+//     if (isCloud && hasFoam) {
+//         if (!actionTimer) {
+//             statusShower.value = true // Включаем анимацию душа
+//
+//             actionTimer = setInterval(() => {
+//                 // Проверяем, что условия всё еще актуальны
+//                 if (cloudShow.value && statusFoam.value) {
+//                     foamOffset.value += 0.8 // Пена плавно сползает вниз
+//
+//                     // Когда пена сместилась достаточно низко (до 60px) — смыв завершен
+//                     if (foamOffset.value >= 60) {
+//                         if (gameData.sick) {
+//                             isLosingLife()
+//                         }
+//                         const now = Date.now()
+//                         if (now - lastBathTime < BATH_COOLDOWN) {
+//                             gameData.sick = true
+//                         }
+//                         lastBathTime = now
+//
+//                         statusShower.value = false
+//                         statusFoam.value = false
+//                         foamOffset.value = 0
+//                         localStorage.removeItem('pet_statusFoam')
+//                         localStorage.removeItem('pet_foamOffset')
+//                         localStorage.removeItem('pet_colorFoam')
+//                         showerCount.value += 1
+//                         gameData.stinky = false
+//                         nextTutorialStep()
+//                         addCoin(2)
+//                         addExp(25)
+//                         incrementTaskProgress('wash', 1)
+//                         gameData.feedCount = 0
+//                         clearActionTimer()
+//                     }
+//                 } else {
+//                     // Если облако или пена пропали — выключаем душ и таймер
+//                     statusShower.value = false
+//                     clearActionTimer()
+//                 }
+//             }, 50) // Каждые 50мс двигаем пену
+//         }
+//     } else {
+//         // Если облака нет или пены нет — гасим душ и таймер
+//         statusShower.value = false
+//         clearActionTimer()
+//     }
+// }, {immediate: true})
+//
 

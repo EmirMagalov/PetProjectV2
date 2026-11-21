@@ -11,14 +11,14 @@ import {
   isBadMood,
   isPopping,
   isVibrating,
-  lifeStage, lowEnergy, mouth
+  lifeStage, lowEnergy, mouth,dropZoneRef
 } from "@/scripts/useGameStore.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {batheStatus, isHovered} from "@/scripts/dragAndDrop.js";
 import {addCoin, comboClicks, comboMultiplier, isComboAnimating, pupilOffset} from "@/scripts/actions.js";
 import {addExp} from "@/scripts/level.js";
 import {ref} from "vue";
-import Cloud from "@/components/Cloud.vue";
+
 
 
 const isFlips = ref(false)
@@ -117,7 +117,7 @@ function getEggsAsset() {
     <Tails class="z-0 pointer-events-none"/>
     <PetHeadwear/>
     <PetClothes/>
-    <div class="absolute w-45 h-45 pointer-events-none">
+    <div  ref="dropZoneRef" class="absolute w-45 h-45 pointer-events-none">
       <!-- Худое тело -->
       <img
           :src="`${characterPath}/skinny_body.webp?v=${APP_VERSION}`"
