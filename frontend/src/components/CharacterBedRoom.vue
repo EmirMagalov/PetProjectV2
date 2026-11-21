@@ -16,6 +16,7 @@ import {comboClicks, comboMultiplier, isComboAnimating, pupilOffset} from "@/scr
 import {addExp} from "@/scripts/level.js";
 import {ref} from "vue";
 import Cloud from "@/components/Cloud.vue";
+import PetHeadwear from "@/components/PetHeadwear.vue";
 
 
 const isFlips = ref(false)
@@ -110,7 +111,7 @@ function getEggsAsset() {
 <!--        class="absolute z-30 w-20 h-20  top-25 cursor-pointer pointer-events-auto"-->
 <!--    ></div>-->
 <!--    <Tails class="z-0 pointer-events-none"/>-->
-<!--    <PetHeadwear/>-->
+    <PetHeadwear weight="w-15"/>
 <!--    <PetClothes/>-->
     <div class="absolute w-35 h-35 pointer-events-none">
       <!-- Худое тело -->

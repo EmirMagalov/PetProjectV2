@@ -240,7 +240,7 @@ watch(serumEl, (newEl) => { if (newEl) initSerumInteract(newEl) })
         <div @click="nextSerumItem()" class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-emerald-200/30">
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
           <template v-if="serumCartList.length === 0">
-            <div class="flex flex-col items-center justify-center w-[80px] h-[80px] bg-contain bg-no-repeat bg-center opacity-40" :style="{backgroundImage: `url('/gamePlay/first_aid_empty.webp?v=${APP_VERSION}')`}"></div>
+            <div :class="gameData.sick?'animate-pulse':''" class="flex flex-col items-center justify-center w-[80px] h-[80px] bg-contain bg-no-repeat bg-center opacity-40" :style="{backgroundImage: `url('/gamePlay/first_aid_empty.webp?v=${APP_VERSION}')`}"></div>
           </template>
           <template v-else>
             <div class="relative w-[80px] h-[80px]" :class="[!isDraggingMain &&

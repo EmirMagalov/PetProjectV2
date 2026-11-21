@@ -148,9 +148,9 @@ function getEggsAsset() {
          class="absolute w-45 z-5 pointer-events-none" alt="">
 
     <img v-show="isBadMood && lifeStage === 'adult'" src="/character/claws.webp"
-         class="absolute w-45 z-10 pointer-events-none" alt="">
+         class="absolute w-45 z-11 pointer-events-none" alt="">
     <img v-show="isBadMood && lifeStage === 'adult' && isHovered && !batheStatus" src="/character/fangs.webp"
-         class="absolute w-45 z-10 pointer-events-none" alt="">
+         class="absolute w-45 z-11 pointer-events-none" alt="">
     <img :src="`${characterPath}/ears.webp?v=${APP_VERSION}`"
          class="absolute z-5 w-45 pointer-events-none" alt="">
 
@@ -159,7 +159,7 @@ function getEggsAsset() {
     <!--                  <img v-show="gameData.sick && bodyType==='fat'" :src="`${characterPath}/sick_fat.webp?v=${APP_VERSION}`"-->
     <!--                       class="absolute w-45 z-10 pointer-events-none" alt="">-->
     <img v-show="gameData.sick" :src="`${characterPath}/sick.webp?v=${APP_VERSION}`"
-         class="absolute w-45 pointer-events-none" alt="">
+         class="absolute w-45 pointer-events-none z-10" alt="">
 
     <div v-if="!blink && !gameData.sleep && !isVibrating" class="pointer-events-none">
       <div v-show="lowEnergy" class="absolute inset-0 flex justify-center items-center z-10">
