@@ -38,6 +38,7 @@ import BouncingBall from "@/components/BouncingBall.vue";
 import ShopModal from "@/components/ShopModal.vue";
 import Character from "@/components/Character.vue";
 import CharacterBedRoom from "@/components/CharacterBedRoom.vue";
+import HeaderModalMenu from "@/components/HeaderModalMenu.vue";
 
 let blinkInterval = null
 let lookInterval = null
@@ -626,6 +627,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
   <PetSideMenu/>
   <PetActivity/>
   <ShopModal :is-open="isShopOpen" @close="isShopOpen = false"/>
+
 </template>
 
 <style scoped>
