@@ -90,6 +90,7 @@ export function initSerumInteract(el) {
         listeners: {
             start(event) {
                 clearActionTimer()
+                isDraggingLaboratory.value = true
                 currentDraggedItem.value = 'food'
                 foodConsumedByPipe.value = false
                 event.target.style.zIndex = '150'
@@ -114,7 +115,7 @@ export function initSerumInteract(el) {
             },
             end(event) {
                 const target = event.target
-
+                isDraggingLaboratory.value = false
                 const serumItem = serumCartList.value?.[currentSerumIndex.value]
                 handleEnd('food', serumItem)
                 resetEyeLook(600)
@@ -169,7 +170,7 @@ export function useItemDraggable(elementRef, itemData) {
 }
 
 export function ingredientMove(event, item) {
-    isDraggingLaboratory.value = true
+
     if (!ingredientDropZoneRef.value || typeof ingredientDropZoneRef.value.getBoundingClientRect !== 'function') return;
 
     const dropRect = ingredientDropZoneRef.value.getBoundingClientRect();

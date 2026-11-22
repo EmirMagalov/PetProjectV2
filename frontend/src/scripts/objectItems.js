@@ -212,13 +212,57 @@ export const foodList = [
 
     },
     {
+        id: 'soap',
+        name: 'Мыло',
+        image: `/Bath/soap.webp?v=${APP_VERSION}`,
+        category: 'bath accessories',
+        subcategory: 'soap',
+        color: 'bg-white/50',
+        price: 70,
+
+    },
+    {
+        id: 'soap_green',
+        name: 'Мыло',
+        image: `/Bath/soap_green.webp?v=${APP_VERSION}`,
+        category: 'bath accessories',
+        subcategory: 'soap',
+        color: 'bg-[#34bc39]/50',
+        price: 80,
+         level: 5,
+
+    },
+    {
+        id: 'soap_blue',
+        name: 'Мыло',
+        image: `/Bath/soap_blue.webp?v=${APP_VERSION}`,
+        category: 'bath accessories',
+        subcategory: 'soap',
+        color: 'bg-[#3552b8]/50',
+        price: 80,
+         level: 5,
+
+    },
+    {
+        id: 'soap_violet',
+        name: 'Мыло',
+        image: `/Bath/soap_violet.webp?v=${APP_VERSION}`,
+        category: 'bath accessories',
+        subcategory: 'soap',
+        color: 'bg-[#a05fba]/50',
+        price: 80,
+         level: 5,
+
+    },
+    {
         id: 'shampoo',
         name: 'Шампунь',
         image: `/Bath/shampoo_icon.webp?v=${APP_VERSION}`,
         category: 'bath accessories',
         subcategory: 'shampoo',
         color: 'bg-white/50',
-        price: 70,
+        price: 120,
+        level: 15,
 
     },
     {
@@ -228,8 +272,8 @@ export const foodList = [
         category: 'bath accessories',
         subcategory: 'shampoo',
         color: 'bg-[#34bc39]/50',
-        price: 80,
-        level: 5
+        price: 130,
+        level: 15,
 
     },
     {
@@ -239,19 +283,19 @@ export const foodList = [
         category: 'bath accessories',
         subcategory: 'shampoo',
         color: 'bg-[#3552b8]/50',
-        price: 80,
-        level: 5
+        price: 130,
+        level: 15,
 
     },
     {
-        id: 'shampoo_violet_green',
+        id: 'shampoo_violet',
         name: 'Шампунь (Фиолетовый)',
         image: `/Bath/shampoo_violet_icon.webp?v=${APP_VERSION}`,
         category: 'bath accessories',
         subcategory: 'shampoo',
         color: 'bg-[#a05fba]/50',
-        price: 80,
-        level: 5
+        price: 130,
+        level: 15,
 
     },
 ]

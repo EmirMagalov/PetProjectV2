@@ -1,6 +1,6 @@
 <script setup>
-import {foamOffset, gameData, lifeStage} from "@/scripts/useGameStore.js";
-import {isHovered} from "@/scripts/dragAndDrop.js";
+import { foamOffset } from "@/scripts/useGameStore.js";
+import {foamBubbles, isHovered} from "@/scripts/dragAndDrop.js";
 
 defineProps({
   statusFoam: Boolean,
@@ -9,46 +9,58 @@ defineProps({
     type: String,
   },
 })
+
+function getBubbleScale(bubble) {
+  if (foamOffset.value <= 0 || bubble.y <= 0) {
+    return 1
+  }
+  // Чем ниже пузырь (больше bubble.y), тем сильнее он сжимается при смыве
+  const depthFactor = Math.min(1.4, 0.7 + bubble.y / 60)
+  const washRatio = Math.min(1, foamOffset.value / 60)
+  return Math.max(0.35, 1 - washRatio * 0.65 * depthFactor)
+}
+
+function getBubbleOpacity(bubble) {
+  // Верхние и центральные пузыри не теряют прозрачность
+  if (foamOffset.value <= 0 || bubble.y <= 0) {
+    return 1
+  }
+  const depthFactor = Math.min(1.3, 0.5 + bubble.y / 50)
+  const washRatio = Math.min(1, foamOffset.value / 60)
+  // Нижний порог прозрачности: 0.15, чтобы пузырь плавно растворялся, а не пропадал рывком
+  return Math.max(0.15, 1 - washRatio * 0.85 * depthFactor)
+}
 </script>
 
 <template>
-  <div v-if="statusFoam" class="absolute inset-0 flex justify-center items-center pointer-events-none z-15" style="will-change: transform;">
-    <!-- Общий контейнер пены со сдвигом и растворением -->
+  <div
+      v-if="statusFoam || foamBubbles.length > 0"
+      class="absolute mt-20 inset-0 flex justify-center items-center pointer-events-none z-15"
+      style="will-change: transform;"
+  >
     <div
         class="relative w-10 h-10 flex items-center justify-center transition-transform duration-75 ease-out"
         :style="{
-        transform: `translateY(${foamOffset}px)`,
-        opacity: Math.max(0.6, 1 - (foamOffset / 60))
-      }"
+          transform: `translateY(${foamOffset}px)`
+        }"
     >
-
-      <!-- Уровень 1: Верхние пузыри -->
-      <div v-show="lifeStage === 'adult' && foamOffset < 40">
-        <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-2 left-10 w-6 h-6 rounded-full bubble-glossy"></div>
-        <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-2 left-0 w-8 h-8 rounded-full bubble-glossy"></div>
-      </div>
-      <div v-show="foamOffset < 30" :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-5 -left-5 w-8 h-8 rounded-full bubble-glossy"></div>
-
-      <!-- Уровень 2: Основная масса пузырей -->
       <div
-          class="absolute inset-0 flex items-center justify-center transition-all duration-100"
-          :style="{ transform: `scale(${Math.max(0.6, 1 - (foamOffset / 55))})` }"
-      >
-        <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-18 -left-8 w-9 h-9 rounded-full bubble-glossy"></div>
-        <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-20 left-2 w-8 h-8 rounded-full bubble-glossy"></div>
-        <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-15 left-5 w-6 h-6 rounded-full bubble-glossy"></div>
-        <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-18 left-10 w-9 h-9 rounded-full bubble-glossy"></div>
-        <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-11 left-10 w-8 h-8 rounded-full bubble-glossy"></div>
-        <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-11 -left-5 w-8 h-8 rounded-full bubble-glossy"></div>
-      </div>
-
-      <!-- Уровень 3: Нижние пузыри -->
-      <div v-show="foamOffset < 50">
-        <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-10 left-5 w-8 h-8 rounded-full bubble-glossy"></div>
-        <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-12 left-2 w-6 h-6 rounded-full bubble-glossy"></div>
-        <div :class="[bgColor ,!isHovered?'animate-bounce':'']" class="absolute top-22 left-0 w-6 h-6 rounded-full bubble-glossy"></div>
-      </div>
-
+          v-for="bubble in foamBubbles"
+          :key="bubble.id"
+          :class="[bubble.color || bgColor, !isHovered ? 'animate-bounce' : '']"
+          class="absolute rounded-full bubble-glossy transition-opacity duration-75 ease-out"
+          :style="{
+            width: `${bubble.size}px`,
+            height: `${bubble.size}px`,
+            left: `calc(50% + ${bubble.x}px)`,
+            top: `calc(50% + ${bubble.y}px)`,
+            marginLeft: `${-bubble.size / 2}px`,
+            marginTop: `${-bubble.size / 2}px`,
+            opacity: getBubbleOpacity(bubble),
+            '--bubble-scale': getBubbleScale(bubble),
+            transform: foamOffset > 0 ? `scale(${getBubbleScale(bubble)})` : undefined
+          }"
+      ></div>
     </div>
   </div>
 </template>
@@ -57,11 +69,11 @@ defineProps({
 
 @keyframes bounce {
   0%, 100% {
-    transform: translateY(-3%);
+    transform: translateY(-3%) scale(var(--bubble-scale, 1));
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
   50% {
-    transform: none;
+    transform: translateY(0) scale(var(--bubble-scale, 1));
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
 }
@@ -70,6 +82,21 @@ defineProps({
   animation: bounce 2s infinite;
 }
 
+
+@keyframes bubblePop {
+  0% {
+    scale: 0.2;
+    opacity: 0;
+  }
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+}
+
+.bubble-pop {
+  animation: bubblePop 0.16s ease-out forwards;
+}
 
 .bubble-glossy {
   background-image:

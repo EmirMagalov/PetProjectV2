@@ -84,7 +84,7 @@ export default {
         step_4: "Кликай по питомцу чтобы делать комбо и заработать еще больше монет и опыта!",
         step_5: "Вернись в главное меню!",
         step_6: "Питомец испачкался, нужно его помыть!",
-        step_7: "Перетащи шампунь на питомца!",
+        step_7: "Намыль питомца мылом!",
         step_8: "Перетащи и держи душ чтобы смыть пену!"
     },
 
@@ -155,11 +155,14 @@ export default {
         energy_serum: 'Сыворотка энергии',
         life_serum: 'Сыворотка жизни',
         health_serum: 'Сыворотка здоровья',
-
+        soap: 'Мыло',
+        soap_green: 'Мыло (Green)',
+        soap_blue: 'Мыло (Blue)',
+        soap_violet: 'Мыло (Violet)',
         shampoo: 'Шампунь',
         shampoo_green: 'Шампунь (Зеленый)',
         shampoo_blue: 'Шампунь (Синий)',
-        shampoo_violet_green: 'Шампунь (Фиолетовый)',
+        shampoo_violet: 'Шампунь (Фиолетовый)',
     },
     store: {
         pet_name_placeholder: 'Имя:',

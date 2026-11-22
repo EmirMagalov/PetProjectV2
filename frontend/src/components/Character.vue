@@ -106,7 +106,7 @@ function getEggsAsset() {
 <!--  <Cloud class="absolute top-0"/>-->
   <!-- Персонаж (исходный контейнер w-45 h-45, ничего не сжимается) -->
   <div v-if="gameData.level>1"
-       class="absolute flex justify-center items-center w-45 h-45 pointer-events-none"
+       class="absolute  flex justify-center items-center w-45 h-45 pointer-events-none"
        :class="[isPopping ? 'animate-pop' : '']">
 
     <!-- 🎯 Точечная кликабельная зона поверх персонажа (размер w-24 h-24, клик работает строго по центру) -->

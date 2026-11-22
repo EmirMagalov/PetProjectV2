@@ -92,7 +92,7 @@ export default {
         step_4: "Click on the pet to make combos and earn even more coins and XP!",
         step_5: "Return to the main menu!",
         step_6: "The pet is dirty, time for a bath!",
-        step_7: "Drag the shampoo onto the pet!",
+        step_7: "Soap up your pet!",
         step_8: "Drag and hold the shower to wash away the foam!"
     },
 
@@ -161,11 +161,14 @@ export default {
         energy_serum: 'Energy Serum',
         life_serum: 'Life Serum',
         health_serum: 'Health Serum',
-
+        soap: 'Soap',
+        soap_green: 'Soap (Green)',
+        soap_blue: 'Soap (Blue)',
+        soap_violet: 'Soap (Violet)',
         shampoo: 'Shampoo',
         shampoo_green: 'Shampoo (Green)',
         shampoo_blue: 'Shampoo (Blue)',
-        shampoo_violet_green: 'Shampoo (Violet)',
+        shampoo_violet: 'Shampoo (Violet)',
     },
     store: {
         pet_name_placeholder: 'Name:',

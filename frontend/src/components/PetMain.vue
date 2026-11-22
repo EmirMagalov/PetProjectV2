@@ -295,7 +295,7 @@ onMounted(async () => {
       gameData.energy = 50
       gameData.exp = 0
       addToCart('burger');
-      addToCart('shampoo');
+      addToCart('soap');
     }
     // Если игрок совсем новый (1 уровень) — сбрасываем локал и даем стартовые вещи
     else if (gameData.level < 2) {

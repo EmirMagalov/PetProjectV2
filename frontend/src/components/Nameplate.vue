@@ -40,7 +40,7 @@ function handleBlur() {
 <template>
   <div
       class="absolute inset-0 z-0 pointer-events-auto "
-      :class="[1,2,3,4, 7, 8].includes(tutorialStep)?'brightness-40':''"
+
       v-show="(location === 'home' || location === 'food' || location==='bedroom')"
   >
     <div class="absolute left-6 top-19 pointer-events-auto">
