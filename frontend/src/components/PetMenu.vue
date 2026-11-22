@@ -186,21 +186,21 @@ watch(serumEl, (newEl) => {
         <div id="tutorial-shampoo" @click="nextBathItem()"
              class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 cursor-pointer">
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
-          <div v-show="gameData.sick" class="absolute pointer-events-none w-20 opacity-50 animate-pulse z-20"><img
-              :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt=""></div>
+          <div v-show="gameData.sick && !statusFoam" class="absolute pointer-events-none w-20 opacity-50 animate-pulse z-20"><img
+              :src="`/gamePlay/thermometer.webp?v=${APP_VERSION}`" alt=""></div>
           <template v-if="bathCartList.length === 0 || statusFoam">
             <div
-                class="flex flex-col items-center justify-center w-[70px] h-[70px] opacity-30 bg-contain bg-no-repeat bg-center"
-                :class="!isDraggingMain && gameData.stinky?'animate-pulse':''"
+                class="flex flex-col items-center justify-center w-[70px] h-[70px] opacity-25 bg-contain bg-no-repeat bg-center"
+                :class="!isDraggingMain && gameData.stinky && !statusFoam && !gameData.sick?'animate-pulse':''"
                 :style="{backgroundImage: `url('/Bath/soap.webp?v=${APP_VERSION}')`}"></div>
           </template>
           <template v-else>
-            <div class="relative w-[70px] h-[70px]" :class="!isDraggingMain && gameData.stinky?'animate-pulse':''">
+            <div class="relative w-[70px] h-[70px]" :class="!isDraggingMain && gameData.stinky && !statusFoam && !gameData.sick?'animate-pulse':''">
               <!-- 1. Призрак шампуня (лежит строго в 0,0 под основным элементом) -->
               <div
                   v-show="!feedStatus"
                   :style="{ 'background-image': currentBathImage ? `url('${currentBathImage}')` : 'none' }"
-                  class="absolute inset-0 w-[70px] h-[70px] bg-contain bg-no-repeat bg-center opacity-30 pointer-events-none"
+                  class="absolute inset-0 w-[70px] h-[70px] bg-contain bg-no-repeat bg-center opacity-25 pointer-events-none"
               ></div>
 
               <!-- 2. Перетаскиваемый шампунь (лежит поверх, двигается через interact.js) -->
