@@ -10,7 +10,7 @@ export let tgId = import.meta.env.VITE_USER_ID || null
 export const isApiError = ref(false) // 👈 Флаг ошибки бэкенда
 export const errorMessage = ref('')  // 👈 Текст ошибки
 export const isLoading = ref(true)
-
+let isInitializing = false
 let isMaster = true
 let isDuplicate = false
 let isDataLoaded = false
@@ -72,7 +72,7 @@ setInterval(() => {
 
 
 if (savedSessionKey && savedSessionKey !== currentSessionKey) {
-    console.warn("🔄 Обнаружен новый вход через бота! Принудительно перезагружаем страницу...")
+    // console.warn("🔄 Обнаружен новый вход через бота! Принудительно перезагружаем страницу...")
     sessionStorage.setItem('tg_session_signature', currentSessionKey)
     window.location.reload()
 } else {
@@ -81,157 +81,157 @@ if (savedSessionKey && savedSessionKey !== currentSessionKey) {
 
 // --- 4. ЗАГРУЗКА И СИНХРОНИЗАЦИЯ ДАННЫХ ---
 export async function initGameData() {
-
-    if (!tgId) {
-        tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
-    }
-
-    if (!tgId) {
-        console.warn("⚠️ Не удалось определить tgId пользователя. Ждем Telegram WebApp...")
-        // Даем короткую паузу на случай холодного старта Telegram
-        await new Promise(resolve => setTimeout(resolve, 300))
-        tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
-    }
-
-    if (!tgId) {
-        console.error("❌ tgId так и не был найден!")
-        isApiError.value = true
-        errorMessage.value = i18n.global.t('store.user_not_found')
-        isLoading.value = false
+    if (isInitializing) {
+        // console.warn("⏳ initGameData уже выполняется, пропускаем повторный вызов.")
         return
     }
-    isDataLoaded = false
-    isApiError.value = false // Сбрасываем ошибку перед новой попыткой
-    isLoading.value = true
 
+    isInitializing = true
 
-    const maxRetries = 5;
+    try {
+        if (!tgId) {
+            tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+        }
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        if (!isMasterTab()) {
-            console.warn("⚠️ Загрузка отменена: вкладка не является ведущей.")
+        if (!tgId) {
+            // console.warn("⚠️ Не удалось определить tgId пользователя. Ждем Telegram WebApp...")
+            await new Promise(resolve => setTimeout(resolve, 300))
+            tgId = import.meta.env.VITE_USER_ID || window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+        }
+
+        if (!tgId) {
+            // console.error("❌ tgId так и не был найден!")
+            isApiError.value = true
+            errorMessage.value = i18n.global.t('store.user_not_found')
+            isLoading.value = false
             return
         }
 
-        try {
-            const minDelay = new Promise(resolve => setTimeout(resolve, 800))
-            const [response] = await Promise.all([
-                axios.get(`${API_URL}/${tgId}`, {
-                    params: {
-                        device_id: deviceId, // 👈 Передаем ID текущего устройства
-                        _t: Date.now()
-                    }
-                }),
-                minDelay
-            ])
+        isDataLoaded = false
+        isApiError.value = false
+        isLoading.value = true
 
-            const serverData = response.data
-            if (serverData.last_fortune_spin !== undefined) {
-                syncFortuneTime(serverData.last_fortune_spin, serverData.paid_spin_count);
-            }
-            // ... (твой существующий маппинг gameData.name, level, coins и т.д.) ...
-            gameData.name = serverData.name && serverData.name.trim() ? serverData.name : 'store.pet_name_placeholder'
-            gameData.level = serverData.level
-            gameData.exp = serverData.exp
-            gameData.coins = serverData.coins
-            gameData.lives = serverData.lives
-            gameData.deathsCount = serverData.deaths_count
-            gameData.season = serverData.season || 'summer'
-            gameData.fatCount = serverData.fat_count
-            gameData.foodLevel = serverData.food_level
-            gameData.funLevel = serverData.fun_level,
-            gameData.energy = serverData.energy
-            gameData.stinky = serverData.stinky
-            gameData.clickCounter = serverData.click_counter
-            gameData.sleep = serverData.sleep
-            gameData.sleepEndTime = serverData.sleep_end_time
-            gameData.fastfoodStreak = serverData.fastfood_streak
-            gameData.isFat = serverData.is_fat
-            gameData.sick = serverData.sick
-            gameData.isPooped = serverData.is_pooped
-            gameData.addictionStreak = serverData.addiction_streak
-            gameData.cart = serverData.cart || {}
-            gameData.daily_tasks = serverData.daily_tasks || {
-                feed: {progress: 0, claimed: false},
-                wash: {progress: 0, claimed: false},
-                click: {progress: 0, claimed: false}
-            }
-            gameData.unlockedHeads = serverData.unlocked_heads || []
-            gameData.unlockedHeads = serverData.unlocked_heads || []
-            gameData.equippedHead = serverData.equipped_head || null
-            gameData.unlockedClothes = serverData.unlocked_clothes || []
-            gameData.equippedClothes = serverData.equipped_clothes || null
-            gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
-            gameData.tutorialCompleted = serverData.tutorial_completed || false
-            gameData.referredBy = serverData.referred_by || false
-            gameData.isGameOver = serverData.is_game_over || false
-            gameData.match3Level=serverData.match3_level || 1
-            if (serverData.language) {
-                gameData.language = serverData.language
-                // localStorage.setItem('user-locale', serverData.language)
-            }
-            if (gameData.level >= 60 && gameData.lives > 2) {
-                gameData.lives = 2;
+        const maxRetries = 5;
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            if (!isMasterTab()) {
+                // console.warn("⚠️ Загрузка отменена: вкладка не является ведущей.")
+                return
             }
 
-            // 👈 ДОБАВЛЯЕМ ЭТУ ПРОВЕРКУ:
-            const localTutorialDone = localStorage.getItem('tutorial_completed') === 'true'
-            if (localTutorialDone) {
-                gameData.tutorialCompleted = true
-                tutorialStep.value = 0
-            }
+            try {
+                const minDelay = new Promise(resolve => setTimeout(resolve, 800))
+                const [response] = await Promise.all([
+                    axios.get(`${API_URL}/${tgId}`, {
+                        params: {
+                            device_id: deviceId,
+                            _t: Date.now()
+                        }
+                    }),
+                    minDelay
+                ])
 
-            if (gameData.tutorialCompleted) {
-                localStorage.setItem('tutorial_completed', 'true')
-                tutorialStep.value = 0
+                const serverData = response.data
+                if (serverData.last_fortune_spin !== undefined) {
+                    syncFortuneTime(serverData.last_fortune_spin, serverData.paid_spin_count);
+                }
 
-                // 👈 ЕСЛИ НА СЕРВЕРЕ БЫЛО false, А ЛОКАЛЬНО true — СИНХРОНИЗИРУЕМ С БАЗОЙ
-                if (!serverData.tutorial_completed) {
-                    console.log("🔄 Обнаружен локальный прогресс туториала. Синхронизируем с сервером...")
-                    // Отправляем актуальные данные на сервер, чтобы в базе тоже стало true
-                    try {
-                        await syncToBackend()
-                    } catch (error) {
-                        console.error(error);
+                gameData.name = serverData.name && serverData.name.trim() ? serverData.name : 'store.pet_name_placeholder'
+                gameData.level = serverData.level
+                gameData.exp = serverData.exp
+                gameData.coins = serverData.coins
+                gameData.lives = serverData.lives
+                gameData.deathsCount = serverData.deaths_count
+                gameData.season = serverData.season || 'summer'
+                gameData.fatCount = serverData.fat_count
+                gameData.foodLevel = serverData.food_level
+                gameData.funLevel = serverData.fun_level
+                gameData.energy = serverData.energy
+                gameData.stinky = serverData.stinky
+                gameData.clickCounter = serverData.click_counter
+                gameData.sleep = serverData.sleep
+                gameData.sleepEndTime = serverData.sleep_end_time
+                gameData.fastfoodStreak = serverData.fastfood_streak
+                gameData.isFat = serverData.is_fat
+                gameData.sick = serverData.sick
+                gameData.isPooped = serverData.is_pooped
+                gameData.addictionStreak = serverData.addiction_streak
+                gameData.cart = serverData.cart || {}
+                gameData.daily_tasks = serverData.daily_tasks || {
+                    feed: {progress: 0, claimed: false},
+                    wash: {progress: 0, claimed: false},
+                    click: {progress: 0, claimed: false}
+                }
+                gameData.unlockedHeads = serverData.unlocked_heads || []
+                gameData.equippedHead = serverData.equipped_head || null
+                gameData.unlockedClothes = serverData.unlocked_clothes || []
+                gameData.equippedClothes = serverData.equipped_clothes || null
+                gameData.lastUpdate = serverData.last_update ? Math.floor(serverData.last_update * 1000) : Date.now()
+                gameData.tutorialCompleted = serverData.tutorial_completed || false
+                gameData.referredBy = serverData.referred_by || false
+                gameData.isGameOver = serverData.is_game_over || false
+                gameData.match3Level = serverData.match3_level || 1
+                if (serverData.language) {
+                    gameData.language = serverData.language
+                }
+                if (gameData.level >= 60 && gameData.lives > 2) {
+                    gameData.lives = 2;
+                }
+
+                const localTutorialDone = localStorage.getItem('tutorial_completed') === 'true'
+                if (localTutorialDone) {
+                    gameData.tutorialCompleted = true
+                    tutorialStep.value = 0
+                }
+
+                if (gameData.tutorialCompleted) {
+                    localStorage.setItem('tutorial_completed', 'true')
+                    tutorialStep.value = 0
+
+                    if (!serverData.tutorial_completed) {
+                        // console.log("🔄 Обнаружен локальный прогресс туториала. Синхронизируем с сервером...")
+                        try {
+                            await syncToBackend()
+                        } catch (error) {
+                            console.error(error);
+                        }
                     }
                 }
-            }
-            isDataLoaded = true
-            isGameInitialized.value = true
-            // Если всё прошло успешно, выключаем экран загрузки
-            setTimeout(() => {
-                isLoading.value = false;
-            }, 500);
 
-            return; // Выходим из функции при успехе
+                isDataLoaded = true
+                isGameInitialized.value = true
+                setTimeout(() => {
+                    isLoading.value = false;
+                }, 500);
 
-        } catch (e) {
-            // 🛑 ЕСЛИ ИГРА УЖЕ ОТКРЫТА НА ДРУГОМ УСТРОЙСТВЕ
-            if (e.response && e.response.status === 403) {
-                isLoading.value = false
-                isApiError.value = true
-
-                document.body.innerHTML = `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #1a1a1a; color: #fff; font-family: sans-serif; text-align: center; padding: 20px;">
-                <h2 style="color: #ff4757;">${i18n.global.t('store.device_already_open')}</h2>
-                <p style="color: #aaa; margin-top: 10px;">${i18n.global.t('store.close_other_device')}</p>
-            </div>
-        `
                 return;
-            }
+            } catch (e) {
+                if (e.response && e.response.status === 403) {
+                    isLoading.value = false
+                    isApiError.value = true
 
+                    document.body.innerHTML = `
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #1a1a1a; color: #fff; font-family: sans-serif; text-align: center; padding: 20px;">
+                            <h2 style="color: #ff4757;">${i18n.global.t('store.device_already_open')}</h2>
+                            <p style="color: #aaa; margin-top: 10px;">${i18n.global.t('store.close_other_device')}</p>
+                        </div>
+                    `
+                    return;
+                }
 
-            console.warn(`⚠️ Попытка ${attempt} из ${maxRetries} не удалась...`, e)
+                // console.warn(`⚠️ Попытка ${attempt} из ${maxRetries} не удалась...`, e)
 
-            if (attempt === maxRetries) {
-                // 🛑 Все попытки исчерпаны: фиксируем ошибку и НЕ выключаем isLoading
-                console.error("❌ Не удалось подключиться к бэкенду после всех попыток.")
-                isApiError.value = true
-                errorMessage.value = i18n.global.t('store.server_unavailable')
-            } else {
-                await new Promise(resolve => setTimeout(resolve, 2000))
+                if (attempt === maxRetries) {
+                    // console.error("❌ Не удалось подключиться к бэкенду после всех попыток.")
+                    isApiError.value = true
+                    errorMessage.value = i18n.global.t('store.server_unavailable')
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 2000))
+                }
             }
         }
+    } finally {
+        isInitializing = false
     }
 }
 
@@ -242,7 +242,7 @@ export async function resetPet() {
         await axios.post(`${API_URL}/reset`, {tg_id: tgId})
         return true
     } catch (e) {
-        console.error("❌ Ошибка при сбросе питомца:", e)
+        // console.error("❌ Ошибка при сбросе питомца:", e)
         return false
     }
 }
@@ -289,15 +289,17 @@ function getPayload() {
 
 
 export async function syncToBackend() {
+    // console.log('📤 syncToBackend call', { isSyncLocked, isDataLoaded, active: isCurrentTabActive() })
+    // console.trace('TRACE syncToBackend')
     if (!isCurrentTabActive() || !isDataLoaded || isSyncLocked) {
         return
     }
 
-
+    // console.warn('📤 POST /api/update', new Error().stack)
     try {
         await axios.post(`${API_URL}/update`, getPayload())
     } catch (e) {
-        console.error("❌ Ошибка сохранения:", e)
+        // console.error("❌ Ошибка сохранения:", e)
     }
 }
 
@@ -324,10 +326,8 @@ document.addEventListener('visibilitychange', () => {
 
     if (document.visibilityState === 'visible') {
         isSyncLocked = true
-
-        syncToBackend()
-            .then(() => initGameData())
-            .catch(err => console.error("❌ Ошибка при возврате в игру:", err))
+        initGameData()
+            // .catch(err => console.error("❌ Ошибка при возврате в игру:", err))
             .finally(() => {
                 setTimeout(() => {
                     isSyncLocked = false

@@ -18,7 +18,7 @@ const changeLanguage = async (lang) => {
     gameData.language = lang;
   }
   try {
-    await syncToBackend()
+    // await syncToBackend()
   } catch (error) {
     console.error(error);
   }

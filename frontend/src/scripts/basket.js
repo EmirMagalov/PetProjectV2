@@ -77,7 +77,7 @@ export const currentClothesItem = computed(() => {
 export const laboratoryIngredientsList = computed(() => {
     return ingredientCartList.value
 })
-
+let cartSyncTimeout = null
 // Отслеживание изменений корзины с автокоррекцией индексов и синхронизацией
 watch(() => gameData.cart, () => {
     // Безопасно проверяем, чтобы индексы никогда не выходили за границы массивов
@@ -94,13 +94,18 @@ watch(() => gameData.cart, () => {
         currentBathIndex.value = Math.max(0, bathLength - 1)
     }
 
-    (async () => {
+    if (cartSyncTimeout) {
+        clearTimeout(cartSyncTimeout)
+    }
+
+    cartSyncTimeout = setTimeout(async () => {
+        cartSyncTimeout = null
         try {
             await syncToBackend()
         } catch (e) {
             console.error("Ошибка синхронизации корзины:", e)
         }
-    })()
+    }, 400)
 }, {deep: true})
 
 // watch(gameData.unlockedHeads, (newList) => {
