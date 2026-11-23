@@ -1,5 +1,5 @@
 <script setup>
-import {ref, nextTick, computed, onMounted, onUnmounted} from "vue";
+import {ref, nextTick, computed} from "vue";
 import {
   gameFinished,
   gameStarted,
@@ -14,11 +14,15 @@ import {
   placeBet,
   determineWinner,
   currentBet,
-  isDealing, betOptions, selectedBet, playerScoreText
+  isDealing,
+  betOptions,
+  selectedBet,
+  playerScoreText
 } from "@/scripts/saloonScripts/twentyOneGame.js";
 import {gameData} from "@/scripts/useGameStore.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 import i18n from "@/scripts/locales/i18n.js";
+
 // Безопасный расчет монет
 const userCoins = computed(() => {
   if (!gameData) return 0;
@@ -28,7 +32,6 @@ const userCoins = computed(() => {
 
 const emit = defineEmits(["animate-draw"]);
 const playerCardsZone = ref(null);
-
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -41,14 +44,6 @@ function resetGameState() {
   currentBet.value = null;
   playerCards.value = [];
 }
-
-// onMounted(() => {
-//   resetGameState();
-// });
-
-// onUnmounted(() => {
-//   resetGameState();
-// });
 
 async function handleStartGame() {
   if (userCoins.value < 50) {
@@ -79,7 +74,7 @@ async function handleStartGame() {
 
 function handleConfirmBet() {
   if (userCoins.value < selectedBet.value) return;
-  handleHit()
+  handleHit();
   placeBet(selectedBet.value);
 }
 
@@ -124,9 +119,8 @@ function handleRestart() {
 <template>
   <!-- Главный контейнер меню с фиксом для Safari -->
   <div
-      class="saloon-container rounded-4xl p-2 bg-[#fff6ef] h-60 border-2 border-[#f7c9a5] flex flex-col mt-1 items-center justify-between relative w-full max-w-[300px] mx-auto"
+      class="saloon-container rounded-4xl p-2 bg-[#fff6ef] h-55 border-2 border-[#f7c9a5] flex flex-col mt-1 items-center relative w-full max-w-[300px] mx-auto z-30"
       :style="{backgroundImage: `url('/gamePlay/poker_table.webp?v=${APP_VERSION}')`, backgroundSize: `cover`}"
-
   >
     <!-- Кнопка "Назад" -->
     <RouterLink to="/" class="z-30">
@@ -142,129 +136,166 @@ function handleRestart() {
       </div>
     </RouterLink>
 
-    <!-- Текст ставки -->
-    <div class="w-full flex justify-center items-center px-2 text-sm font-bold text-amber-900 z-20">
-      <div v-if="gameStarted && currentBet" class="bg-amber-100 px-3 py-1 rounded-full border border-amber-300">
-        {{ $t('jackpot.bet_label', {bet: currentBet}) }}
+    <!-- Игровая область карт -->
+    <div v-if="gameStarted" class="flex flex-col items-center my-2 w-full">
+      <div ref="playerCardsZone" class="flex items-center justify-center -top-12 w-full absolute">
+        <!-- Пустышка, пока карт ещё нет -->
+        <div
+            v-if="!playerCards || playerCards.length === 0"
+            class="card-render-wrapper w-12 h-17 relative shrink-0 rounded-sm border-2 border-dashed border-amber-300/70 bg-amber-950/20 pointer-events-none select-none"
+        ></div>
+
+        <!-- Сами карты, когда они появляются -->
+        <template v-else>
+          <div
+              v-for="(card, index) in playerCards"
+              :key="card.suit + card.name + index"
+              class="card-render-wrapper w-16 h-17 -ml-10 first:ml-0 relative shrink-0"
+          >
+            <img
+                :src="card.image"
+                :alt="`${card.name} of ${card.suit}`"
+                loading="eager"
+                decoding="sync"
+                class="w-full h-full object-contain drop-shadow-md pointer-events-none"
+            />
+          </div>
+        </template>
       </div>
     </div>
 
-    <!-- Игровая область карт -->
-    <div v-if="gameStarted" class="flex flex-col items-center gap-1 my-auto z-20 w-full">
-      <div v-show="playerScore > 0" class="inline-flex items-center justify-center">
-       <span
-           class="px-3 py-1 rounded-full text-xs font-bold shadow-sm transition-all"
-           :class="typeof playerScoreText === 'string' ? 'bg-amber-950 text-amber-300 border border-amber-400' : 'bg-black/80 text-white'"
-       >
-    {{ $t(playerScoreText) }}
-</span>
-      </div>
+    <!-- Бейдж счёта игрока + заглушка -->
+    <div class="inline-flex items-center justify-center my-1 h-4">
+      <span
+          v-if="playerScore > 0"
+          class="px-3 py-1 rounded-full text-xs font-bold shadow-sm transition-all"
+          :class="typeof playerScoreText === 'string' ? 'bg-amber-950 text-amber-300 border border-amber-400' : 'bg-black/80 text-white'"
+      >
+        {{ typeof playerScoreText === 'string' ? $t(playerScoreText) : playerScoreText }}
+      </span>
 
-      <div ref="playerCardsZone" class="flex items-center justify-center min-h-[80px] w-full relative z-20">
+      <span
+          v-else
+          class="px-3 py-1 rounded-full text-xs font-bold bg-black/25 text-white/40 border border-white/10 select-none pointer-events-none"
+      >
+        0
+      </span>
+    </div>
+
+    <div class="flex flex-col">
+      <!-- Текст ставки -->
+      <div class="w-full flex justify-center items-center my-1 text-sm font-bold text-amber-900 z-20 min-h-[28px]">
         <div
-            v-for="(card, index) in playerCards"
-            :key="card.suit + card.name + index"
-            class="card-render-wrapper w-16 h-20 -ml-6 first:ml-0 relative shrink-0"
+            v-if="gameStarted && currentBet"
+            class="bg-amber-100 px-3 py-1 rounded-full border border-amber-300"
         >
-          <img
-              :src="card.image"
-              :alt="`${card.name} of ${card.suit}`"
-              loading="eager"
-              decoding="sync"
-              class="w-full h-full object-contain drop-shadow-md pointer-events-none"
-          />
+          {{ $t('jackpot.bet_label', {bet: currentBet}) }}
+        </div>
+        <div
+            v-else
+            class="bg-amber-100/60 text-amber-900/60 px-3 py-1 rounded-full border border-amber-300/60 select-none pointer-events-none"
+        >
+          {{ $t('jackpot.bet_label', {bet: 0}) }}
         </div>
       </div>
-    </div>
 
-    <!-- 1. ФАЗА СТАВОК -->
-    <div
-        v-if="gameStarted && !currentBet && (bettingPhase || isDealing)"
-        class="flex flex-col items-center gap-2  duration-300 z-20"
-    >
-      <div class="grid grid-cols-3 gap-1">
+      <!-- БЛОК СТАВОК И УПРАВЛЕНИЯ РАУНДОМ (остаётся и в конце игры) -->
+      <div
+          v-if="gameStarted"
+          class="flex flex-col items-center gap-2 duration-300 z-20"
+      >
+        <!-- Кнопки выбора суммы ставки: приглушены и некликабельны после ставки и в конце игры -->
+        <div class="grid grid-cols-3 gap-1">
+          <button
+              v-for="bet in betOptions"
+              :key="bet"
+              type="button"
+              @click="selectedBet = bet"
+              :disabled="Boolean(currentBet) || gameFinished || !bettingPhase || isDealing || userCoins < bet"
+              :class="[
+                'px-3 py-1 rounded-lg font-bold text-sm transition border',
+                (Boolean(currentBet) || gameFinished || !bettingPhase || isDealing || userCoins < bet)
+                  ? 'opacity-40 pointer-events-none bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed'
+                  : selectedBet === bet
+                    ? 'bg-amber-500 text-white border-amber-600 scale-105 cursor-pointer'
+                    : 'bg-white text-amber-900 border-amber-300 hover:bg-amber-50 cursor-pointer',
+              ]"
+          >
+            {{ bet }}
+          </button>
+        </div>
+
+        <!-- 1. До подтверждения ставки — кнопка "Поставить ставку" -->
         <button
-            v-for="bet in betOptions"
-            :key="bet"
-            @click="selectedBet = bet"
-            :disabled="userCoins < bet || isDealing"
+            v-if="!gameFinished && !currentBet && (bettingPhase || isDealing)"
+            type="button"
+            @click="handleConfirmBet"
+            :disabled="userCoins < selectedBet || isDealing"
             :class="[
-          'px-3 py-1 rounded-lg font-bold text-sm transition border',
-          (userCoins < bet || isDealing)
-            ? 'opacity-40 bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed'
-            : selectedBet === bet
-              ? 'bg-amber-500 text-white border-amber-600 scale-105 cursor-pointer'
-              : 'bg-white text-amber-900 border-amber-300 hover:bg-amber-50 cursor-pointer',
-        ]"
+              'w-35 px-5 py-1 rounded-xl transition text-white text-lg font-bold shadow-md disabled:opacity-50',
+              (userCoins < selectedBet || isDealing)
+                ? 'bg-gray-400 opacity-60 cursor-not-allowed pointer-events-none'
+                : 'bg-emerald-500 hover:bg-emerald-400 active:scale-95 cursor-pointer'
+            ]"
         >
-          {{ bet }}
+          {{ $t('jackpot.place_bet_btn') }}
         </button>
+
+        <!-- 2. В конце игры — кнопка "Начать заново" -->
+        <button
+            v-else-if="gameFinished"
+            type="button"
+            @click="handleRestart"
+            :disabled="userCoins < 50"
+            :class="[
+              'w-35 h-10 rounded-lg font-bold text-sm shadow-lg transition z-20',
+              userCoins < 50
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
+                : 'bg-yellow-400 hover:bg-yellow-300 active:scale-95 cursor-pointer'
+            ]"
+        >
+          {{ userCoins >= 50 ? $t('jackpot.play_again_btn') : $t('jackpot.min_bet_50') }}
+        </button>
+
+        <!-- 3. Во время добора после ставки — Hit и Stand -->
+        <div v-else class="flex gap-3 z-20">
+          <button
+              type="button"
+              @click="handleHit"
+              :disabled="isDealing"
+              class="w-25 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+          >
+            {{ $t('jackpot.hit_btn') }}
+          </button>
+
+          <button
+              type="button"
+              @click="handleStand"
+              :disabled="isDealing"
+              class="w-25 px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+          >
+            {{ $t('jackpot.stand_btn') }}
+          </button>
+        </div>
       </div>
 
+      <!-- КНОПКА СТАРТА (до начала партии) -->
       <button
-          @click="handleConfirmBet"
-          :disabled="userCoins < selectedBet || isDealing"
+          v-if="!gameStarted && !gameFinished"
+          type="button"
+          @click="handleStartGame"
+          :disabled="userCoins < 50"
           :class="[
-        'w-35 px-5 py-1 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50',
-        (userCoins < selectedBet || isDealing)
-          ? 'bg-gray-400 opacity-60 cursor-not-allowed'
-          : 'bg-emerald-500 hover:bg-emerald-400 active:scale-95 cursor-pointer'
-      ]"
+            'w-32 h-25 my-auto font-bold text-md shadow-lg transition bg-[#fff6ef] rounded-4xl border-2 border-[#f7c9a5] z-20',
+            userCoins < 50
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
+              : 'hover:bg-yellow-300 active:scale-95 cursor-pointer'
+          ]"
+          style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
       >
-        {{ $t('jackpot.place_bet_btn') }}
+        {{ userCoins >= 50 ? $t('jackpot.play_btn') : $t('jackpot.min_bet_50') }}
       </button>
     </div>
-
-    <!-- 2. ФАЗА ДОБОРА ("ЕЩЁ" / "ХВАТИТ") -->
-    <div v-else-if="gameStarted && !bettingPhase && !gameFinished" class="flex gap-3  mb-2 z-20">
-
-
-      <button
-          @click="handleHit"
-          :disabled="isDealing"
-          class=" w-25 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
-      >
-        {{ $t('jackpot.hit_btn') }}
-      </button>
-
-      <button
-          @click="handleStand"
-          :disabled="isDealing"
-          class="w-25 px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 active:scale-95 transition text-white text-lg font-bold shadow-md cursor-pointer disabled:opacity-50"
-      >
-        {{ $t('jackpot.stand_btn') }}
-      </button>
-    </div>
-
-    <!-- 3. КНОПКИ ПЕРЕЗАПУСКА И СТАРТА -->
-    <button
-        v-if="gameFinished"
-        @click="handleRestart"
-        :disabled="userCoins < 50"
-        :class="[
-          'w-35 h-12 mb-2 rounded-lg font-bold text-md shadow-lg transition z-20',
-          userCoins < 50
-            ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
-            : 'bg-yellow-400 hover:bg-yellow-300 active:scale-95 cursor-pointer'
-        ]"
-    >
-      {{ userCoins >= 50 ? $t('jackpot.play_again_btn') : $t('jackpot.min_bet_50') }}
-    </button>
-
-    <button
-        v-if="!gameStarted && !gameFinished"
-        @click="handleStartGame"
-        :disabled="userCoins < 50"
-        :class="[
-          'w-32 h-25 my-auto font-bold text-md shadow-lg transition bg-[#fff6ef] rounded-4xl border-2 border-[#f7c9a5] z-20',
-          userCoins < 50
-            ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
-            : 'hover:bg-yellow-300 active:scale-95 cursor-pointer'
-        ]"
-        style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);"
-    >
-      {{ userCoins >= 50 ? $t('jackpot.play_btn') : $t('jackpot.min_bet_50') }}
-    </button>
   </div>
 </template>
 
@@ -277,7 +308,6 @@ function handleRestart() {
   -webkit-transform: translate3d(0, 0, 0);
   isolation: isolate;
 }
-
 
 .card-render-wrapper {
   animation: cardAppear 0.3s ease-out forwards;
@@ -296,3 +326,6 @@ function handleRestart() {
   }
 }
 </style>
+```[cite: 6, 7]
+
+Проверь теперь в финале раунда — кнопки ставок остаются полупрозрачными и заблокированными, а рядом появляется кнопка перезапуска[cite: 6, 7]?

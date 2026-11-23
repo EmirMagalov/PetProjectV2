@@ -289,11 +289,10 @@ onUnmounted(() => {
           </div>
 
           <!-- НИЖНЕЕ МЕНЮ (внутри масштабируемого блока) -->
-          <div >
-            <SaloonMenu @animate-draw="animateFlyTo"/>
-          </div>
+          <SaloonMenu @animate-draw="animateFlyTo"/>
         </div> <!-- end transform scale -->
       </div> <!-- end size-constrained wrapper -->
+
     </div> <!-- end flex-1 -->
 
     <!-- Анимации монет/опыта остаются fixed поверх всего -->
