@@ -3,6 +3,7 @@ import time
 from datetime import date, datetime
 from fastapi import APIRouter, HTTPException, Query
 from backend.models.pet import Pet as PetModel, get_fresh_daily_tasks, TASKS_CONFIG
+from common.config import settings
 from bot.workers.pet import check_pet_notifications_job
 
 pet_router = APIRouter(prefix="/api", tags=["api"])
@@ -106,7 +107,8 @@ async def get_pet(tg_id: int, device_id: str = Query(None)):
         lang = get_pet_lang(pet)
         if pet.active_device_id and pet.active_device_id != device_id:
             time_diff = current_time - pet.last_update
-            if time_diff < 0:  # 20
+            max_time_diff = 0 if settings.TESTING else 16
+            if time_diff < max_time_diff:  # 20
                 raise HTTPException(
                     status_code=403,
                     detail=MESSAGES[lang]["already_open"]

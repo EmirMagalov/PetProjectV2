@@ -46,18 +46,18 @@ async def pet_tick_job():
                 pet.last_poop_cleaned_time if pet.last_poop_cleaned_time > 0 else pet.last_interaction
             )
             time_since_poop = NOW - poop_time
-            if time_since_poop >= 14400:
-                # Через 4 часа — гарантированная кучка
+            if time_since_poop >= 21600:
+                # Через 6 часа — гарантированная кучка
                 pet.is_pooped = True
-            elif time_since_poop >= 10800:
-                # Через 3 часа — шанс накакать
+            elif time_since_poop >= 18000:
+                # Через 5 часа — шанс накакать
                 if random.random() < (1 / 180):
                     pet.is_pooped = True
 
         # --- ПРОВЕРКА ГРЯЗИ (STINKY) ---
         if not pet.stinky and pet.is_pooped:
             pet.poop_bad_minutes += 1
-            if pet.poop_bad_minutes >= 120:
+            if pet.poop_bad_minutes >= 180:
                 pet.stinky = True
                 pet.poop_bad_minutes = 0
         else:
@@ -75,7 +75,7 @@ async def pet_tick_job():
         # --- 4. НАКОПЛЕНИЕ ГРЯЗИ И БОЛЕЗНЬ ---
         if pet.stinky and not pet.sick:
             pet.stinky_bad_minutes += 1
-            if pet.stinky_bad_minutes >= 120:
+            if pet.stinky_bad_minutes >= 180:
                 pet.sick = True
                 pet.stinky_bad_minutes = 0
         else:

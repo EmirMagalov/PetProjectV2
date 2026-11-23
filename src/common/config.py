@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     DOMAIN: str
     DATABASE_URL: str
     FRONTEND_URL: str
+    TESTING: bool = False
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env", env_file_encoding="utf-8", extra="ignore"
     )
