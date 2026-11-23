@@ -39,14 +39,14 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateBoardSize)
 })
 const fruits = [
-  '/food/strawberry.webp',
-  '/food/banana.webp',
-  '/food/apple.webp',
-  '/food/orange.webp',
-  '/food/watermelon.webp',
-  '/food/watermelon.webp',
-  '/food/grape.webp',
-  '/food/pomegranate.webp',
+  `/food/strawberry.webp?v=${APP_VERSION}`,
+  `/food/banana.webp?v=${APP_VERSION}`,
+  `/food/apple.webp?v=${APP_VERSION}`,
+  `/food/orange.webp?v=${APP_VERSION}`,
+  `/food/watermelon.webp?v=${APP_VERSION}`,
+  `/food/watermelon.webp?v=${APP_VERSION}`,
+  `/food/grape.webp?v=${APP_VERSION}`,
+  `/food/pomegranate.webp?v=${APP_VERSION}`,
 ]
 
 // Функция для получения случайного элемента

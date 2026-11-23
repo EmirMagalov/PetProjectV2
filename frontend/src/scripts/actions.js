@@ -369,14 +369,15 @@ export function spawnHeart(x = 160, y = 135) {
 
 
     addFun(0.01)
-    const coinInterval = isBothStatsZero.value ? 3 : 2
-    if (gameData.clickCounter % coinInterval === 0) {
-        addCoin(1, x, y)
+    // const coinInterval = isBothStatsZero.value ? 3 : 2
+    const coinAmount = 1 * comboMultiplier.value
+    if (gameData.clickCounter % 2 !== 0) {
+        addCoin(coinAmount, x, y)
     }
     const expAmount = comboMultiplier.value >= 2 ? 1 * comboMultiplier.value : 1
 
-    if (gameData.clickCounter % coinInterval === 0) {
-        addExp(expAmount, x+15, y)
+    if (gameData.clickCounter % 2 === 0) {
+        addExp(expAmount, x, y)
     }
 
     if (isBothStatsZero.value) {
@@ -433,9 +434,9 @@ export function addFun(amount = 1){
 
 export function addCoin(coins = 1, x = 160, y = 135) {
     if (coinHideTimer) clearTimeout(coinHideTimer)
-    const finalCoins = coins * comboMultiplier.value
+
     // Передаем фиксированную пачку из 5 визуальных монеток и координаты клика
-    triggerCoinAnimation(finalCoins, x, y)
+    triggerCoinAnimation(coins, x, y)
     isCoinPopping.value = true
     setTimeout(() => {
         isCoinPopping.value = false
@@ -448,7 +449,7 @@ export function addCoin(coins = 1, x = 160, y = 135) {
         isCoinAnimating.value = false
     }, 500)
 
-    gameData.coins += finalCoins
+    gameData.coins += coins
 
     isAnimating.value = true
     setTimeout(() => {
@@ -483,8 +484,8 @@ export const Clean = (event) => {
     // ❌ УБРАЛИ: gameData.isPooped = false;
     // Теперь Clean только начисляет награду и спавнит монеты в точке клика
 
-    addCoin(10, x, y);
-    addExp(20, x, y);
+    addCoin(5, x, y);
+    addExp(5, x, y);
 };
 
 export function isLosingLife() {
