@@ -282,7 +282,7 @@ function handleRestart() {
       </button>
     </div>
     <!-- Текст ставки -->
-    <div class="w-15 h-15 absolute text-center -bottom-6 left-4 my-1 text-[10px] font-bold text-amber-900 z-20 ">
+    <div class="w-21 h-15 absolute text-center -bottom-6 left-4 my-1 text-[10px] font-bold text-amber-900 z-20 ">
       <div
           v-if="gameStarted && currentBet"
           class="bg-amber-100  py-1 px-2 rounded-full border border-amber-300"
