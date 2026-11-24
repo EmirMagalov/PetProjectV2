@@ -15,8 +15,8 @@ function startEditing() {
 
 // 1. Принудительно обрезаем имя до 15 символов при любых изменениях (вставка, T9, быстрый ввод)
 watch(() => gameData.name, (newVal) => {
-  if (gameData.name!=='store.pet_name_placeholder' && newVal && newVal.length > 15) {
-    gameData.name = newVal.slice(0, 15)
+  if (gameData.name!=='store.pet_name_placeholder' && newVal && newVal.length > 20) {
+    gameData.name = newVal.slice(0, 20)
   }
 }, { immediate: true })
 
@@ -44,7 +44,7 @@ function handleBlur() {
       v-show="(location === 'home' || location === 'food' || location==='bedroom')"
   >
     <div class="absolute left-6 top-19 pointer-events-auto">
-      <div class="relative w-13">
+      <div class="relative w-15">
         <img :src="`/gamePlay/nameplate_icons.webp?v=${APP_VERSION}`" alt="" class="h-auto">
 
         <!-- Отображение имени -->
@@ -53,7 +53,7 @@ function handleBlur() {
               v-if="!isEditing"
               data-nameplate-trigger
               @click="startEditing"
-              class="absolute scale-75  inset-0 text-white text-shadow-2xs shirk text-shadow-black w-full min-w-0 flex font-bold items-start justify-center text-[5px] leading-tight break-all cursor-pointer select-none"
+              class="absolute scale-90 p-1.5  inset-0 text-white text-shadow-2xs shirk text-shadow-black w-full min-w-0 flex font-bold items-start justify-center text-[5px] leading-tight break-all cursor-pointer select-none"
           >
             {{ $t(gameData.name) }}
           </div>
@@ -64,7 +64,7 @@ function handleBlur() {
                 ref="inputRef"
                 v-model="gameData.name"
                 type="text"
-                maxlength="15"
+                maxlength="20"
                 @blur="handleBlur"
                 @keydown.enter="finishEditing"
                 @pointerdown.stop

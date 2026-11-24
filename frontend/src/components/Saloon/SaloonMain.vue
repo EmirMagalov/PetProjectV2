@@ -272,7 +272,7 @@ onUnmounted(() => {
                         class="w-full h-full rounded-md bg-red-800 border-2 border-amber-300 shadow-md flex items-center justify-center relative overflow-hidden"
                     >
                       <div class="absolute inset-[2px] rounded-[3px] border border-amber-200/60"></div>
-                      <span class="text-amber-200 text-xs font-bold shadow-sm">?</span>
+                      <span class="text-amber-200 text-md font-bold ">?</span>
                     </div>
                   </div>
                 </div>

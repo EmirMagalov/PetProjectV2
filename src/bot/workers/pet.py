@@ -17,7 +17,7 @@ NOTIF_MESSAGES = {
         "addiction": "🚬 The pipe won't smoke itself!",
         "game_over": "💀 The pet has died due to poor conditions!",
         "low_lives": "❤️ The pet only has <b>2</b> lives left!",
-        "critical_life": "🚨 <b>Warning!</b> The pet has only <b>1 life</b> left! It's on the verge of death!",
+        "critical_life": "🚨 <b>Warning!</b> The pet has only <b>1</b> life left! It's on the verge of death!",
         "hungry": "🍽️ The pet is hungry!",
         "fun": "🕹️ The pet misses you! Time to visit and play!",
         "energy": "😴 The pet is very tired and wants to sleep!",
@@ -97,14 +97,43 @@ async def send_telegram_message(tg_id: int, text: str, last_interaction: int, la
 
 async def process_pet_notifications(pet: PetModel, now: float):
     """Обработка одного питомца."""
-    if pet.level <= 1 or getattr(pet, "is_game_over", False):
+    if pet.level <= 1:
         return
+
     is_notified_changed = False
     last_act = pet.last_interaction or 0
     lang = get_notif_lang(pet)
     m = NOTIF_MESSAGES[lang]
+    is_dead = (pet.lives <= 0) or bool(getattr(pet, "is_game_over", False))
 
-    # --- 0. АВТОМАТИЧЕСКИЙ СБРОС ЗАДАНИЙ НА НОВЫЙ ДЕНЬ ---
+    # --- 1. ПРОВЕРКА НА ГИБЕЛЬ (самым первым делом) ---
+    if is_dead:
+        if not pet.game_over_notified:
+            if await send_telegram_message(
+                    pet.tg_id, m["game_over"], last_act, lang
+            ):
+                pet.game_over_notified = True
+                pet.low_lives_notified = False
+                pet.critical_life_notified = False
+                is_notified_changed = True
+
+        if is_notified_changed:
+            update_fields = [
+                "game_over_notified",
+                "low_lives_notified",
+                "critical_life_notified",
+            ]
+            if hasattr(pet, "addiction_notified"):
+                update_fields.append("addiction_notified")
+            await pet.save(update_fields=update_fields)
+
+        return
+
+    if pet.game_over_notified:
+        pet.game_over_notified = False
+        is_notified_changed = True
+
+    # --- 2. АВТОМАТИЧЕСКИЙ СБРОС ЗАДАНИЙ НА НОВЫЙ ДЕНЬ ---
     today_str = str(date.today())
     if pet.tasks_reset_date != today_str:
         pet.tasks_reset_date = today_str
@@ -112,7 +141,7 @@ async def process_pet_notifications(pet: PetModel, now: float):
         pet.daily_tasks_notified = False  # Сбрасываем флаг, чтобы пришло уведомление
         is_notified_changed = True
 
-    # --- 1. ПРОВЕРКА ЗАВИСИМОСТИ ---
+    # --- 3. ПРОВЕРКА ЗАВИСИМОСТИ ---
     if pet.addiction_streak > 0:
         if pet.addiction_time > 0 and (now - pet.addiction_time) >= 1200:
             if not getattr(pet, "addiction_notified", False):
@@ -126,151 +155,138 @@ async def process_pet_notifications(pet: PetModel, now: float):
             pet.addiction_notified = False
             is_notified_changed = True
 
-    # --- 2. ПРОВЕРКА НА ГИБЕЛЬ ---
-    if pet.lives <= 0:
-        if not pet.game_over_notified:
+    # --- 4. ПРЕДУПРЕЖДЕНИЯ О ЖИЗНЯХ ---
+    if pet.lives == 2 and pet.level < 80:
+        if not pet.low_lives_notified:
             if await send_telegram_message(
-                    pet.tg_id, m["game_over"], last_act, lang
+                    pet.tg_id, m["low_lives"], last_act, lang
             ):
-                pet.game_over_notified = True
-                pet.low_lives_notified = False
-                pet.critical_life_notified = False
+                pet.low_lives_notified = True
                 is_notified_changed = True
     else:
-        if pet.game_over_notified:
-            pet.game_over_notified = False
+        if pet.low_lives_notified:
+            pet.low_lives_notified = False
             is_notified_changed = True
 
-        # --- 3. ПРЕДУПРЕЖДЕНИЯ О ЖИЗНЯХ ---
-        if pet.lives == 2 and pet.level < 80:
-            if not pet.low_lives_notified:
-                if await send_telegram_message(
-                        pet.tg_id, m["low_lives"], last_act, lang
-                ):
-                    pet.low_lives_notified = True
-                    is_notified_changed = True
-        else:
-            if pet.low_lives_notified:
-                pet.low_lives_notified = False
-                is_notified_changed = True
-
-        if pet.lives == 1:
-            if not pet.critical_life_notified:
-                if await send_telegram_message(
-                        pet.tg_id,
-                        m["critical_life"],
-                        last_act,
-                        lang
-                ):
-                    pet.critical_life_notified = True
-                    is_notified_changed = True
-        else:
-            if pet.critical_life_notified:
-                pet.critical_life_notified = False
-                is_notified_changed = True
-
-        # --- 4. ГОЛОД И ЭНЕРГИЯ ---
-        if pet.food_level < 20:
-            if not pet.hungry_notified:
-                if await send_telegram_message(
-                        pet.tg_id, m["hungry"], last_act, lang
-                ):
-                    pet.hungry_notified = True
-                    is_notified_changed = True
-        else:
-            if pet.hungry_notified:
-                pet.hungry_notified = False
-                is_notified_changed = True
-        if pet.fun_level < 10:
-            if not pet.fun_notified:
-                if await send_telegram_message(
-                        pet.tg_id, m["fun"], last_act, lang
-                ):
-                    pet.fun_notified = True
-                    is_notified_changed = True
-        else:
-            if pet.fun_notified:
-                pet.fun_notified = False
-                is_notified_changed = True
-        if pet.energy < 20:
-            if not pet.energy_notified:
-                if await send_telegram_message(
-                        pet.tg_id, m["energy"], last_act, lang
-                ):
-                    pet.energy_notified = True
-                    is_notified_changed = True
-        else:
-            if pet.energy_notified:
-                pet.energy_notified = False
-                is_notified_changed = True
-
-        # --- 5. ГРЯЗЬ И БОЛЕЗНЬ ---
-        if pet.is_pooped:
-            if not pet.poop_notified:
-                if await send_telegram_message(
-                        pet.tg_id, m["poop"], last_act, lang
-                ):
-                    pet.poop_notified = True
-                    is_notified_changed = True
-        else:
-            if pet.poop_notified:
-                pet.poop_notified = False
-                is_notified_changed = True
-
-        if pet.stinky:
-            if not pet.stinky_notified:
-                if await send_telegram_message(
-                        pet.tg_id,
-                        m["stinky"],
-                        last_act,
-                        lang
-                ):
-                    pet.stinky_notified = True
-                    is_notified_changed = True
-        else:
-            if pet.stinky_notified:
-                pet.stinky_notified = False
-                is_notified_changed = True
-
-        if pet.sick:
-            if not pet.sick_notified:
-                if await send_telegram_message(
-                        pet.tg_id, m["sick"], last_act, lang
-                ):
-                    pet.sick_notified = True
-                    is_notified_changed = True
-        else:
-            if pet.sick_notified:
-                pet.sick_notified = False
-                is_notified_changed = True
-
-        last_spin = getattr(pet, "last_fortune_spin", 0)
-        time_since_spin = now - last_spin
-
-        if time_since_spin >= 86400:
-            if not getattr(pet, "fortune_notified", False):
-                if await send_telegram_message(
-                        pet.tg_id,
-                        m["fortune"],
-                        last_act,
-                        lang
-                ):
-                    pet.fortune_notified = True
-                    is_notified_changed = True
-        else:
-            if getattr(pet, "fortune_notified", False):
-                pet.fortune_notified = False
-                is_notified_changed = True
-
-        if not getattr(pet, "daily_tasks_notified", False):
+    if pet.lives == 1:
+        if not pet.critical_life_notified:
             if await send_telegram_message(
                     pet.tg_id,
-                    m["daily_tasks"],
+                    m["critical_life"],
                     last_act,
                     lang
             ):
-                pet.daily_tasks_notified = True
+                pet.critical_life_notified = True
                 is_notified_changed = True
+    else:
+        if pet.critical_life_notified:
+            pet.critical_life_notified = False
+            is_notified_changed = True
+
+    # --- 5. ГОЛОД И ЭНЕРГИЯ ---
+    if pet.food_level < 20:
+        if not pet.hungry_notified:
+            if await send_telegram_message(
+                    pet.tg_id, m["hungry"], last_act, lang
+            ):
+                pet.hungry_notified = True
+                is_notified_changed = True
+    else:
+        if pet.hungry_notified:
+            pet.hungry_notified = False
+            is_notified_changed = True
+
+    if pet.fun_level < 10:
+        if not pet.fun_notified:
+            if await send_telegram_message(
+                    pet.tg_id, m["fun"], last_act, lang
+            ):
+                pet.fun_notified = True
+                is_notified_changed = True
+    else:
+        if pet.fun_notified:
+            pet.fun_notified = False
+            is_notified_changed = True
+
+    if pet.energy < 20:
+        if not pet.energy_notified:
+            if await send_telegram_message(
+                    pet.tg_id, m["energy"], last_act, lang
+            ):
+                pet.energy_notified = True
+                is_notified_changed = True
+    else:
+        if pet.energy_notified:
+            pet.energy_notified = False
+            is_notified_changed = True
+
+    # --- 6. ГРЯЗЬ И БОЛЕЗНЬ ---
+    if pet.is_pooped:
+        if not pet.poop_notified:
+            if await send_telegram_message(
+                    pet.tg_id, m["poop"], last_act, lang
+            ):
+                pet.poop_notified = True
+                is_notified_changed = True
+    else:
+        if pet.poop_notified:
+            pet.poop_notified = False
+            is_notified_changed = True
+
+    if pet.stinky:
+        if not pet.stinky_notified:
+            if await send_telegram_message(
+                    pet.tg_id,
+                    m["stinky"],
+                    last_act,
+                    lang
+            ):
+                pet.stinky_notified = True
+                is_notified_changed = True
+    else:
+        if pet.stinky_notified:
+            pet.stinky_notified = False
+            is_notified_changed = True
+
+    if pet.sick:
+        if not pet.sick_notified:
+            if await send_telegram_message(
+                    pet.tg_id, m["sick"], last_act, lang
+            ):
+                pet.sick_notified = True
+                is_notified_changed = True
+    else:
+        if pet.sick_notified:
+            pet.sick_notified = False
+            is_notified_changed = True
+
+    last_spin = getattr(pet, "last_fortune_spin", 0)
+    time_since_spin = now - last_spin
+
+    if time_since_spin >= 86400:
+        if not getattr(pet, "fortune_notified", False):
+            if await send_telegram_message(
+                    pet.tg_id,
+                    m["fortune"],
+                    last_act,
+                    lang
+            ):
+                pet.fortune_notified = True
+                is_notified_changed = True
+    else:
+        if getattr(pet, "fortune_notified", False):
+            pet.fortune_notified = False
+            is_notified_changed = True
+
+    if not getattr(pet, "daily_tasks_notified", False):
+        if await send_telegram_message(
+                pet.tg_id,
+                m["daily_tasks"],
+                last_act,
+                lang
+        ):
+            pet.daily_tasks_notified = True
+            is_notified_changed = True
 
     # Сохраняем измененные состояния
     if is_notified_changed:

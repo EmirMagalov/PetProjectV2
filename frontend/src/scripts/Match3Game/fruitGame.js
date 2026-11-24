@@ -339,7 +339,7 @@ async function triggerVictory() {
     setTimeout(() => {
         isLevelPassed.value = true
         isProcessing.value = false
-        if (currentLevel.value < MAX_GAME_LEVEL) {
+        if (currentLevel.value) {
             if (currentLevel.value >= gameData.match3Level) gameData.match3Level++
             currentLevel.value++
         } else {

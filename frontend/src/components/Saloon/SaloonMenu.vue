@@ -182,22 +182,7 @@ function handleRestart() {
       </span>
     </div>
 
-    <div class="flex flex-col">
-      <!-- Текст ставки -->
-      <div class="w-full flex justify-center items-center my-1 text-sm font-bold text-amber-900 z-20 min-h-[28px]">
-        <div
-            v-if="gameStarted && currentBet"
-            class="bg-amber-100 px-3 py-1 rounded-full border border-amber-300"
-        >
-          {{ $t('jackpot.bet_label', {bet: currentBet}) }}
-        </div>
-        <div
-            v-else
-            class="bg-amber-100/60 text-amber-900/60 px-3 py-1 rounded-full border border-amber-300/60 select-none pointer-events-none"
-        >
-          {{ $t('jackpot.bet_label', {bet: 0}) }}
-        </div>
-      </div>
+    <div class="flex flex-col mt-1">
 
       <!-- БЛОК СТАВОК И УПРАВЛЕНИЯ РАУНДОМ (остаётся и в конце игры) -->
       <div
@@ -215,7 +200,7 @@ function handleRestart() {
               :class="[
                 'px-3 py-1 rounded-lg font-bold text-sm transition border',
                 (Boolean(currentBet) || gameFinished || !bettingPhase || isDealing || userCoins < bet)
-                  ? 'opacity-40 pointer-events-none bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed'
+                  ? ['pointer-events-none  ', bet === currentBet?'bg-amber-500 text-white border-amber-600 scale-105':'border-gray-200/40 bg-gray-200/40 text-amber-900/40']
                   : selectedBet === bet
                     ? 'bg-amber-500 text-white border-amber-600 scale-105 cursor-pointer'
                     : 'bg-white text-amber-900 border-amber-300 hover:bg-amber-50 cursor-pointer',
@@ -296,6 +281,22 @@ function handleRestart() {
         {{ userCoins >= 50 ? $t('jackpot.play_btn') : $t('jackpot.min_bet_50') }}
       </button>
     </div>
+    <!-- Текст ставки -->
+    <div class="w-15 h-15 absolute text-center -bottom-6 left-4 my-1 text-[10px] font-bold text-amber-900 z-20 ">
+      <div
+          v-if="gameStarted && currentBet"
+          class="bg-amber-100  py-1 px-2 rounded-full border border-amber-300"
+      >
+        {{ $t('jackpot.bet_label', {bet: currentBet}) }}
+      </div>
+      <div
+          v-else
+          class="bg-amber-100/60 text-amber-900/60  py-1 px-2 rounded-full border border-amber-300/60 select-none pointer-events-none"
+      >
+        {{ $t('jackpot.bet_label', {bet: 0}) }}
+      </div>
+    </div>
+
   </div>
 </template>
 
