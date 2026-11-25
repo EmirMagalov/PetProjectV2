@@ -178,7 +178,7 @@ export default {
         loss_life: '- 1 Life!',
         gain_life: '+ 1 Life!',
         yummy: 'Yummy!',
-        lost_weight: 'Low Weight',
+        lost_weight: 'Lost Weight',
         max_limit: 'MAX!',
         happy_birthday:"Happy birthday!",
         growth_spurt:"Growth spurt!",
