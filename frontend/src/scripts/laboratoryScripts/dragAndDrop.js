@@ -43,7 +43,7 @@ export function initIngredientInteract(el, itemData, isDraggingRef) {
                 clearActionTimer()
                 currentDraggedItem.value = 'food'
                 foodConsumedByPipe.value = false
-                event.target.style.zIndex = '150'
+                // event.target.style.zIndex = '150'
             },
             move(event) {
                 const target = event.target
@@ -64,7 +64,7 @@ export function initIngredientInteract(el, itemData, isDraggingRef) {
             },
             end(event) {
                 const target = event.target
-                target.style.zIndex = '150'
+                // target.style.zIndex = '150'
 
                 if (isDraggingRef) isDraggingRef.value = false // Выключаем призрак
                 ingredientEnd(itemData)
@@ -93,7 +93,7 @@ export function initSerumInteract(el) {
                 isDraggingLaboratory.value = true
                 currentDraggedItem.value = 'food'
                 foodConsumedByPipe.value = false
-                event.target.style.zIndex = '150'
+                // event.target.style.zIndex = '150'
             },
             move(event) {
                 const target = event.target

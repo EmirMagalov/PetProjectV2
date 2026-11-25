@@ -118,7 +118,7 @@ function setupInteract(el, itemType, getItemFn) {
                 if (itemType === 'food') {
                     foodConsumedByPipe.value = false
                 }
-                event.target.style.zIndex = '150'
+                // event.target.style.zIndex = '150'
             },
             move(event) {
                 const target = event.target

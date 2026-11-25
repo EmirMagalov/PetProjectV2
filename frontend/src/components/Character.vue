@@ -11,7 +11,7 @@ import {
   isBadMood,
   isPopping,
   isVibrating,
-  lifeStage, lowEnergy, mouth,dropZoneRef
+  lifeStage, lowEnergy, mouth, dropZoneRef, showStatus
 } from "@/scripts/useGameStore.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
 import {batheStatus, isHovered} from "@/scripts/dragAndDrop.js";
@@ -85,6 +85,7 @@ function handleCharacterClick() {
     FatPlayCount.value++
     if ((gameData.fatCount - FatPlayCount.value) <= 0) {
       gameData.isFat = false
+      showStatus('lostWeight')
       FatPlayCount.value = 0
       gameData.fastfoodStreak = 0
       addExp(10)

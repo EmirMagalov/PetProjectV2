@@ -160,7 +160,8 @@ watch(serumEl, (newEl) => {
              class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34">
           <div v-show="gameData.sick && statusFoam"
                class="absolute pointer-events-none w-20 opacity-50 animate-pulse z-20"><img
-              :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt=""></div>
+              :src="`/gamePlay/warning_icons.webp?v=${APP_VERSION}`" alt="">
+          </div>
           <img class="absolute top-0 right-3 z-20" src="/signs/two_lines.svg" width="20" alt="">
 
           <div class="relative w-[70px] h-[70px]">
@@ -188,7 +189,7 @@ watch(serumEl, (newEl) => {
         <div id="tutorial-shampoo" @click="nextBathItem()"
              class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 cursor-pointer">
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
-          <div v-show="gameData.sick && !statusFoam" class="absolute pointer-events-none w-20 opacity-50 animate-pulse z-20"><img
+          <div v-show="gameData.sick && !statusFoam" class="absolute -left-2 pointer-events-none w-16 opacity-50 animate-pulse z-20"><img
               :src="`/gamePlay/thermometer.webp?v=${APP_VERSION}`" alt=""></div>
           <template v-if="bathCartList.length === 0">
             <div
