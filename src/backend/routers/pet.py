@@ -4,6 +4,7 @@ from datetime import date, datetime
 from fastapi import APIRouter, HTTPException, Query
 from backend.models.pet import Pet as PetModel, get_fresh_daily_tasks, TASKS_CONFIG
 from common.config import settings
+from backend.models.mood import Mood
 from bot.workers.pet import check_pet_notifications_job
 
 pet_router = APIRouter(prefix="/api", tags=["api"])
@@ -103,6 +104,8 @@ async def get_pet(tg_id: int, device_id: str = Query(None)):
                 "active_device_id": device_id,
             },
         )
+
+        await Mood.get_or_create(pet=pet, defaults={"updated_at": current_time})
     else:
         lang = get_pet_lang(pet)
         if pet.active_device_id and pet.active_device_id != device_id:

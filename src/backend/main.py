@@ -48,7 +48,7 @@ register_tortoise(
     app,
     db_url=settings.DATABASE_URL,
     modules={
-        "models": ["backend.models.pet"]
+        "models": ["backend.models.pet","backend.models.mood"]
     },  # Указываем весь пакет models, чтобы подтянулись все файлы внутри (включая pet.py)
     generate_schemas=False,
     add_exception_handlers=True,
@@ -62,6 +62,7 @@ TORTOISE_ORM = {
         "models": {
             "models": [
                 "backend.models.pet",
+                "backend.models.mood",
                 "aerich.models",
             ],  # Должно совпадать с тем, что выше
             "default_connection": "default",

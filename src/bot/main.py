@@ -11,7 +11,7 @@ dp = Dispatcher()
 
 async def main():
     await Tortoise.init(
-        db_url=settings.DATABASE_URL, modules={"models": ["backend.models.pet"]}
+        db_url=settings.DATABASE_URL, modules={"models": ["backend.models.pet","backend.models.mood"]}
     )
     print("✅ База данных успешно подключена в боте!")
 
