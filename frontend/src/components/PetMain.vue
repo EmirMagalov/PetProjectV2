@@ -39,6 +39,7 @@ import ShopModal from "@/components/ShopModal.vue";
 import Character from "@/components/Character.vue";
 import CharacterBedRoom from "@/components/CharacterBedRoom.vue";
 import HeaderModalMenu from "@/components/HeaderModalMenu.vue";
+import MoodModal from "@/components/moodModal.vue";
 
 let blinkInterval = null
 let lookInterval = null
@@ -626,6 +627,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
   <FortuneWheel/>
   <PetSideMenu/>
   <PetActivity/>
+  <moodModal/>
   <ShopModal :is-open="isShopOpen" @close="isShopOpen = false"/>
 
 </template>

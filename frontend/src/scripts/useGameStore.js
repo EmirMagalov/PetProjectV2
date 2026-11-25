@@ -34,6 +34,7 @@ export const fruitStreak = ref(
 )
 
 export const showStatsModal = ref(false);
+export const showMoodModal = ref(false);
 export const statusFoam = ref(localStorage.getItem('pet_statusFoam') === 'true')
 export const colorFoam = ref(localStorage.getItem('pet_colorFoam') || 'bg-white/70')
 export const foamOffset = ref(Number(localStorage.getItem('pet_foamOffset')) || 0)
