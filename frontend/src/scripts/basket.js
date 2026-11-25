@@ -2,7 +2,7 @@ import {computed, ref, watch} from "vue";
 import {
     activeTab,
     gameData,
-    isShopOpen
+    isShopOpen, statusFoam
 } from "@/scripts/useGameStore.js";
 import {foodList} from "@/scripts/objectItems.js";
 import {headItems} from "@/scripts/headwearItems.js";
@@ -60,6 +60,7 @@ export const currentFoodItem = computed(() => {
 })
 
 export const currentBathItem = computed(() => {
+    if (statusFoam.value) return null
     return bathCartList.value[currentBathIndex.value] || null
 })
 

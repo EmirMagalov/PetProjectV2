@@ -33,7 +33,7 @@ onMounted(() => {
 
   intervalId = setInterval(() => {
     currentFrameIndex.value = (currentFrameIndex.value + 1) % props.currentFrames.length
-  }, 135)
+  }, 160)
 })
 
 onUnmounted(() => {

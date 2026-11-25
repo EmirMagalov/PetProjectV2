@@ -81,7 +81,7 @@ let lastFoamPos = null
 let bubbleIdCounter = initialBubbles.reduce((maxId, b) => Math.max(maxId, Number(b.id) || 0), 0)
 let distanceSinceLastBubble = 0
 let lastBathTime = 0
-
+let foamCompletedInGesture = false
 latherProgress.value = Math.min(
     100,
     Math.round((foamBubbles.value.length / MAX_FOAM_BUBBLES.value) * 100)
@@ -197,7 +197,7 @@ export function handleMove(event, itemType, Item) {
     const centerY = dropRect.top + dropRect.height / 2 + offsetY
 
     const radiusX = itemType === 'foam' ? 175 : 45
-    const radiusY = itemType === 'shower' ? 100 : 75
+    const radiusY = itemType === 'shower' ? 175 : 75
 
     const isInside =
         clientX >= centerX - radiusX &&
@@ -379,7 +379,22 @@ export function handleEnd(itemType, Item) {
 
     lastFoamPos = null
     distanceSinceLastBubble = 0
+    console.log(latherProgress.value)
+    if(latherProgress.value>=80){
+        statusFoam.value = true
+        latherProgress.value = 100
+        saveBubbles()
 
+        if (Item?.color) {
+            colorFoam.value = Item.color
+            localStorage.setItem('pet_colorFoam', Item.color)
+        }
+
+        nextTutorialStep()
+        if (Item?.id) {
+            removeFromCart(Item.id)
+        }
+    }
     if (isHovered.value && itemType === 'food') {
         if (Item?.category === 'food') {
             feedPet(Item.id)
@@ -431,7 +446,6 @@ export function handleEnd(itemType, Item) {
                     color: shampooItem?.color || colorFoam.value || null
                 })
             }
-
             statusFoam.value = true
             latherProgress.value = 100
             saveBubbles()

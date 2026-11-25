@@ -80,9 +80,11 @@ function Match3Game() {
         <span class="text-amber-300 font-extrabold text-[7px] text-shadow-xs text-shadow-black">Beta</span>
       </div>
     </div>
-    <div @click="showMoodModal=true" class="bg-blue-300/50 relative overflow-hidden rounded-full border-2 border-green-400 cursor-pointer shadow-md active:scale-95 transition-transform" style="box-shadow: inset 0 -3px 1px -1px rgba(0, 0, 0, 0.2);">
-      <div class="w-10 h-10 sm:w-11 sm:h-11 bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/mood/emoji/good_mood.webp?v=${APP_VERSION}')` }"></div>
-    </div>
+
+    <!-- Mood-->
+<!--    <div @click="showMoodModal=true" class="bg-blue-300/50 relative overflow-hidden rounded-full border-2 border-green-400 cursor-pointer shadow-md active:scale-95 transition-transform" style="box-shadow: inset 0 -3px 1px -1px rgba(0, 0, 0, 0.2);">-->
+<!--      <div class="w-10 h-10 sm:w-11 sm:h-11 bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/mood/emoji/good_mood.webp?v=${APP_VERSION}')` }"></div>-->
+<!--    </div>-->
   </div>
 </template>
 

@@ -21,7 +21,7 @@ import {
   foamEl,
   initFoodInteract,
   initFoamInteract,
-  initShowerInteract, isDraggingMain, isHovered
+  initShowerInteract, isDraggingMain, isHovered, foamBubbles
 } from "@/scripts/dragAndDrop.js";
 import {computed, onMounted, watch} from "vue";
 
@@ -118,7 +118,7 @@ watch(serumEl, (newEl) => {
                :style="{ backgroundImage: `url('/gamePlay/market.webp?v=${APP_VERSION}')` }"></div>
         </div>
 
-
+        <!-- FOOD -->
         <div id="tutorial-fridge" @click="location = 'food',nextTutorialStep()"
              class="bg-[#fff6ef] justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95"
              :class="[showHunger?'animate-pulse':'']" style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
@@ -126,15 +126,16 @@ watch(serumEl, (newEl) => {
                :style="{backgroundImage: `url('/gamePlay/fridge.webp?v=${APP_VERSION}')`}"></div>
           <button class="text-md font-bold text-gray-600">{{ $t('feed') }}</button>
         </div>
-
+        <!-- BATH -->
         <div id="tutorial-bath-btn" @click="location = 'bath',nextTutorialStep()"
+             :class="(!isDraggingMain && (gameData.stinky || foamBubbles.length > 0))? 'animate-pulse':''"
              class="bg-[#fff6ef] justify-center flex flex-col h-25 items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95 cursor-pointer"
              style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
           <div class="w-[80px] h-[80px] bg-contain bg-no-repeat bg-center"
                :style="{backgroundImage: `url('/gamePlay/bath_icon.webp?v=${APP_VERSION}')`}"></div>
           <button class="text-md font-bold text-gray-600 pointer-events-none">{{ $t('wash') }}</button>
         </div>
-
+        <!-- BEDROOM -->
         <div @click="location = 'bedroom'"
              :class="[lowEnergy && !showHunger && !gameData.sleep?'animate-pulse':'','bg-[#fff6ef] relative justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] active:scale-95']"
              style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
@@ -142,7 +143,7 @@ watch(serumEl, (newEl) => {
                :style="{backgroundImage: `url('/gamePlay/bed_icon.webp?v=${APP_VERSION}')`}"></div>
           <button class="text-xs font-bold text-gray-600 pointer-events-none">{{ $t('bedroom') }}</button>
         </div>
-
+        <!-- LABORATORY -->
         <div @click="router.push('/laboratory');"
              class="bg-[#fff6ef] relative justify-center h-25 flex flex-col items-center p-0.5 rounded-4xl border-2 border-[#f7c9a5] cursor-pointer"
              style="box-shadow: inset 0 -4px 1px -1px rgba(0, 0, 0, 0.2);">
@@ -175,6 +176,7 @@ watch(serumEl, (newEl) => {
                 v-show="!feedStatus && statusFoam"
                 ref="showerEl"
                 style="touch-action: none; background-image: url('/gamePlay/shower_icon.webp')"
+                :class="!isDraggingMain && statusFoam?'animate-pulse':''"
                 class="relative z-10 flex flex-col items-center cursor-move w-[70px] h-[70px] bg-contain bg-no-repeat bg-center">
             </div>
           </div>
@@ -182,20 +184,20 @@ watch(serumEl, (newEl) => {
           <button class="absolute text-xs font-bold bottom-0 text-gray-600 z-20">{{ $t('shower') }}</button>
         </div>
 
-        <!-- Шампунь -->
+        <!-- Шампунь/Мыло -->
         <div id="tutorial-shampoo" @click="nextBathItem()"
              class="border-gray-300 h-25 justify-center flex flex-col relative items-center p-2 rounded-3xl border-2 bg-[#f7c9a5]/34 cursor-pointer">
           <img class="absolute top-0 right-3" src="/signs/two_lines.svg" width="20" alt="">
           <div v-show="gameData.sick && !statusFoam" class="absolute pointer-events-none w-20 opacity-50 animate-pulse z-20"><img
               :src="`/gamePlay/thermometer.webp?v=${APP_VERSION}`" alt=""></div>
-          <template v-if="bathCartList.length === 0 || statusFoam">
+          <template v-if="bathCartList.length === 0">
             <div
                 class="flex flex-col items-center justify-center w-[70px] h-[70px] opacity-25 bg-contain bg-no-repeat bg-center"
                 :class="!isDraggingMain && gameData.stinky && !statusFoam && !gameData.sick?'animate-pulse':''"
                 :style="{backgroundImage: `url('/Bath/soap.webp?v=${APP_VERSION}')`}"></div>
           </template>
           <template v-else>
-            <div class="relative w-[70px] h-[70px]" :class="!isDraggingMain && gameData.stinky && !statusFoam && !gameData.sick?'animate-pulse':''">
+            <div class="relative w-[70px] h-[70px]" :class="(!isDraggingMain && (gameData.stinky || foamBubbles.length > 0) && !statusFoam && !gameData.sick)? 'animate-pulse':''">
               <!-- 1. Призрак шампуня (лежит строго в 0,0 под основным элементом) -->
               <div
                   v-show="!feedStatus"
@@ -210,6 +212,7 @@ watch(serumEl, (newEl) => {
                   style="touch-action: none; will-change: transform;"
                   :style="{ 'background-image': currentBathImage ? `url('${currentBathImage}')` : 'none' }"
                   class="relative z-10 flex flex-col items-center cursor-move w-[70px] h-[70px] bg-contain bg-no-repeat bg-center"
+                  :class="statusFoam ? 'opacity-25 pointer-events-none transform-none!' : ''"
               ></div>
             </div>
           </template>
