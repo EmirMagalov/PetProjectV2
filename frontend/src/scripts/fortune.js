@@ -18,7 +18,18 @@ export const currentSpinPrice = ref(
         ? Math.min(500, 100 + (Number(localStorage.getItem('pet_paidSpinsCount')) || 0) * 100)
         : 0
 )
+export const fortuneSnoozeUntil = ref(Number(localStorage.getItem("pet_fortuneSnoozeUntil")) || 0);
 
+export function snoozeFortune(cooldownMs = 86400 * 1000) {
+    const targetMs = Date.now() + cooldownMs;
+    fortuneSnoozeUntil.value = targetMs;
+    localStorage.setItem("pet_fortuneSnoozeUntil", String(targetMs));
+}
+
+export function clearFortuneSnooze() {
+    fortuneSnoozeUntil.value = 0;
+    localStorage.setItem("pet_fortuneSnoozeUntil", "0");
+}
 export function syncFortuneTime(serverLastFortuneSpin, serverPaidCount, serverNextPrice) {
     const COOLDOWN_MS = 86400 * 1000
 
@@ -66,7 +77,9 @@ export const fortuneRewards = [
     {id: 7, name: '', type: 'nothing', icon: '/gamePlay/poop.webp'},
 ]
 
-export const canSpin = computed(() => now.value >= nextSpinTime.value)
+export const canSpin = computed(
+    () => now.value >= nextSpinTime.value && now.value >= fortuneSnoozeUntil.value
+);
 
 export const formattedCooldown = computed(() => {
     const diff = Math.max(0, Math.floor((nextSpinTime.value - now.value) / 1000))

@@ -1,12 +1,22 @@
 <script setup>
-import {useRouter} from "vue-router";
+
 import {gameData, showMoodModal} from "@/scripts/useGameStore.js";
 import {currentBet} from "@/scripts/saloonScripts/twentyOneGame.js";
 import i18n from "@/scripts/locales/i18n.js";
-import {isFortuneOpen} from "@/scripts/fortune.js";
 import {APP_VERSION} from "@/scripts/imageVersion.js";
+import {isFortuneOpen} from "@/scripts/fortune.js";
+import {requestModal} from "@/scripts/modalQueue.js";
 
-const router = useRouter();
+function openFortuneFromButton() {
+  isFortuneOpen.value = true;
+  requestModal("fortune");
+}
+
+function openMoodFromButton() {
+  showMoodModal.value = true;
+  requestModal("mood");
+}
+
 function goToSaloon() {
   const coins = Number(gameData?.value?.coins ?? gameData?.coins) || 0;
   if (coins < 50 && !currentBet.value) {
@@ -54,7 +64,7 @@ function Match3Game() {
   <div v-show="gameData.level>1" class="absolute gap-1.5 flex flex-col right-1 top-28 select-none">
 
     <!-- Колесо фортуны -->
-    <div @click="isFortuneOpen = true" class="bg-purple-300/50 overflow-hidden rounded-full border-2 border-purple-400 cursor-pointer shadow-md active:scale-95 transition-transform">
+    <div @click="openFortuneFromButton()" class="bg-purple-300/50 overflow-hidden rounded-full border-2 border-purple-400 cursor-pointer shadow-md active:scale-95 transition-transform">
       <div class="w-10 h-10 sm:w-11 sm:h-11 bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/gamePlay/fortune_icons.webp?v=${APP_VERSION}')` }"></div>
     </div>
 
@@ -82,9 +92,9 @@ function Match3Game() {
     </div>
 
     <!-- Mood-->
-<!--    <div @click="showMoodModal=true" class="bg-blue-300/50 relative overflow-hidden rounded-full border-2 border-green-400 cursor-pointer shadow-md active:scale-95 transition-transform" style="box-shadow: inset 0 -3px 1px -1px rgba(0, 0, 0, 0.2);">-->
-<!--      <div class="w-10 h-10 sm:w-11 sm:h-11 bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/mood/emoji/good_mood.webp?v=${APP_VERSION}')` }"></div>-->
-<!--    </div>-->
+    <div @click="openMoodFromButton()" class="bg-blue-300/50 relative overflow-hidden rounded-full border-2 border-green-400 cursor-pointer shadow-md active:scale-95 transition-transform" style="box-shadow: inset 0 -3px 1px -1px rgba(0, 0, 0, 0.2);">
+      <div class="w-10 h-10 sm:w-11 sm:h-11 bg-contain bg-no-repeat bg-center" :style="{ backgroundImage: `url('/mood/emoji/${gameData.user_mood?gameData.user_mood.trim().replace(/\s+/g, '_'):'good'}_mood.webp?v=${APP_VERSION}')` }"></div>
+    </div>
   </div>
 </template>
 

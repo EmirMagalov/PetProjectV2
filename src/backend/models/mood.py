@@ -3,14 +3,29 @@ from tortoise import fields, models
 
 MOOD_STATES = ("great", "good", "not a great", "bad", "terrible")
 
+MOOD_EMOTIONS = (
+    "happiness",
+    "excitement",
+    "relaxation",
+    "tiredness",
+    "insecurity",
+    "boredom",
+    "anxiety",
+    "anger",
+    "sadness",
+    "despair",
+)
+
 
 def get_fresh_mood_counts() -> dict[str, int]:
     return {state: 0 for state in MOOD_STATES}
 
 
-class Mood(models.Model):
-    """Текущее настроение питомца и счётчики по каждому состоянию."""
+def get_fresh_emotion_counts() -> dict[str, int]:
+    return {emotion: 0 for emotion in MOOD_EMOTIONS}
 
+
+class Mood(models.Model):
     id = fields.IntField(pk=True)
     pet = fields.OneToOneField(
         "models.Pet",
@@ -18,19 +33,17 @@ class Mood(models.Model):
         related_name="mood",
     )
     state = fields.CharField(max_length=32, default="good")
-    # Счётчик каждого настроения: {"great": 0, "good": 1, "not a great": 0, "bad": 0, "terrible": 0}
+    emotion = fields.CharField(max_length=32, null=True, default=None)
     counts = fields.JSONField(default=get_fresh_mood_counts)
-    # Дата/время с фронтенда для последнего обновления (например ISO-строка или epoch ms/s)
+    emotion_counts = fields.JSONField(default=get_fresh_emotion_counts)
     client_recorded_at = fields.CharField(max_length=64, null=True, default=None)
-    updated_at = fields.FloatField(default=0.0)  # Серверный timestamp последнего обновления
+    updated_at = fields.FloatField(default=0.0)
 
     class Meta:
         db_table = "pet_mood"
 
 
 class MoodLog(models.Model):
-    """История записей настроения с датой и временем от клиента."""
-
     id = fields.IntField(pk=True)
     mood = fields.ForeignKeyField(
         "models.Mood",
@@ -38,7 +51,7 @@ class MoodLog(models.Model):
         related_name="logs",
     )
     state = fields.CharField(max_length=32)
-    # Дата и время, присланные с фронтенда (сохраняем как пришло + при желании можно парсить в datetime)
+    emotion = fields.CharField(max_length=32, null=True, default=None)
     recorded_at_client = fields.CharField(max_length=64)
     server_timestamp = fields.FloatField(default=0.0)
 

@@ -1,43 +1,68 @@
 <script setup>
 import {
-  canSpin, currentSpinPrice,
+  canSpin,
+  currentSpinPrice,
   formattedCooldown,
   fortuneRewards,
   getSectorStyle,
   isFortuneOpen,
-  isSpinning, spinWheel,
-  wheelRotation
+  isSpinning, snoozeFortune,
+  spinWheel,
 } from "@/scripts/fortune.js";
-import {gameData, isTutorialCompleted} from "@/scripts/useGameStore.js";
-import {onMounted, watch} from "vue";
+import { gameData, isTutorialCompleted } from "@/scripts/useGameStore.js";
+import { activeModal, requestModal, releaseModal } from "@/scripts/modalQueue.js";
+import { computed, onMounted, watch } from "vue";
+
+const canShowFortune = computed(() =>
+    Boolean(isTutorialCompleted.value && !gameData.isGameOver && gameData.level > 1)
+);
+
+const isFortuneVisible = computed(() =>
+    Boolean(isFortuneOpen.value && activeModal.value === "fortune" && canShowFortune.value)
+);
+
+function syncFortuneQueue() {
+  if (canSpin.value && canShowFortune.value) {
+    isFortuneOpen.value = true;
+    requestModal("fortune");
+  }
+}
+
+function closeFortuneModal() {
+  snoozeFortune();
+  isFortuneOpen.value = false;
+  releaseModal("fortune");
+}
 
 onMounted(() => {
-  if (canSpin.value) {
-    isFortuneOpen.value = true
-  }
-})
+  syncFortuneQueue();
+});
 
-// Если таймер закончился, пока пользователь был в игре — тоже открываем
-watch(canSpin, (newValue) => {
-  if (newValue) {
-    isFortuneOpen.value = true
-  }
-})
+watch([canSpin, canShowFortune], () => {
+  syncFortuneQueue();
+});
 
+watch(isFortuneOpen, (val) => {
+  if (val) {
+    requestModal("fortune");
+  } else {
+    releaseModal("fortune");
+  }
+});
 </script>
 
 <template>
-  <div class="fortune-overlay" v-if="isFortuneOpen && isTutorialCompleted && !gameData.isGameOver && gameData.level>1">
+  <div class="fortune-overlay" v-if="isFortuneVisible">
     <div class="fortune-card">
       <button
           class="absolute top-2 right-3 text-3xl text-red-600 font-bold hover:text-red-800 transition-colors"
-          @click="isFortuneOpen = false"
+          @click="closeFortuneModal"
       >
         X
       </button>
 
       <h2 class="title">{{ $t(`wheel_of_fortune`) }}</h2>
-      <p class="subtitle">{{ $t(`spin_and_win`)}}</p>
+      <p class="subtitle">{{ $t(`spin_and_win`) }}</p>
 
       <!-- Стрелка-указатель -->
       <div class="pointer-wrapper">
@@ -49,9 +74,9 @@ watch(canSpin, (newValue) => {
         <div
             class="wheel-inner"
             :style="{
-    transform: `rotate(${wheelRotation}deg)`,
-    transition: isSpinning ? 'transform 3s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none'
-  }"
+              transform: `rotate(${wheelRotation}deg)`,
+              transition: isSpinning ? 'transform 3s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none'
+            }"
         >
           <!-- Секторы (кусочки пирога) -->
           <div
@@ -61,7 +86,7 @@ watch(canSpin, (newValue) => {
               :style="getSectorStyle(index)"
           >
             <div class="sector-content relative" v-if="reward.icon">
-              <img :src="reward.icon" :alt="reward.name"/>
+              <img :src="reward.icon" :alt="reward.name" />
               <span class="absolute bottom-0">{{ reward.name }}</span>
             </div>
           </div>
@@ -88,15 +113,13 @@ watch(canSpin, (newValue) => {
         </div>
       </button>
       <p v-show="!canSpin">{{ $t(`free_in`) }} {{ formattedCooldown }}</p>
-      <div class=" py-2  flex items-center gap-1 justify-end ">
+      <div class="py-2 flex items-center gap-1 justify-end">
         <span class="text-slate-400 text-sm">{{ $t(`balance`) }}</span>
         <span class="text-amber-400 font-bold text-xs flex items-center gap-1 tabular-nums">
           <img class="w-5" src="/gamePlay/coin.webp" alt=""> {{ gameData.coins }}
         </span>
       </div>
-
     </div>
-
   </div>
 </template>
 
@@ -122,17 +145,6 @@ watch(canSpin, (newValue) => {
   color: white;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   position: relative;
-}
-
-.close-icon {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
 }
 
 .title {
@@ -182,7 +194,6 @@ watch(canSpin, (newValue) => {
   border-radius: 50%;
 }
 
-/* Сектор-кусок пирога */
 .sector {
   position: absolute;
   width: 100%;
@@ -215,7 +226,6 @@ watch(canSpin, (newValue) => {
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
 }
 
-/* Кружок по центру колеса */
 .wheel-center-cap {
   position: absolute;
   top: 50%;

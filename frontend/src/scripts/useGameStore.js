@@ -103,6 +103,7 @@ export const defaultGameData = {
     exp: 0,
     coins: 50,
     lives: 3,
+    user_mood: null,
     deathsCount: 0,
     foodLevel: 50,
     energy: 50,

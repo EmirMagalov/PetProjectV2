@@ -4,7 +4,6 @@ import PetFoam from "@/components/PetFoam.vue";
 import PetShower from "@/components/PetShower.vue";
 import {ref, onMounted, onUnmounted, watch, computed} from "vue"
 import PetHeaderMenu from "@/components/PetHeaderMenu.vue";
-import Cloud from "@/components/Cloud.vue";
 import PetStinky from "@/components/PetStinky.vue";
 import Status from "@/components/Status.vue";
 import {initGameData} from "@/scripts/api.js";
@@ -51,7 +50,7 @@ const isLoading = ref(true);
 // === Адаптивное масштабирование под разные мобильные устройства ===
 
 const BASE_WIDTH = 320
-
+const MOOD_COOLDOWN = 86400
 function updateScale() {
   // Небольшие боковые отступы + safe-area через visualViewport если доступен
   const vw = window.visualViewport?.width || window.innerWidth
@@ -627,7 +626,7 @@ function handleBallTracking(ballX, ballY, isMoving) {
   <FortuneWheel/>
   <PetSideMenu/>
   <PetActivity/>
-  <moodModal/>
+  <moodModal />
   <ShopModal :is-open="isShopOpen" @close="isShopOpen = false"/>
 
 </template>

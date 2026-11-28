@@ -3,6 +3,7 @@ import {gameData, isGameInitialized, tutorialStep} from './useGameStore.js'
 import {ref} from "vue";
 import {syncFortuneTime} from "@/scripts/fortune.js";
 import i18n from "@/scripts/locales/i18n.js";
+import {syncMoodTime} from "@/scripts/mood.js";
 
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api'
@@ -171,6 +172,8 @@ export async function initGameData() {
                 gameData.referredBy = serverData.referred_by || false
                 gameData.isGameOver = serverData.is_game_over || false
                 gameData.match3Level = serverData.match3_level || 1
+                gameData.user_mood = serverData.mood_state || null
+
                 if (serverData.language) {
                     gameData.language = serverData.language
                 }
@@ -199,6 +202,8 @@ export async function initGameData() {
                 }
 
                 isDataLoaded = true
+                const moodUpdatedAt = serverData.mood_updated_at ?? serverData.mood_state?.updated_at ?? 0;
+                syncMoodTime(moodUpdatedAt);
                 isGameInitialized.value = true
                 setTimeout(() => {
                     isLoading.value = false;

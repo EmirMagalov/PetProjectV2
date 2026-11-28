@@ -125,7 +125,11 @@ async def get_pet(tg_id: int, device_id: str = Query(None)):
 
         await pet.save(update_fields=updated_fields)
     pet.season = get_current_season()
-    return pet
+    mood = await Mood.get_or_none(pet=pet)
+    data = {field: getattr(pet, field) for field in pet._meta.fields_map}
+    data["mood_state"] = mood.state if mood else None
+    return data
+
 
 
 @pet_router.post("/update")

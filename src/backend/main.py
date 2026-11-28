@@ -3,10 +3,12 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
 from backend.routers.pet import pet_router
+from backend.routers.mood import mood_router
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from backend.services.pet import pet_tick_job
 from bot.workers.pet import check_pet_notifications_job
 from common.config import settings
+
 
 
 @asynccontextmanager
@@ -70,5 +72,6 @@ TORTOISE_ORM = {
         },
     },
 }
-
+app.include_router(mood_router)
 app.include_router(pet_router)
+
